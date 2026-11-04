@@ -13,6 +13,27 @@
     小程序训练使用云端异步姿态分析：训练视频上传后由服务端生成结果，训练过程中没有实时动作反馈。
   </view>
 
+  <view wx:if="{{loading}}" class="card" aria-role="status">正在加载您的训练概览…</view>
+  <view wx:elif="{{error}}" class="card">
+    <view class="notice notice--danger" aria-role="alert">{{error}}</view>
+    <button class="btn btn--secondary" bindtap="loadData">重新加载</button>
+  </view>
+  <view wx:elif="{{overview && !overview.context.patient}}" class="card">尚未关联患者，请先联系管理员获取绑定码。</view>
+  <view wx:elif="{{overview}}" class="section">
+    <view class="section-title">{{overview.context.patient.displayName}}，今天也一起加油</view>
+    <view class="card">
+      <view class="card-title">今日打卡 {{overview.todayCount}} 次</view>
+      <view class="muted">近 30 天打卡 {{overview.trainingCount}} 次 · 连续坚持 {{overview.streakDays}} 天</view>
+      <view class="hint">连续天数按近 30 个自然日统计，今天尚未打卡时从昨天计起。</view>
+    </view>
+    <view class="section-title">最近训练</view>
+    <view wx:if="{{!overview.records.length}}" class="card">近 30 天还没有训练记录，期待您的下一次练习。</view>
+    <view wx:for="{{overview.records}}" wx:key="id" class="card">
+      <view class="card-title">{{item.recordedAt}}</view>
+      <view class="muted">{{item.status}} · 完成动作 {{item.completionCount}}</view>
+    </view>
+  </view>
+
   <view class="section">
     <view class="section-title">开始今天的训练</view>
     <navigator
@@ -23,8 +44,8 @@
       aria-label="进入训练条目列表"
     >
       <view class="entry__body">
-        <view class="entry__title">今日活力跟练</view>
-        <view class="entry__desc">按处方逐条完成动作，给健康打卡</view>
+        <view class="entry__title">活力跟练演示</view>
+        <view class="entry__desc">查看训练示例与安全提示</view>
       </view>
       <view class="entry__arrow">›</view>
     </navigator>
@@ -40,7 +61,7 @@
         aria-label="查看活力健康档案"
       >
         <view class="entry-tile__title">健康档案</view>
-        <view class="entry-tile__desc">坚持 12 天 · 活力榜</view>
+        <view class="entry-tile__desc">查看打卡与坚持记录</view>
       </navigator>
 
       <navigator
@@ -77,17 +98,16 @@
     </view>
   </view>
 
-  <view class="section">
+  <view wx:if="{{overview}}" class="section">
     <view class="section-title">当前身份</view>
     <view class="card">
       <view class="identity">
         <view class="identity__body">
-          <view class="card-title">本人操作</view>
-          <view class="muted">照护者代操作：功能占位，尚未开放</view>
+          <view class="card-title">{{overview.context.accountName}} · {{overview.context.identity}}</view>
+          <view class="muted">{{overview.context.orgName}}</view>
         </view>
-        <view class="switch-placeholder" aria-role="switch" aria-checked="false">未开启</view>
       </view>
-      <view class="hint">代操作时，写操作会同时记录操作者与患者本人。</view>
+      <view class="hint">当前展示账号关联的患者；切换患者功能尚未开放。</view>
     </view>
   </view>
 </view>

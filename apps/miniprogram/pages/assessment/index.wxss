@@ -5,3 +5,21 @@
 .assessment__action {
   margin-top: 24rpx;
 }
+
+.assessment label {
+  display: block;
+  margin-top: 24rpx;
+  font-weight: 700;
+}
+
+.assessment__input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 280rpx;
+  margin-top: 16rpx;
+  padding: 24rpx;
+  border: 2rpx solid #94a3b8;
+  border-radius: 16rpx;
+  background-color: #f8fafc;
+  font-size: 34rpx;
+}

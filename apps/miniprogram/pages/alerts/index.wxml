@@ -1,58 +1,26 @@
 <view class="page">
   <view class="page-title">风险预警</view>
-  <view class="page-subtitle">预警由症状自评达到阈值触发，请及时查看并登记随访。</view>
+  <view class="page-subtitle">查看与您关联的提醒和处理进展。</view>
 
-  <view class="chip-row">
-    <view class="chip chip--active">全部</view>
-    <view class="chip">提示</view>
-    <view class="chip">警告</view>
-    <view class="chip">严重</view>
+  <view wx:if="{{loading}}" class="card" aria-role="status">正在加载提醒…</view>
+  <view wx:elif="{{error}}" class="card">
+    <view class="notice notice--danger" aria-role="alert">{{error}}</view>
+    <button class="btn btn--secondary" bindtap="loadData">重新加载</button>
   </view>
+  <view wx:elif="{{result && !result.context.patient}}" class="card">尚未关联患者，请联系管理员完成绑定。</view>
+  <view wx:elif="{{result && !result.alerts.length}}" class="card">目前没有提醒，继续保持适合自己的练习节奏。</view>
 
-  <view class="card alert alert--critical">
+  <view wx:for="{{result.alerts}}" wx:key="id" class="card alert alert--{{item.level}}">
     <view class="alert__head">
-      <text class="badge badge--danger">严重</text>
-      <text class="alert__time">— 月 — 日　—:—</text>
+      <text class="badge badge--{{item.level === 'critical' ? 'danger' : item.level}}">{{item.levelLabel}}</text>
+      <text class="alert__time">{{item.triggeredAt}}</text>
     </view>
-    <view class="card-title">预警规则（占位）</view>
-    <view class="muted">当前状态：待处理</view>
-    <view class="muted">通知渠道：—</view>
-    <view class="btn btn--secondary btn--block alert__action" hover-class="btn--pressed" aria-role="button">
-      查看预警详情
-    </view>
+    <view class="card-title">请关注本次提醒</view>
+    <view class="muted">当前状态：{{item.status}}</view>
+    <view class="muted">通知进展：{{item.deliveries}}</view>
   </view>
 
-  <view class="card alert alert--warning">
-    <view class="alert__head">
-      <text class="badge badge--warning">警告</text>
-      <text class="alert__time">— 月 — 日　—:—</text>
-    </view>
-    <view class="card-title">预警规则（占位）</view>
-    <view class="muted">当前状态：已确认</view>
-    <view class="muted">通知渠道：—</view>
-    <view class="btn btn--secondary btn--block alert__action" hover-class="btn--pressed" aria-role="button">
-      查看预警详情
-    </view>
-  </view>
-
-  <view class="card alert alert--info">
-    <view class="alert__head">
-      <text class="badge badge--info">提示</text>
-      <text class="alert__time">— 月 — 日　—:—</text>
-    </view>
-    <view class="card-title">预警规则（占位）</view>
-    <view class="muted">当前状态：已随访</view>
-    <view class="muted">通知渠道：—</view>
-    <view class="btn btn--secondary btn--block alert__action" hover-class="btn--pressed" aria-role="button">
-      查看预警详情
-    </view>
-  </view>
-
-  <view class="notice">
-    通知渠道包括小程序弹窗、语音提示、微信服务通知与审计日志；未送达时的兜底通道尚未确定。
-  </view>
   <view class="notice notice--warning">
-    预警处理与随访登记由照护管理员或康复治疗师在 Web 后台完成，小程序内仅查看。
+    预警处理与随访登记由照护管理员或康复治疗师在机构端完成，小程序内仅查看。
   </view>
-  <view class="hint">本页为结构占位，预警数据与处理动作待接入。</view>
 </view>

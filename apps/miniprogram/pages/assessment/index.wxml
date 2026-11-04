@@ -6,40 +6,26 @@
     记录真实的活动体验，帮助康复治疗师为您调整更舒适契合的运动节律。感到疲劳请随时休息。
   </view>
 
-  <view class="card assessment">
-    <view class="card-title">日常活动自如度评估</view>
-    <view class="muted">评估起步、转身与双手活动的自如度，记录轻松程度。</view>
-    <view class="btn btn--secondary btn--block assessment__action" hover-class="btn--pressed" aria-role="button">
-      开始记录
-    </view>
+  <view wx:if="{{loading}}" class="card" aria-role="status">正在加载记录人信息…</view>
+  <view wx:elif="{{error}}" class="card">
+    <view class="notice notice--danger" aria-role="alert">{{error}}</view>
+    <button class="btn btn--secondary" bindtap="loadData">重新加载</button>
   </view>
-
-  <view class="card assessment">
-    <view class="card-title">肌肉力量与灵活性感受</view>
-    <view class="muted">记录从椅子起立、提拿物品与平地行走时的力量感与灵活性。</view>
-    <view class="btn btn--secondary btn--block assessment__action" hover-class="btn--pressed" aria-role="button">
-      开始记录
-    </view>
-  </view>
-
-  <view class="card assessment">
-    <view class="card-title">关节与肢体活动轻松度</view>
-    <view class="muted">记录晨起或活动后肢体的舒展感与放松程度。</view>
-    <view class="btn btn--secondary btn--block assessment__action" hover-class="btn--pressed" aria-role="button">
-      开始记录
-    </view>
-  </view>
-
-  <view class="card assessment">
-    <view class="card-title">步态稳健与平衡感知</view>
-    <view class="muted">评估行走踏步时的平稳感，帮助匹配更适宜的 RAS 听觉引导节拍。</view>
-    <view class="btn btn--secondary btn--block assessment__action" hover-class="btn--pressed" aria-role="button">
-      开始记录
-    </view>
+  <view wx:elif="{{context && !context.patient}}" class="card">尚未关联患者，请联系管理员完成绑定后再记录。</view>
+  <view wx:elif="{{context}}" class="card assessment">
+    <view class="card-title">{{context.patient.displayName}}的今日感受</view>
+    <view class="muted">记录人：{{context.accountName}} · {{context.identity}}</view>
+    <label for="feeling">今天活动起来感觉怎么样？</label>
+    <textarea id="feeling" class="assessment__input" value="{{feeling}}" bindinput="onFeelingInput" maxlength="1000" disabled="{{submitting}}" placeholder="例如：散步很轻松，练习后休息了一会儿。" aria-label="今日身体感受" />
+    <view class="hint">{{feeling.length}} / 1000 字。这里记录您的体验，不计算量表分数。</view>
+    <view wx:if="{{!feeling && !submittedAt}}" class="hint">今天的感受还未填写，写下后即可提交。</view>
+    <view wx:if="{{submitError}}" class="notice notice--danger" aria-role="alert">{{submitError}}</view>
+    <view wx:if="{{submittedAt}}" class="notice" aria-role="status">已提交，记录时间 {{submittedAt}}。感谢您的分享。</view>
+    <button class="btn btn--primary assessment__action" bindtap="submit" loading="{{submitting}}" disabled="{{submitting || !feeling}}">{{submitting ? '正在提交…' : '提交感受记录'}}</button>
   </view>
 
   <view class="notice notice--warning">
     代操作时，提交记录会同时记录操作者与患者本人。
   </view>
-  <view class="hint">记录将安全同步至医护工作台，作为后续处方优化的参考依据。</view>
+  <view class="hint">提交成功的记录将同步至医护工作台，作为后续训练安排的参考。</view>
 </view>

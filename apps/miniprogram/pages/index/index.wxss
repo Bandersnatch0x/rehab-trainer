@@ -84,17 +84,3 @@
 .identity__body {
   flex: 1;
 }
-
-.switch-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 168rpx;
-  min-height: 88rpx;
-  padding: 0 24rpx;
-  color: #4a4a4a;
-  font-size: 30rpx;
-  background-color: #eceff3;
-  border: 2rpx solid #8a8a8a;
-  border-radius: 999rpx;
-}

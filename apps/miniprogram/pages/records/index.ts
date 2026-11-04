@@ -1,2 +1,17 @@
-// 训练记录页仅做结构与样式占位，不承载业务逻辑。
-Page({});
+import { errorMessage, loadRecords, type RecordsData } from '../../utils/patient-data';
+
+Page({
+  data: { loading: false, error: '', result: null as RecordsData | null },
+  onShow() { return this.loadData(); },
+  async loadData() {
+    if (this.data.loading) return;
+    this.setData({ loading: true, error: '', result: null });
+    try {
+      this.setData({ result: await loadRecords() });
+    } catch (error) {
+      this.setData({ error: errorMessage(error) });
+    } finally {
+      this.setData({ loading: false });
+    }
+  },
+});
