@@ -1,0 +1,106 @@
+# GitHub Actions CI。仓库当前没有 GitHub 远端，本文件未在真实流水线验证。
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      android: ${{ steps.filter.outputs.android }}
+      miniprogram: ${{ steps.filter.outputs.miniprogram }}
+      admin_web: ${{ steps.filter.outputs.admin_web }}
+      api_contract: ${{ steps.filter.outputs.api_contract }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            android:
+              - 'apps/android/**'
+            miniprogram:
+              - 'apps/miniprogram/**'
+            admin_web:
+              - 'apps/admin-web/**'
+            api_contract:
+              - 'packages/api-contract/**'
+              - 'packages/api-client-ts/**'
+              - 'packages/api-client-kt/**'
+
+  android:
+    needs: changes
+    if: needs.changes.outputs.android == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/android
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+      - run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon
+
+  miniprogram:
+    needs: changes
+    if: needs.changes.outputs.miniprogram == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.7.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm --filter @rehab-trainer/miniprogram typecheck
+
+  admin-web:
+    needs: changes
+    if: needs.changes.outputs.admin_web == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.7.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm --filter @rehab-trainer/admin-web build
+
+  api-contract:
+    needs: changes
+    if: needs.changes.outputs.api_contract == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pyyaml
+      - name: 校验占位契约可解析且顶层键齐备
+        run: |
+          python -c "
+          import yaml
+          with open('packages/api-contract/openapi.yaml', encoding='utf-8') as f:
+              doc = yaml.safe_load(f)
+          assert str(doc['openapi']).startswith('3.1.'), doc.get('openapi')
+          assert 'info' in doc and 'servers' in doc
+          print('openapi placeholder ok')
+          "

@@ -36,3 +36,7 @@ App 与小程序功能清单一致;差异只在姿态识别的实现方式与实
 | `.agent/keep/` | 持久区:票据、决策、术语表(入版本控制) |
 | `.agent/tmp/` | 临时产物(忽略) |
 | `.agents/` | 本地面:个人过程记录与装配的技能(忽略) |
+| `apps/` | 三端应用:Android、微信小程序、Web 后台 |
+| `services/` | 服务占位:API、云端 CV 推理 |
+| `packages/` | API 契约与生成客户端 |
+| `docs/architecture/` | 架构与仓库结构说明 |

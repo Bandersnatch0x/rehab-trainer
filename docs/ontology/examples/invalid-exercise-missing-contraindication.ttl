@@ -1,0 +1,34 @@
+# 违规实例：训练条目缺少 contraindicatedFor（禁忌）。
+# 预期：SHACL 拒绝，触发 rtsh:ExerciseSafetyShape 的 MinCount 约束（说明书模块 2）。
+
+@prefix ex: <https://rehab-trainer.local/ontology/examples#> .
+@prefix rt: <https://rehab-trainer.local/ontology#> .
+
+ex:danger1 a rt:DangerSignal ;
+    rt:dangerSignalCode "DIZZINESS_DURING_TRAINING" .
+
+ex:movementSeated a rt:Movement ;
+    rt:movementCode "SEATED_KNEE_EXTENSION" ;
+    rt:hasSupportLevel rt:Seated ;
+    rt:hasMovementPattern rt:Extension ;
+    rt:involvesJoint rt:KneeJoint ;
+    rt:involvesBodyPart rt:LowerLimb ;
+    rt:usesLandmark rt:LeftKnee, rt:RightKnee .
+
+ex:dosage1 a rt:Dosage ;
+    rt:sets 2 ;
+    rt:repetitions 10 ;
+    rt:durationMinutes 5.0 .
+
+# 故意不写 rt:contraindicatedFor。
+ex:exerciseMissingContraindication a rt:StretchingExercise ;
+    rt:exerciseCode "STR-BAD-001" ;
+    rt:inCategory rt:catStretchingRelaxation ;
+    rt:hasPublicationStatus rt:Published ;
+    rt:hasRiskLevel rt:LowRisk ;
+    rt:applicableToStage rt:HYStage1, rt:HYStage2, rt:HYStage3, rt:HYStage4 ;
+    rt:targetsBodyPart rt:LowerLimb ;
+    rt:targetsJoint rt:KneeJoint ;
+    rt:hasMovement ex:movementSeated ;
+    rt:hasDefaultDosage ex:dosage1 ;
+    rt:hasDangerSignal ex:danger1 .

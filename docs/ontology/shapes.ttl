@@ -1,0 +1,902 @@
+# =============================================================================
+# rehab-trainer SHACL 约束
+#
+# 与 rehab.ttl 配套使用。业务硬约束在此表达；可推理的领域知识在 OWL 本体内。
+# 决策来源：.agent/keep/decisions/0001-需求基线与范围裁决.md
+# =============================================================================
+
+@prefix rtsh: <https://rehab-trainer.local/shapes#> .
+@prefix rt: <https://rehab-trainer.local/ontology#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://rehab-trainer.local/shapes> a owl:Ontology ;
+    rdfs:label "rehab-trainer SHACL 约束"@zh ;
+    rdfs:comment "训练条目、处方、训练记录、预警与患者档案的业务约束。"@zh ;
+    owl:versionInfo "0.1.0" ;
+    dcterms:source "决策 0001：需求基线与范围裁决（D5、D6、D10、D11、D12、C1、C2、T7）" ;
+    owl:imports <https://rehab-trainer.local/ontology> .
+
+# SHACL-SPARQL 的前缀声明。
+rtsh:prefixes a owl:Ontology ;
+    sh:declare [
+        sh:prefix "rt" ;
+        sh:namespace "https://rehab-trainer.local/ontology#"^^xsd:anyURI ;
+    ] ;
+    sh:declare [
+        sh:prefix "xsd" ;
+        sh:namespace "http://www.w3.org/2001/XMLSchema#"^^xsd:anyURI ;
+    ] .
+
+# =============================================================================
+# 一、患者域约束
+# =============================================================================
+
+rtsh:PatientShape a sh:NodeShape ;
+    rdfs:label "患者档案约束"@zh ;
+    sh:targetClass rt:Patient ;
+    sh:property [
+        sh:path rt:hasHYStage ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:HYStage ;
+        sh:message "患者必须有且仅有一个当前 H-Y 分级（D5）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:hasStageConfirmationStatus ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:in ( rt:Confirmed rt:Suspected ) ;
+        sh:message "患者必须标记分期确认状态：已确认或疑似（D11）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:belongsToOrg ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:Organization ;
+        sh:message "患者必须属于且仅属于一个机构（D10）。"@zh ;
+    ] ;
+    sh:or (
+        [
+            sh:property [
+                sh:path rt:hasStageConfirmationStatus ;
+                sh:hasValue rt:Suspected ;
+            ] ;
+            sh:property [
+                sh:path rt:stageConfirmedBy ;
+                sh:maxCount 0 ;
+            ] ;
+            sh:property [
+                sh:path rt:hasStageConfirmation ;
+                sh:maxCount 0 ;
+            ] ;
+        ]
+        [
+            sh:property [
+                sh:path rt:hasStageConfirmationStatus ;
+                sh:hasValue rt:Confirmed ;
+            ] ;
+            sh:property [
+                sh:path rt:stageConfirmedBy ;
+                sh:minCount 1 ;
+                sh:maxCount 1 ;
+                sh:class rt:RehabTherapistRole ;
+            ] ;
+            sh:property [
+                sh:path rt:hasStageConfirmation ;
+                sh:minCount 1 ;
+            ] ;
+        ]
+    ) ;
+    sh:message "疑似分期不得携带治疗师确认；已确认分期必须有康复治疗师确认人与确认记录（D11）。"@zh .
+
+rtsh:StageConfirmationShape a sh:NodeShape ;
+    rdfs:label "分期确认记录约束"@zh ;
+    sh:targetClass rt:StageConfirmation ;
+    sh:property [
+        sh:path rt:confirmsPatient ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:Patient ;
+    ] ;
+    sh:property [
+        sh:path rt:confirmsStage ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:HYStage ;
+    ] ;
+    sh:property [
+        sh:path rt:confirmedBy ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:RehabTherapistRole ;
+        sh:message "分期确认必须由康复治疗师作出（D11）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:confirmedAt ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:dateTime ;
+        sh:message "分期确认必须记录确认时间（D11）。"@zh ;
+    ] .
+
+rtsh:StageConfirmationConsistencyShape a sh:NodeShape ;
+    rdfs:label "分期确认记录一致性"@zh ;
+    sh:targetClass rt:Patient ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:severity sh:Violation ;
+        sh:message "分期确认记录的患者、分期与确认人必须与患者当前记录一致（D11）。"@zh ;
+        sh:prefixes rtsh:prefixes ;
+        sh:select """
+            SELECT DISTINCT $this ?confirmation WHERE {
+                $this rt:hasStageConfirmation ?confirmation .
+                $this rt:hasHYStage ?stage .
+                $this rt:stageConfirmedBy ?therapist .
+                ?confirmation rt:confirmsPatient ?confirmedPatient .
+                ?confirmation rt:confirmsStage ?confirmedStage .
+                ?confirmation rt:confirmedBy ?confirmedTherapist .
+                FILTER (
+                    ?confirmedPatient != $this ||
+                    ?confirmedStage != ?stage ||
+                    ?confirmedTherapist != ?therapist
+                )
+            }
+        """ ;
+    ] .
+
+rtsh:OrganizationShape a sh:NodeShape ;
+    rdfs:label "机构约束"@zh ;
+    sh:targetClass rt:Organization ;
+    sh:property [
+        sh:path rt:orgId ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:minLength 1 ;
+        sh:message "机构必须携带非空 org_id（D10）。"@zh ;
+    ] .
+
+# =============================================================================
+# 二、训练域约束
+# =============================================================================
+
+rtsh:ExerciseSafetyShape a sh:NodeShape ;
+    rdfs:label "训练条目安全信息约束"@zh ;
+    rdfs:comment "说明书模块 2：每条训练条目必须有禁忌与危险信号；C1/C2 要求分类与发布状态。"@zh ;
+    sh:targetClass rt:Exercise ;
+    sh:property [
+        sh:path rt:exerciseCode ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:minLength 1 ;
+        sh:message "训练条目必须有非空条目标识。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:contraindicatedFor ;
+        sh:minCount 1 ;
+        sh:or (
+            [ sh:class rt:Symptom ]
+            [ sh:class rt:Contraindication ]
+        ) ;
+        sh:message "训练条目必须声明至少一条禁忌（contraindicatedFor），指向症状或禁忌（说明书模块 2）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:hasDangerSignal ;
+        sh:minCount 1 ;
+        sh:class rt:DangerSignal ;
+        sh:message "训练条目必须声明至少一个危险信号（hasDangerSignal，说明书模块 2）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:inCategory ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:in (
+            rt:catStretchingRelaxation
+            rt:catStrengthMaintenance
+            rt:catRhythmicGait
+            rt:catPosturalCorrection
+        ) ;
+        sh:message "训练条目必须属于且仅属于四个固定训练大类之一（C1）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:hasPublicationStatus ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:in ( rt:Draft rt:Published rt:Retired ) ;
+        sh:message "训练条目必须有发布状态。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:hasRiskLevel ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:in ( rt:LowRisk rt:MediumRisk rt:HighRisk ) ;
+        sh:message "训练条目必须有风险等级，供 D11 高风险准入判断。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:applicableToStage ;
+        sh:minCount 1 ;
+        sh:in ( rt:HYStage1 rt:HYStage2 rt:HYStage3 rt:HYStage4 ) ;
+        sh:message "训练条目不得适用于 H-Y 5 级；5 级仅宣教与转诊（D5）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:hasDefaultDosage ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:Dosage ;
+        sh:message "训练条目必须有且仅有一个默认剂量。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:hasMovement ;
+        sh:minCount 1 ;
+        sh:class rt:Movement ;
+        sh:message "训练条目必须至少分解为一个动作。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:targetsBodyPart ;
+        sh:minCount 1 ;
+        sh:class rt:BodyPart ;
+        sh:message "训练条目必须声明目标身体部位。"@zh ;
+    ] .
+
+rtsh:DifficultyVariantShape a sh:NodeShape ;
+    rdfs:label "难度变体约束"@zh ;
+    sh:targetClass rt:DifficultyVariant ;
+    sh:property [
+        sh:path rt:variantCode ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:minLength 1 ;
+    ] ;
+    sh:property [
+        sh:path rt:variantOf ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:Exercise ;
+        sh:message "难度变体必须归属一个训练条目。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:variantLevel ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 1 ;
+        sh:maxInclusive 3 ;
+        sh:message "难度变体级别为 1–3（C1 的 2–3 个变体）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:applicableToStage ;
+        sh:minCount 1 ;
+        sh:in ( rt:HYStage1 rt:HYStage2 rt:HYStage3 rt:HYStage4 ) ;
+        sh:message "难度变体不得适用于 H-Y 5 级（D5）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:hasDefaultDosage ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:Dosage ;
+    ] ;
+    sh:property [
+        sh:path rt:hasPublicationStatus ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:in ( rt:Draft rt:Published rt:Retired ) ;
+    ] .
+
+rtsh:DosageShape a sh:NodeShape ;
+    rdfs:label "剂量约束"@zh ;
+    sh:targetClass rt:Dosage ;
+    sh:property [
+        sh:path rt:sets ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 1 ;
+        sh:message "剂量必须记录组数，且至少 1 组。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:repetitions ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 1 ;
+        sh:message "剂量必须记录次数，且至少 1 次。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:durationMinutes ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:minExclusive 0 ;
+        sh:message "剂量必须记录大于 0 的时长（分钟）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:bpm ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:message "BPM 属临床配置（C3），本体不设固定上下限，待签核。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:frequencyPerWeek ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 1 ;
+    ] ;
+    sh:property [
+        sh:path rt:restSeconds ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 0 ;
+    ] .
+
+rtsh:MovementShape a sh:NodeShape ;
+    rdfs:label "动作约束"@zh ;
+    rdfs:comment "支撑方式是 H-Y 3–4 安全判定的一部分，必须显式声明。"@zh ;
+    sh:targetClass rt:Movement ;
+    sh:property [
+        sh:path rt:movementCode ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:minLength 1 ;
+    ] ;
+    sh:property [
+        sh:path rt:hasSupportLevel ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:in ( rt:UnsupportedStanding rt:SupportedStanding rt:Seated ) ;
+        sh:message "动作必须声明支撑方式：无支撑站立、有支撑站立或坐位。"@zh ;
+    ] .
+
+# --- 说明书安全逻辑：H-Y 3–4 级不得使用无支撑站立类动作 ---
+
+rtsh:Stage34NoUnsupportedStandingShape a sh:NodeShape ;
+    rdfs:label "H-Y 3–4 级无支撑站立禁用"@zh ;
+    sh:targetClass rt:Exercise, rt:DifficultyVariant ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:severity sh:Violation ;
+        sh:message "H-Y 3–4 级不得使用无支撑站立类动作（说明书安全逻辑）。"@zh ;
+        sh:prefixes rtsh:prefixes ;
+        sh:select """
+            SELECT DISTINCT $this ?movement WHERE {
+                $this rt:applicableToStage ?stage .
+                FILTER (?stage IN (rt:HYStage3, rt:HYStage4))
+                {
+                    $this rt:hasMovement ?movement .
+                }
+                UNION
+                {
+                    $this rt:variantOf ?exercise .
+                    ?exercise rt:hasMovement ?movement .
+                }
+                ?movement rt:hasSupportLevel rt:UnsupportedStanding .
+            }
+        """ ;
+    ] .
+
+# =============================================================================
+# 三、处方与高风险准入约束
+# =============================================================================
+
+rtsh:PrescriptionShape a sh:NodeShape ;
+    rdfs:label "处方约束"@zh ;
+    sh:targetClass rt:Prescription ;
+    sh:property [
+        sh:path rt:prescriptionFor ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:Patient ;
+        sh:message "处方必须对应且仅对应一个患者。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:prescribedBy ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:RehabTherapistRole ;
+        sh:message "处方必须由康复治疗师签发（D12）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:issuedAt ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:dateTime ;
+        sh:message "处方必须记录签发时间（D12）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:prescriptionVersion ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:minLength 1 ;
+        sh:message "处方必须记录版本（D12）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:referencesExercise ;
+        sh:minCount 1 ;
+        sh:node rtsh:PublishedExerciseShape ;
+        sh:message "处方引用的训练条目必须存在且状态为已发布（C1/C2）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:prescribedDosage ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:Dosage ;
+        sh:message "处方必须记录剂量。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:validFrom ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:dateTime ;
+        sh:message "处方必须记录有效期开始时间。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:validUntil ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:dateTime ;
+        sh:message "处方必须记录有效期结束时间。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:usesMappingTableVersion ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:minLength 1 ;
+        sh:message "处方必须记录所用 H-Y → 条目映射表的 semver 版本（C2）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:hasPrescriptionStatus ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:in ( rt:PrescriptionDraft rt:PrescriptionActive rt:PrescriptionExpired ) ;
+    ] .
+
+rtsh:PublishedExerciseShape a sh:NodeShape ;
+    rdfs:label "已发布训练条目节点约束"@zh ;
+    sh:class rt:Exercise ;
+    sh:property [
+        sh:path rt:hasPublicationStatus ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:hasValue rt:Published ;
+        sh:message "处方引用的训练条目必须存在且状态为已发布（C1/C2）。"@zh ;
+    ] ;
+    sh:message "处方引用的训练条目必须存在且类型为训练条目（C1/C2）。"@zh .
+
+rtsh:PrescriptionValidityWindowShape a sh:NodeShape ;
+    rdfs:label "处方有效期窗口约束"@zh ;
+    sh:targetClass rt:Prescription ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:severity sh:Violation ;
+        sh:message "处方有效期结束时间必须晚于开始时间。"@zh ;
+        sh:prefixes rtsh:prefixes ;
+        sh:select """
+            SELECT $this ?validFrom ?validUntil WHERE {
+                $this rt:validFrom ?validFrom .
+                $this rt:validUntil ?validUntil .
+                FILTER (?validUntil <= ?validFrom)
+            }
+        """ ;
+    ] .
+
+rtsh:HighRiskAdmissionRequiresConfirmedStageShape a sh:NodeShape ;
+    rdfs:label "高风险准入需已确认分期"@zh ;
+    sh:targetClass rt:Prescription ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:severity sh:Violation ;
+        sh:message "分期未确认（疑似）时不得开具或准入高风险训练条目（D11）。"@zh ;
+        sh:prefixes rtsh:prefixes ;
+        sh:select """
+            SELECT DISTINCT $this ?patient ?exercise WHERE {
+                {
+                    $this rt:prescriptionFor ?patient .
+                }
+                UNION
+                {
+                    ?patient rt:hasPrescription $this .
+                }
+                $this rt:referencesExercise ?exercise .
+                ?exercise rt:hasRiskLevel rt:HighRisk .
+                OPTIONAL { ?patient rt:stageConfirmedBy ?therapist . }
+                OPTIONAL { ?patient rt:hasStageConfirmationStatus ?status . }
+                FILTER (!BOUND(?therapist) || !BOUND(?status) || ?status != rt:Confirmed)
+            }
+        """ ;
+    ] .
+
+# --- D5：H-Y 5 级患者不得被分配训练方案 ---
+
+rtsh:HY5NoPrescriptionShape a sh:NodeShape ;
+    rdfs:label "H-Y 5 级不得分配训练方案"@zh ;
+    sh:targetClass rt:Patient ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:severity sh:Violation ;
+        sh:message "H-Y 5 级患者仅宣教与转诊，不得分配训练方案/处方（D5）。"@zh ;
+        sh:prefixes rtsh:prefixes ;
+        sh:select """
+            SELECT DISTINCT $this ?prescription WHERE {
+                $this rt:hasHYStage rt:HYStage5 .
+                {
+                    $this rt:hasPrescription ?prescription .
+                }
+                UNION
+                {
+                    ?prescription rt:prescriptionFor $this .
+                }
+            }
+        """ ;
+    ] .
+
+# =============================================================================
+# 四、训练记录约束（T7 / D14）
+# =============================================================================
+
+rtsh:SessionRecordShape a sh:NodeShape ;
+    rdfs:label "训练记录约束"@zh ;
+    sh:targetClass rt:SessionRecord ;
+    sh:property [
+        sh:path rt:recordedFor ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:Patient ;
+    ] ;
+    sh:property [
+        sh:path rt:recordsPrescription ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:Prescription ;
+    ] ;
+    sh:property [
+        sh:path rt:recordedBy ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:Role ;
+        sh:message "训练记录必须记录操作者（D4）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:sessionTimestamp ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:dateTime ;
+    ] ;
+    sh:property [
+        sh:path rt:checkedIn ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:boolean ;
+        sh:message "训练记录必须记录打卡结果（D13）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:completionCount ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 0 ;
+    ] ;
+    sh:property [
+        sh:path rt:movementErrorCount ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 0 ;
+        sh:message "训练记录必须记录动作错误次数（D14）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:interruptionCount ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 0 ;
+        sh:message "训练记录必须记录中断次数（D14）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:validFrameRatio ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:minInclusive 0 ;
+        sh:maxInclusive 1 ;
+        sh:message "训练记录必须记录 0–1 的有效帧占比（D14）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:isDoubtful ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:boolean ;
+        sh:message "训练记录必须记录存疑标记（D13）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:modelVersion ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:minLength 1 ;
+        sh:message "训练记录必须携带模型版本（T7）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:modelSha256 ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:pattern "^[0-9a-fA-F]{64}$" ;
+        sh:message "训练记录必须携带 64 位十六进制模型 SHA-256（T7）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:metricAlgorithmVersion ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:minLength 1 ;
+        sh:message "训练记录必须携带指标算法版本（T7）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:thresholdConfigVersion ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:minLength 1 ;
+        sh:message "训练记录必须携带阈值配置版本（T7）。"@zh ;
+    ] .
+
+# =============================================================================
+# 五、预警与评估约束（D6 / C4 / C5）
+# =============================================================================
+
+rtsh:AlertEventShape a sh:NodeShape ;
+    rdfs:label "风险预警事件约束"@zh ;
+    sh:targetClass rt:AlertEvent ;
+    sh:property [
+        sh:path rt:alertFor ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:Patient ;
+    ] ;
+    sh:property [
+        sh:path rt:triggeredByRule ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:AlertRule ;
+        sh:message "风险预警必须记录触发规则（D6）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:triggeredAt ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:dateTime ;
+        sh:message "风险预警必须记录触发时间戳（D6）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:alertLevel ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:in ( rt:Info rt:Warning rt:Critical ) ;
+    ] ;
+    sh:property [
+        sh:path rt:deliveredVia ;
+        sh:minCount 1 ;
+        sh:in ( rt:InAppPopup rt:VoicePrompt rt:PushNotification rt:AuditLog ) ;
+        sh:message "风险预警必须至少记录一个送达通道（D6）。"@zh ;
+    ] .
+
+rtsh:AlertRuleShape a sh:NodeShape ;
+    rdfs:label "预警规则约束"@zh ;
+    sh:targetClass rt:AlertRule ;
+    sh:property [
+        sh:path rt:ruleCode ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:minLength 1 ;
+    ] ;
+    sh:property [
+        sh:path rt:hasTriggerSource ;
+        sh:minCount 1 ;
+        sh:class rt:TriggerSource ;
+        sh:message "预警规则必须关联症状或阈值触发源（D6/C5）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:alertLevel ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:in ( rt:Info rt:Warning rt:Critical ) ;
+    ] .
+
+rtsh:AlertThresholdShape a sh:NodeShape ;
+    rdfs:label "预警阈值约束"@zh ;
+    sh:targetClass rt:AlertThreshold ;
+    sh:property [
+        sh:path rt:thresholdValue ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+    ] ;
+    sh:property [
+        sh:path rt:thresholdOperator ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:in ( ">=" "<=" ">" "<" "=" ) ;
+    ] ;
+    sh:property [
+        sh:path rt:thresholdUnit ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+    ] .
+
+rtsh:AssessmentShape a sh:NodeShape ;
+    rdfs:label "评估约束"@zh ;
+    sh:targetClass rt:Assessment ;
+    sh:property [
+        sh:path rt:assessedPatient ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:Patient ;
+    ] ;
+    sh:property [
+        sh:path rt:assessmentTimestamp ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:dateTime ;
+    ] ;
+    sh:property [
+        sh:path rt:severity ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:message "严重度分值域由量表决定，分界值待临床签核（C4）。"@zh ;
+    ] .
+
+rtsh:AssessmentRecordShape a sh:NodeShape ;
+    rdfs:label "评估记录约束"@zh ;
+    sh:targetClass rt:AssessmentRecord ;
+    sh:property [
+        sh:path rt:assessmentOf ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:Patient ;
+    ] ;
+    sh:property [
+        sh:path rt:recordsAssessment ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:Assessment ;
+    ] ;
+    sh:property [
+        sh:path rt:recordedAt ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:dateTime ;
+    ] ;
+    sh:property [
+        sh:path rt:recordedBy ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:Role ;
+    ] .
+
+rtsh:FallRiskShape a sh:NodeShape ;
+    rdfs:label "跌倒风险约束"@zh ;
+    sh:targetClass rt:FallRisk ;
+    sh:property [
+        sh:path rt:hasRiskLevel ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:in ( rt:LowRisk rt:MediumRisk rt:HighRisk ) ;
+    ] .
+
+# =============================================================================
+# 六、角色约束
+# =============================================================================
+
+rtsh:CareAdminRoleShape a sh:NodeShape ;
+    rdfs:label "照护管理员角色约束"@zh ;
+    sh:targetClass rt:CareAdminRole ;
+    sh:property [
+        sh:path rt:affiliatedWithOrg ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:Organization ;
+        sh:message "照护管理员必须属于一个机构（D10）。"@zh ;
+    ] .
+
+rtsh:RehabTherapistRoleShape a sh:NodeShape ;
+    rdfs:label "康复治疗师角色约束"@zh ;
+    sh:targetClass rt:RehabTherapistRole ;
+    sh:property [
+        sh:path rt:affiliatedWithOrg ;
+        sh:minCount 1 ;
+        sh:class rt:Organization ;
+        sh:message "康复治疗师必须至少属于一个机构（D10）。"@zh ;
+    ] .
+
+# =============================================================================
+# 七、身份与投递约束（补 charter §7 缺口）
+# =============================================================================
+
+rtsh:AccountShape a sh:NodeShape ;
+    rdfs:label "账号约束"@zh ;
+    sh:targetClass rt:Account ;
+    sh:property [
+        sh:path rt:accountBelongsToOrg ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:Organization ;
+        sh:message "账号必须属于且仅属于一个机构（D10）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:hasRoleBinding ;
+        sh:minCount 1 ;
+        sh:class rt:Role ;
+        sh:message "账号至少需要一个角色绑定（D4）。"@zh ;
+    ] .
+
+rtsh:ExerciseCategoryShape a sh:NodeShape ;
+    rdfs:label "训练大类固定四条"@zh ;
+    sh:targetClass rt:Exercise ;
+    sh:property [
+        sh:path rt:inCategory ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:in (
+            rt:catStretchingRelaxation
+            rt:catStrengthMaintenance
+            rt:catRhythmicGait
+            rt:catPosturalCorrection
+        ) ;
+        sh:message "训练条目必须属于固定的四大类之一（说明书模块 2）。"@zh ;
+    ] .
+
+rtsh:NotificationDeliveryShape a sh:NodeShape ;
+    rdfs:label "通知投递约束"@zh ;
+    sh:targetClass rt:NotificationDelivery ;
+    sh:property [
+        sh:path rt:deliveryForAlert ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:AlertEvent ;
+        sh:message "投递记录必须关联一条预警（D6）。"@zh ;
+    ] ;
+    sh:property [
+        sh:path rt:deliveryChannel ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:DeliveryChannel ;
+    ] ;
+    sh:property [
+        sh:path rt:deliveryStatus ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:in (
+            rt:DeliveryPending
+            rt:DeliverySent
+            rt:DeliveryFailed
+            rt:DeliveryFallback
+        ) ;
+    ] ;
+    sh:property [
+        sh:path rt:deliveredAt ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:dateTime ;
+    ] .
+
+rtsh:DeviceSessionShape a sh:NodeShape ;
+    rdfs:label "设备会话约束"@zh ;
+    sh:targetClass rt:DeviceSession ;
+    sh:property [
+        sh:path rt:deviceBoundToPatient ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class rt:Patient ;
+        sh:message "一设备长期绑定一患者（D9）。"@zh ;
+    ] .

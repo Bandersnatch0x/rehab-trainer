@@ -1,0 +1,71 @@
+# 合法实例：账号、角色绑定、微信外部身份、绑定码与设备会话。
+# 预期：validate.py 返回 CONFORMS（D4、D9、D10、T2）。
+
+@prefix ex: <https://rehab-trainer.local/ontology/examples#> .
+@prefix rt: <https://rehab-trainer.local/ontology#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:org1 a rt:Organization ;
+    rdfs:label "示例机构" ;
+    rt:orgId "ORG-001" .
+
+ex:therapist1 a rt:RehabTherapistRole ;
+    rdfs:label "示例康复治疗师" ;
+    rt:affiliatedWithOrg ex:org1 .
+
+ex:patientRole1 a rt:PatientRole ;
+    rdfs:label "示例患者角色" ;
+    rt:affiliatedWithOrg ex:org1 .
+
+ex:caregiverRole1 a rt:CaregiverRole ;
+    rdfs:label "示例照护者角色" ;
+    rt:affiliatedWithOrg ex:org1 ;
+    rt:caresFor ex:patient1 .
+
+# --- 账号：内部主键，属于且仅属于一个机构 ---
+
+ex:accountPatient1 a rt:Account ;
+    rdfs:label "患者账号" ;
+    rt:accountBelongsToOrg ex:org1 ;
+    rt:hasRoleBinding ex:patientRole1 .
+
+ex:accountCaregiver1 a rt:Account ;
+    rdfs:label "照护者账号" ;
+    rt:accountBelongsToOrg ex:org1 ;
+    rt:hasRoleBinding ex:caregiverRole1 .
+
+# --- 外部身份：微信 openid 只是可撤销凭据 ---
+
+ex:identityCaregiver1 a rt:ExternalIdentity ;
+    rdfs:label "照护者微信凭据" ;
+    rt:identityOfAccount ex:accountCaregiver1 .
+
+ex:accountCaregiver1 rt:hasExternalIdentity ex:identityCaregiver1 .
+
+# --- 患者与分期确认 ---
+
+ex:patient1 a rt:Patient ;
+    rdfs:label "示例患者" ;
+    rt:belongsToOrg ex:org1 ;
+    rt:hasHYStage rt:HYStage2 ;
+    rt:hasStageConfirmationStatus rt:Confirmed ;
+    rt:stageConfirmedBy ex:therapist1 ;
+    rt:hasStageConfirmation ex:stageConfirmation1 .
+
+ex:stageConfirmation1 a rt:StageConfirmation ;
+    rt:confirmsPatient ex:patient1 ;
+    rt:confirmsStage rt:HYStage2 ;
+    rt:confirmedBy ex:therapist1 ;
+    rt:confirmedAt "2026-11-01T09:00:00+08:00"^^xsd:dateTime .
+
+# --- 绑定码与设备会话 ---
+
+ex:bindingToken1 a rt:BindingToken ;
+    rdfs:label "照护者绑定患者的绑定码" ;
+    rt:bindingTargetPatient ex:patient1 .
+
+ex:deviceSession1 a rt:DeviceSession ;
+    rdfs:label "居家平板会话" ;
+    rt:deviceBoundToPatient ex:patient1 ;
+    rt:accountOfDeviceSession ex:accountPatient1 .

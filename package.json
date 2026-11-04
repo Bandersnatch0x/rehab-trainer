@@ -1,0 +1,11 @@
+{
+  "name": "rehab-trainer",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.7.1",
+  "scripts": {
+    "dev:admin-web": "pnpm --filter @rehab-trainer/admin-web dev",
+    "build:admin-web": "pnpm --filter @rehab-trainer/admin-web build",
+    "typecheck:miniprogram": "pnpm --filter @rehab-trainer/miniprogram typecheck"
+  }
+}

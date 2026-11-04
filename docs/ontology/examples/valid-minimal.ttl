@@ -1,0 +1,139 @@
+# 最小合法实例：H-Y 2 级患者 + 一个牵伸条目 + 一张治疗师签发的处方 + 一条训练记录。
+# 预期：validate.py 返回 CONFORMS。
+
+@prefix ex: <https://rehab-trainer.local/ontology/examples#> .
+@prefix rt: <https://rehab-trainer.local/ontology#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# --- 机构与角色 ---
+
+ex:org1 a rt:Organization ;
+    rdfs:label "示例机构" ;
+    rt:orgId "ORG-001" .
+
+ex:therapist1 a rt:RehabTherapistRole ;
+    rdfs:label "示例康复治疗师" ;
+    rt:affiliatedWithOrg ex:org1 .
+
+ex:patientRole1 a rt:PatientRole ;
+    rdfs:label "示例患者账号" ;
+    rt:affiliatedWithOrg ex:org1 .
+
+# --- 患者与分期确认 ---
+
+ex:patient1 a rt:Patient ;
+    rdfs:label "示例患者" ;
+    rt:belongsToOrg ex:org1 ;
+    rt:hasHYStage rt:HYStage2 ;
+    rt:hasStageConfirmationStatus rt:Confirmed ;
+    rt:stageConfirmedBy ex:therapist1 ;
+    rt:hasStageConfirmation ex:stageConfirmation1 .
+
+ex:stageConfirmation1 a rt:StageConfirmation ;
+    rt:confirmsPatient ex:patient1 ;
+    rt:confirmsStage rt:HYStage2 ;
+    rt:confirmedBy ex:therapist1 ;
+    rt:confirmedAt "2026-11-01T09:00:00+08:00"^^xsd:dateTime .
+
+# --- 症状、危险信号与动作 ---
+
+ex:pain1 a rt:Pain ;
+    rdfs:label "疼痛" ;
+    rt:symptomCode "PAIN" .
+
+ex:dangerDizziness1 a rt:DangerSignal ;
+    rdfs:label "训练中出现头晕" ;
+    rt:dangerSignalCode "DIZZINESS_DURING_TRAINING" ;
+    rt:dangerSignalDescription "训练中出现头晕或眩晕时应立即停止。" .
+
+ex:movementSeatedKneeExtension a rt:Movement ;
+    rdfs:label "坐位伸膝" ;
+    rt:movementCode "SEATED_KNEE_EXTENSION" ;
+    rt:hasSupportLevel rt:Seated ;
+    rt:hasMovementPattern rt:Extension ;
+    rt:involvesJoint rt:KneeJoint ;
+    rt:involvesBodyPart rt:LowerLimb ;
+    rt:usesLandmark rt:LeftKnee, rt:RightKnee .
+
+# --- 剂量 ---
+
+ex:dosageExercise1 a rt:Dosage ;
+    rt:sets 2 ;
+    rt:repetitions 10 ;
+    rt:durationMinutes 5.0 ;
+    rt:frequencyPerWeek 5 .
+
+ex:dosageVariant1 a rt:Dosage ;
+    rt:sets 2 ;
+    rt:repetitions 8 ;
+    rt:durationMinutes 4.0 ;
+    rt:frequencyPerWeek 5 .
+
+ex:dosagePrescription1 a rt:Dosage ;
+    rt:sets 2 ;
+    rt:repetitions 10 ;
+    rt:durationMinutes 5.0 ;
+    rt:frequencyPerWeek 5 .
+
+# --- 训练条目与难度变体 ---
+
+ex:exerciseStretch1 a rt:StretchingExercise ;
+    rdfs:label "坐位腘绳肌牵伸" ;
+    rt:exerciseCode "STR-001" ;
+    rt:inCategory rt:catStretchingRelaxation ;
+    rt:hasPublicationStatus rt:Published ;
+    rt:hasRiskLevel rt:LowRisk ;
+    rt:applicableToStage rt:HYStage1, rt:HYStage2, rt:HYStage3, rt:HYStage4 ;
+    rt:targetsBodyPart rt:LowerLimb ;
+    rt:targetsJoint rt:KneeJoint ;
+    rt:hasMovement ex:movementSeatedKneeExtension ;
+    rt:hasDefaultDosage ex:dosageExercise1 ;
+    rt:hasVariant ex:variantStretch1 ;
+    rt:contraindicatedFor ex:pain1 ;
+    rt:hasDangerSignal ex:dangerDizziness1 ;
+    rt:videoUri <https://example.invalid/video/str-001.mp4> ;
+    rt:audioUri <https://example.invalid/audio/str-001-beat.wav> .
+
+ex:variantStretch1 a rt:DifficultyVariant ;
+    rdfs:label "坐位腘绳肌牵伸-初级" ;
+    rt:variantCode "STR-001-V1" ;
+    rt:variantOf ex:exerciseStretch1 ;
+    rt:variantLevel 1 ;
+    rt:applicableToStage rt:HYStage1, rt:HYStage2, rt:HYStage3, rt:HYStage4 ;
+    rt:hasDefaultDosage ex:dosageVariant1 ;
+    rt:hasPublicationStatus rt:Published .
+
+# --- 处方 ---
+
+ex:prescription1 a rt:Prescription ;
+    rdfs:label "示例处方" ;
+    rt:prescriptionFor ex:patient1 ;
+    rt:prescribedBy ex:therapist1 ;
+    rt:referencesExercise ex:exerciseStretch1 ;
+    rt:prescribedDosage ex:dosagePrescription1 ;
+    rt:issuedAt "2026-11-01T10:00:00+08:00"^^xsd:dateTime ;
+    rt:validFrom "2026-11-01T00:00:00+08:00"^^xsd:dateTime ;
+    rt:validUntil "2026-11-15T23:59:59+08:00"^^xsd:dateTime ;
+    rt:prescriptionVersion "1.0.0" ;
+    rt:usesMappingTableVersion "2026.11.0" ;
+    rt:hasPrescriptionStatus rt:PrescriptionActive .
+
+# --- 训练记录 ---
+
+ex:session1 a rt:SessionRecord ;
+    rdfs:label "示例训练记录" ;
+    rt:recordedFor ex:patient1 ;
+    rt:recordsPrescription ex:prescription1 ;
+    rt:recordedBy ex:patientRole1 ;
+    rt:sessionTimestamp "2026-11-02T08:00:00+08:00"^^xsd:dateTime ;
+    rt:checkedIn true ;
+    rt:completionCount 18 ;
+    rt:movementErrorCount 2 ;
+    rt:interruptionCount 1 ;
+    rt:validFrameRatio 0.92 ;
+    rt:isDoubtful false ;
+    rt:modelVersion "pose-model-1.2.2" ;
+    rt:modelSha256 "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" ;
+    rt:metricAlgorithmVersion "metrics-0.1.0" ;
+    rt:thresholdConfigVersion "thresholds-2026.11.0" .

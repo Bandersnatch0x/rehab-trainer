@@ -1,0 +1,51 @@
+# 违规实例：通知投递记录缺投递通道与时间。
+# 预期：validate.py 返回 NON-CONFORMS（D6：投递必须记录通道、状态与时间）。
+
+@prefix ex: <https://rehab-trainer.local/ontology/examples#> .
+@prefix rt: <https://rehab-trainer.local/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:org1 a rt:Organization ;
+    rt:orgId "ORG-001" .
+
+ex:therapist1 a rt:RehabTherapistRole ;
+    rt:affiliatedWithOrg ex:org1 .
+
+ex:patient1 a rt:Patient ;
+    rt:belongsToOrg ex:org1 ;
+    rt:hasHYStage rt:HYStage2 ;
+    rt:hasStageConfirmationStatus rt:Confirmed ;
+    rt:stageConfirmedBy ex:therapist1 ;
+    rt:hasStageConfirmation ex:stageConfirmation1 .
+
+ex:stageConfirmation1 a rt:StageConfirmation ;
+    rt:confirmsPatient ex:patient1 ;
+    rt:confirmsStage rt:HYStage2 ;
+    rt:confirmedBy ex:therapist1 ;
+    rt:confirmedAt "2026-11-01T09:00:00+08:00"^^xsd:dateTime .
+
+ex:pain1 a rt:Pain ;
+    rt:symptomCode "PAIN" .
+
+ex:painThreshold a rt:AlertThreshold ;
+    rt:thresholdValue 4.0 ;
+    rt:thresholdOperator ">=" ;
+    rt:thresholdUnit "分" ;
+    rt:triggersAlert ex:rulePain .
+
+ex:rulePain a rt:AlertRule ;
+    rt:ruleCode "PAIN_GE_4_2D" ;
+    rt:hasTriggerSource ex:painThreshold ;
+    rt:alertLevel rt:Warning ;
+    rt:windowDays 2 .
+
+ex:alertPain a rt:AlertEvent ;
+    rt:alertFor ex:patient1 ;
+    rt:triggeredByRule ex:rulePain ;
+    rt:triggeredAt "2026-11-03T08:00:00+08:00"^^xsd:dateTime ;
+    rt:alertLevel rt:Warning .
+
+# 缺 deliveryChannel 与 deliveredAt。
+ex:deliveryBroken a rt:NotificationDelivery ;
+    rt:deliveryForAlert ex:alertPain ;
+    rt:deliveryStatus rt:DeliveryPending .

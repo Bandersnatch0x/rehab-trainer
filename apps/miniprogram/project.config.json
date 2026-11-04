@@ -1,0 +1,14 @@
+{
+  "appid": "touristappid",
+  "compileType": "miniprogram",
+  "projectname": "rehab-trainer-miniprogram",
+  "description": "康复训练微信小程序(原生 TypeScript)",
+  "setting": {
+    "urlCheck": true,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true
+  },
+  "condition": {}
+}

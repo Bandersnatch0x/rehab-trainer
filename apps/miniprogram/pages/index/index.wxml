@@ -1,0 +1,4 @@
+<view class="page">
+  <text class="title">{{title}}</text>
+  <text class="hint">小程序骨架已就位，业务页面待实现。</text>
+</view>

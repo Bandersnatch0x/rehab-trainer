@@ -1,0 +1,67 @@
+# 违规实例：分期未经康复治疗师确认（疑似），处方却引用了高风险训练条目。
+# 预期：SHACL 拒绝，触发 rtsh:HighRiskAdmissionRequiresConfirmedStageShape（D11）。
+
+@prefix ex: <https://rehab-trainer.local/ontology/examples#> .
+@prefix rt: <https://rehab-trainer.local/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:org1 a rt:Organization ;
+    rt:orgId "ORG-001" .
+
+ex:therapist1 a rt:RehabTherapistRole ;
+    rt:affiliatedWithOrg ex:org1 .
+
+# 疑似分期：没有 stageConfirmedBy，也没有分期确认记录。
+ex:patientSuspected a rt:Patient ;
+    rt:belongsToOrg ex:org1 ;
+    rt:hasHYStage rt:HYStage2 ;
+    rt:hasStageConfirmationStatus rt:Suspected .
+
+ex:pain1 a rt:Pain ;
+    rt:symptomCode "PAIN" .
+
+ex:danger1 a rt:DangerSignal ;
+    rt:dangerSignalCode "DIZZINESS_DURING_TRAINING" .
+
+ex:movementSeated a rt:Movement ;
+    rt:movementCode "SEATED_KNEE_EXTENSION" ;
+    rt:hasSupportLevel rt:Seated ;
+    rt:hasMovementPattern rt:Extension ;
+    rt:involvesJoint rt:KneeJoint ;
+    rt:involvesBodyPart rt:LowerLimb ;
+    rt:usesLandmark rt:LeftKnee, rt:RightKnee .
+
+ex:dosageExercise a rt:Dosage ;
+    rt:sets 2 ;
+    rt:repetitions 10 ;
+    rt:durationMinutes 5.0 .
+
+ex:exerciseHighRisk a rt:StrengthExercise ;
+    rt:exerciseCode "STR-HIGH-001" ;
+    rt:inCategory rt:catStrengthMaintenance ;
+    rt:hasPublicationStatus rt:Published ;
+    rt:hasRiskLevel rt:HighRisk ;
+    rt:applicableToStage rt:HYStage1, rt:HYStage2, rt:HYStage3, rt:HYStage4 ;
+    rt:targetsBodyPart rt:LowerLimb ;
+    rt:targetsJoint rt:KneeJoint ;
+    rt:hasMovement ex:movementSeated ;
+    rt:hasDefaultDosage ex:dosageExercise ;
+    rt:contraindicatedFor ex:pain1 ;
+    rt:hasDangerSignal ex:danger1 .
+
+ex:dosagePrescription a rt:Dosage ;
+    rt:sets 2 ;
+    rt:repetitions 10 ;
+    rt:durationMinutes 5.0 .
+
+ex:prescriptionHighRisk a rt:Prescription ;
+    rt:prescriptionFor ex:patientSuspected ;
+    rt:prescribedBy ex:therapist1 ;
+    rt:referencesExercise ex:exerciseHighRisk ;
+    rt:prescribedDosage ex:dosagePrescription ;
+    rt:issuedAt "2026-11-01T10:00:00+08:00"^^xsd:dateTime ;
+    rt:validFrom "2026-11-01T00:00:00+08:00"^^xsd:dateTime ;
+    rt:validUntil "2026-11-15T23:59:59+08:00"^^xsd:dateTime ;
+    rt:prescriptionVersion "1.0.0" ;
+    rt:usesMappingTableVersion "2026.11.0" ;
+    rt:hasPrescriptionStatus rt:PrescriptionActive .

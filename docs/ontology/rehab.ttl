@@ -1,0 +1,1404 @@
+# =============================================================================
+# rehab-trainer 领域本体（OWL 2 / Turtle）
+#
+# 术语权威：.agent/keep/glossary.md
+# 决策依据：.agent/keep/decisions/0001-需求基线与范围裁决.md（D1–D16、T1–T9、C1–C5）
+#
+# 分层约定：
+#   - 本文件只放 OWL 2 的类、属性、个体与可推理关系，不放业务校验规则；
+#   - 「必须/不得」类约束放 shapes.ttl（SHACL）；
+#   - 临床阈值（BPM 区间、疼痛分界、量表分界、预警时间窗口）尚未签核，
+#     本文件只用注释标明，不写成公理。
+# =============================================================================
+
+@prefix rt: <https://rehab-trainer.local/ontology#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+# -----------------------------------------------------------------------------
+# 本体头
+# -----------------------------------------------------------------------------
+
+<https://rehab-trainer.local/ontology> a owl:Ontology ;
+    rdfs:label "帕金森康复训练领域本体"@zh ;
+    rdfs:comment """帕金森病患者肌肉保护训练系统的上位语义层。
+覆盖患者、训练、身体、风险、干预、角色、记录七个概念域。
+本体表达可推理的领域知识；业务硬约束由 shapes.ttl 的 SHACL 形状表达。"""@zh ;
+    owl:versionInfo "0.1.0" ;
+    owl:versionIRI <https://rehab-trainer.local/ontology/0.1.0> ;
+    dcterms:source "决策 0001：需求基线与范围裁决（D1–D16、T1–T9、C1–C5）" ;
+    dcterms:created "2026-11-04"^^xsd:date .
+
+# =============================================================================
+# 一、患者域
+# =============================================================================
+
+rt:Patient a owl:Class ;
+    rdfs:label "患者"@zh, "Patient"@en ;
+    rdfs:comment """接受康复训练的患者档案。
+决策依据：D4（四角色）、D5（H-Y 1–5 建档）、D9（一设备长期绑定一患者）、D10（多机构）、D11（分期确认）。"""@zh .
+
+rt:HYStage a owl:Class ;
+    rdfs:label "H-Y 分级"@zh, "Hoehn-Yahr Stage"@en ;
+    rdfs:comment """Hoehn-Yahr 分期，帕金森病运动症状严重度的五级评定。
+3–4 级为安全逻辑的主要分界；5 级仅宣教与转诊，不进训练流程。
+决策依据：D5、C2。"""@zh ;
+    owl:oneOf ( rt:HYStage1 rt:HYStage2 rt:HYStage3 rt:HYStage4 rt:HYStage5 ) .
+
+rt:HYStage1 a owl:NamedIndividual, rt:HYStage ;
+    rdfs:label "H-Y 1 级"@zh ;
+    rt:stageValue 1 .
+
+rt:HYStage2 a owl:NamedIndividual, rt:HYStage ;
+    rdfs:label "H-Y 2 级"@zh ;
+    rt:stageValue 2 .
+
+rt:HYStage3 a owl:NamedIndividual, rt:HYStage ;
+    rdfs:label "H-Y 3 级"@zh ;
+    rt:stageValue 3 .
+
+rt:HYStage4 a owl:NamedIndividual, rt:HYStage ;
+    rdfs:label "H-Y 4 级"@zh ;
+    rt:stageValue 4 .
+
+rt:HYStage5 a owl:NamedIndividual, rt:HYStage ;
+    rdfs:label "H-Y 5 级"@zh ;
+    rt:stageValue 5 .
+
+rt:StageConfirmation a owl:Class ;
+    rdfs:label "分期确认"@zh, "Stage Confirmation"@en ;
+    rdfs:comment """由康复治疗师对患者 H-Y 分期作出的权威判定记录。
+未经确认的分期标记为「疑似」，不得用于高风险训练准入。
+决策依据：D11。"""@zh .
+
+rt:StageConfirmationStatus a owl:Class ;
+    rdfs:label "分期确认状态"@zh, "Stage Confirmation Status"@en ;
+    rdfs:comment "已确认 / 疑似两态。决策依据：D11。"@zh ;
+    owl:oneOf ( rt:Confirmed rt:Suspected ) .
+
+rt:Confirmed a owl:NamedIndividual, rt:StageConfirmationStatus ;
+    rdfs:label "已确认"@zh .
+
+rt:Suspected a owl:NamedIndividual, rt:StageConfirmationStatus ;
+    rdfs:label "疑似"@zh .
+
+rt:Assessment a owl:Class ;
+    rdfs:label "评估"@zh, "Assessment"@en ;
+    rdfs:comment """一次临床或自评评估。
+量表选择与分界值属于待临床签核配置（C4）；本体只建模评估事实、量表标识与分值，
+不把 SARC-F ≥4、SARC-CalF ≥11、TUG ≥11.5s 等阈值写成公理。"""@zh .
+
+rt:HYStageAssessment a owl:Class ;
+    rdfs:label "H-Y 分期评估"@zh ;
+    rdfs:subClassOf rt:Assessment .
+
+rt:FallRiskAssessment a owl:Class ;
+    rdfs:label "跌倒风险评估"@zh ;
+    rdfs:subClassOf rt:Assessment .
+
+rt:Symptom a owl:Class ;
+    rdfs:label "症状"@zh, "Symptom"@en ;
+    rdfs:comment "患者症状；症状修饰进入剂量层（C2）。"@zh .
+
+rt:Rigidity a owl:Class ;
+    rdfs:label "僵直"@zh ;
+    rdfs:subClassOf rt:Symptom ;
+    rdfs:comment "C4 使用 5 级主观僵硬感；分界值待临床签核。"@zh .
+
+rt:Pain a owl:Class ;
+    rdfs:label "疼痛"@zh ;
+    rdfs:subClassOf rt:Symptom ;
+    rdfs:comment "C5 疼痛预警阈值待临床签核；本体不设固定分值。"@zh .
+
+rt:FreezingOfGait a owl:Class ;
+    rdfs:label "冻结步态"@zh, "Freezing of Gait"@en ;
+    rdfs:subClassOf rt:Symptom ;
+    rdfs:comment "缩写 FOG。自动检测为研究级难题，本系统不做自动检测（术语表）。"@zh .
+
+rt:Dizziness a owl:Class ;
+    rdfs:label "头晕"@zh ;
+    rdfs:subClassOf rt:Symptom .
+
+rt:Sarcopenia a owl:Class ;
+    rdfs:label "肌少症"@zh, "Sarcopenia"@en ;
+    rdfs:subClassOf rt:Symptom ;
+    rdfs:comment "C4：SARC-F ≥4 初筛，阳性加小腿围（SARC-CalF ≥11）；阈值待临床签核。"@zh .
+
+rt:AssessmentInstrument a owl:Class ;
+    rdfs:label "评估量表"@zh, "Assessment Instrument"@en ;
+    rdfs:comment "C4 所列量表的标识；量表分界值不在本体中固化。"@zh .
+
+rt:SARCF a owl:NamedIndividual, rt:AssessmentInstrument ;
+    rdfs:label "SARC-F"@zh ;
+    rt:instrumentCode "SARC-F" .
+
+rt:SARCCalF a owl:NamedIndividual, rt:AssessmentInstrument ;
+    rdfs:label "SARC-CalF"@zh ;
+    rt:instrumentCode "SARC-CalF" .
+
+rt:STEADI a owl:NamedIndividual, rt:AssessmentInstrument ;
+    rdfs:label "STEADI"@zh ;
+    rt:instrumentCode "STEADI" .
+
+rt:ShortFES_I a owl:NamedIndividual, rt:AssessmentInstrument ;
+    rdfs:label "Short FES-I"@zh ;
+    rt:instrumentCode "Short FES-I" .
+
+rt:TUG a owl:NamedIndividual, rt:AssessmentInstrument ;
+    rdfs:label "TUG"@zh ;
+    rt:instrumentCode "TUG" .
+
+rt:Organization a owl:Class ;
+    rdfs:label "机构"@zh, "Organization"@en ;
+    rdfs:comment "多机构隔离的单位；org_id 强制（D10）。"@zh .
+
+rt:Account a owl:Class ;
+    rdfs:label "账号"@zh, "Account"@en ;
+    rdfs:comment """系统内的身份主键。患者身份以病历主键为准，微信 openid 仅作可撤销凭据。
+账号必须属于且仅属于一个机构（D10）。
+决策依据：D4、T2、D10。"""@zh .
+
+rt:ExternalIdentity a owl:Class ;
+    rdfs:label "外部身份凭据"@zh, "External Identity"@en ;
+    rdfs:comment """账号与第三方身份（微信 openid / unionid）的绑定记录，可撤销。
+openid 不是人的主键，只作凭据。决策依据：T2。"""@zh .
+
+rt:BindingToken a owl:Class ;
+    rdfs:label "绑定码"@zh, "Binding Token"@en ;
+    rdfs:comment """一次性、短时有效的绑定凭据，用于照护者与患者、管理员与微信的绑定。
+决策依据：T2。"""@zh .
+
+rt:DeviceSession a owl:Class ;
+    rdfs:label "设备会话"@zh, "Device Session"@en ;
+    rdfs:comment """一台设备与一个患者的长期绑定会话。居家自用，一设备绑一患者。
+决策依据：D9。"""@zh .
+
+# =============================================================================
+# 二、训练域
+# =============================================================================
+
+rt:ExerciseCategory a owl:Class ;
+    rdfs:label "训练大类"@zh, "Exercise Category"@en ;
+    rdfs:comment """训练条目的顶层分类：牵伸放松、肌力维持、节律步态、姿势矫正。
+四条固定，不随内容扩展而增加（术语表）。"""@zh ;
+    owl:oneOf (
+        rt:catStretchingRelaxation
+        rt:catStrengthMaintenance
+        rt:catRhythmicGait
+        rt:catPosturalCorrection
+    ) .
+
+rt:catStretchingRelaxation a owl:NamedIndividual, rt:ExerciseCategory ;
+    rdfs:label "牵伸放松"@zh ;
+    rt:categoryCode "stretching-relaxation" .
+
+rt:catStrengthMaintenance a owl:NamedIndividual, rt:ExerciseCategory ;
+    rdfs:label "肌力维持"@zh ;
+    rt:categoryCode "strength-maintenance" .
+
+rt:catRhythmicGait a owl:NamedIndividual, rt:ExerciseCategory ;
+    rdfs:label "节律步态"@zh ;
+    rt:categoryCode "rhythmic-gait" .
+
+rt:catPosturalCorrection a owl:NamedIndividual, rt:ExerciseCategory ;
+    rdfs:label "姿势矫正"@zh ;
+    rt:categoryCode "postural-correction" .
+
+rt:Exercise a owl:Class ;
+    rdfs:label "训练条目"@zh, "Exercise"@en ;
+    rdfs:comment """一条可执行的训练内容，含视频、节拍、时长、频次、禁忌与适用分级。
+数据实体 Exercise。决策依据：D2、D12、C1、C2。"""@zh .
+
+rt:StretchingExercise a owl:Class ;
+    rdfs:label "牵伸放松"@zh, "Stretching Exercise"@en ;
+    rdfs:subClassOf rt:Exercise ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty rt:inCategory ;
+        owl:hasValue rt:catStretchingRelaxation
+    ] ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty rt:realizesIntervention ;
+        owl:someValuesFrom rt:Stretching
+    ] .
+
+rt:StrengthExercise a owl:Class ;
+    rdfs:label "肌力维持"@zh, "Strength Exercise"@en ;
+    rdfs:subClassOf rt:Exercise ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty rt:inCategory ;
+        owl:hasValue rt:catStrengthMaintenance
+    ] ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty rt:realizesIntervention ;
+        owl:someValuesFrom rt:StrengthMaintenance
+    ] .
+
+rt:RhythmicGaitExercise a owl:Class ;
+    rdfs:label "节律步态"@zh, "Rhythmic Gait Exercise"@en ;
+    rdfs:subClassOf rt:Exercise ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty rt:inCategory ;
+        owl:hasValue rt:catRhythmicGait
+    ] ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty rt:realizesIntervention ;
+        owl:someValuesFrom rt:RhythmicAuditoryStimulation
+    ] .
+
+rt:PosturalCorrectionExercise a owl:Class ;
+    rdfs:label "姿势矫正"@zh, "Postural Correction Exercise"@en ;
+    rdfs:subClassOf rt:Exercise ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty rt:inCategory ;
+        owl:hasValue rt:catPosturalCorrection
+    ] ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty rt:realizesIntervention ;
+        owl:someValuesFrom rt:PosturalCorrection
+    ] .
+
+rt:Movement a owl:Class ;
+    rdfs:label "动作"@zh, "Movement"@en ;
+    rdfs:comment "可复用的动作基元，承载关节、身体部位、关键点与支撑方式。"@zh .
+
+rt:DifficultyVariant a owl:Class ;
+    rdfs:label "难度变体"@zh, "Difficulty Variant"@en ;
+    rdfs:comment "训练条目的难度变体；每条 2–3 个（C1）。"@zh .
+
+rt:Dosage a owl:Class ;
+    rdfs:label "剂量"@zh, "Dosage"@en ;
+    rdfs:comment """组数、次数、节拍与时长。
+BPM 规则见 C3（基线步频 × 1.0–1.1，兜底 60–130，不按 H-Y 调整），
+属待临床签核的配置，本体不设固定上下限。"""@zh .
+
+# =============================================================================
+# 三、身体域
+# =============================================================================
+
+rt:BodyPart a owl:Class ;
+    rdfs:label "身体部位"@zh, "Body Part"@en .
+
+rt:UpperLimb a owl:NamedIndividual, rt:BodyPart ;
+    rdfs:label "上肢"@zh .
+
+rt:LowerLimb a owl:NamedIndividual, rt:BodyPart ;
+    rdfs:label "下肢"@zh .
+
+rt:Trunk a owl:NamedIndividual, rt:BodyPart ;
+    rdfs:label "躯干"@zh .
+
+rt:Neck a owl:NamedIndividual, rt:BodyPart ;
+    rdfs:label "颈部"@zh .
+
+rt:WholeBody a owl:NamedIndividual, rt:BodyPart ;
+    rdfs:label "全身"@zh .
+
+rt:Joint a owl:Class ;
+    rdfs:label "关节"@zh, "Joint"@en .
+
+rt:HipJoint a owl:NamedIndividual, rt:Joint ;
+    rdfs:label "髋关节"@zh .
+
+rt:KneeJoint a owl:NamedIndividual, rt:Joint ;
+    rdfs:label "膝关节"@zh .
+
+rt:AnkleJoint a owl:NamedIndividual, rt:Joint ;
+    rdfs:label "踝关节"@zh .
+
+rt:ShoulderJoint a owl:NamedIndividual, rt:Joint ;
+    rdfs:label "肩关节"@zh .
+
+rt:ElbowJoint a owl:NamedIndividual, rt:Joint ;
+    rdfs:label "肘关节"@zh .
+
+rt:WristJoint a owl:NamedIndividual, rt:Joint ;
+    rdfs:label "腕关节"@zh .
+
+rt:SpineJoint a owl:NamedIndividual, rt:Joint ;
+    rdfs:label "脊柱"@zh .
+
+rt:Landmark a owl:Class ;
+    rdfs:label "关键点"@zh, "Landmark"@en ;
+    rdfs:comment """姿态估计关键点。下列个体采用 33 点姿态关键点索引，
+仅用于技术对齐，不构成临床阈值。landmarkIndex 数值为该 33 点约定的固定索引。"""@zh .
+
+rt:LeftShoulder a owl:NamedIndividual, rt:Landmark ;
+    rdfs:label "左肩"@zh ;
+    rt:landmarkIndex 11 .
+
+rt:RightShoulder a owl:NamedIndividual, rt:Landmark ;
+    rdfs:label "右肩"@zh ;
+    rt:landmarkIndex 12 .
+
+rt:LeftElbow a owl:NamedIndividual, rt:Landmark ;
+    rdfs:label "左肘"@zh ;
+    rt:landmarkIndex 13 .
+
+rt:RightElbow a owl:NamedIndividual, rt:Landmark ;
+    rdfs:label "右肘"@zh ;
+    rt:landmarkIndex 14 .
+
+rt:LeftWrist a owl:NamedIndividual, rt:Landmark ;
+    rdfs:label "左腕"@zh ;
+    rt:landmarkIndex 15 .
+
+rt:RightWrist a owl:NamedIndividual, rt:Landmark ;
+    rdfs:label "右腕"@zh ;
+    rt:landmarkIndex 16 .
+
+rt:LeftHip a owl:NamedIndividual, rt:Landmark ;
+    rdfs:label "左髋"@zh ;
+    rt:landmarkIndex 23 .
+
+rt:RightHip a owl:NamedIndividual, rt:Landmark ;
+    rdfs:label "右髋"@zh ;
+    rt:landmarkIndex 24 .
+
+rt:LeftKnee a owl:NamedIndividual, rt:Landmark ;
+    rdfs:label "左膝"@zh ;
+    rt:landmarkIndex 25 .
+
+rt:RightKnee a owl:NamedIndividual, rt:Landmark ;
+    rdfs:label "右膝"@zh ;
+    rt:landmarkIndex 26 .
+
+rt:LeftAnkle a owl:NamedIndividual, rt:Landmark ;
+    rdfs:label "左踝"@zh ;
+    rt:landmarkIndex 27 .
+
+rt:RightAnkle a owl:NamedIndividual, rt:Landmark ;
+    rdfs:label "右踝"@zh ;
+    rt:landmarkIndex 28 .
+
+rt:LeftHeel a owl:NamedIndividual, rt:Landmark ;
+    rdfs:label "左足跟"@zh ;
+    rt:landmarkIndex 29 .
+
+rt:RightHeel a owl:NamedIndividual, rt:Landmark ;
+    rdfs:label "右足跟"@zh ;
+    rt:landmarkIndex 30 .
+
+rt:LeftFootIndex a owl:NamedIndividual, rt:Landmark ;
+    rdfs:label "左足尖"@zh ;
+    rt:landmarkIndex 31 .
+
+rt:RightFootIndex a owl:NamedIndividual, rt:Landmark ;
+    rdfs:label "右足尖"@zh ;
+    rt:landmarkIndex 32 .
+
+rt:MovementPattern a owl:Class ;
+    rdfs:label "动作模式"@zh, "Movement Pattern"@en .
+
+rt:Flexion a owl:NamedIndividual, rt:MovementPattern ;
+    rdfs:label "屈曲"@zh .
+
+rt:Extension a owl:NamedIndividual, rt:MovementPattern ;
+    rdfs:label "伸展"@zh .
+
+rt:Abduction a owl:NamedIndividual, rt:MovementPattern ;
+    rdfs:label "外展"@zh .
+
+rt:Adduction a owl:NamedIndividual, rt:MovementPattern ;
+    rdfs:label "内收"@zh .
+
+rt:Rotation a owl:NamedIndividual, rt:MovementPattern ;
+    rdfs:label "旋转"@zh .
+
+rt:Gait a owl:NamedIndividual, rt:MovementPattern ;
+    rdfs:label "步态"@zh .
+
+rt:WeightShift a owl:NamedIndividual, rt:MovementPattern ;
+    rdfs:label "重心转移"@zh .
+
+rt:SitToStand a owl:NamedIndividual, rt:MovementPattern ;
+    rdfs:label "坐站转换"@zh .
+
+rt:SupportLevel a owl:Class ;
+    rdfs:label "支撑方式"@zh, "Support Level"@en ;
+    rdfs:comment "动作执行时的支撑方式；H-Y 3–4 级禁用无支撑站立类动作（说明书安全逻辑）。"@zh ;
+    owl:oneOf ( rt:UnsupportedStanding rt:SupportedStanding rt:Seated ) .
+
+rt:UnsupportedStanding a owl:NamedIndividual, rt:SupportLevel ;
+    rdfs:label "无支撑站立"@zh .
+
+rt:SupportedStanding a owl:NamedIndividual, rt:SupportLevel ;
+    rdfs:label "有支撑站立"@zh .
+
+rt:Seated a owl:NamedIndividual, rt:SupportLevel ;
+    rdfs:label "坐位"@zh .
+
+# =============================================================================
+# 四、风险域
+# =============================================================================
+
+rt:Contraindication a owl:Class ;
+    rdfs:label "禁忌"@zh, "Contraindication"@en ;
+    rdfs:comment "训练条目的禁忌条件；说明书模块 2 要求每条训练条目声明。"@zh .
+
+rt:DangerSignal a owl:Class ;
+    rdfs:label "危险信号"@zh, "Danger Signal"@en ;
+    rdfs:comment "训练中需要立即提示或停止的危险信号；说明书模块 2 要求每条训练条目声明。"@zh .
+
+rt:TriggerSource a owl:Class ;
+    rdfs:label "触发源"@zh, "Trigger Source"@en ;
+    rdfs:comment "可触发预警规则的来源：症状或阈值。决策依据：D6、C5。"@zh .
+
+rt:Symptom rdfs:subClassOf rt:TriggerSource .
+
+rt:AlertThreshold a owl:Class ;
+    rdfs:label "阈值"@zh, "Alert Threshold"@en ;
+    rdfs:subClassOf rt:TriggerSource ;
+    rdfs:comment """预警阈值配置。
+C5 的具体数值与时间窗口（疼痛 ≥4 持续 2 天、僵直较 7 天基线升高 ≥2 级持续 3 天、
+痉挛单次 >10 分钟或 ≥3 次/周持续 2 周、跌倒 ≥2 次/年或 ≥1 次伴受伤）
+须经临床签核，本体只建模阈值结构，不写死数值。"""@zh .
+
+rt:AlertRule a owl:Class ;
+    rdfs:label "预警规则"@zh, "Alert Rule"@en ;
+    rdfs:comment "风险预警的触发规则；规则与阈值须经临床签核（D6/C5）。"@zh .
+
+rt:FallRisk a owl:Class ;
+    rdfs:label "跌倒风险"@zh, "Fall Risk"@en ;
+    rdfs:comment "C4 跌倒筛查结果：STEADI 3 问 + 跌倒史 + Short FES-I，TUG ≥11.5s 作升级；阈值待临床签核。"@zh .
+
+rt:RiskLevel a owl:Class ;
+    rdfs:label "风险等级"@zh, "Risk Level"@en ;
+    rdfs:comment "具体训练条目属于哪一等级由康复治疗师签核；本体只建模等级结构，不预设条目分级。"@zh ;
+    owl:oneOf ( rt:LowRisk rt:MediumRisk rt:HighRisk ) .
+
+rt:LowRisk a owl:NamedIndividual, rt:RiskLevel ;
+    rdfs:label "低风险"@zh .
+
+rt:MediumRisk a owl:NamedIndividual, rt:RiskLevel ;
+    rdfs:label "中风险"@zh .
+
+rt:HighRisk a owl:NamedIndividual, rt:RiskLevel ;
+    rdfs:label "高风险"@zh .
+
+rt:AlertLevel a owl:Class ;
+    rdfs:label "预警等级"@zh, "Alert Level"@en ;
+    owl:oneOf ( rt:Info rt:Warning rt:Critical ) .
+
+rt:Info a owl:NamedIndividual, rt:AlertLevel ;
+    rdfs:label "提示"@zh .
+
+rt:Warning a owl:NamedIndividual, rt:AlertLevel ;
+    rdfs:label "警告"@zh .
+
+rt:Critical a owl:NamedIndividual, rt:AlertLevel ;
+    rdfs:label "严重"@zh .
+
+rt:PublicationStatus a owl:Class ;
+    rdfs:label "发布状态"@zh, "Publication Status"@en ;
+    rdfs:comment "训练条目/难度变体的发布状态；处方只能引用已发布条目（C1/C2）。"@zh ;
+    owl:oneOf ( rt:Draft rt:Published rt:Retired ) .
+
+rt:Draft a owl:NamedIndividual, rt:PublicationStatus ;
+    rdfs:label "草稿"@zh .
+
+rt:Published a owl:NamedIndividual, rt:PublicationStatus ;
+    rdfs:label "已发布"@zh .
+
+rt:Retired a owl:NamedIndividual, rt:PublicationStatus ;
+    rdfs:label "已下架"@zh .
+
+rt:PrescriptionStatus a owl:Class ;
+    rdfs:label "处方状态"@zh, "Prescription Status"@en ;
+    owl:oneOf ( rt:PrescriptionDraft rt:PrescriptionActive rt:PrescriptionExpired ) .
+
+rt:PrescriptionDraft a owl:NamedIndividual, rt:PrescriptionStatus ;
+    rdfs:label "草稿"@zh .
+
+rt:PrescriptionActive a owl:NamedIndividual, rt:PrescriptionStatus ;
+    rdfs:label "生效中"@zh .
+
+rt:PrescriptionExpired a owl:NamedIndividual, rt:PrescriptionStatus ;
+    rdfs:label "已失效"@zh .
+
+rt:DeliveryChannel a owl:Class ;
+    rdfs:label "送达通道"@zh, "Delivery Channel"@en ;
+    rdfs:comment "D6：弹窗、语音停止提示、推送、日志四类通道。"@zh ;
+    owl:oneOf ( rt:InAppPopup rt:VoicePrompt rt:PushNotification rt:AuditLog ) .
+
+rt:InAppPopup a owl:NamedIndividual, rt:DeliveryChannel ;
+    rdfs:label "弹窗"@zh .
+
+rt:VoicePrompt a owl:NamedIndividual, rt:DeliveryChannel ;
+    rdfs:label "语音提示"@zh .
+
+rt:PushNotification a owl:NamedIndividual, rt:DeliveryChannel ;
+    rdfs:label "推送"@zh .
+
+rt:AuditLog a owl:NamedIndividual, rt:DeliveryChannel ;
+    rdfs:label "日志"@zh .
+
+# =============================================================================
+# 五、干预域
+# =============================================================================
+
+rt:Intervention a owl:Class ;
+    rdfs:label "干预"@zh, "Intervention"@en ;
+    rdfs:comment "训练条目背后的干预手段；四大干预与四大训练大类对应。"@zh .
+
+rt:Stretching a owl:Class ;
+    rdfs:label "牵伸放松"@zh, "Stretching"@en ;
+    rdfs:subClassOf rt:Intervention .
+
+rt:StrengthMaintenance a owl:Class ;
+    rdfs:label "肌力维持"@zh, "Strength Maintenance"@en ;
+    rdfs:subClassOf rt:Intervention .
+
+rt:RhythmicAuditoryStimulation a owl:Class ;
+    rdfs:label "节律性听觉刺激"@zh, "Rhythmic Auditory Stimulation"@en ;
+    rdfs:subClassOf rt:Intervention ;
+    rdfs:comment "缩写 RAS。以固定节拍的听觉提示引导步态节律；对冻结步态有循证依据，是本系统的核心机制（术语表）。"@zh .
+
+rt:PosturalCorrection a owl:Class ;
+    rdfs:label "姿势矫正"@zh, "Postural Correction"@en ;
+    rdfs:subClassOf rt:Intervention ;
+    rdfs:comment "将患者关节角度与标准动作模板比对并输出偏差；姿态识别在本系统唯一不可替代的用途（术语表）。"@zh .
+
+# =============================================================================
+# 六、角色域
+# =============================================================================
+
+rt:Role a owl:Class ;
+    rdfs:label "角色"@zh, "Role"@en ;
+    rdfs:comment "四角色：患者、照护者、照护管理员、康复治疗师（D4）。"@zh .
+
+rt:PatientRole a owl:Class ;
+    rdfs:label "患者"@zh, "Patient Role"@en ;
+    rdfs:subClassOf rt:Role ;
+    rdfs:comment "患者本人账号角色。"@zh .
+
+rt:CaregiverRole a owl:Class ;
+    rdfs:label "照护者"@zh, "Caregiver Role"@en ;
+    rdfs:subClassOf rt:Role ;
+    rdfs:comment "可代患者操作；写操作须同时记录 actor 与 subject（D4）。"@zh .
+
+rt:CareAdminRole a owl:Class ;
+    rdfs:label "照护管理员"@zh, "Care Admin Role"@en ;
+    rdfs:subClassOf rt:Role ;
+    rdfs:comment "机构侧账号，查看名下患者档案与预警、登记随访、管理权限；仅能查看自己负责的患者（术语表、D10）。"@zh .
+
+rt:RehabTherapistRole a owl:Class ;
+    rdfs:label "康复治疗师"@zh, "Rehabilitation Therapist Role"@en ;
+    rdfs:subClassOf rt:Role ;
+    rdfs:comment """确认患者 H-Y 分期、开具与调整处方、审核高风险训练准入。
+处方权的唯一持有者；系统自动匹配的方案是其起点而非终点（术语表、D11、D12）。"""@zh .
+
+# =============================================================================
+# 七、记录域
+# =============================================================================
+
+rt:Prescription a owl:Class ;
+    rdfs:label "处方"@zh, "Prescription"@en ;
+    rdfs:comment """康复治疗师为单个患者开具或调整的训练安排，引用训练条目并设定组数、次数、节拍与有效期。
+基础方案由系统按分期自动匹配，治疗师在其上增删条目或调整剂量。
+决策依据：D12、C2。"""@zh .
+
+rt:SessionRecord a owl:Class ;
+    rdfs:label "训练记录"@zh, "Session Record"@en ;
+    rdfs:comment """患者完成一次处方训练的结果，含打卡、姿态指标、动作错误次数、中断次数、有效帧占比与算法版本。
+版本不一致的记录不得直接比较趋势（T7）。
+决策依据：D13、D14、T7。"""@zh .
+
+rt:AssessmentRecord a owl:Class ;
+    rdfs:label "评估记录"@zh, "Assessment Record"@en ;
+    rdfs:comment "评估结果的持久化记录。"@zh .
+
+rt:AlertEvent a owl:Class ;
+    rdfs:label "风险预警"@zh, "Alert Event"@en ;
+    rdfs:comment """由症状自评达到阈值触发的安全事件，含弹窗、语音停止提示、推送与日志。
+触发规则与阈值须经临床签核。决策依据：D6、C5。"""@zh .
+
+rt:NotificationDelivery a owl:Class ;
+    rdfs:label "通知投递"@zh, "Notification Delivery"@en ;
+    rdfs:comment """一次预警通知的投递尝试，含通道、时间与结果。
+同一预警可有多条投递记录；主通道未送达时须走兜底通道。决策依据：D6。"""@zh .
+
+rt:DeliveryStatus a owl:Class ;
+    rdfs:label "投递状态"@zh, "Delivery Status"@en ;
+    rdfs:comment "待发送 / 已送达 / 发送失败 / 已走兜底。决策依据：D6。"@zh ;
+    owl:oneOf (
+        rt:DeliveryPending
+        rt:DeliverySent
+        rt:DeliveryFailed
+        rt:DeliveryFallback
+    ) .
+
+rt:DeliveryPending a owl:NamedIndividual, rt:DeliveryStatus ;
+    rdfs:label "待发送"@zh .
+
+rt:DeliverySent a owl:NamedIndividual, rt:DeliveryStatus ;
+    rdfs:label "已送达"@zh .
+
+rt:DeliveryFailed a owl:NamedIndividual, rt:DeliveryStatus ;
+    rdfs:label "发送失败"@zh .
+
+rt:DeliveryFallback a owl:NamedIndividual, rt:DeliveryStatus ;
+    rdfs:label "已走兜底"@zh .
+
+# =============================================================================
+# 八、对象属性
+# =============================================================================
+
+# --- 组织与身份域 ---
+
+rt:accountBelongsToOrg a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "账号所属机构"@zh ;
+    rdfs:domain rt:Account ;
+    rdfs:range rt:Organization ;
+    rdfs:comment "账号必须属于且仅属于一个机构（D10）。"@zh .
+
+rt:hasRoleBinding a owl:ObjectProperty ;
+    rdfs:label "账号角色"@zh ;
+    rdfs:domain rt:Account ;
+    rdfs:range rt:Role ;
+    rdfs:comment "一个账号可绑定多个角色（D4）。"@zh .
+
+rt:hasExternalIdentity a owl:ObjectProperty ;
+    rdfs:label "外部身份凭据"@zh ;
+    rdfs:domain rt:Account ;
+    rdfs:range rt:ExternalIdentity ;
+    rdfs:comment "微信 openid 等外部凭据，可撤销（T2）。"@zh .
+
+rt:identityOfAccount a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "凭据所属账号"@zh ;
+    rdfs:domain rt:ExternalIdentity ;
+    rdfs:range rt:Account ;
+    owl:inverseOf rt:hasExternalIdentity .
+
+rt:accountOfDeviceSession a owl:ObjectProperty ;
+    rdfs:label "设备会话账号"@zh ;
+    rdfs:domain rt:DeviceSession ;
+    rdfs:range rt:Account .
+
+rt:deviceBoundToPatient a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "设备绑定患者"@zh ;
+    rdfs:domain rt:DeviceSession ;
+    rdfs:range rt:Patient ;
+    rdfs:comment "居家自用，一设备长期绑定一患者（D9）。"@zh .
+
+rt:bindingTargetPatient a owl:ObjectProperty ;
+    rdfs:label "绑定目标患者"@zh ;
+    rdfs:domain rt:BindingToken ;
+    rdfs:range rt:Patient ;
+    rdfs:comment "一次性绑定码指向的患者（T2）。"@zh .
+
+# --- 预警投递 ---
+
+rt:deliveryForAlert a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "投递对应预警"@zh ;
+    rdfs:domain rt:NotificationDelivery ;
+    rdfs:range rt:AlertEvent ;
+    rdfs:comment "一次预警可有多条投递记录（D6）。"@zh .
+
+rt:deliveryChannel a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "投递通道"@zh ;
+    rdfs:domain rt:NotificationDelivery ;
+    rdfs:range rt:DeliveryChannel .
+
+rt:deliveryStatus a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "投递状态"@zh ;
+    rdfs:domain rt:NotificationDelivery ;
+    rdfs:range rt:DeliveryStatus ;
+    rdfs:comment "主通道失败后须有走兜底的投递记录（D6）。"@zh .
+
+# --- 患者域 ---
+
+rt:hasHYStage a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "H-Y 分级"@zh ;
+    rdfs:domain rt:Patient ;
+    rdfs:range rt:HYStage ;
+    rdfs:comment "患者当前的 H-Y 分级；历史分期由分期确认与评估记录承载。决策依据：D5、D11。"@zh .
+
+rt:stageConfirmedBy a owl:ObjectProperty ;
+    rdfs:label "分期确认人"@zh ;
+    rdfs:domain rt:Patient ;
+    rdfs:range rt:RehabTherapistRole ;
+    rdfs:comment "存在即表示分期已由康复治疗师确认；缺失表示「疑似」，不得用于高风险训练准入（D11）。"@zh .
+
+rt:hasStageConfirmationStatus a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "分期确认状态"@zh ;
+    rdfs:domain rt:Patient ;
+    rdfs:range rt:StageConfirmationStatus ;
+    rdfs:comment "已确认 / 疑似（D11）。"@zh .
+
+rt:hasStageConfirmation a owl:ObjectProperty ;
+    rdfs:label "分期确认记录"@zh ;
+    rdfs:domain rt:Patient ;
+    rdfs:range rt:StageConfirmation ;
+    owl:inverseOf rt:confirmsPatient .
+
+rt:confirmsPatient a owl:ObjectProperty ;
+    rdfs:label "确认患者"@zh ;
+    rdfs:domain rt:StageConfirmation ;
+    rdfs:range rt:Patient .
+
+rt:confirmsStage a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "确认分期"@zh ;
+    rdfs:domain rt:StageConfirmation ;
+    rdfs:range rt:HYStage .
+
+rt:confirmedBy a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "确认人"@zh ;
+    rdfs:domain rt:StageConfirmation ;
+    rdfs:range rt:RehabTherapistRole .
+
+rt:hasAssessment a owl:ObjectProperty ;
+    rdfs:label "评估"@zh ;
+    rdfs:domain rt:Patient ;
+    rdfs:range rt:Assessment ;
+    owl:inverseOf rt:assessedPatient .
+
+rt:assessedPatient a owl:ObjectProperty ;
+    rdfs:label "被评估患者"@zh ;
+    rdfs:domain rt:Assessment ;
+    rdfs:range rt:Patient .
+
+rt:assessesSymptom a owl:ObjectProperty ;
+    rdfs:label "评估症状"@zh ;
+    rdfs:domain rt:Assessment ;
+    rdfs:range rt:Symptom .
+
+rt:usesInstrument a owl:ObjectProperty ;
+    rdfs:label "使用量表"@zh ;
+    rdfs:domain rt:Assessment ;
+    rdfs:range rt:AssessmentInstrument .
+
+rt:hasSymptom a owl:ObjectProperty ;
+    rdfs:label "症状"@zh ;
+    rdfs:domain rt:Patient ;
+    rdfs:range rt:Symptom .
+
+rt:hasFallRisk a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "跌倒风险"@zh ;
+    rdfs:domain rt:Patient ;
+    rdfs:range rt:FallRisk ;
+    rdfs:comment "患者当前的跌倒风险分层；历史由评估记录承载（C4）。"@zh .
+
+rt:belongsToOrg a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "所属机构"@zh ;
+    rdfs:domain rt:Patient ;
+    rdfs:range rt:Organization ;
+    rdfs:comment "患者必须属于且仅属于一个机构（D10）。"@zh .
+
+rt:affiliatedWithOrg a owl:ObjectProperty ;
+    rdfs:label "所属机构"@zh ;
+    rdfs:domain rt:Role ;
+    rdfs:range rt:Organization ;
+    rdfs:comment "角色所属机构；跨机构访问须 403 并写审计（D10）。"@zh .
+
+rt:caresFor a owl:ObjectProperty ;
+    rdfs:label "照护"@zh ;
+    rdfs:domain rt:CaregiverRole ;
+    rdfs:range rt:Patient .
+
+# --- 训练域 ---
+
+rt:inCategory a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "训练大类"@zh ;
+    rdfs:domain rt:Exercise ;
+    rdfs:range rt:ExerciseCategory ;
+    rdfs:comment "训练条目属于四个固定训练大类之一（C1）。"@zh .
+
+rt:hasMovement a owl:ObjectProperty ;
+    rdfs:label "动作"@zh ;
+    rdfs:domain rt:Exercise ;
+    rdfs:range rt:Movement ;
+    rdfs:comment "训练条目分解出的动作基元。"@zh .
+
+rt:hasDefaultDosage a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "默认剂量"@zh ;
+    rdfs:domain [
+        a owl:Class ;
+        owl:unionOf ( rt:Exercise rt:DifficultyVariant )
+    ] ;
+    rdfs:range rt:Dosage ;
+    rdfs:comment "训练条目与其难度变体都可以有默认剂量。"@zh .
+
+rt:hasVariant a owl:ObjectProperty ;
+    rdfs:label "难度变体"@zh ;
+    rdfs:domain rt:Exercise ;
+    rdfs:range rt:DifficultyVariant ;
+    owl:inverseOf rt:variantOf .
+
+rt:variantOf a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "所属训练条目"@zh ;
+    rdfs:domain rt:DifficultyVariant ;
+    rdfs:range rt:Exercise .
+
+rt:applicableToStage a owl:ObjectProperty ;
+    rdfs:label "适用 H-Y 分级"@zh ;
+    rdfs:domain [
+        a owl:Class ;
+        owl:unionOf ( rt:Exercise rt:DifficultyVariant )
+    ] ;
+    rdfs:range rt:HYStage ;
+    rdfs:comment "训练条目或难度变体适用的 H-Y 分级；5 级不适用（D5）。"@zh .
+
+rt:targetsBodyPart a owl:ObjectProperty ;
+    rdfs:label "目标身体部位"@zh ;
+    rdfs:domain rt:Exercise ;
+    rdfs:range rt:BodyPart .
+
+rt:targetsJoint a owl:ObjectProperty ;
+    rdfs:label "目标关节"@zh ;
+    rdfs:domain rt:Exercise ;
+    rdfs:range rt:Joint .
+
+rt:contraindicatedFor a owl:ObjectProperty ;
+    rdfs:label "禁忌"@zh ;
+    rdfs:domain rt:Exercise ;
+    rdfs:range [
+        a owl:Class ;
+        owl:unionOf ( rt:Symptom rt:Contraindication )
+    ] ;
+    rdfs:comment "训练条目 → 症状/禁忌。说明书模块 2 要求每条训练条目必须声明。"@zh .
+
+rt:contraindicatedForSymptom a owl:ObjectProperty ;
+    rdfs:label "禁忌于症状"@zh ;
+    rdfs:subPropertyOf rt:contraindicatedFor ;
+    rdfs:domain rt:Exercise ;
+    rdfs:range rt:Symptom ;
+    rdfs:comment "训练条目 → 临床症状：该症状存在时禁用此条目（细化 rt:contraindicatedFor）。"@zh .
+
+rt:contraindicatedForCondition a owl:ObjectProperty ;
+    rdfs:label "禁忌于规则条件"@zh ;
+    rdfs:subPropertyOf rt:contraindicatedFor ;
+    rdfs:domain rt:Exercise ;
+    rdfs:range rt:Contraindication ;
+    rdfs:comment "训练条目 → 禁忌规则：该条件满足时禁用此条目（细化 rt:contraindicatedFor）。"@zh .
+
+rt:hasDangerSignal a owl:ObjectProperty ;
+    rdfs:label "危险信号"@zh ;
+    rdfs:domain rt:Exercise ;
+    rdfs:range rt:DangerSignal ;
+    rdfs:comment "训练条目 → 危险信号。说明书模块 2 要求每条训练条目必须声明。"@zh .
+
+rt:hasPublicationStatus a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "发布状态"@zh ;
+    rdfs:domain [
+        a owl:Class ;
+        owl:unionOf ( rt:Exercise rt:DifficultyVariant )
+    ] ;
+    rdfs:range rt:PublicationStatus ;
+    rdfs:comment "处方只能引用已发布条目（C1/C2）。"@zh .
+
+rt:hasRiskLevel a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "风险等级"@zh ;
+    rdfs:domain [
+        a owl:Class ;
+        owl:unionOf ( rt:Exercise rt:FallRisk )
+    ] ;
+    rdfs:range rt:RiskLevel ;
+    rdfs:comment "训练条目或跌倒风险的风险等级；高风险训练准入受 D11 约束。"@zh .
+
+rt:realizesIntervention a owl:ObjectProperty ;
+    rdfs:label "实现干预"@zh ;
+    rdfs:domain rt:Exercise ;
+    rdfs:range rt:Intervention ;
+    owl:inverseOf rt:realizedByExercise .
+
+rt:realizedByExercise a owl:ObjectProperty ;
+    rdfs:label "由训练条目实现"@zh ;
+    rdfs:domain rt:Intervention ;
+    rdfs:range rt:Exercise .
+
+rt:targetsSymptom a owl:ObjectProperty ;
+    rdfs:label "目标症状"@zh ;
+    rdfs:domain rt:Intervention ;
+    rdfs:range rt:Symptom .
+
+# --- 身体域 ---
+
+rt:hasMovementPattern a owl:ObjectProperty ;
+    rdfs:label "动作模式"@zh ;
+    rdfs:domain rt:Movement ;
+    rdfs:range rt:MovementPattern .
+
+rt:involvesJoint a owl:ObjectProperty ;
+    rdfs:label "涉及关节"@zh ;
+    rdfs:domain rt:Movement ;
+    rdfs:range rt:Joint .
+
+rt:involvesBodyPart a owl:ObjectProperty ;
+    rdfs:label "涉及身体部位"@zh ;
+    rdfs:domain rt:Movement ;
+    rdfs:range rt:BodyPart .
+
+rt:usesLandmark a owl:ObjectProperty ;
+    rdfs:label "使用关键点"@zh ;
+    rdfs:domain rt:Movement ;
+    rdfs:range rt:Landmark .
+
+rt:hasSupportLevel a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "支撑方式"@zh ;
+    rdfs:domain rt:Movement ;
+    rdfs:range rt:SupportLevel ;
+    rdfs:comment "H-Y 3–4 级不得使用无支撑站立类动作（说明书安全逻辑）。"@zh .
+
+# --- 风险域 ---
+
+rt:triggersAlert a owl:ObjectProperty ;
+    rdfs:label "触发预警"@zh ;
+    rdfs:domain rt:TriggerSource ;
+    rdfs:range rt:AlertRule ;
+    owl:inverseOf rt:hasTriggerSource ;
+    rdfs:comment "症状/阈值 → 预警规则（D6、C5）。"@zh .
+
+rt:hasTriggerSource a owl:ObjectProperty ;
+    rdfs:label "触发源"@zh ;
+    rdfs:domain rt:AlertRule ;
+    rdfs:range rt:TriggerSource .
+
+rt:alertFor a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "预警对象"@zh ;
+    rdfs:domain rt:AlertEvent ;
+    rdfs:range rt:Patient .
+
+rt:triggeredByRule a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "触发规则"@zh ;
+    rdfs:domain rt:AlertEvent ;
+    rdfs:range rt:AlertRule .
+
+rt:deliveredVia a owl:ObjectProperty ;
+    rdfs:label "送达通道"@zh ;
+    rdfs:domain rt:AlertEvent ;
+    rdfs:range rt:DeliveryChannel .
+
+rt:alertLevel a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "预警等级"@zh ;
+    rdfs:domain [
+        a owl:Class ;
+        owl:unionOf ( rt:AlertEvent rt:AlertRule )
+    ] ;
+    rdfs:range rt:AlertLevel .
+
+# --- 角色与记录域 ---
+
+rt:prescriptionFor a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "处方对象"@zh ;
+    rdfs:domain rt:Prescription ;
+    rdfs:range rt:Patient ;
+    owl:inverseOf rt:hasPrescription .
+
+rt:hasPrescription a owl:ObjectProperty ;
+    rdfs:label "处方"@zh ;
+    rdfs:domain rt:Patient ;
+    rdfs:range rt:Prescription .
+
+rt:prescribedBy a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "签发人"@zh ;
+    rdfs:domain rt:Prescription ;
+    rdfs:range rt:RehabTherapistRole ;
+    owl:inverseOf rt:prescribes ;
+    rdfs:comment "处方权的唯一持有者是康复治疗师（D12）。"@zh .
+
+rt:prescribes a owl:ObjectProperty ;
+    rdfs:label "签发"@zh ;
+    rdfs:domain rt:RehabTherapistRole ;
+    rdfs:range rt:Prescription .
+
+rt:referencesExercise a owl:ObjectProperty ;
+    rdfs:label "引用训练条目"@zh ;
+    rdfs:domain rt:Prescription ;
+    rdfs:range rt:Exercise ;
+    rdfs:comment "处方引用的训练条目必须存在且状态为已发布（C1/C2）。"@zh .
+
+rt:prescribedDosage a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "处方剂量"@zh ;
+    rdfs:domain rt:Prescription ;
+    rdfs:range rt:Dosage .
+
+rt:lastModifiedBy a owl:ObjectProperty ;
+    rdfs:label "最后修改人"@zh ;
+    rdfs:domain rt:Prescription ;
+    rdfs:range rt:RehabTherapistRole ;
+    rdfs:comment "治疗师调整方案时记录修改人（D12）。"@zh .
+
+rt:hasPrescriptionStatus a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "处方状态"@zh ;
+    rdfs:domain rt:Prescription ;
+    rdfs:range rt:PrescriptionStatus .
+
+rt:recordsPrescription a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "对应处方"@zh ;
+    rdfs:domain rt:SessionRecord ;
+    rdfs:range rt:Prescription .
+
+rt:recordedFor a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "记录对象"@zh ;
+    rdfs:domain rt:SessionRecord ;
+    rdfs:range rt:Patient .
+
+rt:assessmentOf a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "评估对象"@zh ;
+    rdfs:domain rt:AssessmentRecord ;
+    rdfs:range rt:Patient .
+
+rt:recordsAssessment a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "对应评估"@zh ;
+    rdfs:domain rt:AssessmentRecord ;
+    rdfs:range rt:Assessment .
+
+rt:recordedBy a owl:ObjectProperty ;
+    rdfs:label "记录人"@zh ;
+    rdfs:domain [
+        a owl:Class ;
+        owl:unionOf ( rt:SessionRecord rt:AssessmentRecord )
+    ] ;
+    rdfs:range rt:Role ;
+    rdfs:comment "写操作必须同时记录 actor 与 subject（D4）。"@zh .
+
+# =============================================================================
+# 九、数据属性
+# =============================================================================
+
+rt:stageValue a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "分期值"@zh ;
+    rdfs:domain rt:HYStage ;
+    rdfs:range xsd:integer ;
+    rdfs:comment "H-Y 分级数值 1–5（D5）。"@zh .
+
+rt:orgId a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "机构标识"@zh ;
+    rdfs:domain rt:Organization ;
+    rdfs:range xsd:string ;
+    rdfs:comment "org_id 强制（D10）。"@zh .
+
+rt:orgName a owl:DatatypeProperty ;
+    rdfs:label "机构名称"@zh ;
+    rdfs:domain rt:Organization ;
+    rdfs:range xsd:string .
+
+rt:deliveredAt a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "投递时间"@zh ;
+    rdfs:domain rt:NotificationDelivery ;
+    rdfs:range xsd:dateTime ;
+    rdfs:comment "本次投递尝试发生的时间（D6）。"@zh .
+
+rt:exerciseCode a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "训练条目标识"@zh ;
+    rdfs:domain rt:Exercise ;
+    rdfs:range xsd:string .
+
+rt:variantCode a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "难度变体标识"@zh ;
+    rdfs:domain rt:DifficultyVariant ;
+    rdfs:range xsd:string .
+
+rt:variantLevel a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "变体级别"@zh ;
+    rdfs:domain rt:DifficultyVariant ;
+    rdfs:range xsd:integer ;
+    rdfs:comment "难度变体级别 1–3（C1：每条 2–3 个难度变体）。"@zh .
+
+rt:movementCode a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "动作标识"@zh ;
+    rdfs:domain rt:Movement ;
+    rdfs:range xsd:string .
+
+rt:categoryCode a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "训练大类标识"@zh ;
+    rdfs:domain rt:ExerciseCategory ;
+    rdfs:range xsd:string .
+
+rt:symptomCode a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "症状标识"@zh ;
+    rdfs:domain rt:Symptom ;
+    rdfs:range xsd:string .
+
+rt:dangerSignalCode a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "危险信号标识"@zh ;
+    rdfs:domain rt:DangerSignal ;
+    rdfs:range xsd:string .
+
+rt:dangerSignalDescription a owl:DatatypeProperty ;
+    rdfs:label "危险信号说明"@zh ;
+    rdfs:domain rt:DangerSignal ;
+    rdfs:range xsd:string .
+
+rt:contraindicationCode a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "禁忌标识"@zh ;
+    rdfs:domain rt:Contraindication ;
+    rdfs:range xsd:string .
+
+rt:contraindicationDescription a owl:DatatypeProperty ;
+    rdfs:label "禁忌说明"@zh ;
+    rdfs:domain rt:Contraindication ;
+    rdfs:range xsd:string .
+
+rt:instrumentCode a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "量表标识"@zh ;
+    rdfs:domain rt:AssessmentInstrument ;
+    rdfs:range xsd:string .
+
+rt:landmarkIndex a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "关键点索引"@zh ;
+    rdfs:domain rt:Landmark ;
+    rdfs:range xsd:integer ;
+    rdfs:comment "33 点姿态关键点索引，技术对齐用。"@zh .
+
+rt:sets a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "组数"@zh ;
+    rdfs:domain rt:Dosage ;
+    rdfs:range xsd:integer .
+
+rt:repetitions a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "次数"@zh ;
+    rdfs:domain rt:Dosage ;
+    rdfs:range xsd:integer .
+
+rt:bpm a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "节拍（BPM）"@zh ;
+    rdfs:domain rt:Dosage ;
+    rdfs:range xsd:integer ;
+    rdfs:comment """节拍 BPM。C3：基线步频 × 1.0–1.1，兜底 60–130，不按 H-Y 调 BPM，一拍一步。
+上述数值为待临床签核配置，本体不设固定上下限。"""@zh .
+
+rt:durationMinutes a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "时长（分钟）"@zh ;
+    rdfs:domain rt:Dosage ;
+    rdfs:range xsd:decimal .
+
+rt:frequencyPerWeek a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "频次（次/周）"@zh ;
+    rdfs:domain rt:Dosage ;
+    rdfs:range xsd:integer .
+
+rt:restSeconds a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "组间休息（秒）"@zh ;
+    rdfs:domain rt:Dosage ;
+    rdfs:range xsd:integer .
+
+rt:severity a owl:DatatypeProperty ;
+    rdfs:label "严重度"@zh ;
+    rdfs:domain rt:Assessment ;
+    rdfs:range xsd:decimal ;
+    rdfs:comment "量表分值域由所用 instrument 决定；分界值待临床签核（C4）。"@zh .
+
+rt:assessmentTimestamp a owl:DatatypeProperty ;
+    rdfs:label "评估时间"@zh ;
+    rdfs:domain rt:Assessment ;
+    rdfs:range xsd:dateTime .
+
+rt:confirmedAt a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "确认时间"@zh ;
+    rdfs:domain rt:StageConfirmation ;
+    rdfs:range xsd:dateTime .
+
+rt:issuedAt a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "签发时间"@zh ;
+    rdfs:domain rt:Prescription ;
+    rdfs:range xsd:dateTime .
+
+rt:validFrom a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "有效期开始"@zh ;
+    rdfs:domain rt:Prescription ;
+    rdfs:range xsd:dateTime .
+
+rt:validUntil a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "有效期结束"@zh ;
+    rdfs:domain rt:Prescription ;
+    rdfs:range xsd:dateTime .
+
+rt:prescriptionVersion a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "处方版本"@zh ;
+    rdfs:domain rt:Prescription ;
+    rdfs:range xsd:string ;
+    rdfs:comment "每次治疗师调整方案须递增版本（D12）。"@zh .
+
+rt:usesMappingTableVersion a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "映射表版本"@zh ;
+    rdfs:domain rt:Prescription ;
+    rdfs:range xsd:string ;
+    rdfs:comment "H-Y → 条目的映射表 semver 版本，须治疗师签核（C2，未决项 2）。"@zh .
+
+rt:sessionTimestamp a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "训练时间"@zh ;
+    rdfs:domain rt:SessionRecord ;
+    rdfs:range xsd:dateTime .
+
+rt:checkedIn a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "已打卡"@zh ;
+    rdfs:domain rt:SessionRecord ;
+    rdfs:range xsd:boolean ;
+    rdfs:comment "打卡不做独立防作弊模型；异常记录标记存疑但不阻断打卡（D13）。"@zh .
+
+rt:completionCount a owl:DatatypeProperty ;
+    rdfs:label "完成次数"@zh ;
+    rdfs:domain rt:SessionRecord ;
+    rdfs:range xsd:integer .
+
+rt:movementErrorCount a owl:DatatypeProperty ;
+    rdfs:label "动作错误次数"@zh ;
+    rdfs:domain rt:SessionRecord ;
+    rdfs:range xsd:integer .
+
+rt:interruptionCount a owl:DatatypeProperty ;
+    rdfs:label "中断次数"@zh ;
+    rdfs:domain rt:SessionRecord ;
+    rdfs:range xsd:integer .
+
+rt:validFrameRatio a owl:DatatypeProperty ;
+    rdfs:label "有效帧占比"@zh ;
+    rdfs:domain rt:SessionRecord ;
+    rdfs:range xsd:decimal ;
+    rdfs:comment "具体有效性阈值待实测（D13，未决项 12）。"@zh .
+
+rt:isDoubtful a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "存疑"@zh ;
+    rdfs:domain rt:SessionRecord ;
+    rdfs:range xsd:boolean ;
+    rdfs:comment "关键点可见率或动作幅度低于阈值时标记存疑，打卡仍成功（D13）。"@zh .
+
+rt:modelVersion a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "模型版本"@zh ;
+    rdfs:domain rt:SessionRecord ;
+    rdfs:range xsd:string ;
+    rdfs:comment "T7：每条训练记录携带模型版本。"@zh .
+
+rt:modelSha256 a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "模型 SHA-256"@zh ;
+    rdfs:domain rt:SessionRecord ;
+    rdfs:range xsd:string ;
+    rdfs:comment "T7：每条训练记录携带模型 SHA-256。"@zh .
+
+rt:metricAlgorithmVersion a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "指标算法版本"@zh ;
+    rdfs:domain rt:SessionRecord ;
+    rdfs:range xsd:string ;
+    rdfs:comment "T7：指标算法版本；版本不一致的记录不得直接比较趋势。"@zh .
+
+rt:thresholdConfigVersion a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "阈值配置版本"@zh ;
+    rdfs:domain rt:SessionRecord ;
+    rdfs:range xsd:string ;
+    rdfs:comment "T7：阈值配置版本。"@zh .
+
+rt:recordedAt a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "记录时间"@zh ;
+    rdfs:domain rt:AssessmentRecord ;
+    rdfs:range xsd:dateTime .
+
+rt:triggeredAt a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "触发时间"@zh ;
+    rdfs:domain rt:AlertEvent ;
+    rdfs:range xsd:dateTime .
+
+rt:acknowledgedAt a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "确认时间"@zh ;
+    rdfs:domain rt:AlertEvent ;
+    rdfs:range xsd:dateTime .
+
+rt:ruleCode a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "规则标识"@zh ;
+    rdfs:domain rt:AlertRule ;
+    rdfs:range xsd:string .
+
+rt:thresholdValue a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "阈值"@zh ;
+    rdfs:domain rt:AlertThreshold ;
+    rdfs:range xsd:decimal ;
+    rdfs:comment "阈值数值待临床签核（C5）。"@zh .
+
+rt:thresholdOperator a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "阈值比较符"@zh ;
+    rdfs:domain rt:AlertThreshold ;
+    rdfs:range xsd:string .
+
+rt:thresholdUnit a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "阈值单位"@zh ;
+    rdfs:domain rt:AlertThreshold ;
+    rdfs:range xsd:string .
+
+rt:windowDays a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "时间窗口（天）"@zh ;
+    rdfs:domain rt:AlertRule ;
+    rdfs:range xsd:integer ;
+    rdfs:comment "C5 的「持续 3 天」「持续 2 周」等时间窗口无法在 OWL 中表达；运行时或 SHACL-SPARQL 实现，数值待临床签核。"@zh .
+
+rt:thresholdMinutes a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "阈值时长（分钟）"@zh ;
+    rdfs:domain rt:AlertRule ;
+    rdfs:range xsd:decimal ;
+    rdfs:comment "C5 的「单次 >10 分钟」等时长阈值；待临床签核，运行时实现。"@zh .
+
+rt:videoUri a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "视频地址"@zh ;
+    rdfs:domain rt:Exercise ;
+    rdfs:range xsd:anyURI .
+
+rt:audioUri a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "音频地址"@zh ;
+    rdfs:domain rt:Exercise ;
+    rdfs:range xsd:anyURI ;
+    rdfs:comment "节拍音频程序生成（C1）。"@zh .
+
+# =============================================================================
+# 十、不相交与个体区分
+# =============================================================================
+
+[] a owl:AllDisjointClasses ;
+    owl:members (
+        rt:StretchingExercise
+        rt:StrengthExercise
+        rt:RhythmicGaitExercise
+        rt:PosturalCorrectionExercise
+    ) .
+
+[] a owl:AllDisjointClasses ;
+    owl:members ( rt:Rigidity rt:Pain rt:FreezingOfGait rt:Dizziness rt:Sarcopenia ) .
+
+[] a owl:AllDisjointClasses ;
+    owl:members (
+        rt:Stretching
+        rt:StrengthMaintenance
+        rt:RhythmicAuditoryStimulation
+        rt:PosturalCorrection
+    ) .
+
+[] a owl:AllDisjointClasses ;
+    owl:members (
+        rt:PatientRole
+        rt:CaregiverRole
+        rt:CareAdminRole
+        rt:RehabTherapistRole
+    ) .
+
+[] a owl:AllDifferent ;
+    owl:members ( rt:HYStage1 rt:HYStage2 rt:HYStage3 rt:HYStage4 rt:HYStage5 ) .
+
+[] a owl:AllDifferent ;
+    owl:members ( rt:Confirmed rt:Suspected ) .
+
+[] a owl:AllDifferent ;
+    owl:members ( rt:UnsupportedStanding rt:SupportedStanding rt:Seated ) .
+
+[] a owl:AllDifferent ;
+    owl:members ( rt:LowRisk rt:MediumRisk rt:HighRisk ) .
+
+[] a owl:AllDifferent ;
+    owl:members ( rt:Info rt:Warning rt:Critical ) .
+
+[] a owl:AllDifferent ;
+    owl:members ( rt:Draft rt:Published rt:Retired ) .
+
+[] a owl:AllDifferent ;
+    owl:members ( rt:PrescriptionDraft rt:PrescriptionActive rt:PrescriptionExpired ) .
+
+[] a owl:AllDifferent ;
+    owl:members ( rt:InAppPopup rt:VoicePrompt rt:PushNotification rt:AuditLog ) .

@@ -1,0 +1,37 @@
+# 违规实例：适用于 H-Y 3–4 级的训练条目使用了无支撑站立类动作。
+# 预期：SHACL 拒绝，触发 rtsh:Stage34NoUnsupportedStandingShape（说明书安全逻辑）。
+
+@prefix ex: <https://rehab-trainer.local/ontology/examples#> .
+@prefix rt: <https://rehab-trainer.local/ontology#> .
+
+ex:pain1 a rt:Pain ;
+    rt:symptomCode "PAIN" .
+
+ex:danger1 a rt:DangerSignal ;
+    rt:dangerSignalCode "LOSS_OF_BALANCE" .
+
+ex:movementUnsupportedStanding a rt:Movement ;
+    rt:movementCode "UNSUPPORTED_STANDING_KNEE_EXTENSION" ;
+    rt:hasSupportLevel rt:UnsupportedStanding ;
+    rt:hasMovementPattern rt:Extension ;
+    rt:involvesJoint rt:KneeJoint ;
+    rt:involvesBodyPart rt:LowerLimb ;
+    rt:usesLandmark rt:LeftKnee, rt:RightKnee .
+
+ex:dosage1 a rt:Dosage ;
+    rt:sets 2 ;
+    rt:repetitions 10 ;
+    rt:durationMinutes 5.0 .
+
+ex:exerciseUnsafeStanding a rt:StrengthExercise ;
+    rt:exerciseCode "STR-BAD-002" ;
+    rt:inCategory rt:catStrengthMaintenance ;
+    rt:hasPublicationStatus rt:Published ;
+    rt:hasRiskLevel rt:HighRisk ;
+    rt:applicableToStage rt:HYStage1, rt:HYStage2, rt:HYStage3, rt:HYStage4 ;
+    rt:targetsBodyPart rt:LowerLimb ;
+    rt:targetsJoint rt:KneeJoint ;
+    rt:hasMovement ex:movementUnsupportedStanding ;
+    rt:hasDefaultDosage ex:dosage1 ;
+    rt:contraindicatedFor ex:pain1 ;
+    rt:hasDangerSignal ex:danger1 .

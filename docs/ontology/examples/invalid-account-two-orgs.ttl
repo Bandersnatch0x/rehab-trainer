@@ -1,0 +1,23 @@
+# 违规实例：一个账号同时属于两个机构。
+# 预期：validate.py 返回 NON-CONFORMS（D10：账号必须属于且仅属于一个机构）。
+
+@prefix ex: <https://rehab-trainer.local/ontology/examples#> .
+@prefix rt: <https://rehab-trainer.local/ontology#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:org1 a rt:Organization ;
+    rdfs:label "机构甲" ;
+    rt:orgId "ORG-001" .
+
+ex:org2 a rt:Organization ;
+    rdfs:label "机构乙" ;
+    rt:orgId "ORG-002" .
+
+ex:patientRole1 a rt:PatientRole ;
+    rdfs:label "示例患者角色" ;
+    rt:affiliatedWithOrg ex:org1 .
+
+ex:account1 a rt:Account ;
+    rdfs:label "跨机构账号" ;
+    rt:accountBelongsToOrg ex:org1, ex:org2 ;
+    rt:hasRoleBinding ex:patientRole1 .

@@ -17,3 +17,14 @@ build/
 dist/
 *.egg-info/
 .gradle/
+
+# Android
+apps/android/**/build/
+apps/android/.gradle/
+.idea/
+
+# 小程序
+apps/miniprogram/miniprogram_npm/
+
+# Web
+apps/admin-web/dist/

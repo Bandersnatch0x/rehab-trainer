@@ -1,0 +1,9 @@
+openapi: 3.1.0
+info:
+  title: rehab-trainer API
+  version: 0.1.0
+  description: |
+    占位契约。领域模型尚未定稿，业务端点不得在此凭空编写。
+servers:
+  - url: https://api.invalid
+    description: 占位地址，部署环境确定后替换

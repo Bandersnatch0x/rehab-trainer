@@ -1,0 +1,16 @@
+# 违规实例：患者同时属于两个机构。
+# 预期：SHACL 拒绝，触发 rtsh:PatientShape 的 belongsToOrg maxCount 约束（D10）。
+
+@prefix ex: <https://rehab-trainer.local/ontology/examples#> .
+@prefix rt: <https://rehab-trainer.local/ontology#> .
+
+ex:org1 a rt:Organization ;
+    rt:orgId "ORG-001" .
+
+ex:org2 a rt:Organization ;
+    rt:orgId "ORG-002" .
+
+ex:patientTwoOrgs a rt:Patient ;
+    rt:belongsToOrg ex:org1, ex:org2 ;
+    rt:hasHYStage rt:HYStage2 ;
+    rt:hasStageConfirmationStatus rt:Suspected .
