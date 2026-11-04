@@ -47,23 +47,37 @@ export default function FollowUpsPage() {
     setLoading(true);
     setError(null);
 
-    listAlerts({ limit: 100 }).then((result) => {
-      if (cancelled) {
-        return;
-      }
-      setLoading(false);
-      if (!result.ok) {
-        setError(result.error.message);
-        setAlerts([]);
-        return;
-      }
+    async function loadAll() {
+      const collected: Alert[] = [];
+      let cursor: string | undefined;
+      do {
+        const result = await listAlerts({
+          limit: 100,
+          ...(cursor ? { cursor } : {}),
+        });
+        if (cancelled) {
+          return;
+        }
+        if (!result.ok) {
+          setError(result.error.message);
+          setAlerts([]);
+          setLoading(false);
+          return;
+        }
+        collected.push(...result.data.items);
+        cursor = result.data.nextCursor ?? undefined;
+      } while (cursor && collected.length < 1000);
+
       // 台账只收已处置的预警；契约没有单独的随访记录端点。
       setAlerts(
-        result.data.items.filter(
+        collected.filter(
           (item) => item.status === "followed_up" || item.status === "closed",
         ),
       );
-    });
+      setLoading(false);
+    }
+
+    void loadAll();
 
     return () => {
       cancelled = true;
