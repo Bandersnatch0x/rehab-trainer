@@ -16,6 +16,7 @@ jobs:
       android: ${{ steps.filter.outputs.android }}
       miniprogram: ${{ steps.filter.outputs.miniprogram }}
       admin_web: ${{ steps.filter.outputs.admin_web }}
+      api: ${{ steps.filter.outputs.api }}
       api_contract: ${{ steps.filter.outputs.api_contract }}
     steps:
       - uses: actions/checkout@v4
@@ -29,6 +30,9 @@ jobs:
               - 'apps/miniprogram/**'
             admin_web:
               - 'apps/admin-web/**'
+            api:
+              - 'services/api/**'
+              - 'packages/api-contract/**'
             api_contract:
               - 'packages/api-contract/**'
               - 'packages/api-client-ts/**'
@@ -84,6 +88,21 @@ jobs:
       - run: pnpm install --no-frozen-lockfile
       - run: pnpm --filter @rehab-trainer/admin-web build
 
+  api:
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install -e '.[dev]'
+      - run: python -m pytest -q
+
   api-contract:
     needs: changes
     if: needs.changes.outputs.api_contract == 'true'
@@ -94,7 +113,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install pyyaml
-      - name: 校验占位契约可解析且顶层键齐备
+      - name: 校验契约可解析、版本与路径齐备
         run: |
           python -c "
           import yaml
@@ -102,5 +121,7 @@ jobs:
               doc = yaml.safe_load(f)
           assert str(doc['openapi']).startswith('3.1.'), doc.get('openapi')
           assert 'info' in doc and 'servers' in doc
-          print('openapi placeholder ok')
+          paths = doc.get('paths') or {}
+          assert len(paths) > 0, 'paths 不能为空'
+          print(f'openapi ok: {len(paths)} paths')
           "
