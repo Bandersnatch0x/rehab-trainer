@@ -16,9 +16,10 @@ enum class RehabDestination(
     val icon: ImageVector
 ) {
     HOME(route = "home", label = "首页", icon = Icons.Filled.Home),
-    PATIENTS(route = "patients", label = "患者", icon = Icons.Filled.Person),
-    TRAINING(route = "training", label = "训练", icon = Icons.Filled.PlayArrow),
-    RECORDS(route = "records", label = "记录", icon = Icons.Filled.List),
-    ALERTS(route = "alerts", label = "预警", icon = Icons.Filled.Notifications),
+    EXERCISES(route = "exercises", label = "训练列表", icon = Icons.Filled.PlayArrow),
+    TRAINING(route = "training", label = "训练执行", icon = Icons.Filled.PlayArrow),
+    RECORDS(route = "records", label = "训练记录", icon = Icons.Filled.List),
+    ALERTS(route = "alerts", label = "风险预警", icon = Icons.Filled.Notifications),
+    PATIENTS(route = "patients", label = "患者档案", icon = Icons.Filled.Person),
     SETTINGS(route = "settings", label = "设置", icon = Icons.Filled.Settings)
 }

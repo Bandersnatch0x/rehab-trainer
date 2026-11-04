@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.rehabtrainer.app.ui.screens.AlertsScreen
+import com.rehabtrainer.app.ui.screens.ExercisesScreen
 import com.rehabtrainer.app.ui.screens.HomeScreen
 import com.rehabtrainer.app.ui.screens.PatientsScreen
 import com.rehabtrainer.app.ui.screens.RecordsScreen
@@ -27,6 +28,9 @@ fun RehabNavHost(
     ) {
         composable(RehabDestination.HOME.route) {
             HomeScreen(widthSizeClass = widthSizeClass)
+        }
+        composable(RehabDestination.EXERCISES.route) {
+            ExercisesScreen(onSelectExercise = { navController.navigate(RehabDestination.TRAINING.route) })
         }
         composable(RehabDestination.PATIENTS.route) {
             PatientsScreen()

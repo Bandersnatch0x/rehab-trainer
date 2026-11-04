@@ -880,31 +880,37 @@
 
     const screensByPlatform = {
       'android-phone': [
-        { id: 'home', name: '首页 (工作台)' },
-        { id: 'training', name: '训练执行 (端上CV)' },
-        { id: 'records', name: '训练记录' },
-        { id: 'alerts', name: '风险预警' },
-        { id: 'patient', name: '患者档案' }
+        { id: 'home', name: '1. 首页 (工作台)' },
+        { id: 'exercises', name: '2. 训练列表 (4大类)' },
+        { id: 'training', name: '3. 训练执行 (实时计数)' },
+        { id: 'records', name: '4. 训练记录' },
+        { id: 'alerts', name: '5. 风险预警' },
+        { id: 'patient', name: '6. 患者档案' },
+        { id: 'settings', name: '7. 系统设置' }
       ],
       'android-tablet': [
         { id: 'tablet-home', name: '平板双栏首页' },
         { id: 'tablet-training', name: '平板大屏训练' }
       ],
       'miniprogram': [
-        { id: 'home', name: '小程序首页' },
-        { id: 'training', name: '异步云端训练' },
-        { id: 'records', name: '训练记录' },
-        { id: 'assessment', name: '症状自评' },
-        { id: 'alerts', name: '风险预警' },
-        { id: 'patient', name: '患者档案' }
+        { id: 'home', name: '1. 小程序首页' },
+        { id: 'patient', name: '2. 患者档案' },
+        { id: 'training-list', name: '3. 训练列表' },
+        { id: 'training', name: '4. 训练执行' },
+        { id: 'records', name: '5. 训练记录' },
+        { id: 'assessment', name: '6. 症状自评' },
+        { id: 'alerts', name: '7. 风险预警' }
       ],
       'admin-web': [
-        { id: 'login', name: '管理端登录' },
-        { id: 'patients', name: '患者工作台' },
-        { id: 'patient-detail', name: '患者详情' },
-        { id: 'stage-confirmation', name: '分期确认' },
-        { id: 'prescription', name: '处方制定' },
-        { id: 'alerts', name: '预警处置' }
+        { id: 'login', name: '1. 登录' },
+        { id: 'patients', name: '2. 患者列表' },
+        { id: 'patient-detail', name: '3. 患者详情' },
+        { id: 'stage-confirmation', name: '4. 分期确认' },
+        { id: 'prescription', name: '5. 处方编辑' },
+        { id: 'alerts', name: '6. 预警中心' },
+        { id: 'follow-ups', name: '7. 随访台账' },
+        { id: 'permissions', name: '8. 权限管理' },
+        { id: 'errors', name: '9. 403/404' }
       ]
     };
 
@@ -1192,6 +1198,63 @@
               <button class="btn-elderly-secondary">
                 关联照护人微信
               </button>
+            </div>
+          </div>
+        `;
+      } else if (currentAndroidScreen === 'exercises') {
+        container.innerHTML = `
+          <div class="ui-top-bar">
+            <div class="ui-top-bar__title">训练条目列表</div>
+            <span class="badge-pill badge-primary">4大固定大类</span>
+          </div>
+
+          <div style="padding: 24px;">
+            <div class="card-container">
+              <span class="badge-pill badge-primary">节律步态 (RAS)</span>
+              <h3 style="font-size:22px; font-weight:800; margin:8px 0;">原地节律踏步训练</h3>
+              <p style="font-size:16px; color:var(--text-secondary); margin-bottom:12px;">以 64 BPM 听觉节律引导步态，预防冻结步态 (FoG)。</p>
+              <button class="btn-elderly-primary" onclick="switchAndroidScreen('training')">
+                ▶ 开始此项训练 (80dp)
+              </button>
+            </div>
+
+            <div class="card-container">
+              <span class="badge-pill badge-success">牵伸放松</span>
+              <h3 style="font-size:22px; font-weight:800; margin:8px 0;">坐位上肢躯干伸展</h3>
+              <p style="font-size:16px; color:var(--text-secondary); margin-bottom:12px;">缓解齿轮样强直，维持关节活动度。</p>
+              <button class="btn-elderly-secondary" onclick="switchAndroidScreen('training')">
+                开始牵伸 (56dp)
+              </button>
+            </div>
+          </div>
+        `;
+      } else if (currentAndroidScreen === 'settings') {
+        container.innerHTML = `
+          <div class="ui-top-bar">
+            <div class="ui-top-bar__title">系统设置</div>
+            <span class="badge-pill badge-success">适老化大字模式</span>
+          </div>
+
+          <div style="padding: 24px;">
+            <div class="card-container">
+              <h3 style="font-size:20px; font-weight:700; margin-bottom:16px;">视听与触控无障碍</h3>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <div><strong>RAS 节拍语音与蜂鸣引导</strong><div style="font-size:14px; color:var(--text-secondary);">步态训练中固定节拍提示</div></div>
+                <input type="checkbox" checked style="transform:scale(1.5);">
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div><strong>80dp 按键振动确认</strong><div style="font-size:14px; color:var(--text-secondary);">防抖防颤触感确认反馈</div></div>
+                <input type="checkbox" checked style="transform:scale(1.5);">
+              </div>
+            </div>
+
+            <div class="card-container">
+              <h3 style="font-size:20px; font-weight:700; margin-bottom:10px;">机构与授权</h3>
+              <p style="font-size:16px; color:var(--text-secondary); line-height:1.6;">
+                签约机构：市康复中心第三病区<br>
+                治疗师：李主任<br>
+                版本：v1.0.0 (MediaPipe Lite + RAS)
+              </p>
             </div>
           </div>
         `;
@@ -1530,6 +1593,9 @@
       if (screen === 'stage-confirmation') return 'H-Y 临床分期权威确认';
       if (screen === 'prescription') return '康复训练处方制定 (4大训练大类)';
       if (screen === 'alerts') return '机构风险预警与随访处置中心';
+      if (screen === 'follow-ups') return '机构随访台账汇总';
+      if (screen === 'permissions') return '机构角色与权限管理';
+      if (screen === 'errors') return '异常状态页 (403/404)';
       return '';
     }
 
@@ -1731,26 +1797,77 @@
             </table>
           </div>
         `;
-      } else if (screen === 'patient-detail') {
+      } else if (screen === 'follow-ups') {
         return `
-          <div style="display:flex; gap:24px;">
-            <div class="card-container" style="flex:1;">
-              <h3 style="font-size:22px; font-weight:800; margin-bottom:12px;">张建国 (男, 72岁)</h3>
-              <p style="font-size:16px; color:var(--text-secondary); line-height:1.8;">
-                <strong>H-Y 分期：</strong>2 期（李医生于 2026-11-01 确诊签发）<br>
-                <strong>主要症状：</strong>双手震颤、晨僵明显<br>
-                <strong>训练达标率：</strong>92% (本月累计训练 14 次)
-              </p>
-              <div style="margin-top:20px; display:flex; gap:12px;">
-                <button class="btn-elderly-primary" style="min-height:50px; font-size:16px;" onclick="onChipClick('prescription', document.querySelectorAll('.page-chip')[4])">调整处方</button>
-                <button class="btn-elderly-secondary" style="min-height:50px; font-size:16px;" onclick="onChipClick('stage-confirmation', document.querySelectorAll('.page-chip')[3])">重审分期</button>
+          <div class="card-container">
+            <h3 style="font-size:22px; font-weight:800; margin-bottom:16px;">机构随访台账汇总</h3>
+            <table class="admin-table">
+              <thead>
+                <tr><th>台账编号</th><th>患者</th><th>随访时间</th><th>类型</th><th>随访记录摘要</th><th>执行人</th><th>结论</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>FU-2026-101</strong></td>
+                  <td><strong>王秀英 (PT-085)</strong></td>
+                  <td>昨日 15:30</td>
+                  <td><span class="badge-pill badge-primary">跌倒预警电话随访</span></td>
+                  <td>居家踏步轻微晃动，已指导近身监护并下调 BPM 至 56。</td>
+                  <td>王照护主管</td>
+                  <td><span class="badge-pill badge-success">居家安全确认</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      } else if (screen === 'permissions') {
+        return `
+          <div class="card-container">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+              <div>
+                <h3 style="font-size:22px; font-weight:800;">机构内角色与账号权限</h3>
+                <span style="font-size:14px; color:var(--text-tertiary);">当前机构：第一康复医院 (D10 独立租户)</span>
               </div>
+              <button class="btn-elderly-primary" style="width:auto; min-height:40px; font-size:14px; padding:0 16px; border-radius:6px;">
+                + 分配机构账号
+              </button>
             </div>
-            <div class="card-container" style="flex:2;">
-              <h4 style="font-size:18px; font-weight:700; margin-bottom:12px;">训练有效性与存疑趋势 (T7跨版本比较合规)</h4>
-              <div style="height:140px; background:#F8FAFC; border:1px dashed var(--border-card); border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--text-tertiary);">
-                📈 [有效帧占比与步态对称性折线图 - 近14次训练曲线均为良好]
-              </div>
+            <table class="admin-table">
+              <thead>
+                <tr><th>账号编号</th><th>姓名</th><th>角色</th><th>权限范围</th><th>状态</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>ACC-TH-001</td>
+                  <td><strong>李副主任医师</strong></td>
+                  <td><span class="badge-pill badge-primary">康复治疗师</span></td>
+                  <td>H-Y 分期确认 (D11)、运动处方签发 (D12)</td>
+                  <td><span class="badge-pill badge-success">正常</span></td>
+                </tr>
+                <tr>
+                  <td>ACC-CA-002</td>
+                  <td><strong>王主管护师</strong></td>
+                  <td><span class="badge-pill badge-warning">照护管理员</span></td>
+                  <td>患者档案管理、预警随访登记</td>
+                  <td><span class="badge-pill badge-success">正常</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      } else if (screen === 'errors') {
+        return `
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+            <div class="card-container" style="text-align:center; padding:36px;">
+              <div style="font-size:42px; margin-bottom:8px;">🔒</div>
+              <h3 style="font-size:22px; font-weight:800; color:var(--color-warning);">403 · 无权访问</h3>
+              <p style="font-size:15px; color:var(--text-secondary); margin:12px 0;">当前账号角色不具备此功能权限（处方签发仅限治疗师）。</p>
+              <button class="btn-elderly-secondary" style="min-height:44px; font-size:15px;">返回患者工作台</button>
+            </div>
+            <div class="card-container" style="text-align:center; padding:36px;">
+              <div style="font-size:42px; margin-bottom:8px;">🔍</div>
+              <h3 style="font-size:22px; font-weight:800; color:var(--color-primary);">404 · 页面不存在</h3>
+              <p style="font-size:15px; color:var(--text-secondary); margin:12px 0;">访问的临床页面或档案资源不存在，请核实路径。</p>
+              <button class="btn-elderly-primary" style="min-height:44px; font-size:15px;">返回主界面</button>
             </div>
           </div>
         `;
