@@ -102,6 +102,8 @@ def run_smoke(base_url, username, password, binding_token):
     request("PATCH", f"/prescriptions/{prescription_id}", {"note": "联调调整"},
             headers={"If-Match": prescription["version"]},
             check=lambda b: b["id"] == prescription_id and b["version"] == "1.0.1")
+    request("GET", f"/prescriptions?patientId={patient_id}",
+            check=lambda b: b["items"][0]["id"] == prescription_id and b["items"][0]["version"] == "1.0.1")
     record = {
         "clientRecordId": "smoke-" + secrets.token_hex(12), "patientId": patient_id,
         "prescriptionId": prescription_id, "recordedAt": timestamp,
@@ -188,7 +190,8 @@ def main():
                     with urlopen(base_url.removesuffix("/v1") + "/openapi.json", timeout=1) as response:
                         response.read()
                         break
-                except URLError:
+                except (URLError, TimeoutError):
+                    # Windows 上连接未监听端口抛 TimeoutError（OSError 子类），不是 URLError。
                     time.sleep(0.1)
             else:
                 raise TimeoutError("服务启动超时")
