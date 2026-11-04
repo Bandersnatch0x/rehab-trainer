@@ -2,7 +2,7 @@
 
 rehab-trainer 后端 API 骨架。Python 3.13 + FastAPI + SQLAlchemy 2.x + Pydantic v2。
 
-契约唯一真源：`packages/api-contract/openapi.yaml`。本服务实现该文件中的 15 个路径、17 个操作，
+契约唯一真源：`packages/api-contract/openapi.yaml`。本服务实现该文件中的 15 个路径、18 个操作，
 完整 URL 带 `/v1` 前缀（对应契约 `servers[0].url`）。
 
 ## 选型理由
