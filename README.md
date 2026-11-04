@@ -45,6 +45,8 @@ cd apps/admin-web; npx playwright test
 services/api/.venv/Scripts/python.exe scripts/smoke-api.py --config .agent/tmp/smoke-config.json
 # 部署静态自检
 services/api/.venv/Scripts/python.exe deploy/verify.py
+# 容器与真实 PostgreSQL(需 Docker;先在 .agent/tmp/deployment.env 填好秘密)
+docker compose --env-file .agent/tmp/deployment.env up --build -d --wait
 ```
 
 ## 开工

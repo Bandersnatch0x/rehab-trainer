@@ -119,8 +119,26 @@ python -m pytest services/api/tests
 git diff --check
 ```
 
-本次环境没有 Docker 与 hadolint，不能执行 `docker compose config`、镜像构建、容器启动及真实 PostgreSQL 验证。自检覆盖 YAML 解析、16 表 SQLite 迁移往返与重复升级、模型差异、检查约束数量以及 PostgreSQL 离线 SQL 生成。YAML 可解析不等于 Compose 语义或 Dockerfile 构建成功，上线前需在有 Docker 的环境补齐开头的启动验收。
+静态自检覆盖 YAML 解析、16 表 SQLite 迁移往返与重复升级、模型差异、检查约束数量以及 PostgreSQL 离线 SQL 生成。
+
+### 容器与真实 PostgreSQL 验证（2026-11-05）
+
+在 WSL2 的 kali-linux2 发行版内用 Docker 27.5.1 / Compose 2.32.4 实跑，使用本仓 `docker-compose.yml` 与 `.env.example` 生成的临时 env（随机密码与 JWT）：
+
+| 步骤 | 结果 |
+| --- | --- |
+| `docker compose config --quiet` | 通过 |
+| `docker compose up --build -d --wait` | 通过；api 与 postgres 均 `healthy` |
+| 构建上下文 | 120 KB（新增 `.dockerignore`，此前会把约 1 GB 仓库送进 daemon） |
+| `alembic current` | `0001 (head)` |
+| `python deploy/healthcheck.py` | 退出 0 |
+| PostgreSQL 表数 | 17（16 张业务表 + `alembic_version`） |
+| `pg_dump -Fc` | 46,593 字节 |
+| `createdb` + `pg_restore --exit-on-error` | 成功；恢复库表结构与 `alembic_version=0001` 与源库一致，行数等于备份时点 |
+| 联调脚本对容器 API | **18/18 契约操作通过**，含批量幂等与重放 |
+
+补充说明：该环境无法直连 Docker Hub，基础镜像经 `docker.m.daocloud.io` 镜像拉取后按原名打标签；这与镜像内容无关，但生产构建应配置可用的镜像仓库。未执行云上部署，也未做 hadolint 静态检查。
 
 2026-11-04 本地结果为部署自检通过、后端全量 36 项通过、Python 语法解析通过、`git diff --check` 通过。测试产生现有 HTTP 客户端弃用及依赖版本警告。未执行云部署，独立审查交由协调者完成。
 
-仓库内有 `.github/workflows/ci.yml`（按路径触发 Android 构建、小程序类型检查、管理端构建、后端 pytest 与契约校验），但仓库没有远端流水线，**该配置未在真实 CI 上运行过**。未做蓝绿部署，未提供云资源编排、存量 SQLite 数据搬迁及生产账号初始化。现有登录限流使用进程内状态，多副本及重启不能共享计数；扩容前应单独治理。存量 ORM 与 PostgreSQL 的完整业务兼容性必须通过真实数据库测试确认。
+仓库内有 `.github/workflows/ci.yml`（按路径触发 Android 构建、小程序类型检查、管理端构建、后端 pytest 与契约校验），但仓库没有远端流水线，**该配置未在真实 CI 上运行过**。未做蓝绿部署，未提供云资源编排、存量 SQLite 数据搬迁及生产账号初始化。现有登录限流使用进程内状态，多副本及重启不能共享计数；扩容前应单独治理。存量 ORM 与 PostgreSQL 的完整业务兼容性已在本机容器内的 PostgreSQL 17 上跑通主链路（18/18 契约操作），但未做长时压测与并发验证。

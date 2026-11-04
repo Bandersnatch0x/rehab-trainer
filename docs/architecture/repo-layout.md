@@ -79,7 +79,7 @@
 | 小程序 | 行为测试 15 项通过、`tsc --noEmit` 退出 0;**实际渲染与真机未验证** |
 | 联调脚本 | `scripts/smoke-api.py` 自管理模式 **18/18 契约操作**,含批量幂等与重放 |
 | 部署自检 | `deploy/verify.py` 通过:16 表迁移往返、模型差异为空、PostgreSQL 离线 SQL、YAML |
-| 容器 | **未验证**:本机无 Docker 与 hadolint |
+| 容器 | 已在 WSL2(kali-linux2,Docker 27.5.1/Compose 2.32.4)实跑:构建、compose up(双 healthy)、`alembic 0001`、healthcheck、pg_dump/restore、18/18 联调通过;hadolint 未装 |
 | Android | **未验证**:本机无 Android SDK |
 | CI | **未验证**:仓库无远端流水线 |
 | 独立审查 | 两轮(`cb072f8..HEAD`、`d0b612d..HEAD`):3 个 HIGH 与 19 个 MEDIUM 已修;offset 游标语义与契约 schema 级校验仍待排期 |
@@ -87,6 +87,6 @@
 ## 后续事项
 
 - 安装 Android SDK 后补跑 `./gradlew :app:assembleDebug`,并记录 AGP/Gradle 兼容结果。
-- 在具备 Docker 的环境补跑镜像构建与 `docker compose up`,完成真实 PostgreSQL 验证。
+- 容器已验证主链路;仍需 hadolint 静态检查与并发/长时压测。
 - 在微信开发者工具中实跑小程序,验证 WXML 渲染、输入法与合法域名配置。
 - CI 尚未接远端,接入后改为冻结锁文件并复用上述检查。

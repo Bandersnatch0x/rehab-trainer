@@ -1,0 +1,27 @@
+# 构建上下文只需要 services/api 与 deploy；其余一律排除，避免把 1GB 仓库送进 daemon。
+.git
+.github
+.agent
+.agents
+.idea
+.vscode
+
+# 依赖与构建产物
+**/node_modules
+**/.venv
+**/__pycache__
+**/*.pyc
+**/dist
+**/build
+**/.gradle
+
+# 与镜像无关的应用与素材
+apps
+assets
+docs
+packages
+
+# 本地数据库与临时文件
+*.db
+*.sqlite3
+**/.pytest_cache
