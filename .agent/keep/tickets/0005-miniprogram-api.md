@@ -1,7 +1,7 @@
 ---
 id: "0005"
 type: task
-status: open
+status: closed
 assignee: codex
 part-of: null
 blocked-by: []
@@ -37,3 +37,14 @@ created: 2026-11-05
 标准轴自查确认范围、边界校验和错误显示；规格轴自查确认五页、演示、D3/D20、验证入口及交付记录。完整逐页说明、实际输出和限制在 `.agent/tmp/MINIPROGRAM.md`。未运行真实服务 HTTP、开发工具或真机；沿用已有认证工具及登录态，未新增登录页面。单代理派工未运行独立评审，票保持 open，由协调者安排验收和关票。
 
 被否选项：把账号 ID 当患者 ID、默认选择多个关联中的首项、按本地时间解析后端无时区 UTC、捏造完成率或临床量表分数、用静态成功数据替代失败、添加没有契约的上传分析端点；这些会产生错误归属、错误统计或不实能力。无未决实施项。
+
+### 2026-11-05 协调者验收与关票
+
+合并到 main（`b9a9523`）后由协调者复跑，未只采信自述：
+
+- `node --test apps/miniprogram/tests/patient-data.cjs` → **15 passed / 0 failed**。测试用 `global.wx` 桩驱动编译后的真实 `utils/patient-data.js` 与五个 `Page`，没有替换被测函数，不是空转。
+- `npx --no-install --prefix apps/miniprogram tsc --noEmit -p apps/miniprogram` → 退出 0。
+- 复核中补了一处 worker 扫描漏掉的 D20 违规：`pages/assessment/index.json` 的 `navigationBarTitleText` 仍是「症状自评」，已改为「身体感受记录」，重跑测试仍 15/15。
+- 五页 WXML 已确认使用 `{{}}` 绑定真实数据（此前 grep 计数被 RTK 包装误报，改用 Select-String 与直接读文件核实）。
+
+关票。被否选项：把「WXML 仍是静态」当作已完成（会让页面看起来接线了但什么都不显示）；只信 worker 的「五页扫描未发现症状字段」（漏了 json 配置）。无替代方案。
