@@ -3,27 +3,73 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Stitch NeuroShield Mobility Font & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
   <title>rehab-trainer 三端 UI/UX 设计与交互原型 (适老化与医疗康复系统)</title>
   <style>
     :root {
-      --color-primary: #1A4FA0;
-      --color-primary-dark: #0F3268;
-      --color-primary-light: #EAF1FB;
-      --color-success: #1B5E20;
-      --color-success-light: #E8F5E9;
-      --color-warning: #B45309;
-      --color-warning-light: #FEF3C7;
-      --color-danger: #B91C1C;
-      --color-danger-dark: #7F1D1D;
-      --color-danger-light: #FEE2E2;
-      --text-primary: #0F172A;
-      --text-secondary: #334155;
-      --text-tertiary: #475569;
-      --bg-page: #F8FAFC;
+      /* Stitch NeuroShield Mobility Theme Tokens */
+      --color-primary: #00387E;
+      --color-primary-container: #1A4FA0;
+      --color-on-primary: #FFFFFF;
+      --color-on-primary-container: #ABC5FF;
+      --color-primary-fixed: #D8E2FF;
+      --color-primary-fixed-dim: #AEC6FF;
+      --color-primary-dark: #002252;
+      --color-primary-light: #EFF4FF;
+
+      --color-secondary: #006A63;
+      --color-secondary-container: #99EFE5;
+      --color-on-secondary: #FFFFFF;
+      --color-on-secondary-container: #006F67;
+      --color-secondary-fixed: #9CF2E8;
+      --color-secondary-fixed-dim: #80D5CB;
+      --color-secondary-light: #E6F6F4;
+      --color-success: #006A63;
+      --color-success-light: #E6F6F4;
+
+      --color-tertiary: #6F1F00;
+      --color-tertiary-container: #962D00;
+      --color-on-tertiary: #FFFFFF;
+      --color-on-tertiary-container: #FFB39A;
+      --color-tertiary-fixed: #FFDBD0;
+
+      --color-warning: #962D00;
+      --color-warning-light: #FFDBD0;
+      --color-warning-border: #C2410C;
+
+      --color-danger: #BA1A1A;
+      --color-danger-container: #FFDAD6;
+      --color-on-danger-container: #93000A;
+      --color-danger-dark: #680003;
+      --color-danger-light: #FFDAD6;
+
+      --text-primary: #0D1C2E;
+      --text-secondary: #434751;
+      --text-tertiary: #737783;
+
+      --bg-page: #F8F9FF;
       --bg-card: #FFFFFF;
-      --border-card: #CBD5E1;
-      --border-strong: #94A3B8;
-      --font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --bg-surface-lowest: #FFFFFF;
+      --bg-surface-low: #EFF4FF;
+      --bg-surface-mid: #E6EEFF;
+      --bg-surface-high: #DCE9FF;
+      --bg-surface-highest: #D5E3FC;
+      --bg-surface-dim: #CCDBF3;
+
+      --border-card: #C3C6D3;
+      --border-strong: #737783;
+
+      --font-family: "Atkinson Hyperlegible Next", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --radius-2xl: 24px;
+      --radius-full: 9999px;
     }
 
     * {
@@ -679,6 +725,139 @@
       background: #F8FAFC;
     }
 
+
+    /* Matrix Mockup Shell */
+    .frame-matrix {
+      width: 1240px;
+      max-width: 95vw;
+      min-height: 760px;
+      max-height: 85vh;
+      display: none;
+      flex-direction: column;
+      border-radius: 16px;
+      background: #FFFFFF;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 0 8px #334155;
+      overflow: hidden;
+    }
+
+    .frame-matrix.active {
+      display: flex;
+    }
+
+    .matrix-header {
+      background: #1E293B;
+      color: #FFFFFF;
+      padding: 20px 28px;
+      border-bottom: 2px solid #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .matrix-content {
+      padding: 28px;
+      overflow-y: auto;
+      background: #F8F9FF;
+      flex: 1;
+    }
+
+    .matrix-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: #FFFFFF;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1.5px solid var(--border-card);
+      box-shadow: 0 4px 12px rgba(13, 28, 46, 0.05);
+    }
+
+    .matrix-table th {
+      background: #EFF4FF;
+      color: var(--color-primary);
+      padding: 16px 14px;
+      text-align: left;
+      font-size: 15px;
+      font-weight: 700;
+      border-bottom: 2px solid var(--border-card);
+      border-right: 1px solid #E2E8F0;
+    }
+
+    .matrix-table td {
+      padding: 16px 14px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-primary);
+      border-bottom: 1px solid #E2E8F0;
+      border-right: 1px solid #E2E8F0;
+      vertical-align: top;
+    }
+
+    .matrix-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .matrix-table tr:hover td {
+      background: #F8FAFC;
+    }
+
+    .tag-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      margin-bottom: 6px;
+    }
+
+    .tag-support {
+      background: #D1FAE5;
+      color: #065F46;
+      border: 1px solid #A7F3D0;
+    }
+
+    .tag-partial {
+      background: #FEF3C7;
+      color: #92400E;
+      border: 1px solid #FDE68A;
+    }
+
+    .tag-none {
+      background: #F1F5F9;
+      color: #64748B;
+      border: 1px solid #CBD5E1;
+    }
+
+    .endpoint-code {
+      display: block;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+      color: #0F172A;
+      background: #F1F5F9;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid #CBD5E1;
+      margin-top: 4px;
+      word-break: break-all;
+    }
+
+    .role-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-primary);
+      background: var(--color-primary-light);
+      padding: 2px 8px;
+      border-radius: 6px;
+      border: 1px solid #ABC5FF;
+      margin-top: 4px;
+    }
+
     /* WCAG AA Checklist Section in Header */
     .spec-drawer-toggle {
       background: #10B981;
@@ -731,6 +910,7 @@
       <button class="device-tab" onclick="switchPlatform('android-tablet')">📟 Android 平板</button>
       <button class="device-tab" onclick="switchPlatform('miniprogram')">💬 微信小程序</button>
       <button class="device-tab" onclick="switchPlatform('admin-web')">💻 Web 管理端</button>
+      <button class="device-tab" onclick="switchPlatform('matrix')">📊 各端功能矩阵</button>
     </div>
 
     <!-- Screen Navigation Chips (Dynamically changed per platform) -->
@@ -869,6 +1049,31 @@
       </div>
     </div>
 
+
+    <!-- ========================================== -->
+    <!-- 5. Cross-Platform Feature Matrix           -->
+    <!-- ========================================== -->
+    <div class="device-frame frame-matrix" id="matrixFrame">
+      <div class="matrix-header">
+        <div>
+          <div style="font-size:20px; font-weight:800; display:flex; align-items:center; gap:10px;">
+            <span style="font-size:24px;">📊</span>
+            <span>rehab-trainer 三端功能与权限矩阵 (Cross-Platform Feature Matrix)</span>
+          </div>
+          <p style="font-size:14px; color:#94A3B8; margin-top:4px;">
+            对齐 Android App / 微信小程序 / Web 管理端的业务边界、API 端点与临床角色权限划分
+          </p>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <span class="tag-status tag-support">● 支持 (已对齐)</span>
+          <span class="tag-status tag-partial">▲ 部分 (能力差异)</span>
+          <span class="tag-status tag-none">✕ 不支持 (权限受限)</span>
+        </div>
+      </div>
+      <div class="matrix-content" id="matrixContent">
+        <!-- Injected by renderMatrix() -->
+      </div>
+    </div>
   </main>
 
   <script>
@@ -917,12 +1122,16 @@
     function switchPlatform(platform) {
       currentPlatform = platform;
       document.querySelectorAll('.device-tab').forEach(b => b.classList.remove('active'));
-      event.target.classList.add('active');
+      if (event && event.target && event.target.classList.contains('device-tab')) {
+        event.target.classList.add('active');
+      }
 
       document.getElementById('androidPhoneFrame').classList.remove('active');
       document.getElementById('androidTabletFrame').classList.remove('active');
       document.getElementById('miniprogramFrame').classList.remove('active');
       document.getElementById('adminWebFrame').classList.remove('active');
+      const matrixFrame = document.getElementById('matrixFrame');
+      if (matrixFrame) matrixFrame.classList.remove('active');
 
       if (platform === 'android-phone') {
         document.getElementById('androidPhoneFrame').classList.add('active');
@@ -936,6 +1145,9 @@
       } else if (platform === 'admin-web') {
         document.getElementById('adminWebFrame').classList.add('active');
         renderAdminWeb();
+      } else if (platform === 'matrix') {
+        if (matrixFrame) matrixFrame.classList.add('active');
+        renderMatrix();
       }
       renderNavChips();
     }
@@ -1873,6 +2085,154 @@
         `;
       }
       return '';
+    }
+
+
+    /* =======================================
+       5. Cross-Platform Feature Matrix Renderer
+       ======================================= */
+    function renderMatrix() {
+      const container = document.getElementById('matrixContent');
+      if (!container) return;
+
+      const matrixData = [
+        {
+          feature: "1. 训练执行 (实时姿态识别与防颤计数)",
+          desc: "RAS 听觉节律引导、骨骼关键点追踪、大字体防抖实时计数",
+          android: { status: "support", label: "支持", note: "端上 MediaPipe / YOLO 离线实时 30FPS 推理，48sp 等宽大数字动态跳字，微震动实时触觉反馈" },
+          mini: { status: "partial", label: "部分", note: "小程序沙箱算力受限，采用视频录制异步上传云端推断与延迟质检评估" },
+          web: { status: "none", label: "不支持", note: "机构端工作站仅提供训练动作库配置与患者录像抽检查阅，无端上实时采集功能" },
+          endpoint: "POST /api/v1/training/sessions\nPOST /api/v1/training/records",
+          role: "患者 (Patient) / 照护陪同 (Caregiver)"
+        },
+        {
+          feature: "2. 训练记录 (依从度日历与肌肉负荷趋势)",
+          desc: "训练完成度、历史组数回溯、RPE 疲劳度与肌肉保护剂量评级",
+          android: { status: "support", label: "支持", note: "本地 SQLite 离线持久化与云端双向同步，7日打卡依从度日历与中度肌肉负荷图表" },
+          mini: { status: "support", label: "支持", note: "微信端轻量级卡片，展示单次完成组数、有效帧率占比及周康复趋势摘要" },
+          web: { status: "support", label: "支持", note: "机构级全景统计大屏，支持按患者、H-Y 分期、训练完成率多维下钻与数据导出" },
+          endpoint: "GET /api/v1/training/records\nGET /api/v1/patients/{id}/compliance",
+          role: "患者 / 照护者 / 康复治疗师 / 主管医师"
+        },
+        {
+          feature: "3. 症状自评 (H-Y 分期自评与 SARC-F 筛查)",
+          desc: "Hoehn & Yahr 1~5 级自主量表评估、肌少症筛查与跌倒风险初筛",
+          android: { status: "partial", label: "部分", note: "提供大字号防误触简版自评问卷，辅助计算患者自评得分" },
+          mini: { status: "support", label: "支持", note: "利用微信轻应用优势，支持家属代办录入、量表自评，一键同步至机构后台" },
+          web: { status: "partial", label: "部分", note: "支持门诊接诊护士人工补录门诊纸质量表与代评数据" },
+          endpoint: "POST /api/v1/assessments\nGET /api/v1/assessments/scales",
+          role: "患者 / 照护管理员 / 门诊护士"
+        },
+        {
+          feature: "4. 预警中心 (跌倒高危阻断与急救求助 SOS)",
+          desc: "动作剧烈晃动告警、主观僵直加重持续预警、一键 SOS 与随访流",
+          android: { status: "support", label: "支持", note: "端上强声光弹窗阻断，80dp+ 红色急救呼叫 (拨打 120)，轻量 Web Vibration 振动" },
+          mini: { status: "support", label: "支持", note: "微信服务号/小程序模板消息即时推送风险事件通知照护人家属" },
+          web: { status: "support", label: "支持", note: "预警中心风险事件流看板、红黄等级闪烁提示、强制电话随访处置与闭环登记" },
+          endpoint: "POST /api/v1/alerts\nGET /api/v1/alerts/unhandled\nPOST /api/v1/alerts/{id}/resolve",
+          role: "系统自动告警 / 责任护师 / 照护主管"
+        },
+        {
+          feature: "5. 患者档案 (临床分期、开期/关期时间窗)",
+          desc: "患者人口学资料、临床病史、服药时间窗口与晨间状态指标",
+          android: { status: "support", label: "支持", note: "适老化展示当前 H-Y 分期徽章、服药后 45 分钟最佳运动窗口提醒" },
+          mini: { status: "support", label: "支持", note: "支持照护人家属绑定并代管多位帕金森病患档案" },
+          web: { status: "support", label: "支持", note: "主数据中心：门诊诊断、病程演进记录、分期认定历史、用药处方明细" },
+          endpoint: "GET /api/v1/patients/{id}\nPUT /api/v1/patients/{id}",
+          role: "患者 / 照护者 / 主治医师 / 临床护士"
+        },
+        {
+          feature: "6. 分期确认 (Hoehn & Yahr 临床医师资格复核)",
+          desc: "双人临床复核确认机制，防越权锁定临床分期基线 (D11 规则)",
+          android: { status: "none", label: "不支持", note: "受医疗安全规范限制，患者端严禁自主锁定或修改法定临床医疗分期" },
+          mini: { status: "none", label: "不支持", note: "小程序仅提交自评建议得分，无医疗执业诊断确认权限" },
+          web: { status: "support", label: "支持", note: "机构康复治疗师/主治医师工作站专属：对比自评与门诊体征，双人复核签发锁定" },
+          endpoint: "POST /api/v1/clinical/staging/confirm\nGET /api/v1/clinical/staging/history",
+          role: "康复治疗师 (Therapist) / 副主任及以上医师"
+        },
+        {
+          feature: "7. 处方编辑 (RAS 听觉节律引导、动作编排与乐观锁)",
+          desc: "50~90 BPM 节拍参数配置、抗阻组数剂量设定、乐观锁版本控制 (D12)",
+          android: { status: "none", label: "不支持", note: "患者端只读执行，严格依循治疗师下发处方，禁止私自篡改动作参数" },
+          mini: { status: "none", label: "不支持", note: "只读展示训练指导视频、动作注意事项与预估时长" },
+          web: { status: "support", label: "支持", note: "治疗师工作台：支持 50~90 BPM 滑块调节、4大类动作编排、版本号乐观锁控制" },
+          endpoint: "POST /api/v1/prescriptions\nPUT /api/v1/prescriptions/{id}\nGET /api/v1/prescriptions/active",
+          role: "康复治疗师 (Therapist)"
+        },
+        {
+          feature: "8. 随访台账 (机构电话随访登记与转归结论追踪)",
+          desc: "高危跌倒后电话回访、服药依从性追踪、康复进展评估台账",
+          android: { status: "none", label: "不支持", note: "患者日常训练端，不承载机构临床随访管理工作流" },
+          mini: { status: "none", label: "不支持", note: "不面向普通用户开放机构内部处置台账" },
+          web: { status: "support", label: "支持", note: "机构随访中心：随访台账汇总编号 (FU-2026-xxx)、回访记录录入、安全转归确认" },
+          endpoint: "GET /api/v1/followups\nPOST /api/v1/followups\nGET /api/v1/followups/{id}",
+          role: "照护管理员 (Care Admin) / 门诊护士"
+        },
+        {
+          feature: "9. 权限管理 (多租户机构权限隔离与 RBAC 角色授权)",
+          desc: "医院租户物理/逻辑隔离、医生/护士/管理员权限矩阵与停启用控制",
+          android: { status: "none", label: "不支持", note: "仅支持单患者/家属本地凭证登录，无系统管理权限" },
+          mini: { status: "none", label: "不支持", note: "基于微信生态个人身份认证，无机构系统管理功能" },
+          web: { status: "support", label: "支持", note: "多租户机构隔离 (D10 规范)，支持账号开通、角色分配 (治疗师/照护管理/管理员)" },
+          endpoint: "GET /api/v1/admin/users\nPOST /api/v1/admin/users\nGET /api/v1/admin/roles",
+          role: "机构超级管理员 (Tenant Admin)"
+        }
+      ];
+
+      container.innerHTML = `
+        <div style="background:#FFFFFF; border-radius:14px; padding:20px; border:1.5px solid var(--border-card); margin-bottom:24px;">
+          <h3 style="font-size:18px; font-weight:800; color:var(--color-primary); margin-bottom:8px;">
+            📌 业务架构与端侧职责说明
+          </h3>
+          <p style="font-size:14px; color:var(--text-secondary); line-height:1.7;">
+            系统严格遵循《帕金森康复设计系统 (NeuroShield Mobility)》与医疗安全合规要求。
+            <strong>Android App</strong> 承担高精度端上姿态计算与适老化物理防抖交互；
+            <strong>微信小程序</strong> 聚焦照护家属代办、量表自评与异步视频录制；
+            <strong>Web 管理端</strong> 为执业医师/治疗师提供临床分期确认、运动处方下发、风险随访闭环与机构权限隔离。
+          </p>
+        </div>
+
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th style="width:200px;">核心业务功能</th>
+              <th style="width:240px;">📱 Android App (患者端)</th>
+              <th style="width:230px;">💬 微信小程序 (轻量/家属)</th>
+              <th style="width:250px;">💻 Web 管理端 (医护机构)</th>
+              <th style="width:200px;">对应 API 端点 (Endpoint)</th>
+              <th style="width:180px;">临床角色与安全权限</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${matrixData.map(item => `
+              <tr>
+                <td>
+                  <strong style="font-size:15px; color:var(--color-primary);">${item.feature}</strong>
+                  <div style="font-size:12px; color:var(--text-tertiary); margin-top:4px;">${item.desc}</div>
+                </td>
+                <td>
+                  <span class="tag-status tag-${item.android.status}">${item.android.status === 'support' ? '● 支持' : item.android.status === 'partial' ? '▲ 部分' : '✕ 不支持'}</span>
+                  <div style="font-size:13px; color:var(--text-secondary); margin-top:4px;">${item.android.note}</div>
+                </td>
+                <td>
+                  <span class="tag-status tag-${item.mini.status}">${item.mini.status === 'support' ? '● 支持' : item.mini.status === 'partial' ? '▲ 部分' : '✕ 不支持'}</span>
+                  <div style="font-size:13px; color:var(--text-secondary); margin-top:4px;">${item.mini.note}</div>
+                </td>
+                <td>
+                  <span class="tag-status tag-${item.web.status}">${item.web.status === 'support' ? '● 支持' : item.web.status === 'partial' ? '▲ 部分' : '✕ 不支持'}</span>
+                  <div style="font-size:13px; color:var(--text-secondary); margin-top:4px;">${item.web.note}</div>
+                </td>
+                <td>
+                  ${item.endpoint.split('\n').map(ep => `<code class="endpoint-code">${ep}</code>`).join('')}
+                </td>
+                <td>
+                  <span class="role-badge">${item.role}</span>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
     }
 
     function toggleSpecDrawer() {
