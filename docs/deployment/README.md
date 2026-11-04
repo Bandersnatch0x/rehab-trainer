@@ -63,7 +63,7 @@ python -m alembic -c deploy/alembic.ini check
 
 生产执行需另行人工授权。本次仅交付配置与步骤，不创建云资源。
 
-1. 在同一地域与 VPC 创建托管 PostgreSQL、容器运行环境及镜像仓库。数据库只允许容器网络访问。创建专用数据库与迁移账号；运行账号只授业务表读写及读取 `alembic_version` 权限，迁移账号持有 DDL 权限。
+1. 在同一地域与 VPC 创建托管 PostgreSQL、容器运行环境及镜像仓库。数据库只允许容器网络访问。创建专用数据库与迁移账号；运行账号只授业务表读写及读取 `alembic_version` 权限，迁移账号持有 DDL 权限。新迁移建出的表不会自动继承运行账号权限，需在迁移账号上配置 `ALTER DEFAULT PRIVILEGES ... GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO rehab_runtime`，或在每次迁移后重新授权；否则 API 会在新表上返回权限错误。
 2. 构建镜像，使用发布版本标签推送到已授权的镜像仓库。上线固定镜像 digest，保留上一版本，构建记录中保存依赖清单。基础镜像及应用依赖仍使用版本范围，不能宣称字节级可重复构建。
 
    ```powershell
@@ -139,6 +139,7 @@ git diff --check
 | 运行身份 | api 进程 `uid=10001(rehab)`，非 root |
 | 端口暴露 | api 仅 `127.0.0.1:8000`；postgres 无宿主机端口 |
 | 迁移失败不启动 | 用错误数据库密码启动：api 退出码 1，日志为 `password authentication failed`，8010 未监听。`restart: unless-stopped` 会让它反复重启，但始终不提供服务，平台侧仍需失败告警 |
+| 迁移/运行账号分离 | 在全新库上用 `rehab_migrator` 跑 `alembic upgrade head` 成功（退出 0）；`rehab_runtime` 执行 `CREATE TABLE` 被拒（`permission denied for schema public`）；API 用运行账号启动，healthcheck 退出 0，seed 写入成功 |
 
 补充说明：该环境无法直连 Docker Hub，基础镜像经 `docker.m.daocloud.io` 镜像拉取后按原名打标签；这与镜像内容无关，但生产构建应配置可用的镜像仓库。未执行云上部署，也未做 hadolint 静态检查。
 
