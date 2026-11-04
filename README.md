@@ -20,7 +20,30 @@ App 与小程序功能清单一致;差异只在姿态识别的实现方式与实
 
 ## 当前状态
 
-仓库已完成 agent 工作环境装配(见 `AGENTS.md`),需求基线已裁决(见 `.agent/keep/decisions/`),尚无产品代码。
+需求基线已裁决(见 `.agent/keep/decisions/`),演示版全链路可运行:
+
+| 部分 | 状态 |
+| --- | --- |
+| 后端 `services/api` | FastAPI + SQLAlchemy,Alembic 初始迁移覆盖 16 张表;37 项测试通过 |
+| Web 后台 `apps/admin-web` | 6 个页面已接真实 API(患者、详情、分期、处方、预警);Playwright E2E 10 条全部通过 |
+| 微信小程序 / Android | 契约客户端已生成,配置指向本地后端;小程序 async 云端 CV 与 App 端上实时推理按 D3 分级实现 |
+| 部署 | `services/api/Dockerfile` + `docker-compose.yml` + `deploy/`(Alembic、健康检查、自检);手册见 `docs/deployment/README.md` |
+| 联调 | `scripts/smoke-api.py` 覆盖 17 项契约操作,含批量幂等与重放 |
+
+演示版对未裁决与待临床签核内容使用 mock 并标注(D21);步态指标在完成标定前不进训练成绩(D23)。
+
+## 验证
+
+```powershell
+# 后端
+python -m pytest services/api/tests
+# 管理端 E2E(自动起后端与预览服务)
+cd apps/admin-web; npx playwright test
+# 联调(需先 seed 并启动 uvicorn)
+python scripts/smoke-api.py --base-url http://127.0.0.1:8000/v1
+# 部署静态自检
+python deploy/verify.py
+```
 
 ## 开工
 
@@ -37,6 +60,6 @@ App 与小程序功能清单一致;差异只在姿态识别的实现方式与实
 | `.agent/tmp/` | 临时产物(忽略) |
 | `.agents/` | 本地面:个人过程记录与装配的技能(忽略) |
 | `apps/` | 三端应用:Android、微信小程序、Web 后台 |
-| `services/` | 服务占位:API、云端 CV 推理 |
+| `services/` | 服务:API(FastAPI)、云端 CV 推理(占位) |
 | `packages/` | API 契约与生成客户端 |
 | `docs/architecture/` | 架构与仓库结构说明 |
