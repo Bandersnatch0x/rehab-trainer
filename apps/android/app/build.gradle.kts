@@ -21,6 +21,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            // 模拟器通过此地址访问开发机，真机需换成开发机局域网地址。
+            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8000/v1/\"")
+        }
         release {
             isMinifyEnabled = false
         }

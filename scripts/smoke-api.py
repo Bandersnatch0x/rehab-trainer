@@ -1,0 +1,213 @@
+"""真实 HTTP 联调。用服务端 venv 执行；默认启动独立数据库上的本地服务。"""
+
+import argparse
+import json
+import os
+from pathlib import Path
+import re
+import secrets
+import socket
+import subprocess
+import sys
+import tempfile
+import time
+from datetime import datetime, timedelta, timezone
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
+
+
+ROOT = Path(__file__).resolve().parents[1]
+API_DIR = ROOT / "services/api"
+
+
+def run_smoke(base_url, username, password, binding_token):
+    covered = set()
+    token = None
+
+    def request(method, path, payload=None, status=200, check=None, headers=None):
+        operation = method + " " + re.sub(r"\?.*$", "", path)
+        operation = re.sub(r"/patients/[^/]+", "/patients/{patientId}", operation)
+        operation = re.sub(r"/prescriptions/[^/]+", "/prescriptions/{prescriptionId}", operation)
+        operation = re.sub(r"/exercises/[^/]+", "/exercises/{code}", operation)
+        operation = re.sub(r"/alerts/[^/]+", "/alerts/{alertId}", operation)
+        request_headers = {"Content-Type": "application/json"}
+        if token:
+            request_headers["Authorization"] = f"Bearer {token}"
+        request_headers.update(headers or {})
+        req = Request(base_url + path, method=method, headers=request_headers,
+                      data=None if payload is None else json.dumps(payload).encode())
+        actual_status = None
+        try:
+            try:
+                response = urlopen(req, timeout=10)
+            except HTTPError as error:
+                response = error
+            with response:
+                actual_status = response.status
+                body = json.load(response)
+                if actual_status != status:
+                    raise AssertionError(f"expected HTTP {status}, got {actual_status}")
+                if check is not None and not check(body):
+                    raise AssertionError("关键字段断言失败")
+            covered.add(operation)
+            print(f"PASS {operation} HTTP {actual_status} status_and_fields", flush=True)
+            return body
+        except (AssertionError, ValueError, KeyError, TypeError, URLError) as error:
+            print(f"FAIL {operation} HTTP {actual_status}: {error}", flush=True)
+            raise
+
+    def valid_tokens(body):
+        return (isinstance(body.get("accessToken"), str) and bool(body["accessToken"])
+                and isinstance(body.get("refreshToken"), str) and bool(body["refreshToken"])
+                and body.get("expiresIn", 0) > 0)
+
+    bound = request("POST", "/auth/bind", {"bindingToken": binding_token}, check=valid_tokens)
+    token = bound["accessToken"]
+    request("GET", "/me", check=lambda b: "patient" in b["roles"] and b["orgId"] == "org-demo")
+    request("POST", "/auth/bind", {"bindingToken": binding_token}, status=409,
+            check=lambda b: b["code"] == "CONFLICT")
+    logged_in = request("POST", "/auth/login", {"username": username, "password": password},
+                        check=lambda b: valid_tokens(b) and "rehab_therapist" in b["profile"]["roles"])
+    refreshed = request("POST", "/auth/refresh", {"refreshToken": logged_in["refreshToken"]},
+                        check=valid_tokens)
+    token = refreshed["accessToken"]
+    request("GET", "/me", check=lambda b: b["accountId"] == "therapist-demo")
+    patient = request("POST", "/patients", {"displayName": "联调患者", "birthYear": 1950}, status=201,
+                      check=lambda b: bool(b["id"]) and b["stageConfirmationStatus"] == "suspected")
+    patient_id = patient["id"]
+    listing = request("GET", "/patients?limit=100", check=lambda b: isinstance(b["items"], list))
+    while not any(p["id"] == patient_id for p in listing["items"]):
+        if not listing.get("nextCursor"):
+            raise AssertionError("新增患者未出现在分页列表")
+        listing = request("GET", "/patients?limit=100&cursor=" + listing["nextCursor"],
+                          check=lambda b: isinstance(b["items"], list))
+    now = datetime.now(timezone.utc)
+    timestamp = now.isoformat()
+    request("POST", f"/patients/{patient_id}/stage-confirmations",
+            {"stage": 3, "confirmedAt": timestamp}, status=201,
+            check=lambda b: b["patientId"] == patient_id and b["status"] == "confirmed" and b["stage"] == 3)
+    request("GET", f"/patients/{patient_id}",
+            check=lambda b: b["id"] == patient_id and b["hyStage"] == 3 and b["stageConfirmationStatus"] == "confirmed")
+    request("POST", f"/patients/{patient_id}/assessments",
+            {"instrument": "STEADI", "score": 1, "assessedAt": timestamp}, status=201,
+            check=lambda b: bool(b["id"]) and b["patientId"] == patient_id and b["score"] == 1)
+    request("GET", "/exercises", check=lambda b: any(e["code"] == "ex-stretch-01" for e in b["items"]))
+    request("GET", "/exercises/ex-stretch-01", check=lambda b: b["code"] == "ex-stretch-01" and bool(b["label"]))
+    prescription = request("POST", "/prescriptions", {
+        "patientId": patient_id, "items": [{"exerciseCode": "ex-stretch-01"}],
+        "issuedAt": timestamp, "validFrom": timestamp,
+        "validUntil": (now + timedelta(days=30)).isoformat(), "mappingTableVersion": "smoke.1",
+    }, status=201, check=lambda b: bool(b["id"]) and b["patientId"] == patient_id and b["version"] == "1.0.0")
+    prescription_id = prescription["id"]
+    request("PATCH", f"/prescriptions/{prescription_id}", {"note": "联调调整"},
+            headers={"If-Match": prescription["version"]},
+            check=lambda b: b["id"] == prescription_id and b["version"] == "1.0.1")
+    record = {
+        "clientRecordId": "smoke-" + secrets.token_hex(12), "patientId": patient_id,
+        "prescriptionId": prescription_id, "recordedAt": timestamp,
+        "checkedIn": True, "completionCount": 12, "validFrameRatio": 0.92,
+        "modelVersion": "smoke.1", "modelSha256": "a" * 64,
+        "metricAlgorithmVersion": "smoke.1", "thresholdConfigVersion": "smoke.1",
+    }
+    batch = {"records": [record, record]}
+    uploaded = request("POST", "/sessions", batch,
+                       check=lambda b: len(b["results"]) == 2 and all(r["accepted"] and r["recordId"] for r in b["results"]))
+    record_id = uploaded["results"][0]["recordId"]
+    if uploaded["results"][1]["recordId"] != record_id:
+        raise AssertionError("批内重复未去重")
+    request("POST", "/sessions", batch,
+            check=lambda b: len(b["results"]) == 2 and all(r["accepted"] and r["recordId"] == record_id for r in b["results"]))
+    request("GET", f"/sessions?patientId={patient_id}",
+            check=lambda b: len(b["items"]) == 1 and b["items"][0]["id"] == record_id and b["items"][0]["completionCount"] == 12)
+    # shortcut: 后端尚无自动预警生成，使用种子预警；规则引擎落地后改为训练数据触发。
+    request("GET", "/alerts?patientId=patient-demo",
+            check=lambda b: any(a["id"] == "alert-demo" for a in b["items"]))
+    request("PATCH", "/alerts/alert-demo", {"status": "acknowledged", "note": "联调确认"},
+            check=lambda b: b["id"] == "alert-demo" and b["status"] == "acknowledged")
+    request("GET", "/alerts?patientId=patient-demo",
+            check=lambda b: any(a["id"] == "alert-demo" and a["status"] == "acknowledged" for a in b["items"]))
+    expected = set()
+    path = None
+    for line in (ROOT / "packages/api-contract/openapi.yaml").read_text(encoding="utf-8").splitlines():
+        if re.fullmatch(r"  /[^:]+:", line):
+            path = line.strip()[:-1]
+        match = re.fullmatch(r"    (get|post|patch|put|delete):", line)
+        if match and path:
+            expected.add(match[1].upper() + " " + path)
+    if not expected or expected != covered:
+        raise AssertionError(f"操作覆盖不匹配 missing={expected - covered}, extra={covered - expected}")
+    paths = {operation.split(" ", 1)[1] for operation in covered}
+    print(f"PASS {len(paths)} paths; {len(covered)}/{len(expected)} contract operations; "
+          "batch and replay idempotency", flush=True)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--config", required=True, type=Path,
+                        help="本地 JSON 凭证文件，字段为 username、password、bindingToken")
+    parser.add_argument("--base-url", help="测试已启动的服务；会新增数据并消耗绑定码，限本地测试环境")
+    parser.add_argument("--port", type=int, default=8000, help="独立本地服务端口")
+    args = parser.parse_args()
+    config = json.loads(args.config.read_text(encoding="utf-8-sig"))
+    if not isinstance(config, dict) or any(
+        not isinstance(config.get(key), str) or not config[key].strip()
+        for key in ("username", "password", "bindingToken")
+    ):
+        parser.error("配置必须提供非空字符串 username、password、bindingToken")
+    username = config["username"]
+    password = config["password"]
+    binding_token = config["bindingToken"]
+    if args.base_url:
+        run_smoke(args.base_url.rstrip("/"), username, password, binding_token)
+        return
+    with socket.socket() as probe:
+        probe.bind(("127.0.0.1", args.port))
+    output = ROOT / ".agent/tmp"
+    output.mkdir(parents=True, exist_ok=True)
+    run_dir = Path(tempfile.mkdtemp(prefix="smoke-api-", dir=output))
+    env = {**os.environ, "REHAB_DATABASE_URL": "sqlite:///" + (run_dir / "smoke.db").as_posix(),
+           "REHAB_JWT_SECRET": secrets.token_urlsafe(48), "REHAB_AUTO_CREATE_SCHEMA": "true",
+           "PYTHONIOENCODING": "utf-8"}
+    with (run_dir / "seed.log").open("w", encoding="utf-8") as log:
+        subprocess.run([sys.executable, "-m", "app.seed"], cwd=API_DIR, env=env,
+                       stdout=log, stderr=subprocess.STDOUT, check=True, timeout=30)
+    base_url = f"http://127.0.0.1:{args.port}/v1"
+    print(f"Evidence: {run_dir}", flush=True)
+    print("PASS seed: python -m app.seed", flush=True)
+    print(f"Starting: python -m uvicorn app.main:app --host 127.0.0.1 --port {args.port}",
+          flush=True)
+    with (run_dir / "server.log").open("w", encoding="utf-8") as log:
+        server = subprocess.Popen([sys.executable, "-m", "uvicorn", "app.main:app", "--host",
+                                   "127.0.0.1", "--port", str(args.port)], cwd=API_DIR,
+                                  env=env, stdout=log, stderr=subprocess.STDOUT)
+        try:
+            for _ in range(100):
+                if server.poll() is not None:
+                    raise RuntimeError(f"服务启动失败，见 {run_dir / 'server.log'}")
+                try:
+                    with urlopen(base_url.removesuffix("/v1") + "/openapi.json", timeout=1) as response:
+                        response.read()
+                        break
+                except URLError:
+                    time.sleep(0.1)
+            else:
+                raise TimeoutError("服务启动超时")
+            if server.poll() is not None:
+                raise RuntimeError("本地服务已退出，检查端口冲突")
+            print(f"PASS ready: {base_url}; PID {server.pid}", flush=True)
+            run_smoke(base_url, username, password, binding_token)
+        finally:
+            server.terminate()
+            try:
+                server.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                server.kill()
+                server.wait(timeout=5)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (AssertionError, KeyError, OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
+        print(f"FAIL 联调中止，后续操作未验证: {error}", file=sys.stderr)
+        sys.exit(1)
