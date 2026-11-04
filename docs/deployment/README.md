@@ -4,7 +4,7 @@
 
 ## 本地 Docker 启动
 
-需要 Docker Engine 与 Compose v2。将 `.env.example` 复制到 `.agent/tmp/deployment.env`，填写数据库密码、JWT 密钥以及数据库 URL。此目录已被忽略；不要在仓库根保存真实 `.env`，当前忽略规则不保护它。
+需要 Docker Engine 与 Compose v2。将 `.env.example` 复制到 `.agent/tmp/deployment.env`，填写数据库密码、JWT 密钥以及数据库 URL。该目录已被忽略；根目录的 `.env`、`.env.local` 与 `.env.*.local` 也已纳入忽略规则，但秘密仍应优先来自环境变量或秘密管理服务，不要长期留在工作区。
 
 ```powershell
 New-Item -ItemType Directory -Force .agent/tmp

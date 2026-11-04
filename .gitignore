@@ -1,3 +1,8 @@
+# 真实秘密文件：只保留模板 .env.example 与已提交的开发配置 .env.development
+.env
+.env.local
+.env.*.local
+
 # 本地面：过程产物与个人票据，不入版本控制（AGENTS.md「过程产物另分一路」）
 .agents/
 
