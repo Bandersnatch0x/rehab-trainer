@@ -138,6 +138,7 @@ git diff --check
 | 联调脚本对容器 API | **18/18 契约操作通过**，含批量幂等与重放 |
 | 运行身份 | api 进程 `uid=10001(rehab)`，非 root |
 | 端口暴露 | api 仅 `127.0.0.1:8000`；postgres 无宿主机端口 |
+| 迁移失败不启动 | 用错误数据库密码启动：api 退出码 1，日志为 `password authentication failed`，8010 未监听。`restart: unless-stopped` 会让它反复重启，但始终不提供服务，平台侧仍需失败告警 |
 
 补充说明：该环境无法直连 Docker Hub，基础镜像经 `docker.m.daocloud.io` 镜像拉取后按原名打标签；这与镜像内容无关，但生产构建应配置可用的镜像仓库。未执行云上部署，也未做 hadolint 静态检查。
 
