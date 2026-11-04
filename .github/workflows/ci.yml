@@ -72,6 +72,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --no-frozen-lockfile
       - run: pnpm --filter @rehab-trainer/miniprogram typecheck
+      - run: pnpm --filter @rehab-trainer/miniprogram test
 
   admin-web:
     needs: changes
