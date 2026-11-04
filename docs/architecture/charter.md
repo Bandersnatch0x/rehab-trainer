@@ -76,7 +76,7 @@
 
 ## 3. API 契约骨架
 
-契约文件:`packages/api-contract/openapi.yaml`(当前为占位,待本节确认后填充)。
+契约文件:`packages/api-contract/openapi.yaml`(已填充:15 路径 / 18 操作,OpenAPI 3.1)。
 
 | 资源 | 端点 | 鉴权 | 说明 |
 | --- | --- | --- | --- |
