@@ -7,7 +7,7 @@
 | 路径 | 内容 | 当前状态 |
 | --- | --- | --- |
 | `apps/android/` | Kotlin + Jetpack Compose,手机与平板同一 App | CameraX + MediaPipe 实时上肢计数与训练页已落地;本机无 Android SDK,**构建未验证** |
-| `apps/miniprogram/` | 微信原生小程序 + TypeScript | 6 个页面 + 请求层(Bearer、401 刷新重放);页面数据接入进行中 |
+| `apps/miniprogram/` | 微信原生小程序 + TypeScript | 5 个页面接真实接口(index/patient/records/alerts/assessment),训练页保持演示并标注;行为测试 15 项、类型检查通过 |
 | `apps/admin-web/` | React + Vite + TypeScript | 路由、鉴权、6 个业务页接真实 API;E2E 10 条全部通过 |
 | `services/api/` | FastAPI + SQLAlchemy 后端 | 15 路径 / 18 操作,16 张表,Alembic 初始迁移,37 项测试通过 |
 | `services/cv-worker/` | 云端 CV 异步推理 | 占位,仅 README |
@@ -38,7 +38,9 @@
 - `project.config.json` 的 `appid` 为 `touristappid`,接入真实主体时替换;本地调试关闭 `urlCheck`,发布前恢复。
 - 页面:`index`、`patient`、`records`、`alerts`、`assessment`、`training`。
 - 请求层已具备 Bearer 注入与 401 刷新重放;`API_BASE_URL` 指向 `http://127.0.0.1:8000/v1`。
-- 本机无微信开发者工具,页面运行**未验证**;类型检查与静态校验可执行。
+- 取数与字段投影集中在 `utils/patient-data.ts`,页面只做绑定;临床字段(分级/症状)不进入患者端页面数据(D20)。
+- 行为测试 `node --test apps/miniprogram/tests/patient-data.cjs`(15 项)用 `global.wx` 桩驱动真实请求层与五个 Page。
+- 本机无微信开发者工具,实际渲染与真机运行**未验证**;类型检查与行为测试可执行。
 
 ## Web 后台骨架
 
@@ -71,19 +73,20 @@
 
 | 项 | 结果 |
 | --- | --- |
-| 后端测试 | `pytest` 39 项通过(含处方读取、机构隔离与契约一致性) |
-| 管理端 E2E | `npx playwright test` **10 passed / 0 failed**(真实后端 + 每例独立机构数据) |
+| 后端测试 | `pytest` 40 项通过(含处方读取、机构隔离与契约一致性) |
+| 管理端 E2E | `npx playwright test` **12 passed / 0 failed**(真实后端 + 每例独立机构数据) |
 | 管理端构建 | `tsc --noEmit` 退出 0;`vite build` 通过 |
+| 小程序 | 行为测试 15 项通过、`tsc --noEmit` 退出 0;**实际渲染与真机未验证** |
 | 联调脚本 | `scripts/smoke-api.py` 自管理模式 **18/18 契约操作**,含批量幂等与重放 |
 | 部署自检 | `deploy/verify.py` 通过:16 表迁移往返、模型差异为空、PostgreSQL 离线 SQL、YAML |
 | 容器 | **未验证**:本机无 Docker 与 hadolint |
 | Android | **未验证**:本机无 Android SDK |
-| 小程序 | **运行未验证**:本机无微信开发者工具 |
 | CI | **未验证**:仓库无远端流水线 |
+| 独立审查 | 已跑 `cb072f8..HEAD`;3 个 HIGH 与 11 个 MEDIUM 已修,1 个 MEDIUM 有意保留(offset 游标) |
 
 ## 后续事项
 
 - 安装 Android SDK 后补跑 `./gradlew :app:assembleDebug`,并记录 AGP/Gradle 兼容结果。
 - 在具备 Docker 的环境补跑镜像构建与 `docker compose up`,完成真实 PostgreSQL 验证。
-- 小程序页面数据接入完成后在微信开发者工具实跑。
-- CI 尚未接远端,接入后改为冻结锁文件并复用上述四类检查。
+- 在微信开发者工具中实跑小程序,验证 WXML 渲染、输入法与合法域名配置。
+- CI 尚未接远端,接入后改为冻结锁文件并复用上述检查。
