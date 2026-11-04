@@ -1,14 +1,152 @@
 package com.rehabtrainer.app.ui.screens
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.rehabtrainer.app.core.pose.PoseAnalyzer
+import com.rehabtrainer.app.core.pose.PoseFrame
+import java.util.concurrent.Executors
 
-/** 训练：条目详情、实时姿态反馈与离线视频预缓存。 */
+/**
+ * 训练：摄像头预览 + 实时上肢计数 + 采集条件提示。
+ *
+ * 当前只验证上肢计数（T6 实测阶段的端上管线）；步态指标需脚部入镜（D17）。
+ */
 @Composable
 fun TrainingScreen(modifier: Modifier = Modifier) {
-    PlaceholderScreen(
-        title = "训练",
-        description = "训练条目、实时姿态反馈与离线视频预缓存。",
-        modifier = modifier
-    )
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    var hasCameraPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
+                PackageManager.PERMISSION_GRANTED
+        )
+    }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted -> hasCameraPermission = granted }
+
+    LaunchedEffect(Unit) {
+        if (!hasCameraPermission) {
+            permissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
+
+    if (!hasCameraPermission) {
+        Column(
+            modifier = modifier.fillMaxSize().padding(24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("需要摄像头权限才能进行姿态识别", style = MaterialTheme.typography.headlineSmall)
+            Spacer(Modifier.height(16.dp))
+            Button(onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) }) {
+                Text("授予权限")
+            }
+        }
+        return
+    }
+
+    var armRaiseCount by remember { mutableIntStateOf(0) }
+    var statusText by remember { mutableStateOf("正在寻找人体…") }
+    var footVisible by remember { mutableStateOf(true) }
+
+    val analyzer = remember {
+        PoseAnalyzer(context) { frame ->
+            when (frame) {
+                is PoseFrame.Detected -> {
+                    armRaiseCount = frame.armRaiseCount
+                    footVisible = frame.footVisibility >= 0.5f
+                    statusText = if (footVisible) "已检测到人体" else "脚部不在画面内"
+                }
+
+                PoseFrame.NoPose -> statusText = "未检测到人体，请站到画面中央"
+                is PoseFrame.Failure -> statusText = frame.message
+            }
+        }
+    }
+
+    val executor = remember { Executors.newSingleThreadExecutor() }
+    val previewView = remember { PreviewView(context) }
+
+    DisposableEffect(Unit) {
+        val providerFuture = ProcessCameraProvider.getInstance(context)
+        providerFuture.addListener({
+            val cameraProvider = providerFuture.get()
+            val preview = Preview.Builder().build().also {
+                it.setSurfaceProvider(previewView.surfaceProvider)
+            }
+            val analysis = ImageAnalysis.Builder()
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .build()
+            analysis.setAnalyzer(executor, analyzer)
+            cameraProvider.unbindAll()
+            cameraProvider.bindToLifecycle(
+                lifecycleOwner,
+                CameraSelector.DEFAULT_FRONT_CAMERA,
+                preview,
+                analysis
+            )
+        }, ContextCompat.getMainExecutor(context))
+
+        onDispose {
+            analyzer.close()
+            executor.shutdown()
+        }
+    }
+
+    Column(modifier = modifier.fillMaxSize()) {
+        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            AndroidView(factory = { previewView }, modifier = Modifier.fillMaxSize())
+        }
+        Column(modifier = Modifier.padding(24.dp)) {
+            Text(
+                "抬臂次数：$armRaiseCount",
+                style = MaterialTheme.typography.headlineMedium
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(statusText, style = MaterialTheme.typography.bodyLarge)
+            if (!footVisible) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "脚部未入镜，本次只能计数，无法计算步态指标（D17）",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+    }
 }

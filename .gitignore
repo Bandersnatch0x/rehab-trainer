@@ -4,8 +4,9 @@
 # 临时产物：日志、截图、一次性证据（AGENTS.md「产物两分」）
 .agent/tmp/
 
-# 训练视频素材：体积大，不入版本控制；正式素材走对象存储
-assets/
+# 根目录训练视频素材：体积大，不入版本控制；正式素材走对象存储
+# 只匹配仓库根目录，避免误伤 apps/android/app/src/main/assets
+/assets/
 
 # 构建缓存与外部安装物
 __pycache__/
