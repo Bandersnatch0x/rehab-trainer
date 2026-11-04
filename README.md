@@ -38,6 +38,7 @@ App 与小程序功能清单一致;差异只在姿态识别的实现方式与实
 # 后端
 python -m pytest services/api/tests
 # 管理端 E2E(自动起后端与预览服务)
+# 若 python 不在 PATH,先把 services/api/.venv/Scripts 加入 PATH
 cd apps/admin-web; npx playwright test
 # 联调(需先 seed 并启动 uvicorn)
 python scripts/smoke-api.py --base-url http://127.0.0.1:8000/v1
