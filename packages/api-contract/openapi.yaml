@@ -309,7 +309,7 @@ paths:
     get:
       tags: [prescriptions]
       summary: 按患者读取处方
-      description: 按签发时间倒序返回；第一条即当前有效处方，用于调整处方时取得 If-Match 版本号。
+      description: 按签发时间倒序返回。第一条是最近签发的处方；是否仍然有效由客户端按 status 与 validUntil 判断，服务端不过滤。
       parameters:
         - name: patientId
           in: query

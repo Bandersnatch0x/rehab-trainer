@@ -91,7 +91,7 @@ if __name__ == "__main__":
     elif sys.argv[1:] == ["seed"]:
         seed_case()
     elif sys.argv[1:] == ["seed-many"]:
-        # 25 位患者 = 两页（默认每页 20），用于验证列表不会静默截断。
-        seed_case(extra_patients=23)
+        # 105 位患者 = 两页（页面每页 100），用于验证列表真的会翻页而不是只取第一页。
+        seed_case(extra_patients=103)
     else:
         raise SystemExit("Usage: python e2e/backend.py serve|seed")

@@ -8,8 +8,8 @@
 | --- | --- | --- |
 | `apps/android/` | Kotlin + Jetpack Compose,手机与平板同一 App | CameraX + MediaPipe 实时上肢计数与训练页已落地;本机无 Android SDK,**构建未验证** |
 | `apps/miniprogram/` | 微信原生小程序 + TypeScript | 5 个页面接真实接口(index/patient/records/alerts/assessment),训练页保持演示并标注;行为测试 15 项、类型检查通过 |
-| `apps/admin-web/` | React + Vite + TypeScript | 路由、鉴权、7 个业务页接真实 API(含随访台账);E2E 13 条全部通过 |
-| `services/api/` | FastAPI + SQLAlchemy 后端 | 15 路径 / 18 操作,16 张表,Alembic 初始迁移,37 项测试通过 |
+| `apps/admin-web/` | React + Vite + TypeScript | 路由、鉴权、7 个业务页接真实 API(含随访台账);E2E 14 条全部通过 |
+| `services/api/` | FastAPI + SQLAlchemy 后端 | 15 路径 / 18 操作,16 张表,Alembic 初始迁移,41 项测试通过 |
 | `services/cv-worker/` | 云端 CV 异步推理 | 占位,仅 README |
 | `packages/api-contract/` | OpenAPI 契约(唯一真源) | 15 路径 / 18 操作,含 `GET /prescriptions` |
 | `packages/api-client-ts/` | TypeScript 生成客户端目录 | 空,仅 .gitkeep 与说明;实际生成物在各自 app 内 |
@@ -47,7 +47,7 @@
 - Vite + React + TypeScript,react-router 路由 + 自建鉴权上下文,无第三方 UI 库。
 - `src/api/` 由 `openapi-typescript` 生成 `schema.d.ts`,业务调用集中在 `operations.ts`。
 - 7 个业务页已接真实 API(患者列表/详情/分期/处方/预警/随访台账);患者端 D20 文案约束只管患者端,管理端保留临床信息。
-- `npx tsc --noEmit` 与 `vite build` 通过;Playwright E2E 13 条全部通过。
+- `npx tsc --noEmit` 与 `vite build` 通过;Playwright E2E 14 条全部通过。
 
 ## 契约工作流
 
@@ -74,7 +74,7 @@
 | 项 | 结果 |
 | --- | --- |
 | 后端测试 | `pytest` 40 项通过(含处方读取、机构隔离与契约一致性) |
-| 管理端 E2E | `npx playwright test` **13 passed / 0 failed**(真实后端 + 每例独立机构数据) |
+| 管理端 E2E | `npx playwright test` **14 passed / 0 failed**(真实后端 + 每例独立机构数据) |
 | 管理端构建 | `tsc --noEmit` 退出 0;`vite build` 通过 |
 | 小程序 | 行为测试 15 项通过、`tsc --noEmit` 退出 0;**实际渲染与真机未验证** |
 | 联调脚本 | `scripts/smoke-api.py` 自管理模式 **18/18 契约操作**,含批量幂等与重放 |
@@ -82,7 +82,7 @@
 | 容器 | **未验证**:本机无 Docker 与 hadolint |
 | Android | **未验证**:本机无 Android SDK |
 | CI | **未验证**:仓库无远端流水线 |
-| 独立审查 | 已跑 `cb072f8..HEAD`;3 个 HIGH 与 11 个 MEDIUM 已修,1 个 MEDIUM 有意保留(offset 游标) |
+| 独立审查 | 两轮(`cb072f8..HEAD`、`d0b612d..HEAD`):3 个 HIGH 与 19 个 MEDIUM 已修;offset 游标语义与契约 schema 级校验仍待排期 |
 
 ## 后续事项
 

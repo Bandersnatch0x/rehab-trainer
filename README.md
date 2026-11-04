@@ -24,8 +24,8 @@ App 与小程序功能清单一致;差异只在姿态识别的实现方式与实
 
 | 部分 | 状态 |
 | --- | --- |
-| 后端 `services/api` | FastAPI + SQLAlchemy,Alembic 初始迁移覆盖 16 张表;37 项测试通过 |
-| Web 后台 `apps/admin-web` | 7 个页面已接真实 API(患者、详情、分期、处方、预警、随访台账);Playwright E2E 13 条全部通过 |
+| 后端 `services/api` | FastAPI + SQLAlchemy,Alembic 初始迁移覆盖 16 张表;41 项测试通过 |
+| Web 后台 `apps/admin-web` | 7 个页面已接真实 API(患者、详情、分期、处方、预警、随访台账);Playwright E2E 14 条全部通过 |
 | 微信小程序 / Android | 契约客户端已生成,配置指向本地后端;小程序 async 云端 CV 与 App 端上实时推理按 D3 分级实现 |
 | 部署 | `services/api/Dockerfile` + `docker-compose.yml` + `deploy/`(Alembic、健康检查、自检);手册见 `docs/deployment/README.md` |
 | 联调 | `scripts/smoke-api.py` 覆盖 18 项契约操作,含批量幂等与重放 |

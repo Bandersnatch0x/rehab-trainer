@@ -3,9 +3,9 @@ import { useNavigate, useParams } from "react-router";
 import {
   createPrescription,
   listExercises,
-  listPrescriptions,
   updatePrescription,
 } from "../api/operations";
+import { findCurrentPrescription } from "../api/prescription-query";
 import type { Exercise, Prescription } from "../api/types";
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -37,6 +37,22 @@ export default function PrescriptionEditPage() {
   const [successVersion, setSuccessVersion] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  /** 把处方内容灌进表单；409 后重拉也用同一套逻辑，避免用旧值覆盖对方改动。 */
+  function hydrate(prescription: Prescription | null, available: Exercise[]) {
+    setCurrent(prescription);
+    const first = prescription?.items[0];
+    if (first?.exerciseCode) {
+      setExerciseCode(first.exerciseCode);
+      const dosage = first.dosage;
+      if (dosage?.sets) setSets(dosage.sets);
+      if (dosage?.repetitions) setReps(dosage.repetitions);
+      if (dosage?.bpm) setBpm(dosage.bpm);
+      if (dosage?.frequencyPerWeek) setFrequency(dosage.frequencyPerWeek);
+    } else if (available[0]) {
+      setExerciseCode(available[0].code);
+    }
+  }
+
   useEffect(() => {
     if (!patientId) {
       setLoading(false);
@@ -49,7 +65,7 @@ export default function PrescriptionEditPage() {
     setCurrent(null);
     setExercises([]);
 
-    Promise.all([listExercises({ limit: 100 }), listPrescriptions({ patientId })]).then(
+    Promise.all([listExercises({ limit: 100 }), findCurrentPrescription(patientId)]).then(
       ([exerciseResult, prescriptionResult]) => {
         if (cancelled) {
           return;
@@ -69,26 +85,7 @@ export default function PrescriptionEditPage() {
           return;
         }
 
-        // 只在读全成功后才认定"当前处方"：active 且未过期，取最新签发。
-        const now = Date.now();
-        const active = prescriptionResult.data.items.find(
-          (item) =>
-            item.status === "active" &&
-            (!item.validUntil || Date.parse(item.validUntil) >= now),
-        );
-        setCurrent(active ?? null);
-
-        const first = active?.items[0];
-        if (first?.exerciseCode) {
-          setExerciseCode(first.exerciseCode);
-          const dosage = first.dosage;
-          if (dosage?.sets) setSets(dosage.sets);
-          if (dosage?.repetitions) setReps(dosage.repetitions);
-          if (dosage?.bpm) setBpm(dosage.bpm);
-          if (dosage?.frequencyPerWeek) setFrequency(dosage.frequencyPerWeek);
-        } else if (exerciseResult.data.items[0]) {
-          setExerciseCode(exerciseResult.data.items[0].code);
-        }
+        hydrate(prescriptionResult.data, exerciseResult.data.items);
       },
     );
 
@@ -111,6 +108,13 @@ export default function PrescriptionEditPage() {
       setError("请选择训练条目");
       return;
     }
+    // 后端不校验重复编码，整表替换会落成两个相同条目，这里先挡住。
+    const otherCodes = (current?.items ?? []).slice(1).map((item) => item.exerciseCode);
+    if (otherCodes.includes(exerciseCode)) {
+      setError(`训练条目 ${exerciseCode} 已在当前处方中，不能重复添加。`);
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
 
@@ -153,16 +157,22 @@ export default function PrescriptionEditPage() {
     }
 
     if (result.error.status === 409) {
-      setError("处方版本冲突：另一端已更新，请刷新后基于最新版本重试。");
-      // 重新拉取最新版本，避免用户拿旧版本反复重试。
-      const latest = await listPrescriptions({ patientId });
+      setError("处方版本冲突：另一端已更新。已载入最新版本，请确认后重新提交。");
+      // 只更新 current 而不重灌表单，会让下一次提交用旧值覆盖对方刚改的条目。
+      const latest = await findCurrentPrescription(patientId);
       if (latest.ok) {
-        setCurrent(latest.data.items.find((item) => item.status === "active") ?? null);
+        hydrate(latest.data, exercises);
       }
       return;
     }
     setError(result.error.message);
   }
+
+  // 已被其他条目占用的编码不再出现在下拉里，避免保存出重复条目。
+  const takenCodes = new Set(
+    (current?.items ?? []).slice(1).map((item) => item.exerciseCode),
+  );
+  const selectableExercises = exercises.filter((exercise) => !takenCodes.has(exercise.code));
 
   return (
     <div className="page" style={{ maxWidth: 960 }}>
@@ -215,10 +225,10 @@ export default function PrescriptionEditPage() {
                 value={exerciseCode}
                 onChange={(event) => setExerciseCode(event.target.value)}
               >
-                {exercises.length === 0 ? (
+                {selectableExercises.length === 0 ? (
                   <option value="">（训练条目加载中或为空）</option>
                 ) : (
-                  exercises.map((exercise) => (
+                  selectableExercises.map((exercise) => (
                     <option key={exercise.code} value={exercise.code}>
                       {exercise.label}（{CATEGORY_LABEL[exercise.category] ?? exercise.category}）
                     </option>

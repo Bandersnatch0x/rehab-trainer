@@ -25,6 +25,7 @@ export default function PatientsPage() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [capped, setCapped] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -34,6 +35,7 @@ export default function PatientsPage() {
     // 契约只支持按 stage 过滤；确认状态在本地筛选，避免臆造查询参数。
     async function loadAll() {
       const collected: Patient[] = [];
+      const seen = new Set<string>();
       let cursor: string | undefined;
       do {
         const result = await listPatients({
@@ -52,10 +54,20 @@ export default function PatientsPage() {
         }
         collected.push(...result.data.items);
         cursor = result.data.nextCursor ?? undefined;
+        // 重复游标说明分页实现异常，继续拉会死循环。
+        if (cursor && seen.has(cursor)) {
+          setError("分页游标重复，已停止加载。");
+          break;
+        }
+        if (cursor) {
+          seen.add(cursor);
+        }
         // 防失控：单次筛选最多拉 1000 条。
       } while (cursor && collected.length < 1000);
 
       setPatients(collected);
+      // 只有确实还有下一页才算被上限截断，恰好 1000 条且已取完时不算。
+      setCapped(Boolean(cursor));
       setLoading(false);
     }
 
@@ -119,8 +131,8 @@ export default function PatientsPage() {
         <span className="hint" style={{ marginLeft: "auto" }}>
           {loading
             ? "加载中…"
-            : patients.length >= 1000
-              ? `已加载 ${visible.length} 位（超过 1000 条上限，请用筛选缩小范围）`
+            : capped
+              ? `已加载 ${visible.length} 位（达到 1000 条上限，请用筛选缩小范围）`
               : `共 ${visible.length} 位患者`}
         </span>
       </div>

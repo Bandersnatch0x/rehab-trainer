@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
-import { getPatient, listPrescriptions, listSessions } from "../api/operations";
+import { getPatient, listSessions } from "../api/operations";
+import { findCurrentPrescription } from "../api/prescription-query";
+import { formatServerTime } from "../api/time";
 import type { Patient, Prescription, SessionRecord } from "../api/types";
 import { useAuth } from "../auth/AuthProvider";
 
@@ -15,10 +17,6 @@ const RISK_CLASS: Record<string, string> = {
   medium: "badge badge--warning",
   high: "badge badge--danger",
 };
-
-function formatTime(value: string): string {
-  return value.replace("T", " ").slice(0, 16);
-}
 
 export default function PatientDetailPage() {
   const { patientId } = useParams<{ patientId: string }>();
@@ -52,7 +50,7 @@ export default function PatientDetailPage() {
 
     Promise.all([
       getPatient(patientId),
-      listPrescriptions({ patientId }),
+      findCurrentPrescription(patientId),
       listSessions({ patientId, limit: 100 }),
     ]).then(([patientResult, prescriptionResult, sessionResult]) => {
       if (cancelled) {
@@ -66,15 +64,8 @@ export default function PatientDetailPage() {
       setPatient(patientResult.data);
 
       if (prescriptionResult.ok) {
-        // 只把 active 且未过期的处方当作"当前有效处方"。
-        const now = Date.now();
-        setPrescription(
-          prescriptionResult.data.items.find(
-            (item) =>
-              item.status === "active" &&
-              (!item.validUntil || Date.parse(item.validUntil) >= now),
-          ) ?? null,
-        );
+        // findCurrentPrescription 已按 active + 未过期筛选并翻页查找。
+        setPrescription(prescriptionResult.data);
       } else {
         setPrescriptionError(prescriptionResult.error.message);
       }
@@ -188,7 +179,7 @@ export default function PatientDetailPage() {
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
                   <span className="hint">有效期至</span>
-                  <span>{prescription.validUntil?.slice(0, 10) ?? "—"}</span>
+                  <span>{formatServerTime(prescription.validUntil).slice(0, 10)}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
                   <span className="hint">签发治疗师</span>
@@ -251,7 +242,7 @@ export default function PatientDetailPage() {
               ) : (
                 sessions.map((record) => (
                   <tr key={record.id}>
-                    <td>{formatTime(record.recordedAt ?? "")}</td>
+                    <td>{formatServerTime(record.recordedAt)}</td>
                     <td>{record.completionCount ?? 0} 次</td>
                     <td>{record.movementErrorCount ?? 0} 次</td>
                     <td>{record.interruptionCount ?? 0} 次</td>

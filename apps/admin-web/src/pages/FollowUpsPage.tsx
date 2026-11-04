@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { listAlerts } from "../api/operations";
+import { formatServerTime } from "../api/time";
 import type { Alert } from "../api/types";
 
 const LEVEL_LABEL: Record<string, string> = {
@@ -33,9 +34,6 @@ const DELIVERY_LABEL: Record<string, string> = {
   fallback: "已转备用",
 };
 
-function formatTime(value: string): string {
-  return value.replace("T", " ").slice(0, 16);
-}
 
 export default function FollowUpsPage() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -49,6 +47,7 @@ export default function FollowUpsPage() {
 
     async function loadAll() {
       const collected: Alert[] = [];
+      const seen = new Set<string>();
       let cursor: string | undefined;
       do {
         const result = await listAlerts({
@@ -66,6 +65,13 @@ export default function FollowUpsPage() {
         }
         collected.push(...result.data.items);
         cursor = result.data.nextCursor ?? undefined;
+        if (cursor && seen.has(cursor)) {
+          setError("分页游标重复，已停止加载。");
+          break;
+        }
+        if (cursor) {
+          seen.add(cursor);
+        }
       } while (cursor && collected.length < 1000);
 
       // 台账只收已处置的预警；契约没有单独的随访记录端点。
@@ -134,7 +140,7 @@ export default function FollowUpsPage() {
                     <strong>{alert.id}</strong>
                   </td>
                   <td>{alert.patientId}</td>
-                  <td>{formatTime(alert.triggeredAt)}</td>
+                  <td>{formatServerTime(alert.triggeredAt)}</td>
                   <td>
                     <code>{alert.ruleCode}</code>
                   </td>

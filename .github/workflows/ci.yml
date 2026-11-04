@@ -89,6 +89,25 @@ jobs:
           cache: pnpm
       - run: pnpm install --no-frozen-lockfile
       - run: pnpm --filter @rehab-trainer/admin-web build
+
+  generated:
+    # 只改契约时也必须跑：否则两份生成物会静默漂移。
+    needs: changes
+    if: >-
+      needs.changes.outputs.api_contract == 'true' ||
+      needs.changes.outputs.admin_web == 'true' ||
+      needs.changes.outputs.miniprogram == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.7.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --no-frozen-lockfile
       - name: 生成物必须与契约一致
         run: |
           pnpm --filter @rehab-trainer/admin-web generate:api

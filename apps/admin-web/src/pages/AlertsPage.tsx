@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { listAlerts, updateAlert } from "../api/operations";
+import { formatServerTime } from "../api/time";
 import type { Alert } from "../api/types";
 
 type LevelFilter = "" | "critical" | "warning" | "info";
@@ -37,10 +38,6 @@ const CHANNEL_LABEL: Record<string, string> = {
   audit_log: "审计日志",
 };
 
-/** 只显示到分钟，避免后端时间戳原样铺满表格。 */
-function formatTime(value: string): string {
-  return value.replace("T", " ").slice(0, 16);
-}
 
 export default function AlertsPage() {
   const [filter, setFilter] = useState<LevelFilter>("");
@@ -48,6 +45,7 @@ export default function AlertsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [capped, setCapped] = useState(false);
 
   // 跟随游标取全量后在本地筛选：计数不会被分页截断，也不会随筛选互相污染。
   const load = useCallback(async () => {
@@ -55,6 +53,7 @@ export default function AlertsPage() {
     setError(null);
 
     const collected: Alert[] = [];
+    const seen = new Set<string>();
     let cursor: string | undefined;
     do {
       const result = await listAlerts({
@@ -69,9 +68,17 @@ export default function AlertsPage() {
       }
       collected.push(...result.data.items);
       cursor = result.data.nextCursor ?? undefined;
+      if (cursor && seen.has(cursor)) {
+        setError("分页游标重复，已停止加载。");
+        break;
+      }
+      if (cursor) {
+        seen.add(cursor);
+      }
     } while (cursor && collected.length < 1000);
 
     setAlerts(collected);
+    setCapped(Boolean(cursor));
     setLoading(false);
   }, []);
 
@@ -157,7 +164,7 @@ export default function AlertsPage() {
         </button>
         {loading ? (
           <span className="hint">加载中…</span>
-        ) : alerts.length >= 1000 ? (
+        ) : capped ? (
           <span className="hint">已达 1000 条上限，请按患者或状态缩小范围</span>
         ) : null}
       </div>
@@ -195,7 +202,7 @@ export default function AlertsPage() {
                   <td>
                     <strong>{a.patientId}</strong>
                   </td>
-                  <td>{formatTime(a.triggeredAt)}</td>
+                  <td>{formatServerTime(a.triggeredAt)}</td>
                   <td>
                     <code>{a.ruleCode}</code>
                   </td>

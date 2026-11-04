@@ -152,10 +152,47 @@ test('患者超过单页上限时列表仍完整显示', async ({ page }) => {
     { encoding: 'utf8', timeout: 15_000 },
   );
   const many = JSON.parse(output);
+  const requests: string[] = [];
+  page.on('request', (request) => {
+    if (request.method() === 'GET' && request.url().includes('/v1/patients')) {
+      requests.push(request.url());
+    }
+  });
+
   await login(page, many);
   await expect(page.getByRole('heading', { name: '患者工作台' })).toBeVisible();
-  await expect(page.locator('tbody tr')).toHaveCount(25);
-  await expect(page.getByText(/共 25 位患者/)).toBeVisible();
+  await expect(page.locator('tbody tr')).toHaveCount(105);
+  await expect(page.getByText(/共 105 位患者/)).toBeVisible();
+  // 105 位 / 每页 100 → 必须发生翻页，否则说明循环被删掉也能通过。
+  expect(requests.filter((url) => url.includes('cursor=')).length).toBeGreaterThan(0);
+});
+
+test('处方读取失败时禁止签发且不创建新处方', async ({ page, data }) => {
+  const signedIn = await login(page, data);
+  const { accessToken } = await signedIn.json();
+  expect(accessToken).toBeTruthy();
+
+  let created = 0;
+  page.on('request', (request) => {
+    if (request.method() === 'POST' && request.url().endsWith('/v1/prescriptions')) {
+      created += 1;
+    }
+  });
+  await page.route('**/v1/prescriptions**', (route) => {
+    if (route.request().method() !== 'GET') {
+      return route.continue();
+    }
+    return route.fulfill({
+      status: 500,
+      contentType: 'application/json',
+      body: JSON.stringify({ code: 'INTERNAL_ERROR', message: '模拟处方读取故障' }),
+    });
+  });
+
+  await page.goto(`/patients/${data.patientId}/prescription`);
+  await expect(page.getByRole('alert')).toContainText('现有处方读取失败');
+  await expect(page.getByRole('button', { name: /签发并同步处方/ })).toBeDisabled();
+  expect(created).toBe(0);
 });
 
 test('未知路由展示404并可返回患者列表', async ({ page, data }) => {

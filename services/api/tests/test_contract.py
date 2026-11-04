@@ -49,6 +49,53 @@ def test_app_prefix_matches_contract_server():
     assert API_PREFIX == _contract_prefix()
 
 
+def _parameters(spec: dict, op: dict) -> list[tuple[str, str, bool]]:
+    """把参数归一化成 (in, name, required)；契约里的 $ref 先解析。"""
+    resolved = []
+    for param in op.get("parameters", []):
+        if "$ref" in param:
+            ref = param["$ref"].split("/")[-1]
+            param = spec["components"]["parameters"][ref]
+        resolved.append(
+            (param.get("in"), param.get("name"), bool(param.get("required")))
+        )
+    return sorted(resolved)
+
+
+def _contract_parameters() -> dict[tuple[str, str], list[tuple[str, str, bool]]]:
+    spec = _contract_spec()
+    prefix = _contract_prefix()
+    out = {}
+    for path, item in spec["paths"].items():
+        for method, op in item.items():
+            if method in HTTP_METHODS:
+                out[(prefix + path, method)] = _parameters(spec, op)
+    return out
+
+
+def _app_parameters() -> dict[tuple[str, str], list[tuple[str, str, bool]]]:
+    spec = app.openapi()
+    out = {}
+    for path, item in spec["paths"].items():
+        for method, op in item.items():
+            if method in HTTP_METHODS:
+                out[(path, method)] = _parameters(spec, op)
+    return out
+
+
+def test_contract_and_app_expose_same_parameters():
+    """参数名/位置/必填也要一致：改名会让生成客户端 422，而操作集比较看不出来。"""
+    contract = _contract_parameters()
+    implemented = _app_parameters()
+
+    mismatches = {
+        key: (contract.get(key), implemented.get(key))
+        for key in contract.keys() | implemented.keys()
+        if contract.get(key) != implemented.get(key)
+    }
+    assert mismatches == {}, f"参数不一致：{mismatches}"
+
+
 def test_contract_and_app_expose_same_operations():
     """契约是唯一真源：实现多一个或少一个操作都要在这里失败。"""
     contract = _contract_operations()
