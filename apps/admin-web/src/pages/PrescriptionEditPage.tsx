@@ -114,8 +114,13 @@ export default function PrescriptionEditPage() {
     setSubmitting(true);
     setError(null);
 
+    const firstItem = current?.items[0];
     const edited = {
       exerciseCode,
+      // 条目未换时保留原有难度变体，避免一次剂量调整把变体清掉。
+      ...(firstItem?.exerciseCode === exerciseCode && firstItem.variantCode
+        ? { variantCode: firstItem.variantCode }
+        : {}),
       dosage: {
         sets,
         repetitions: reps,
