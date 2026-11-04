@@ -1,45 +1,45 @@
 <view class="page">
-  <view class="page-title">症状自评</view>
-  <view class="page-subtitle">选择一项量表开始；结果仅作随访参考。</view>
+  <view class="page-title">身体感受记录</view>
+  <view class="page-subtitle">记录今日日常活动时的身体感受；供随访与节律调整参考。</view>
 
   <view class="notice">
-    量表分界值待临床签核，系统不据此输出诊断结论。如有明显不适，请直接联系治疗师。
+    记录真实的活动体验，帮助康复治疗师为您调整更舒适契合的运动节律。感到疲劳请随时休息。
   </view>
 
   <view class="card assessment">
-    <view class="card-title">H-Y 分期自评</view>
-    <view class="muted">1–5 级自评；最终分期以康复治疗师确认为准。</view>
+    <view class="card-title">日常活动自如度评估</view>
+    <view class="muted">评估起步、转身与双手活动的自如度，记录轻松程度。</view>
     <view class="btn btn--secondary btn--block assessment__action" hover-class="btn--pressed" aria-role="button">
-      开始自评
+      开始记录
     </view>
   </view>
 
   <view class="card assessment">
-    <view class="card-title">肌少症筛查</view>
-    <view class="muted">先做 SARC-F；达到分界值时加做小腿围（SARC-CalF）。</view>
+    <view class="card-title">肌肉力量与灵活性感受</view>
+    <view class="muted">记录从椅子起立、提拿物品与平地行走时的力量感与灵活性。</view>
     <view class="btn btn--secondary btn--block assessment__action" hover-class="btn--pressed" aria-role="button">
-      开始自评
+      开始记录
     </view>
   </view>
 
   <view class="card assessment">
-    <view class="card-title">僵硬感自评</view>
-    <view class="muted">按 5 级主观僵硬感选择最符合的一项。</view>
+    <view class="card-title">关节与肢体活动轻松度</view>
+    <view class="muted">记录晨起或活动后肢体的舒展感与放松程度。</view>
     <view class="btn btn--secondary btn--block assessment__action" hover-class="btn--pressed" aria-role="button">
-      开始自评
+      开始记录
     </view>
   </view>
 
   <view class="card assessment">
-    <view class="card-title">跌倒风险自评</view>
-    <view class="muted">STEADI 三问与跌倒史；必要时补充 Short FES-I。</view>
+    <view class="card-title">步态稳健与平衡感知</view>
+    <view class="muted">评估行走踏步时的平稳感，帮助匹配更适宜的 RAS 听觉引导节拍。</view>
     <view class="btn btn--secondary btn--block assessment__action" hover-class="btn--pressed" aria-role="button">
-      开始自评
+      开始记录
     </view>
   </view>
 
   <view class="notice notice--warning">
     代操作时，提交记录会同时记录操作者与患者本人。
   </view>
-  <view class="hint">本页为结构占位，量表内容与提交待接入。</view>
+  <view class="hint">记录将安全同步至医护工作台，作为后续处方优化的参考依据。</view>
 </view>

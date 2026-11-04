@@ -1,8 +1,12 @@
 <view class="page">
-  <view class="hero card">
-    <view class="hero__eyebrow">帕金森康复训练</view>
-    <view class="page-title">今天也一起练习</view>
-    <view class="page-subtitle">请在照护者陪同下完成，量力而行。</view>
+  <view class="hero card" style="background:#FFF9E6; border-color:#FDE68A;">
+    <view style="display:flex; align-items:center; gap:20rpx;">
+      <text style="font-size:72rpx;">🦌</text>
+      <view>
+        <view class="page-title" style="color:#92400E;">今天也一起练习～</view>
+        <view class="page-subtitle" style="color:#B45309;">康康小鹿陪您练习：动一动，脚步更轻盈！</view>
+      </view>
+    </view>
   </view>
 
   <view class="notice">
@@ -19,8 +23,8 @@
       aria-label="进入训练条目列表"
     >
       <view class="entry__body">
-        <view class="entry__title">训练条目</view>
-        <view class="entry__desc">按处方逐条完成动作</view>
+        <view class="entry__title">今日活力跟练</view>
+        <view class="entry__desc">按处方逐条完成动作，给健康打卡</view>
       </view>
       <view class="entry__arrow">›</view>
     </navigator>
@@ -33,20 +37,20 @@
         class="entry-tile"
         url="/pages/patient/index"
         aria-role="button"
-        aria-label="查看患者档案"
+        aria-label="查看活力健康档案"
       >
-        <view class="entry-tile__title">患者档案</view>
-        <view class="entry-tile__desc">分期、症状、跌倒风险</view>
+        <view class="entry-tile__title">健康档案</view>
+        <view class="entry-tile__desc">坚持 12 天 · 活力榜</view>
       </navigator>
 
       <navigator
         class="entry-tile"
         url="/pages/assessment/index"
         aria-role="button"
-        aria-label="进入症状自评"
+        aria-label="进入身体感受记录"
       >
-        <view class="entry-tile__title">症状自评</view>
-        <view class="entry-tile__desc">僵直、肌少症、跌倒风险</view>
+        <view class="entry-tile__title">身体感受记录</view>
+        <view class="entry-tile__desc">活动自如度、平衡感知</view>
       </navigator>
 
       <navigator

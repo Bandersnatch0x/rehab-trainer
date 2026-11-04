@@ -1,12 +1,58 @@
-.stage {
+.card--mascot {
+  background: #FFF9E6;
+  border-color: #FDE68A;
+}
+
+.mascot-box {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 24rpx;
 }
 
-.stage__value {
-  font-size: 56rpx;
-  font-weight: 700;
-  line-height: 1.3;
+.mascot-avatar {
+  font-size: 72rpx;
+  background: #FEF3C7;
+  border-radius: 50%;
+  width: 100rpx;
+  height: 100rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mascot-title {
+  font-size: 36rpx;
+  font-weight: 800;
+  color: #92400E;
+}
+
+.mascot-quote {
+  font-size: 30rpx;
+  color: #B45309;
+  margin-top: 6rpx;
+}
+
+.stat-grid {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  text-align: center;
+  padding: 12rpx 0;
+}
+
+.stat-item {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 52rpx;
+  font-weight: 800;
+  color: #1A4FA0;
+}
+
+.stat-label {
+  font-size: 28rpx;
+  color: #475569;
+  margin-top: 8rpx;
 }

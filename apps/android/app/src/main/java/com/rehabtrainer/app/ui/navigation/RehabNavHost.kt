@@ -36,7 +36,7 @@ fun RehabNavHost(
             PatientsScreen()
         }
         composable(RehabDestination.TRAINING.route) {
-            TrainingScreen()
+            TrainingScreen(widthSizeClass = widthSizeClass)
         }
         composable(RehabDestination.RECORDS.route) {
             RecordsScreen()

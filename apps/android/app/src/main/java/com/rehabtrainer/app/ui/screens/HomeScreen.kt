@@ -107,12 +107,12 @@ private fun HomeStatusBanner() {
             )
             Column {
                 Text(
-                    text = "患者状态：H-Y 2期（已确认）",
+                    text = "今日活力打卡 · 连续坚持 12 天",
                     style = MaterialTheme.typography.titleMedium
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "经康复治疗师权威判定，准入节律步态训练。",
+                    text = "🦌 康康小鹿陪您练习：今天也是元气满满的一天，跟着节拍动一动～",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

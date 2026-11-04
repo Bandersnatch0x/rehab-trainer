@@ -65,36 +65,51 @@ fun PatientsScreen(modifier: Modifier = Modifier) {
                         style = MaterialTheme.typography.headlineMedium
                     )
                     Surface(
-                        color = MaterialTheme.colorScheme.primaryContainer,
+                        color = MaterialTheme.colorScheme.secondaryContainer,
                         shape = MaterialTheme.shapes.extraSmall
                     ) {
                         Text(
-                            text = "H-Y 2期 (已确认)",
+                            text = "活力达人 🌟",
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
                         )
                     }
                 }
 
                 Text(
-                    text = "所属机构：市康复中心第三病区（机构隔离 D10）",
+                    text = "所属机构：市康复中心第三病区",
                     style = MaterialTheme.typography.bodyLarge
                 )
 
+                // Positive Training Progress & Encouragement (Replaces all disease-related wording per D20)
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant,
                     shape = MaterialTheme.shapes.small,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "累计训练：36 次",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Text(
+                                text = "连续坚持：12 天",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
                         Text(
-                            text = "主要伴随症状：双侧肢体强直、静止性轻微震颤",
-                            style = MaterialTheme.typography.bodyMedium
+                            text = "本周完成率：96% (坚持就是胜利～)",
+                            style = MaterialTheme.typography.bodyLarge
                         )
                         Text(
-                            text = "跌倒风险评级：中度（日常生活活动需安全防护）",
-                            style = MaterialTheme.typography.bodyMedium
+                            text = "🌟 鼓励语：脚步越来越轻盈，动一动更舒畅，为您点赞！",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }

@@ -858,6 +858,85 @@
       margin-top: 4px;
     }
 
+
+    /* Q-Version Mascot & Positive Styling (D19 / D20) */
+    .card-mascot {
+      background: #FFF9E6;
+      border: 1.5px solid #FDE68A;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 20px;
+      border-radius: var(--radius-xl);
+      margin-bottom: 20px;
+    }
+
+    .mascot-avatar-circle {
+      font-size: 38px;
+      background: #FEF3C7;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border: 2px solid #FDE68A;
+    }
+
+    .mascot-quote-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #92400E;
+    }
+
+    .mascot-quote-text {
+      font-size: 14px;
+      color: #B45309;
+      line-height: 1.5;
+      margin-top: 3px;
+    }
+
+    .stat-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #FFF3C4;
+      color: #92400E;
+      border: 1px solid #FDE68A;
+    }
+
+    .positive-stat-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .positive-stat-card {
+      background: #F8FAFC;
+      border: 1.5px solid #E2E8F0;
+      border-radius: 14px;
+      padding: 12px 8px;
+      text-align: center;
+    }
+
+    .positive-stat-val {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--color-primary-container);
+    }
+
+    .positive-stat-lbl {
+      font-size: 13px;
+      color: #475569;
+      margin-top: 4px;
+    }
+
     /* WCAG AA Checklist Section in Header */
     .spec-drawer-toggle {
       background: #10B981;
@@ -1198,118 +1277,162 @@
       if (currentAndroidScreen === 'home') {
         container.innerHTML = `
           <div class="ui-top-bar">
-            <div class="ui-top-bar__title">今日康复训练</div>
-            <span class="badge-pill badge-success">● H-Y 2期 (已确认)</span>
+            <div class="ui-top-bar__title">今日活力训练</div>
+            <span class="stat-badge-pill">🔥 连续打卡 12 天</span>
           </div>
 
           <div style="padding: 24px;">
-            <div class="notice-box notice-info">
+            <!-- Mascot Encouragement Card (Q-Version per D19) -->
+            <div class="card-mascot">
+              <div class="mascot-avatar-circle">🦌</div>
               <div>
-                <strong>帕金森患者日常训练：</strong>请在家人或照护者陪同下开展，感到头晕或肌肉酸痛请随时休息。
+                <div class="mascot-quote-title">早上好，建国叔叔！</div>
+                <div class="mascot-quote-text">今天也是活力满满的一天～康康小鹿陪您一起跟着节拍动一动，脚步更轻盈！</div>
               </div>
             </div>
 
             <!-- Big Action Button (>= 80dp) -->
             <button class="btn-elderly-primary" onclick="switchAndroidScreen('training')">
-              <span style="font-size:32px;">▶</span> 开始今日训练 (第 1/4 节)
+              <span style="font-size:32px;">▶</span> 开始今日活力跟练 (第 1/4 节)
             </button>
 
             <div style="height: 20px;"></div>
 
-            <!-- Prescription Summary Card -->
+            <!-- Prescription Summary Card (No Disease Wording per D20) -->
             <div class="card-container">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-                <h3 style="font-size:22px; font-weight:700;">当前康复处方</h3>
-                <span style="font-size:15px; color:var(--text-tertiary);">治疗师：李主任签发</span>
+                <h3 style="font-size:22px; font-weight:700;">今日跟练项目</h3>
+                <span style="font-size:15px; color:var(--text-tertiary);">治疗师指导方案</span>
               </div>
               <p style="font-size:17px; color:var(--text-secondary); line-height:1.6; margin-bottom:16px;">
-                <strong>训练大类：</strong>节律步态（RAS 引导）+ 上肢牵伸放松
+                <strong>推荐大类：</strong>节律踏步（RAS 听觉引导）+ 上肢舒展放松
               </p>
               <div class="metrics-row">
                 <div class="metric-card">
                   <div class="metric-value">64</div>
-                  <div class="metric-label">设定节拍 (BPM)</div>
+                  <div class="metric-label">舒适节拍 (BPM)</div>
                 </div>
                 <div class="metric-card">
                   <div class="metric-value">3 组</div>
                   <div class="metric-label">每组 12 次</div>
                 </div>
               </div>
-              <button class="btn-elderly-secondary" onclick="alert('进入处方详情')">
-                查看完整处方条目
+              <button class="btn-elderly-secondary" onclick="alert('进入完整条目')">
+                查看跟练条目详情
               </button>
             </div>
 
-            <!-- Risk Status Card -->
+            <!-- Warm Safety Tips Card -->
             <div class="card-container" style="border-left: 6px solid var(--color-success);">
-              <h3 style="font-size:20px; font-weight:700; margin-bottom:8px;">安全与跌倒防护状态</h3>
+              <h3 style="font-size:20px; font-weight:700; margin-bottom:8px;">居家运动温馨小贴士</h3>
               <p style="font-size:16px; color:var(--text-secondary); line-height:1.6;">
-                当前跌倒风险评级：<strong>低风险</strong>（STEADI 筛查合格）。训练环境光线良好。
+                请穿戴平整防滑鞋，保持室内光线明亮，并在家人视线陪同下练习。感到疲累可随时休息哦～
               </p>
             </div>
           </div>
         `;
       } else if (currentAndroidScreen === 'training') {
         container.innerHTML = `
-          <div class="ui-top-bar" style="background:#0F172A; border-bottom:1px solid #334155;">
-            <div class="ui-top-bar__title" style="color:#FFF;">端上姿态动作识别</div>
-            <button class="badge-pill badge-danger" onclick="triggerEmergencyAlert()">🚨 紧急停止</button>
+          <div class="ui-top-bar" style="background:#0F172A; border-bottom:1px solid #334155; min-height:56px; padding:6px 16px;">
+            <div class="ui-top-bar__title" style="color:#FFF; font-size:18px;">双播放实时跟练 (D22)</div>
+            <span class="stat-badge-pill" style="font-size:11px; padding:2px 8px;">【演示数据】</span>
           </div>
 
-          <!-- Video / CV Detection Area -->
-          <div style="position:relative; width:100%; height:320px; background:#1E293B; display:flex; align-items:center; justify-content:center; overflow:hidden;">
-            <!-- Mock Pose Skeleton Lines -->
-            <svg viewBox="0 0 400 320" style="position:absolute; width:100%; height:100%;">
-              <!-- Skeleton connections -->
-              <circle cx="200" cy="80" r="16" fill="#38BDF8" opacity="0.9"/>
-              <line x1="200" y1="96" x2="200" y2="170" stroke="#38BDF8" stroke-width="6"/>
-              <line x1="200" y1="120" x2="150" y2="150" stroke="#38BDF8" stroke-width="6"/>
-              <line x1="150" y1="150" x2="130" y2="200" stroke="#10B981" stroke-width="6"/>
-              <line x1="200" y1="120" x2="250" y2="150" stroke="#38BDF8" stroke-width="6"/>
-              <line x1="250" y1="150" x2="270" y2="200" stroke="#10B981" stroke-width="6"/>
-              <line x1="200" y1="170" x2="175" y2="240" stroke="#38BDF8" stroke-width="6"/>
-              <line x1="175" y1="240" x2="170" y2="295" stroke="#10B981" stroke-width="6"/>
-              <line x1="200" y1="170" x2="225" y2="240" stroke="#38BDF8" stroke-width="6"/>
-              <line x1="225" y1="240" x2="230" y2="295" stroke="#10B981" stroke-width="6"/>
-            </svg>
-            <div style="position:absolute; bottom:14px; left:16px; background:rgba(0,0,0,0.7); padding:6px 14px; border-radius:999px; color:#10B981; font-size:14px; font-weight:700;">
-              ✓ 人体已捕获 · 脚部已入镜 (符合D17)
-            </div>
-            <div style="position:absolute; top:14px; right:16px; background:rgba(0,0,0,0.7); padding:6px 14px; border-radius:999px; color:#F59E0B; font-size:14px;">
-              有效帧: 96%
-            </div>
-          </div>
+          <!-- Dual Video Playback Container (Phone: Top/Bottom Split, each approx 50%) -->
+          <div style="display:flex; flex-direction:column; gap:10px; padding:10px; background:#0F172A; flex:1; min-height:0;">
 
-          <div style="padding: 20px;">
-            <!-- Real-time Count & Metronome -->
-            <div class="card-container" style="padding:16px 20px; margin-bottom:16px;">
+            <!-- 1. Top Pane: Instructional Video (教学示范视频) -->
+            <div style="flex:1; background:#1E293B; border-radius:14px; border:1.5px solid #334155; position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:space-between; padding:12px;">
               <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="background:#1A4FA0; color:#FFF; font-size:12px; font-weight:700; padding:2px 8px; border-radius:6px;">
+                  🎬 示范动作：原地节律踏步 【演示数据】
+                </span>
+                <span style="background:#0F172A; color:#80D5CB; font-size:11px; padding:2px 6px; border-radius:4px;">
+                  循环播放中
+                </span>
+              </div>
+
+              <!-- Coach Skeleton Silhouette Demo -->
+              <div style="display:flex; align-items:center; justify-content:center; gap:14px; margin:4px 0;">
+                <div style="width:44px; height:44px; border-radius:50%; background:#0F172A; border:2px solid #38BDF8; display:flex; align-items:center; justify-content:center; color:#38BDF8; font-size:22px;">
+                  ▶
+                </div>
                 <div>
-                  <div style="font-size:16px; color:var(--text-secondary);">动作完成次数</div>
-                  <div style="font-size:48px; font-weight:900; color:var(--color-primary); line-height:1.1;">8 <span style="font-size:20px; font-weight:500;">/ 12 次</span></div>
-                </div>
-                <div style="text-align:right;">
-                  <div style="font-size:15px; color:var(--text-secondary);">节律性听觉刺激</div>
-                  <div style="font-size:26px; font-weight:800; color:#0284C7;">64 BPM</div>
+                  <div style="font-size:15px; font-weight:700; color:#FFF;">屈髋踏步 · 舒适节拍 64 BPM 【演示数据】</div>
+                  <div style="font-size:12px; color:#94A3B8;">李主任示范视频 · 跟随标准幅度与速度练习</div>
                 </div>
               </div>
 
-              <!-- Metronome Pulse -->
-              <div class="metronome-visual">
-                <div class="metronome-pulse"></div>
-                <span style="font-size:15px; font-weight:600;">节拍音频引导中 (咚 - 嗒 - 咚 - 嗒)</span>
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:11px; color:#94A3B8; margin-bottom:2px;">
+                  <span>示范进度 01:24 / 03:00</span>
+                  <span>目标 12 次 【演示数据】</span>
+                </div>
+                <div style="width:100%; height:4px; background:#334155; border-radius:2px; overflow:hidden;">
+                  <div style="width:46%; height:100%; background:#38BDF8;"></div>
+                </div>
               </div>
             </div>
 
-            <!-- Operations (Pause / Stop >= 80dp) -->
-            <div style="display:flex; gap:12px;">
-              <button class="btn-elderly-secondary" style="flex:1; min-height:80px;" onclick="alert('已暂停')">
-                ⏸ 暂停训练
+            <!-- 2. Bottom Pane: Real-time Patient Camera with Live Overlays -->
+            <div style="flex:1; background:#000; border-radius:14px; border:2px solid #0284C7; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center;">
+              <!-- Simulated Pose Tracking Lines -->
+              <svg viewBox="0 0 400 240" style="position:absolute; width:100%; height:100%;">
+                <circle cx="200" cy="50" r="14" fill="#38BDF8" opacity="0.9"/>
+                <line x1="200" y1="64" x2="200" y2="120" stroke="#38BDF8" stroke-width="5"/>
+                <line x1="200" y1="80" x2="160" y2="110" stroke="#38BDF8" stroke-width="5"/>
+                <line x1="160" y1="110" x2="140" y2="150" stroke="#10B981" stroke-width="5"/>
+                <line x1="200" y1="80" x2="240" y2="110" stroke="#38BDF8" stroke-width="5"/>
+                <line x1="240" y1="110" x2="260" y2="150" stroke="#10B981" stroke-width="5"/>
+                <line x1="200" y1="120" x2="180" y2="180" stroke="#38BDF8" stroke-width="5"/>
+                <line x1="180" y1="180" x2="175" y2="225" stroke="#10B981" stroke-width="5"/>
+                <line x1="200" y1="120" x2="220" y2="180" stroke="#38BDF8" stroke-width="5"/>
+                <line x1="220" y1="180" x2="225" y2="225" stroke="#10B981" stroke-width="5"/>
+              </svg>
+
+              <!-- Overlay: Top-Left Real-time Count (Large Tabular Digits) -->
+              <div style="position:absolute; top:8px; left:8px; background:rgba(15,23,42,0.85); border:1px solid #38BDF8; border-radius:10px; padding:4px 10px;">
+                <div style="font-size:10px; color:#94A3B8; font-weight:700;">实时计数 【演示数据】</div>
+                <div style="font-size:28px; font-weight:900; font-family:monospace; color:#38BDF8; line-height:1;">
+                  08 <span style="font-size:14px; color:#FFF; font-weight:bold;">/ 12 次</span>
+                </div>
+              </div>
+
+              <!-- Overlay: Top-Right Metronome Switch & Pulse -->
+              <div style="position:absolute; top:8px; right:8px; background:rgba(15,23,42,0.85); border:1px solid #334155; border-radius:10px; padding:4px 10px; display:flex; align-items:center; gap:8px;">
+                <div>
+                  <div style="font-size:10px; color:#80D5CB; font-weight:bold;">RAS 节拍 【演示数据】</div>
+                  <div style="font-size:14px; font-weight:900; color:#FFF;">64 BPM</div>
+                </div>
+                <div class="metronome-pulse" style="width:14px; height:14px;"></div>
+              </div>
+
+              <!-- Overlay: Bottom Foot-in-frame Status (D17 requirement) -->
+              <div style="position:absolute; bottom:8px; left:8px; right:8px; background:rgba(15,23,42,0.85); border-radius:8px; padding:5px 10px; display:flex; align-items:center; gap:6px;">
+                <span style="color:#10B981; font-size:14px;">●</span>
+                <span style="font-size:12px; color:#E2E8F0; font-weight:600;">
+                  脚部完整入镜 (足踝可见度 94%) · 患者实时摄像头画面 【演示数据】
+                </span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Fixed Controls: Emergency Stop MUST BE >= 80dp -->
+          <div style="padding:12px 16px; background:#FFFFFF; border-top:1.5px solid var(--border-card); display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; gap:10px;">
+              <button class="btn-elderly-secondary" style="flex:1; min-height:56px; font-size:16px;" onclick="alert('跟练已暂停')">
+                ⏸ 暂停
               </button>
-              <button class="btn-elderly-primary" style="flex:2; min-height:80px;" onclick="alert('完成一组，休息60秒')">
-                ✓ 完成本组
+              <button class="btn-elderly-primary" style="flex:1.5; min-height:56px; font-size:16px;" onclick="alert('完成本组，休息60秒')">
+                ✓ 完成本组 (第 1/3 组)
               </button>
             </div>
+
+            <!-- Emergency Stop Button: >= 80dp Height constraint (D22 / Accessibility) -->
+            <button class="btn-elderly-danger" style="min-height:80px; font-size:22px; width:100%; border-radius:18px;" onclick="triggerEmergencyAlert()">
+              🛑 紧急停止训练
+            </button>
           </div>
         `;
       } else if (currentAndroidScreen === 'records') {
@@ -1385,30 +1508,55 @@
       } else if (currentAndroidScreen === 'patient') {
         container.innerHTML = `
           <div class="ui-top-bar">
-            <div class="ui-top-bar__title">患者基本档案</div>
-            <span class="badge-pill badge-primary">ID: PT-2026-081</span>
+            <div class="ui-top-bar__title">活力健康档案</div>
+            <span class="stat-badge-pill">🌟 康复小模范</span>
           </div>
 
           <div style="padding: 24px;">
-            <div class="card-container">
-              <h3 style="font-size:24px; font-weight:800; margin-bottom:12px;">张建国 (72岁)</h3>
-              <div style="margin-bottom:14px;">
-                <span class="badge-pill badge-success" style="font-size:16px;">H-Y 2期 (治疗师已确认)</span>
+            <!-- Mascot Encouragement Card -->
+            <div class="card-mascot">
+              <div class="mascot-avatar-circle">🦌</div>
+              <div>
+                <div class="mascot-quote-title">坚持运动，活力常在！</div>
+                <div class="mascot-quote-text">康康小鹿为您打气：脚步比上周更稳健啦，继续保持好节奏～</div>
               </div>
-              <p style="font-size:16px; color:var(--text-secondary); line-height:1.7;">
-                <strong>所属机构：</strong>市康复中心第三病区<br>
-                <strong>伴随症状：</strong>轻度右上肢震颤、齿轮样强直<br>
-                <strong>跌倒风险：</strong>中度 (已配置扶手训练处方)
-              </p>
             </div>
 
+            <!-- Positive Achievements (Replaces all disease-related wording per D20) -->
+            <div class="card-container">
+              <h3 style="font-size:24px; font-weight:800; margin-bottom:12px;">张建国 (72岁)</h3>
+              <p style="font-size:16px; color:var(--text-secondary); margin-bottom:14px;">
+                所属机构：市康复中心第三病区
+              </p>
+
+              <div class="positive-stat-row">
+                <div class="positive-stat-card">
+                  <div class="positive-stat-val">36</div>
+                  <div class="positive-stat-lbl">累计完成 (次)</div>
+                </div>
+                <div class="positive-stat-card">
+                  <div class="positive-stat-val">12</div>
+                  <div class="positive-stat-lbl">连续坚持 (天)</div>
+                </div>
+                <div class="positive-stat-card">
+                  <div class="positive-stat-val">96%</div>
+                  <div class="positive-stat-lbl">本周完成率</div>
+                </div>
+              </div>
+
+              <div style="background:#EFF4FF; border-radius:12px; padding:12px; font-size:15px; color:var(--color-primary); line-height:1.6;">
+                🎯 <strong>活力寄语：</strong>已累计打卡运动超过 540 分钟，持之以恒，身体状态越来越棒！
+              </div>
+            </div>
+
+            <!-- Caregiver Management Card -->
             <div class="card-container">
               <h4 style="font-size:20px; font-weight:700; margin-bottom:10px;">照护人代操作状态</h4>
               <p style="font-size:16px; color:var(--text-secondary); line-height:1.6; margin-bottom:16px;">
-                当前：<strong>本人直接操作</strong>。若由子女或护工代操作，请在设置中开启代操作并完成身份关联。
+                当前：<strong>本人直接操作</strong>。子女或照护人员可随时微信扫码绑定，协助日常打卡。
               </p>
               <button class="btn-elderly-secondary">
-                关联照护人微信
+                管理照护人代办
               </button>
             </div>
           </div>
@@ -1492,75 +1640,145 @@
           <div style="flex:1; padding:32px; border-right:2px solid var(--border-card); overflow-y:auto;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
               <div>
-                <h2 style="font-size:30px; font-weight:800; color:var(--text-primary);">今日康复任务</h2>
-                <p style="font-size:17px; color:var(--text-secondary);">患者：张建国 · H-Y 2期 (已确认)</p>
+                <h2 style="font-size:30px; font-weight:800; color:var(--text-primary);">今日活力康复</h2>
+                <p style="font-size:17px; color:var(--text-secondary);">张建国 · 连续坚持 12 天 【演示数据】</p>
               </div>
-              <span class="badge-pill badge-success" style="font-size:16px; padding:6px 16px;">状态良好</span>
+              <span class="stat-badge-pill" style="font-size:15px; padding:6px 14px;">🌟 活力模范</span>
             </div>
 
             <button class="btn-elderly-primary" style="margin-bottom:24px; min-height:88px;" onclick="renderAndroidTablet('tablet-training')">
-              <span style="font-size:36px;">▶</span> 进入大屏姿态识别训练
+              <span style="font-size:36px;">▶</span> 进入双播放大屏训练 (D22)
             </button>
 
-            <div class="notice-box notice-info">
-              <div>平板大屏专享：画面视角宽广，建议将平板立于前方 1.5–2 米处稳固支架上。</div>
+            <div class="card-mascot" style="margin-bottom:20px;">
+              <div class="mascot-avatar-circle" style="font-size:32px; width:52px; height:52px;">🦌</div>
+              <div>
+                <div class="mascot-quote-title">平板大屏双播放提示 (D22)</div>
+                <div class="mascot-quote-text">左侧看教学视频示范，右侧看自己实时动作，双足入镜更清晰！</div>
+              </div>
             </div>
 
             <div class="card-container">
-              <h3 style="font-size:22px; font-weight:700; margin-bottom:12px;">安全提示</h3>
-              <p style="font-size:17px; color:var(--text-secondary); line-height:1.6;">
-                H-Y 2期患者支持无支撑动作，但需预备稳固扶手座椅防滑防跌。
+              <h3 style="font-size:20px; font-weight:700; margin-bottom:8px;">跟练安全提示</h3>
+              <p style="font-size:16px; color:var(--text-secondary); line-height:1.6;">
+                建议将平板立于前方 1.5–2 米平稳支架上，穿好防滑健步鞋，并在家人视线内练习。
               </p>
             </div>
           </div>
 
           <!-- Right Column (50% Width) -->
           <div style="flex:1; padding:32px; background:#FFFFFF; overflow-y:auto;">
-            <h3 style="font-size:24px; font-weight:700; margin-bottom:20px;">训练处方与最近进展</h3>
+            <h3 style="font-size:24px; font-weight:700; margin-bottom:20px;">今日训练项目 【演示数据】</h3>
             <div class="metrics-row">
               <div class="metric-card">
                 <div class="metric-value">64 BPM</div>
-                <div class="metric-label">RAS 推荐步频</div>
+                <div class="metric-label">RAS 节律引导 【演示数据】</div>
               </div>
               <div class="metric-card">
                 <div class="metric-value">96.8%</div>
-                <div class="metric-label">近期姿态平均质量</div>
+                <div class="metric-label">平均动作质量 【演示数据】</div>
               </div>
             </div>
 
             <div class="card-container" style="background:#F8FAFC; border:1px solid var(--border-card);">
               <h4 style="font-size:18px; font-weight:700; margin-bottom:8px;">包含条目</h4>
               <ul style="font-size:16px; line-height:1.8; color:var(--text-secondary); padding-left:20px;">
-                <li>节律步态原地踏步（3组 × 15次）</li>
-                <li>躯干旋转牵伸放松（2组 × 10次）</li>
-                <li>下肢肌力维持训练（2组 × 8次）</li>
+                <li>下肢原地节律踏步（3组 × 15次 【演示数据】）</li>
+                <li>躯干左右舒展放松（2组 × 10次 【演示数据】）</li>
+                <li>抗阻伸膝肌力练习（2组 × 12次 【演示数据】）</li>
               </ul>
             </div>
           </div>
         `;
       } else {
         container.innerHTML = `
-          <div style="flex:2; background:#0F172A; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative;">
-            <div style="color:#FFF; font-size:22px; margin-bottom:12px;">大屏人体关键点捕捉 (MediaPipe 实时)</div>
-            <div style="width:80%; height:70%; border:2px dashed #38BDF8; border-radius:16px; display:flex; align-items:center; justify-content:center; color:#38BDF8;">
-              <span style="font-size:28px;">📷 摄像头全身体位捕获正常</span>
-            </div>
-            <div style="position:absolute; bottom:20px; left:30px; color:#10B981; font-size:18px; font-weight:700;">
-              ✓ 双足定位准确 (D17 标准满足)
-            </div>
-          </div>
-          <div style="flex:1; padding:32px; background:#FFFFFF; display:flex; flex-direction:column; justify-content:space-between;">
-            <div>
-              <h2 style="font-size:28px; font-weight:800; color:var(--color-primary); margin-bottom:12px;">动作实时计数</h2>
-              <div style="font-size:64px; font-weight:900; color:var(--color-primary);">10 <span style="font-size:24px; color:var(--text-tertiary);">/ 15</span></div>
-              <div class="metronome-visual">
-                <div class="metronome-pulse"></div>
-                <span>64 BPM 听觉节律</span>
+          <!-- Tablet Training: Left/Right Split Layout (D22 Dual Playback) -->
+          <div style="display:flex; width:100%; height:100%;">
+            <!-- Left Pane: Instructional Video (50% width) -->
+            <div style="flex:1; background:#0F172A; border-right:2px solid #334155; padding:24px; display:flex; flex-direction:column; justify-content:space-between;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="background:#1A4FA0; color:#FFF; font-size:14px; font-weight:bold; padding:4px 12px; border-radius:8px;">
+                  🎬 教学示范视频 【演示数据】
+                </span>
+                <span style="color:#80D5CB; font-size:14px; font-weight:600;">循环播放中</span>
+              </div>
+
+              <!-- Coach Skeleton Demo Simulation -->
+              <div style="border:2px dashed #38BDF8; border-radius:18px; height:60%; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#38BDF8;">
+                <div style="font-size:48px; margin-bottom:10px;">▶</div>
+                <div style="font-size:22px; font-weight:800; color:#FFF;">下肢原地节律踏步 · 示范</div>
+                <div style="font-size:15px; color:#94A3B8; margin-top:6px;">建议屈髋 45° · RAS 64 BPM 引导 【演示数据】</div>
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; color:#94A3B8; font-size:14px; margin-bottom:6px;">
+                  <span>示范进度 01:24 / 03:00</span>
+                  <span>动作库编号: EX-GAIT-01 【演示数据】</span>
+                </div>
+                <div style="width:100%; height:6px; background:#334155; border-radius:3px; overflow:hidden;">
+                  <div style="width:46%; height:100%; background:#38BDF8;"></div>
+                </div>
               </div>
             </div>
-            <div style="display:flex; flex-direction:column; gap:16px;">
-              <button class="btn-elderly-primary" onclick="alert('完成一组')">完成本组动作</button>
-              <button class="btn-elderly-danger" onclick="renderAndroidTablet('tablet-home')">结束并返回</button>
+
+            <!-- Right Pane: Real-time Camera & Overlays & Emergency Stop (50% width) -->
+            <div style="flex:1; background:#000; display:flex; flex-direction:column; justify-content:space-between; position:relative; padding:20px;">
+              <!-- Simulated Live Camera Canvas -->
+              <div style="position:relative; width:100%; height:75%; border-radius:16px; overflow:hidden; border:2px solid #0284C7; background:#111; display:flex; align-items:center; justify-content:center;">
+                <svg viewBox="0 0 400 240" style="position:absolute; width:100%; height:100%;">
+                  <circle cx="200" cy="45" r="14" fill="#38BDF8" opacity="0.9"/>
+                  <line x1="200" y1="59" x2="200" y2="120" stroke="#38BDF8" stroke-width="5"/>
+                  <line x1="200" y1="75" x2="160" y2="105" stroke="#38BDF8" stroke-width="5"/>
+                  <line x1="160" y1="105" x2="140" y2="145" stroke="#10B981" stroke-width="5"/>
+                  <line x1="200" y1="75" x2="240" y2="105" stroke="#38BDF8" stroke-width="5"/>
+                  <line x1="240" y1="105" x2="260" y2="145" stroke="#10B981" stroke-width="5"/>
+                  <line x1="200" y1="120" x2="180" y2="175" stroke="#38BDF8" stroke-width="5"/>
+                  <line x1="180" y1="175" x2="175" y2="225" stroke="#10B981" stroke-width="5"/>
+                  <line x1="200" y1="120" x2="220" y2="175" stroke="#38BDF8" stroke-width="5"/>
+                  <line x1="220" y1="175" x2="225" y2="225" stroke="#10B981" stroke-width="5"/>
+                </svg>
+
+                <!-- Overlay: Real-time Count -->
+                <div style="position:absolute; top:12px; left:12px; background:rgba(15,23,42,0.85); border:1.5px solid #38BDF8; border-radius:12px; padding:6px 14px;">
+                  <div style="font-size:12px; color:#94A3B8; font-weight:700;">实时计数 【演示数据】</div>
+                  <div style="font-size:36px; font-weight:900; font-family:monospace; color:#38BDF8; line-height:1.1;">
+                    10 <span style="font-size:18px; color:#FFF;">/ 15 次</span>
+                  </div>
+                </div>
+
+                <!-- Overlay: Metronome -->
+                <div style="position:absolute; top:12px; right:12px; background:rgba(15,23,42,0.85); border:1px solid #334155; border-radius:12px; padding:6px 14px; display:flex; align-items:center; gap:8px;">
+                  <div>
+                    <div style="font-size:12px; color:#80D5CB; font-weight:bold;">RAS 节拍 【演示数据】</div>
+                    <div style="font-size:16px; font-weight:900; color:#FFF;">64 BPM</div>
+                  </div>
+                  <div class="metronome-pulse" style="width:16px; height:16px;"></div>
+                </div>
+
+                <!-- Overlay: Foot Status (D17) -->
+                <div style="position:absolute; bottom:12px; left:12px; right:12px; background:rgba(15,23,42,0.9); border-radius:8px; padding:6px 12px; display:flex; align-items:center; gap:8px;">
+                  <span style="color:#10B981; font-size:16px;">●</span>
+                  <span style="font-size:13px; color:#E2E8F0; font-weight:600;">
+                    ✓ 双足完整入镜 (D17标准已满足) · 患者实时姿态捕获 【演示数据】
+                  </span>
+                </div>
+              </div>
+
+              <!-- Controls & Emergency Stop (Height >= 80dp) -->
+              <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+                <div style="display:flex; gap:12px;">
+                  <button class="btn-elderly-secondary" style="flex:1; min-height:56px; font-size:16px;" onclick="alert('已暂停跟练')">
+                    ⏸ 暂停
+                  </button>
+                  <button class="btn-elderly-primary" style="flex:1.5; min-height:56px; font-size:16px;" onclick="alert('完成本组')">
+                    ✓ 完成本组动作
+                  </button>
+                </div>
+                <!-- Emergency Stop >= 80dp -->
+                <button class="btn-elderly-danger" style="min-height:80px; font-size:22px; width:100%; border-radius:16px;" onclick="renderAndroidTablet('tablet-home')">
+                  🛑 紧急停止训练
+                </button>
+              </div>
             </div>
           </div>
         `;
@@ -1584,48 +1802,107 @@
       const container = document.getElementById('miniprogramContent');
       if (currentMiniScreen === 'home') {
         container.innerHTML = `
-          <div class="ui-top-bar" style="border-bottom:none;">
-            <div>
-              <div style="font-size:14px; color:var(--text-tertiary);">帕金森病肌肉保护康复系统</div>
-              <div class="ui-top-bar__title" style="font-size:24px;">微信小程序端</div>
-            </div>
-            <span class="badge-pill badge-primary">云端异步CV</span>
+          <div class="ui-top-bar">
+            <div class="ui-top-bar__title">今天也一起练习～</div>
+            <span class="stat-badge-pill">🦌 康康小鹿</span>
           </div>
-
           <div style="padding:20px;">
-            <div class="notice-box notice-warning">
+            <div class="card-mascot" style="margin-bottom:16px;">
+              <div class="mascot-avatar-circle" style="width:52px; height:52px; font-size:32px;">🦌</div>
               <div>
-                <strong>异步分析提示：</strong>小程序端采用录制上传模式，由云端算法计算动作质量与步态指标，训练中无实时计数。
+                <div class="mascot-quote-title">打卡第 12 天！</div>
+                <div class="mascot-quote-text">跟着节拍慢慢来，今天也是充满活力的一天～</div>
               </div>
             </div>
 
-            <!-- Big Action Button (160rpx / 80dp) -->
+            <!-- Mini Big Primary Button -->
             <button class="btn-elderly-primary" onclick="switchMiniScreen('training')">
-              <span>📹</span> 开始录制今日训练
+              ● 开始今日跟练
             </button>
 
-            <div style="height:20px;"></div>
+            <div style="height:16px;"></div>
 
-            <div class="card-container">
-              <h3 style="font-size:20px; font-weight:700; margin-bottom:12px;">快捷入口</h3>
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                <button class="btn-elderly-secondary" style="min-height:64px; font-size:16px;" onclick="switchMiniScreen('assessment')">
-                  📝 症状自评
-                </button>
-                <button class="btn-elderly-secondary" style="min-height:64px; font-size:16px;" onclick="switchMiniScreen('records')">
-                  📋 历史记录
-                </button>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+              <div class="card-container" style="margin:0; padding:16px; cursor:pointer;" onclick="switchMiniScreen('patient')">
+                <div style="font-size:26px; margin-bottom:4px;">📋</div>
+                <strong style="font-size:16px;">健康档案</strong>
+                <div style="font-size:13px; color:var(--text-tertiary); margin-top:2px;">坚持 12 天 · 活力榜</div>
+              </div>
+              <div class="card-container" style="margin:0; padding:16px; cursor:pointer;" onclick="switchMiniScreen('assessment')">
+                <div style="font-size:26px; margin-bottom:4px;">📝</div>
+                <strong style="font-size:16px;">身体感受记录</strong>
+                <div style="font-size:13px; color:var(--text-tertiary); margin-top:2px;">活动轻松度 · 平衡</div>
               </div>
             </div>
 
             <div class="card-container">
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                  <h4 style="font-size:18px; font-weight:700;">当前模式：本人操作</h4>
-                  <div style="font-size:14px; color:var(--text-tertiary); margin-top:4px;">照护者代操作功能尚未开启</div>
-                </div>
-                <span class="badge-pill badge-primary">切换</span>
+              <h4 style="font-size:18px; font-weight:700; margin-bottom:8px;">微信端练习说明</h4>
+              <p style="font-size:15px; color:var(--text-secondary); line-height:1.6;">
+                小程序采用云端异步姿态分析，录制动作视频上传后，将在 1–2 分钟内返回分析结果与打卡记录。
+              </p>
+            </div>
+          </div>
+        `;
+      } else if (currentMiniScreen === 'patient') {
+        container.innerHTML = `
+          <div class="ui-top-bar">
+            <div class="ui-top-bar__title">活力健康档案</div>
+            <span class="stat-badge-pill">🌟 活力榜首</span>
+          </div>
+          <div style="padding:20px;">
+            <div class="card-mascot">
+              <div class="mascot-avatar-circle" style="width:52px; height:52px; font-size:32px;">🦌</div>
+              <div>
+                <div class="mascot-quote-title">建国叔叔，您真棒！</div>
+                <div class="mascot-quote-text">步子越来越平稳，运动让身心常青～</div>
               </div>
+            </div>
+
+            <div class="card-container">
+              <h3 style="font-size:22px; font-weight:800; margin-bottom:10px;">张建国 (72岁)</h3>
+              <div style="font-size:15px; color:var(--text-secondary); margin-bottom:12px;">所属机构：市康复中心第三病区</div>
+
+              <div class="positive-stat-row">
+                <div class="positive-stat-card">
+                  <div class="positive-stat-val">36</div>
+                  <div class="positive-stat-lbl">累计完成</div>
+                </div>
+                <div class="positive-stat-card">
+                  <div class="positive-stat-val">12</div>
+                  <div class="positive-stat-lbl">连续天数</div>
+                </div>
+                <div class="positive-stat-card">
+                  <div class="positive-stat-val">96%</div>
+                  <div class="positive-stat-lbl">周完成率</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-container">
+              <h4 style="font-size:18px; font-weight:700; margin-bottom:8px;">照护家属代办</h4>
+              <p style="font-size:15px; color:var(--text-secondary); line-height:1.6;">
+                已绑定照护人微信。子女可代为填报身体感受、查阅训练记录。
+              </p>
+            </div>
+          </div>
+        `;
+      } else if (currentMiniScreen === 'training-list') {
+        container.innerHTML = `
+          <div class="ui-top-bar">
+            <div class="ui-top-bar__title">今日训练条目</div>
+          </div>
+          <div style="padding:20px;">
+            <div class="card-container" style="border-left:6px solid var(--color-primary-container);">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:18px;">原地节律踏步</strong>
+                <span class="badge-pill badge-primary">推荐节拍 64 BPM</span>
+              </div>
+              <p style="font-size:15px; color:var(--text-secondary); margin-top:8px;">
+                跟从节拍器稳定踏步，改善足底抓地与行走冻结。
+              </p>
+              <button class="btn-elderly-primary" style="min-height:56px; font-size:16px; margin-top:12px;" onclick="switchMiniScreen('training')">
+                录制本次动作
+              </button>
             </div>
           </div>
         `;
@@ -1643,10 +1920,10 @@
             </div>
 
             <div class="card-container">
-              <h4 style="font-size:18px; font-weight:700; margin-bottom:8px;">训练处方要求</h4>
+              <h4 style="font-size:18px; font-weight:700; margin-bottom:8px;">动作指引与温馨提示</h4>
               <p style="font-size:16px; color:var(--text-secondary); line-height:1.6;">
                 条目：下肢原地节律踏步<br>
-                目标时长：3 分钟 · 推荐步频：64 BPM
+                目标时长：3 分钟 · 推荐舒适步频：64 BPM
               </p>
             </div>
 
@@ -1662,16 +1939,17 @@
       } else if (currentMiniScreen === 'records') {
         container.innerHTML = `
           <div class="ui-top-bar">
-            <div class="ui-top-bar__title">小程序训练记录</div>
+            <div class="ui-top-bar__title">跟练记录与打卡</div>
+            <span class="stat-badge-pill">已坚持 12 天</span>
           </div>
           <div style="padding:20px;">
             <div class="card-container">
               <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                <strong>11月04日 上午</strong>
+                <strong>11月04日 上午跟练</strong>
                 <span class="badge-pill badge-success">分析完成</span>
               </div>
               <div class="metrics-row">
-                <div class="metric-card"><div class="metric-value">32次</div><div class="metric-label">云端估算完成</div></div>
+                <div class="metric-card"><div class="metric-value">32次</div><div class="metric-label">有效动作</div></div>
                 <div class="metric-card"><div class="metric-value">91%</div><div class="metric-label">有效帧占比</div></div>
               </div>
             </div>
@@ -1680,32 +1958,43 @@
       } else if (currentMiniScreen === 'assessment') {
         container.innerHTML = `
           <div class="ui-top-bar">
-            <div class="ui-top-bar__title">症状与分期自评</div>
+            <div class="ui-top-bar__title">身体感受记录</div>
+            <span class="stat-badge-pill">日常自测</span>
           </div>
           <div style="padding:20px;">
             <div class="notice-box notice-info">
-              <div>量表自评结果将作为治疗师分期确认与处方开具的辅助依据。</div>
+              <div>记录日常真实身体活动体验，供康复治疗师为您调整更舒适的步频节拍。</div>
             </div>
             <div class="card-container">
-              <h3 style="font-size:20px; font-weight:700; margin-bottom:6px;">H-Y 分期自评量表</h3>
-              <p style="font-size:15px; color:var(--text-secondary); margin-bottom:14px;">1–5 级自主评定，评估单双侧受累及平衡情况。</p>
-              <button class="btn-elderly-primary" style="min-height:64px;" onclick="alert('进入自评问卷')">立即开始自评</button>
+              <h3 style="font-size:20px; font-weight:700; margin-bottom:6px;">日常活动自如度评估</h3>
+              <p style="font-size:15px; color:var(--text-secondary); margin-bottom:14px;">评测日常起步、转身与双手活动的轻松自如程度。</p>
+              <button class="btn-elderly-primary" style="min-height:56px; font-size:17px;" onclick="alert('进入自如度评估')">开始记录</button>
             </div>
             <div class="card-container">
-              <h3 style="font-size:20px; font-weight:700; margin-bottom:6px;">SARC-F 肌少症筛查</h3>
-              <p style="font-size:15px; color:var(--text-secondary); margin-bottom:14px;">力量、辅助行走、从椅子起立、爬楼梯与跌倒评估。</p>
-              <button class="btn-elderly-secondary" onclick="alert('进入SARC-F')">进入筛查</button>
+              <h3 style="font-size:20px; font-weight:700; margin-bottom:6px;">肌肉力量与灵活性感受</h3>
+              <p style="font-size:15px; color:var(--text-secondary); margin-bottom:14px;">从椅子起立、提拿物品与平地行走的力量与平衡自测。</p>
+              <button class="btn-elderly-secondary" onclick="alert('进入灵活性自测')">开始记录</button>
+            </div>
+            <div class="card-container">
+              <h3 style="font-size:20px; font-weight:700; margin-bottom:6px;">关节与肢体活动轻松度</h3>
+              <p style="font-size:15px; color:var(--text-secondary); margin-bottom:14px;">记录晨起或活动后肢体的舒展程度与放松感受。</p>
+              <button class="btn-elderly-secondary" onclick="alert('进入轻松度自测')">开始记录</button>
+            </div>
+            <div class="card-container">
+              <h3 style="font-size:20px; font-weight:700; margin-bottom:6px;">步态稳健与平衡感知</h3>
+              <p style="font-size:15px; color:var(--text-secondary); margin-bottom:14px;">记录行走踏步时的平稳度，辅助匹配适宜节拍。</p>
+              <button class="btn-elderly-secondary" onclick="alert('进入稳健度自测')">开始记录</button>
             </div>
           </div>
         `;
       } else if (currentMiniScreen === 'alerts') {
         container.innerHTML = `
-          <div class="ui-top-bar"><div class="ui-top-bar__title">风险预警通知</div></div>
+          <div class="ui-top-bar"><div class="ui-top-bar__title">温馨提醒与关注</div></div>
           <div style="padding:20px;">
             <div class="card-container" style="border-left:6px solid var(--color-warning);">
-              <span class="badge-pill badge-warning" style="margin-bottom:8px;">警告</span>
-              <h4 style="font-size:18px; font-weight:700; margin-bottom:6px;">跌倒自评得分上升</h4>
-              <p style="font-size:15px; color:var(--text-secondary);">STEADI得分达到预警分界值，建议联系医生复查。</p>
+              <span class="badge-pill badge-warning" style="margin-bottom:8px;">关注</span>
+              <h4 style="font-size:18px; font-weight:700; margin-bottom:6px;">身体感受提示：建议充分休息</h4>
+              <p style="font-size:15px; color:var(--text-secondary);">今日活动后若感肢体酸痛，请坐位休息并饮水，必要时与医生联系。</p>
             </div>
           </div>
         `;

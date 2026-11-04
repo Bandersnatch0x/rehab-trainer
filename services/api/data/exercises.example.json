@@ -1,0 +1,1143 @@
+{
+  "_meta": {
+    "contract": "packages/api-contract/openapi.yaml#/components/schemas/Exercise",
+    "ontology": "docs/ontology/rehab.ttl#rt:Exercise",
+    "scope": "MVP 24 条骨架（决策 C1：4 类 × 6）",
+    "clinicalStatus": "pending",
+    "note": "仅含动作类型与结构字段。禁忌、危险信号、适用分级、剂量、风险等级均待临床签核；publicationStatus=draft，不得用于处方。applicableStages 为空表示尚未裁决，不是「不适用任何分级」。"
+  },
+  "items": [
+    {
+      "code": "STR-001",
+      "label": "坐位伸膝",
+      "category": "stretching-relaxation",
+      "publicationStatus": "draft",
+      "riskLevel": "low",
+      "applicableStages": [],
+      "bodyParts": [
+        "下肢"
+      ],
+      "joints": [
+        "膝关节"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "STR-001-V1",
+          "level": 1,
+          "supportLevel": "seated",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "STR-001-V2",
+          "level": 2,
+          "supportLevel": "seated",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/STR-001/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/STR-001/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "STR-002",
+      "label": "站姿小腿牵伸",
+      "category": "stretching-relaxation",
+      "publicationStatus": "draft",
+      "riskLevel": "medium",
+      "applicableStages": [],
+      "bodyParts": [
+        "下肢"
+      ],
+      "joints": [
+        "膝关节",
+        "踝关节"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "STR-002-V1",
+          "level": 1,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "STR-002-V2",
+          "level": 2,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/STR-002/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/STR-002/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "STR-003",
+      "label": "坐位肩前屈",
+      "category": "stretching-relaxation",
+      "publicationStatus": "draft",
+      "riskLevel": "low",
+      "applicableStages": [],
+      "bodyParts": [
+        "上肢"
+      ],
+      "joints": [
+        "肩关节"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "STR-003-V1",
+          "level": 1,
+          "supportLevel": "seated",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "STR-003-V2",
+          "level": 2,
+          "supportLevel": "seated",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/STR-003/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/STR-003/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "STR-004",
+      "label": "颈部侧屈",
+      "category": "stretching-relaxation",
+      "publicationStatus": "draft",
+      "riskLevel": "low",
+      "applicableStages": [],
+      "bodyParts": [
+        "颈部"
+      ],
+      "joints": [
+        "脊柱"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "STR-004-V1",
+          "level": 1,
+          "supportLevel": "seated",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "STR-004-V2",
+          "level": 2,
+          "supportLevel": "seated",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/STR-004/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/STR-004/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "STR-005",
+      "label": "坐位踝背屈",
+      "category": "stretching-relaxation",
+      "publicationStatus": "draft",
+      "riskLevel": "low",
+      "applicableStages": [],
+      "bodyParts": [
+        "下肢"
+      ],
+      "joints": [
+        "踝关节"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "STR-005-V1",
+          "level": 1,
+          "supportLevel": "seated",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "STR-005-V2",
+          "level": 2,
+          "supportLevel": "seated",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/STR-005/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/STR-005/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "STR-006",
+      "label": "坐位躯干旋转",
+      "category": "stretching-relaxation",
+      "publicationStatus": "draft",
+      "riskLevel": "low",
+      "applicableStages": [],
+      "bodyParts": [
+        "躯干"
+      ],
+      "joints": [
+        "脊柱"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "STR-006-V1",
+          "level": 1,
+          "supportLevel": "seated",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "STR-006-V2",
+          "level": 2,
+          "supportLevel": "seated",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/STR-006/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/STR-006/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "STG-001",
+      "label": "坐位抬腿",
+      "category": "strength-maintenance",
+      "publicationStatus": "draft",
+      "riskLevel": "low",
+      "applicableStages": [],
+      "bodyParts": [
+        "下肢"
+      ],
+      "joints": [
+        "髋关节",
+        "膝关节"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "STG-001-V1",
+          "level": 1,
+          "supportLevel": "seated",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "STG-001-V2",
+          "level": 2,
+          "supportLevel": "seated",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/STG-001/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/STG-001/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "STG-002",
+      "label": "坐位屈肘",
+      "category": "strength-maintenance",
+      "publicationStatus": "draft",
+      "riskLevel": "low",
+      "applicableStages": [],
+      "bodyParts": [
+        "上肢"
+      ],
+      "joints": [
+        "肘关节"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "STG-002-V1",
+          "level": 1,
+          "supportLevel": "seated",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "STG-002-V2",
+          "level": 2,
+          "supportLevel": "seated",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/STG-002/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/STG-002/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "STG-003",
+      "label": "扶椅提踵",
+      "category": "strength-maintenance",
+      "publicationStatus": "draft",
+      "riskLevel": "medium",
+      "applicableStages": [],
+      "bodyParts": [
+        "下肢"
+      ],
+      "joints": [
+        "踝关节"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "STG-003-V1",
+          "level": 1,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "STG-003-V2",
+          "level": 2,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/STG-003/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/STG-003/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "STG-004",
+      "label": "坐站转换",
+      "category": "strength-maintenance",
+      "publicationStatus": "draft",
+      "riskLevel": "medium",
+      "applicableStages": [],
+      "bodyParts": [
+        "下肢",
+        "躯干"
+      ],
+      "joints": [
+        "髋关节",
+        "膝关节"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "STG-004-V1",
+          "level": 1,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "STG-004-V2",
+          "level": 2,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/STG-004/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/STG-004/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "STG-005",
+      "label": "扶椅侧抬腿",
+      "category": "strength-maintenance",
+      "publicationStatus": "draft",
+      "riskLevel": "medium",
+      "applicableStages": [],
+      "bodyParts": [
+        "下肢"
+      ],
+      "joints": [
+        "髋关节"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "STG-005-V1",
+          "level": 1,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "STG-005-V2",
+          "level": 2,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/STG-005/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/STG-005/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "STG-006",
+      "label": "扶椅屈髋",
+      "category": "strength-maintenance",
+      "publicationStatus": "draft",
+      "riskLevel": "medium",
+      "applicableStages": [],
+      "bodyParts": [
+        "下肢"
+      ],
+      "joints": [
+        "髋关节"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "STG-006-V1",
+          "level": 1,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "STG-006-V2",
+          "level": 2,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/STG-006/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/STG-006/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "GAIT-001",
+      "label": "原地踏步",
+      "category": "rhythmic-gait",
+      "publicationStatus": "draft",
+      "riskLevel": "high",
+      "applicableStages": [],
+      "bodyParts": [
+        "下肢",
+        "全身"
+      ],
+      "joints": [
+        "髋关节",
+        "膝关节",
+        "踝关节"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "GAIT-001-V1",
+          "level": 1,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "GAIT-001-V2",
+          "level": 2,
+          "supportLevel": "unsupported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/GAIT-001/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/GAIT-001/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "GAIT-002",
+      "label": "节拍步行",
+      "category": "rhythmic-gait",
+      "publicationStatus": "draft",
+      "riskLevel": "high",
+      "applicableStages": [],
+      "bodyParts": [
+        "全身",
+        "下肢"
+      ],
+      "joints": [
+        "髋关节",
+        "膝关节",
+        "踝关节"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "GAIT-002-V1",
+          "level": 1,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "GAIT-002-V2",
+          "level": 2,
+          "supportLevel": "unsupported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/GAIT-002/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/GAIT-002/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "GAIT-003",
+      "label": "侧向迈步",
+      "category": "rhythmic-gait",
+      "publicationStatus": "draft",
+      "riskLevel": "high",
+      "applicableStages": [],
+      "bodyParts": [
+        "下肢",
+        "躯干"
+      ],
+      "joints": [
+        "髋关节",
+        "膝关节",
+        "踝关节"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "GAIT-003-V1",
+          "level": 1,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "GAIT-003-V2",
+          "level": 2,
+          "supportLevel": "unsupported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/GAIT-003/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/GAIT-003/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "GAIT-004",
+      "label": "后退步行",
+      "category": "rhythmic-gait",
+      "publicationStatus": "draft",
+      "riskLevel": "high",
+      "applicableStages": [],
+      "bodyParts": [
+        "全身",
+        "下肢"
+      ],
+      "joints": [
+        "髋关节",
+        "膝关节",
+        "踝关节"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "GAIT-004-V1",
+          "level": 1,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "GAIT-004-V2",
+          "level": 2,
+          "supportLevel": "unsupported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/GAIT-004/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/GAIT-004/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "GAIT-005",
+      "label": "足跟足尖交替",
+      "category": "rhythmic-gait",
+      "publicationStatus": "draft",
+      "riskLevel": "high",
+      "applicableStages": [],
+      "bodyParts": [
+        "下肢"
+      ],
+      "joints": [
+        "踝关节"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "GAIT-005-V1",
+          "level": 1,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "GAIT-005-V2",
+          "level": 2,
+          "supportLevel": "unsupported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/GAIT-005/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/GAIT-005/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "GAIT-006",
+      "label": "跨步重心转移",
+      "category": "rhythmic-gait",
+      "publicationStatus": "draft",
+      "riskLevel": "high",
+      "applicableStages": [],
+      "bodyParts": [
+        "全身",
+        "下肢"
+      ],
+      "joints": [
+        "髋关节",
+        "膝关节",
+        "踝关节"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "GAIT-006-V1",
+          "level": 1,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "GAIT-006-V2",
+          "level": 2,
+          "supportLevel": "unsupported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/GAIT-006/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/GAIT-006/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "POST-001",
+      "label": "靠墙站立",
+      "category": "postural-correction",
+      "publicationStatus": "draft",
+      "riskLevel": "medium",
+      "applicableStages": [],
+      "bodyParts": [
+        "全身",
+        "躯干"
+      ],
+      "joints": [
+        "脊柱",
+        "髋关节"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "POST-001-V1",
+          "level": 1,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "POST-001-V2",
+          "level": 2,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/POST-001/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/POST-001/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "POST-002",
+      "label": "坐位躯干伸展",
+      "category": "postural-correction",
+      "publicationStatus": "draft",
+      "riskLevel": "low",
+      "applicableStages": [],
+      "bodyParts": [
+        "躯干"
+      ],
+      "joints": [
+        "脊柱"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "POST-002-V1",
+          "level": 1,
+          "supportLevel": "seated",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "POST-002-V2",
+          "level": 2,
+          "supportLevel": "seated",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/POST-002/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/POST-002/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "POST-003",
+      "label": "站姿肩胛后缩",
+      "category": "postural-correction",
+      "publicationStatus": "draft",
+      "riskLevel": "medium",
+      "applicableStages": [],
+      "bodyParts": [
+        "上肢",
+        "躯干"
+      ],
+      "joints": [
+        "肩关节",
+        "脊柱"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "POST-003-V1",
+          "level": 1,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "POST-003-V2",
+          "level": 2,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/POST-003/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/POST-003/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "POST-004",
+      "label": "站姿重心转移",
+      "category": "postural-correction",
+      "publicationStatus": "draft",
+      "riskLevel": "high",
+      "applicableStages": [],
+      "bodyParts": [
+        "全身",
+        "下肢"
+      ],
+      "joints": [
+        "髋关节",
+        "膝关节",
+        "踝关节"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "POST-004-V1",
+          "level": 1,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "POST-004-V2",
+          "level": 2,
+          "supportLevel": "unsupported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/POST-004/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/POST-004/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "POST-005",
+      "label": "站姿髋伸展",
+      "category": "postural-correction",
+      "publicationStatus": "draft",
+      "riskLevel": "medium",
+      "applicableStages": [],
+      "bodyParts": [
+        "下肢",
+        "躯干"
+      ],
+      "joints": [
+        "髋关节"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "POST-005-V1",
+          "level": 1,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "POST-005-V2",
+          "level": 2,
+          "supportLevel": "supported-standing",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/POST-005/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/POST-005/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    },
+    {
+      "code": "POST-006",
+      "label": "坐位骨盆倾斜",
+      "category": "postural-correction",
+      "publicationStatus": "draft",
+      "riskLevel": "low",
+      "applicableStages": [],
+      "bodyParts": [
+        "躯干"
+      ],
+      "joints": [
+        "脊柱",
+        "髋关节"
+      ],
+      "contraindications": [
+        "TODO: 待临床签核"
+      ],
+      "dangerSignals": [
+        "TODO: 待临床签核"
+      ],
+      "variants": [
+        {
+          "code": "POST-006-V1",
+          "level": 1,
+          "supportLevel": "seated",
+          "applicableStages": [],
+          "defaultDosage": {}
+        },
+        {
+          "code": "POST-006-V2",
+          "level": 2,
+          "supportLevel": "seated",
+          "applicableStages": [],
+          "defaultDosage": {}
+        }
+      ],
+      "defaultDosage": {},
+      "videoUri": "https://media.rehab-trainer.invalid/exercises/POST-006/video.mp4",
+      "audioUri": "https://media.rehab-trainer.invalid/exercises/POST-006/metronome.mp3",
+      "_todo": {
+        "contraindications": "TODO: 待临床签核",
+        "dangerSignals": "TODO: 待临床签核",
+        "applicableStages": "TODO: 待临床签核",
+        "defaultDosage": "TODO: 待临床签核",
+        "riskLevel": "TODO: 待临床签核（当前值仅为按支撑方式的工程占位）"
+      }
+    }
+  ]
+}

@@ -1,63 +1,61 @@
 <view class="page">
-  <view class="page-title">患者档案</view>
-  <view class="page-subtitle">档案由管理端建立，H-Y 分期由康复治疗师确认。</view>
+  <view class="page-title">活力健康档案</view>
+  <view class="page-subtitle">记录坚持打卡的每一天，身体越来越轻松～</view>
 
-  <view class="notice notice--warning">
-    分期未经治疗师确认时标记为「疑似」，高风险训练条目不可用。
-  </view>
-
-  <view class="card">
-    <view class="info-row">
-      <text class="info-row__label">姓名</text>
-      <text class="info-row__value">—</text>
-    </view>
-    <view class="info-row">
-      <text class="info-row__label">出生年份</text>
-      <text class="info-row__value">—</text>
-    </view>
-    <view class="info-row">
-      <text class="info-row__label">所属机构</text>
-      <text class="info-row__value">—</text>
-    </view>
-    <view class="info-row">
-      <text class="info-row__label">档案状态</text>
-      <text class="info-row__value">—</text>
+  <!-- Mascot Encouragement Card -->
+  <view class="card card--mascot">
+    <view class="mascot-box">
+      <text class="mascot-avatar">🦌</text>
+      <view class="mascot-text">
+        <view class="mascot-title">康复小模范 🌟</view>
+        <view class="mascot-quote">坚持运动，活力满满！康康小鹿为您点赞～</view>
+      </view>
     </view>
   </view>
 
+  <!-- Training Progress Card (Positive Metrics per D20) -->
   <view class="section">
-    <view class="section-title">H-Y 分期</view>
+    <view class="section-title">坚持跟练成就</view>
     <view class="card">
-      <view class="stage">
-        <view class="stage__value">— 级</view>
-        <text class="badge badge--warning">疑似（待确认）</text>
-      </view>
-      <view class="divider"></view>
-      <view class="info-row">
-        <text class="info-row__label">确认人</text>
-        <text class="info-row__value">—</text>
-      </view>
-      <view class="info-row">
-        <text class="info-row__label">确认时间</text>
-        <text class="info-row__value">—</text>
+      <view class="stat-grid">
+        <view class="stat-item">
+          <view class="stat-value">36</view>
+          <view class="stat-label">累计训练 (次)</view>
+        </view>
+        <view class="stat-item">
+          <view class="stat-value">12</view>
+          <view class="stat-label">连续坚持 (天)</view>
+        </view>
+        <view class="stat-item">
+          <view class="stat-value">96%</view>
+          <view class="stat-label">本周完成率</view>
+        </view>
       </view>
     </view>
   </view>
 
+  <!-- Basic Profile Info (No Disease / Diagnosis Wording) -->
   <view class="section">
-    <view class="section-title">症状与风险</view>
+    <view class="section-title">基本信息</view>
     <view class="card">
       <view class="info-row">
-        <text class="info-row__label">跌倒风险</text>
-        <text class="info-row__value">—</text>
+        <text class="info-row__label">姓名</text>
+        <text class="info-row__value">张建国</text>
       </view>
       <view class="info-row">
-        <text class="info-row__label">症状标签</text>
-        <text class="info-row__value">暂无记录</text>
+        <text class="info-row__label">出生年份</text>
+        <text class="info-row__value">1954 年</text>
+      </view>
+      <view class="info-row">
+        <text class="info-row__label">所属机构</text>
+        <text class="info-row__value">市康复中心第三病区</text>
+      </view>
+      <view class="info-row">
+        <text class="info-row__label">照护代办</text>
+        <text class="info-row__value">已关联家人微信</text>
       </view>
     </view>
   </view>
 
-  <view class="notice">5 级仅提供健康宣教与转诊建议，不进入训练流程。</view>
-  <view class="hint">本页为结构占位，档案数据待接入。</view>
+  <view class="hint">训练数据持续与机构端同步；医护端工作台可查阅详细康复方案。</view>
 </view>
