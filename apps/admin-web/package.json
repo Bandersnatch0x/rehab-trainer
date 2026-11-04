@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
+    "test:e2e": "playwright test",
+    "test:e2e:report": "playwright show-report ../../.agent/tmp/admin-e2e/html",
     "generate:api": "openapi-typescript ../../packages/api-contract/openapi.yaml -o src/api/schema.d.ts"
   },
   "dependencies": {
@@ -16,6 +18,7 @@
     "react-router": "^8.5.1"
   },
   "devDependencies": {
+    "@playwright/test": "1.64.1",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.2.1",
