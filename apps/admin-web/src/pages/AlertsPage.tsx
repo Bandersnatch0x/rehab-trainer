@@ -1,67 +1,89 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { listAlerts, updateAlert } from "../api/operations";
+import type { Alert } from "../api/types";
 
-interface AlertRecord {
-  id: string;
-  patientId: string;
-  patientName: string;
-  time: string;
-  ruleCode: string;
-  severity: "critical" | "warning" | "info";
-  description: string;
-  status: "待处理" | "已确认" | "已随访";
-  channel: string;
+type LevelFilter = "" | "critical" | "warning" | "info";
+
+const LEVEL_LABEL: Record<string, string> = {
+  critical: "严重",
+  warning: "警告",
+  info: "提示",
+};
+
+const LEVEL_CLASS: Record<string, string> = {
+  critical: "badge badge--danger",
+  warning: "badge badge--warning",
+  info: "badge badge--info",
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  open: "待处理",
+  acknowledged: "已确认",
+  followed_up: "已随访",
+  closed: "已关闭",
+};
+
+const STATUS_CLASS: Record<string, string> = {
+  open: "badge badge--danger",
+  acknowledged: "badge badge--info",
+  followed_up: "badge badge--success",
+  closed: "badge badge--info",
+};
+
+const CHANNEL_LABEL: Record<string, string> = {
+  in_app_popup: "端上弹窗",
+  voice_prompt: "语音提示",
+  push_notification: "推送通知",
+  audit_log: "审计日志",
+};
+
+/** 只显示到分钟，避免后端时间戳原样铺满表格。 */
+function formatTime(value: string): string {
+  return value.replace("T", " ").slice(0, 16);
 }
 
-const MOCK_ALERTS: AlertRecord[] = [
-  {
-    id: "ALT-2026-001",
-    patientId: "PT-2026-081",
-    patientName: "张建国",
-    time: "今日 09:20",
-    ruleCode: "RULE-RIGIDITY-03",
-    severity: "critical",
-    description: "自评主观晨僵感连续 3 天加重，超过临床预警阈值",
-    status: "待处理",
-    channel: "端上弹窗 + 微信服务通知",
-  },
-  {
-    id: "ALT-2026-002",
-    patientId: "PT-2026-085",
-    patientName: "王秀英",
-    time: "昨日 14:10",
-    ruleCode: "RULE-FALL-01",
-    severity: "warning",
-    description: "STEADI 跌倒风险自评出现单项异常，步态平衡不稳",
-    status: "已随访",
-    channel: "微信服务通知",
-  },
-  {
-    id: "ALT-2026-003",
-    patientId: "PT-2026-092",
-    patientName: "李素芬",
-    time: "前天 16:45",
-    ruleCode: "RULE-FRAME-QUALITY-02",
-    severity: "info",
-    description: "连续两轮训练有效帧占比低于 75%，疑似摄像头角度偏移",
-    status: "已确认",
-    channel: "系统消息",
-  },
-];
-
 export default function AlertsPage() {
-  const [filter, setFilter] = useState<string>("all");
-  const [alerts, setAlerts] = useState<AlertRecord[]>(MOCK_ALERTS);
+  const [filter, setFilter] = useState<LevelFilter>("");
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [pendingId, setPendingId] = useState<string | null>(null);
 
-  const filteredAlerts = alerts.filter((a) => {
-    if (filter === "all") return true;
-    return a.severity === filter;
-  });
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    const result = await listAlerts(filter ? { level: filter } : {});
+    setLoading(false);
+    if (result.ok) {
+      setAlerts(result.data.items);
+    } else {
+      setError(result.error.message);
+      setAlerts([]);
+    }
+  }, [filter]);
 
-  const handleResolve = (id: string) => {
-    setAlerts((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, status: "已随访" } : item))
-    );
-  };
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  async function handleResolve(alert: Alert) {
+    setPendingId(alert.id);
+    setError(null);
+    const result = await updateAlert(alert.id, {
+      status: "followed_up",
+      note: "管理端登记随访",
+    });
+    setPendingId(null);
+    if (!result.ok) {
+      setError(`预警 ${alert.id} 登记失败：${result.error.message}`);
+      return;
+    }
+    // 以服务端返回为准，避免本地状态与台账不一致。
+    setAlerts((prev) => prev.map((item) => (item.id === result.data.id ? result.data : item)));
+  }
+
+  const countByLevel = (level: Exclude<LevelFilter, "">) =>
+    alerts.filter((a) => a.level === level).length;
 
   return (
     <div className="page">
@@ -77,11 +99,17 @@ export default function AlertsPage() {
         </div>
       </div>
 
+      {error ? (
+        <p role="alert" className="notice notice--danger">
+          {error}
+        </p>
+      ) : null}
+
       <div className="card" style={{ padding: "16px 20px", display: "flex", gap: 12, alignItems: "center" }}>
         <button
-          className={filter === "all" ? "btn-primary" : "btn-secondary"}
+          className={filter === "" ? "btn-primary" : "btn-secondary"}
           style={{ minHeight: 36, padding: "4px 14px", fontSize: 14 }}
-          onClick={() => setFilter("all")}
+          onClick={() => setFilter("")}
         >
           全部 ({alerts.length})
         </button>
@@ -90,10 +118,10 @@ export default function AlertsPage() {
           style={{ minHeight: 36, padding: "4px 14px", fontSize: 14 }}
           onClick={() => setFilter("critical")}
         >
-          严重 ({alerts.filter((a) => a.severity === "critical").length})
+          严重 ({countByLevel("critical")})
         </button>
         <button
-          className={filter === "warning" ? "btn-secondary" : "btn-secondary"}
+          className="btn-secondary"
           style={{
             minHeight: 36,
             padding: "4px 14px",
@@ -103,15 +131,16 @@ export default function AlertsPage() {
           }}
           onClick={() => setFilter("warning")}
         >
-          警告 ({alerts.filter((a) => a.severity === "warning").length})
+          警告 ({countByLevel("warning")})
         </button>
         <button
-          className={filter === "info" ? "btn-secondary" : "btn-secondary"}
+          className="btn-secondary"
           style={{ minHeight: 36, padding: "4px 14px", fontSize: 14 }}
           onClick={() => setFilter("info")}
         >
-          提示 ({alerts.filter((a) => a.severity === "info").length})
+          提示 ({countByLevel("info")})
         </button>
+        {loading ? <span className="hint">加载中…</span> : null}
       </div>
 
       <div className="table-container">
@@ -122,63 +151,66 @@ export default function AlertsPage() {
               <th>患者</th>
               <th>触发时间</th>
               <th>触发规则</th>
-              <th>事件描述</th>
               <th>通知渠道</th>
               <th>处置状态</th>
               <th>操作</th>
             </tr>
           </thead>
           <tbody>
-            {filteredAlerts.map((a) => (
-              <tr key={a.id}>
-                <td>
-                  <span
-                    className={
-                      a.severity === "critical"
-                        ? "badge badge--danger"
-                        : a.severity === "warning"
-                        ? "badge badge--warning"
-                        : "badge badge--info"
-                    }
-                  >
-                    {a.severity === "critical" ? "严重" : a.severity === "warning" ? "警告" : "提示"}
-                  </span>
-                </td>
-                <td>
-                  <strong>{a.patientName}</strong> ({a.patientId})
-                </td>
-                <td>{a.time}</td>
-                <td><code>{a.ruleCode}</code></td>
-                <td>{a.description}</td>
-                <td><span className="hint">{a.channel}</span></td>
-                <td>
-                  <span
-                    className={
-                      a.status === "待处理"
-                        ? "badge badge--danger"
-                        : a.status === "已随访"
-                        ? "badge badge--success"
-                        : "badge badge--info"
-                    }
-                  >
-                    {a.status}
-                  </span>
-                </td>
-                <td>
-                  {a.status === "待处理" ? (
-                    <button
-                      className="btn-primary"
-                      style={{ padding: "4px 12px", minHeight: 32, fontSize: 13 }}
-                      onClick={() => handleResolve(a.id)}
-                    >
-                      登记随访
-                    </button>
-                  ) : (
-                    <span className="hint">已归档</span>
-                  )}
-                </td>
+            {loading ? (
+              <tr>
+                <td colSpan={7}>正在读取预警台账…</td>
               </tr>
-            ))}
+            ) : alerts.length === 0 ? (
+              <tr>
+                <td colSpan={7}>当前筛选条件下没有预警。</td>
+              </tr>
+            ) : (
+              alerts.map((a) => (
+                <tr key={a.id}>
+                  <td>
+                    <span className={LEVEL_CLASS[a.level] ?? "badge"}>
+                      {LEVEL_LABEL[a.level] ?? a.level}
+                    </span>
+                  </td>
+                  <td>
+                    <strong>{a.patientId}</strong>
+                  </td>
+                  <td>{formatTime(a.triggeredAt)}</td>
+                  <td>
+                    <code>{a.ruleCode}</code>
+                  </td>
+                  <td>
+                    <span className="hint">
+                      {a.deliveries && a.deliveries.length > 0
+                        ? a.deliveries
+                            .map((d) => CHANNEL_LABEL[d.channel] ?? d.channel)
+                            .join(" + ")
+                        : "—"}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={STATUS_CLASS[a.status] ?? "badge"}>
+                      {STATUS_LABEL[a.status] ?? a.status}
+                    </span>
+                  </td>
+                  <td>
+                    {a.status === "open" ? (
+                      <button
+                        className="btn-primary"
+                        style={{ padding: "4px 12px", minHeight: 32, fontSize: 13 }}
+                        disabled={pendingId === a.id}
+                        onClick={() => void handleResolve(a)}
+                      >
+                        {pendingId === a.id ? "登记中…" : "登记随访"}
+                      </button>
+                    ) : (
+                      <span className="hint">已归档</span>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

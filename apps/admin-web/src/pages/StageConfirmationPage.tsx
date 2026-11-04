@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router";
+import { confirmStage } from "../api/operations";
 
 export default function StageConfirmationPage() {
   const { patientId } = useParams<{ patientId: string }>();
@@ -10,14 +11,29 @@ export default function StageConfirmationPage() {
   );
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!patientId) {
+      setError("缺少患者编号，无法签发分期");
+      return;
+    }
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
+    setError(null);
+
+    const result = await confirmStage(patientId, {
+      stage: stageValue,
+      confirmedAt: new Date().toISOString(),
+      note: clinicalNotes,
+    });
+
+    setSubmitting(false);
+    if (result.ok) {
       setSuccess(true);
-    }, 600);
+      return;
+    }
+    setError(result.error.message);
   };
 
   return (
@@ -82,6 +98,12 @@ export default function StageConfirmationPage() {
               若判定为 H-Y 3–4 级，系统将强制锁定站立位高难度动作，并要求照护人员近身在场。
             </div>
           </div>
+
+          {error ? (
+            <p role="alert" className="notice notice--danger">
+              分期签发失败：{error}
+            </p>
+          ) : null}
 
           <div style={{ display: "flex", gap: 16, marginTop: 12 }}>
             <button

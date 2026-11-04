@@ -35,7 +35,8 @@ export default function LoginPage() {
     const adminRole = result.data.profile.roles.find(isAdminRole);
     if (!adminRole) {
       setBusy(false);
-      setError("该账号没有管理端权限");
+      // 账号本身有效，只是没有管理端角色：按 403 处理，不建立管理端会话。
+      navigate("/forbidden", { replace: true });
       return;
     }
 

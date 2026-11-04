@@ -1,18 +1,76 @@
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
+import { getPatient, listSessions } from "../api/operations";
+import type { Patient, SessionRecord } from "../api/types";
 import { useAuth } from "../auth/AuthProvider";
+
+const RISK_LABEL: Record<string, string> = {
+  low: "低风险",
+  medium: "中风险",
+  high: "高风险",
+};
+
+const RISK_CLASS: Record<string, string> = {
+  low: "badge badge--success",
+  medium: "badge badge--warning",
+  high: "badge badge--danger",
+};
+
+function formatTime(value: string): string {
+  return value.replace("T", " ").slice(0, 16);
+}
 
 export default function PatientDetailPage() {
   const { patientId } = useParams<{ patientId: string }>();
   const { can } = useAuth();
   const isTherapist = can("rehab_therapist");
-  const encodedId = encodeURIComponent(patientId ?? "PT-2026-081");
+  const encodedId = encodeURIComponent(patientId ?? "");
+
+  const [patient, setPatient] = useState<Patient | null>(null);
+  const [sessions, setSessions] = useState<SessionRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!patientId) {
+      setLoading(false);
+      setError("缺少患者编号");
+      return;
+    }
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    Promise.all([getPatient(patientId), listSessions({ patientId })]).then(
+      ([patientResult, sessionResult]) => {
+        if (cancelled) {
+          return;
+        }
+        setLoading(false);
+        if (!patientResult.ok) {
+          setError(patientResult.error.message);
+          return;
+        }
+        setPatient(patientResult.data);
+        if (sessionResult.ok) {
+          setSessions(sessionResult.data.items);
+        }
+      },
+    );
+
+    return () => {
+      cancelled = true;
+    };
+  }, [patientId]);
+
+  const confirmed = patient?.stageConfirmationStatus === "confirmed";
 
   return (
     <div className="page">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div>
           <h1>患者详情档案</h1>
-          <p className="page-description">患者编号：{patientId ?? "PT-2026-081"} · 机构康复监护中</p>
+          <p className="page-description">患者编号：{patientId} · 机构康复监护中</p>
         </div>
         {isTherapist && (
           <div style={{ display: "flex", gap: 12 }}>
@@ -26,55 +84,78 @@ export default function PatientDetailPage() {
         )}
       </div>
 
+      {error ? (
+        <p role="alert" className="notice notice--danger">
+          患者档案读取失败：{error}
+        </p>
+      ) : null}
+
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 24 }}>
-        {/* Basic & Stage Card */}
         <div className="card">
           <div className="card-title">基本生理与临床分期</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span className="hint">患者姓名</span>
-              <strong>张建国 (72 岁)</strong>
+              <strong>
+                {loading
+                  ? "加载中…"
+                  : patient
+                    ? `${patient.displayName}${
+                        patient.birthYear
+                          ? ` (${new Date().getFullYear() - patient.birthYear} 岁)`
+                          : ""
+                      }`
+                    : "—"}
+              </strong>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span className="hint">H-Y 临床分级</span>
-              <span className="badge badge--info">H-Y 2期 (双侧轻度受累)</span>
+              <span className="badge badge--info">
+                {patient ? `H-Y ${patient.hyStage}期` : "—"}
+              </span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span className="hint">分期确认状态</span>
-              <span className="badge badge--success">✓ 康复治疗师已确认</span>
+              {patient ? (
+                confirmed ? (
+                  <span className="badge badge--success">✓ 康复治疗师已确认</span>
+                ) : (
+                  <span className="badge badge--warning">⚠️ 疑似待确认 (D11)</span>
+                )
+              ) : (
+                <span>—</span>
+              )}
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span className="hint">跌倒风险评级</span>
-              <span className="badge badge--warning">中风险 (STEADI)</span>
+              <span className={RISK_CLASS[patient?.fallRisk ?? "low"] ?? "badge"}>
+                {RISK_LABEL[patient?.fallRisk ?? "low"] ?? "—"}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Current Prescription */}
         <div className="card">
-          <div className="card-title">当前有效处方（版本 v2.0）</div>
+          <div className="card-title">当前有效处方</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <p className="hint" style={{ margin: 0 }}>
+              契约当前只提供开具与调整处方（POST/PATCH），没有按患者读取处方的操作，
+              因此本页不展示处方内容，避免与真实台账不一致。
+            </p>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span className="hint">核心训练大类</span>
-              <strong>节律步态（RAS 引导）</strong>
+              <span className="hint">已提交训练记录</span>
+              <strong>{loading ? "加载中…" : `${sessions.length} 条`}</strong>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span className="hint">听觉刺激节拍</span>
-              <strong>64 BPM (个体化定制)</strong>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span className="hint">计划频次与剂量</span>
-              <strong>每周 5 次 · 每次 3 组 × 12 次</strong>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span className="hint">签发治疗师</span>
-              <span>李主任 (2026-11-01)</span>
+              <span className="hint">处方调整</span>
+              <Link to={`/patients/${encodedId}/prescription`} className="btn-secondary">
+                前往调整
+              </Link>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Recent Training Records Table */}
       <div className="card">
         <div className="card-title">近期训练有效性与质检记录 (D14, T7)</div>
         <div className="table-container">
@@ -82,41 +163,57 @@ export default function PatientDetailPage() {
             <thead>
               <tr>
                 <th>训练时间</th>
-                <th>训练条目</th>
                 <th>完成次数</th>
                 <th>动作错误</th>
+                <th>中断</th>
                 <th>有效帧占比</th>
                 <th>质检标记</th>
                 <th>算法版本</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>今天 10:15</td>
-                <td>RAS 节律踏步训练</td>
-                <td>36 次</td>
-                <td>1 次</td>
-                <td>
-                  <strong style={{ color: "var(--color-success)" }}>98.4%</strong>
-                </td>
-                <td>
-                  <span className="badge badge--success">无存疑</span>
-                </td>
-                <td>MediaPipe-Lite-v1.2</td>
-              </tr>
-              <tr>
-                <td>昨天 15:30</td>
-                <td>坐位上肢躯干伸展</td>
-                <td>20 次</td>
-                <td>4 次</td>
-                <td>
-                  <strong style={{ color: "var(--color-danger)" }}>71.2%</strong>
-                </td>
-                <td>
-                  <span className="badge badge--warning">已存疑（脚部遮挡）</span>
-                </td>
-                <td>MediaPipe-Lite-v1.2</td>
-              </tr>
+              {loading ? (
+                <tr>
+                  <td colSpan={7}>正在读取训练记录…</td>
+                </tr>
+              ) : sessions.length === 0 ? (
+                <tr>
+                  <td colSpan={7}>该患者暂无训练记录。</td>
+                </tr>
+              ) : (
+                sessions.map((record) => (
+                  <tr key={record.id}>
+                    <td>{formatTime(record.recordedAt ?? "")}</td>
+                    <td>{record.completionCount ?? 0} 次</td>
+                    <td>{record.movementErrorCount ?? 0} 次</td>
+                    <td>{record.interruptionCount ?? 0} 次</td>
+                    <td>
+                      {typeof record.validFrameRatio === "number" ? (
+                        <strong
+                          style={{
+                            color:
+                              record.validFrameRatio >= 0.85
+                                ? "var(--color-success)"
+                                : "var(--color-danger)",
+                          }}
+                        >
+                          {(record.validFrameRatio * 100).toFixed(1)}%
+                        </strong>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                    <td>
+                      {record.isDoubtful ? (
+                        <span className="badge badge--warning">已存疑</span>
+                      ) : (
+                        <span className="badge badge--success">无存疑</span>
+                      )}
+                    </td>
+                    <td>{record.metricAlgorithmVersion ?? "—"}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
