@@ -49,6 +49,31 @@ def test_non_clinician_only_sees_linked_patients(client, seed):
     assert [item["id"] for item in listing.json()["items"]] == ["patient-a"]
 
 
+def test_prescription_list_respects_org_and_patient_scope(client, seed):
+    cross_org = client.get(
+        f"{API}/prescriptions",
+        params={"patientId": seed["patient_a"]},
+        headers=auth_headers(login(client, "therapist-b")),
+    )
+    assert cross_org.status_code == 403
+    assert cross_org.json()["code"] == "FORBIDDEN"
+
+    unlinked = client.get(
+        f"{API}/prescriptions",
+        params={"patientId": seed["patient_unconfirmed"]},
+        headers=auth_headers(login(client, "caregiver-a")),
+    )
+    assert unlinked.status_code == 403
+
+    own = client.get(
+        f"{API}/prescriptions",
+        params={"patientId": seed["patient_a"]},
+        headers=auth_headers(login(client, "caregiver-a")),
+    )
+    assert own.status_code == 200
+    assert [item["id"] for item in own.json()["items"]] == [seed["prescription_a"]]
+
+
 def test_clinician_sees_all_patients_in_org(client, seed):
     token = login(client, "therapist-a")
     response = client.get(f"{API}/patients", headers=auth_headers(token))
