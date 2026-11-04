@@ -38,6 +38,7 @@ App 与小程序功能清单一致;差异只在姿态识别的实现方式与实
 # 后端
 services/api/.venv/Scripts/python.exe -m pytest services/api/tests
 # 管理端 E2E(自动起后端与预览服务;优先用 services/api/.venv 的 python)
+# 默认端口 18765/4173,被占用时用 E2E_BACKEND_PORT / E2E_PREVIEW_PORT 覆盖
 cd apps/admin-web; npx playwright test
 # 联调(不加 --base-url 时脚本自建独立库并拉起 uvicorn)
 # 配置文件格式: {"username":"therapist","password":"<seed 输出>","bindingToken":"<seed 输出>"}

@@ -86,7 +86,8 @@ if __name__ == "__main__":
             _seed_exercises(db)
             db.commit()
         import uvicorn
-        uvicorn.run("app.main:app", host="127.0.0.1", port=18765)
+        port = int(os.environ.get("E2E_BACKEND_PORT", "18765"))
+        uvicorn.run("app.main:app", host="127.0.0.1", port=port)
     elif sys.argv[1:] == ["seed"]:
         seed_case()
     elif sys.argv[1:] == ["seed-many"]:
