@@ -27,6 +27,7 @@ export type ExerciseVariant = components["schemas"]["ExerciseVariant"];
 export type ExercisePage = components["schemas"]["ExercisePage"];
 export type Dosage = components["schemas"]["Dosage"];
 export type Prescription = components["schemas"]["Prescription"];
+export type PrescriptionPage = components["schemas"]["PrescriptionPage"];
 export type PrescriptionItem = components["schemas"]["PrescriptionItem"];
 export type SessionRecord = components["schemas"]["SessionRecord"];
 export type SessionRecordPage = components["schemas"]["SessionRecordPage"];
@@ -66,4 +67,7 @@ export type SessionListQuery = NonNullable<
 >;
 export type AlertListQuery = NonNullable<
   paths["/alerts"]["get"]["parameters"]["query"]
+>;
+export type PrescriptionListQuery = NonNullable<
+  paths["/prescriptions"]["get"]["parameters"]["query"]
 >;

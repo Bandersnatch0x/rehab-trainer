@@ -27,6 +27,8 @@ export const router = createBrowserRouter([
     element: <RootProviders />,
     children: [
       { path: "/login", element: <LoginPage /> },
+      // 403 页不要求登录：账号有效但无管理端角色时正是要展示它。
+      { path: "/forbidden", element: <ForbiddenPage /> },
       {
         element: (
           <RequireAuth>
@@ -63,7 +65,6 @@ export const router = createBrowserRouter([
               </RequireRole>
             ),
           },
-          { path: "forbidden", element: <ForbiddenPage /> },
         ],
       },
       { path: "*", element: <NotFoundPage /> },

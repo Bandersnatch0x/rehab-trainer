@@ -110,6 +110,35 @@ def test_create_and_patch_prescription_version(client, seed):
     assert conflict.status_code == 409
 
 
+def test_list_prescriptions_returns_latest_first(client, seed):
+    token = login(client, "therapist-a")
+    headers = auth_headers(token)
+
+    listed = client.get(
+        f"{API}/prescriptions",
+        params={"patientId": seed["patient_a"]},
+        headers=headers,
+    )
+    assert listed.status_code == 200, listed.text
+    assert listed.json()["items"][0]["id"] == seed["prescription_a"]
+
+    body = _create_body(seed)
+    # 明确晚于种子处方的签发时间，才能验证倒序。
+    body["issuedAt"] = "2027-01-01T08:00:00Z"
+    created = client.post(f"{API}/prescriptions", json=body, headers=headers)
+    assert created.status_code == 201, created.text
+
+    after = client.get(
+        f"{API}/prescriptions",
+        params={"patientId": seed["patient_a"]},
+        headers=headers,
+    )
+    items = after.json()["items"]
+    assert len(items) == 2
+    # 新签发的处方排在最前，页面据此取当前有效版本。
+    assert items[0]["id"] == created.json()["id"]
+
+
 def test_prescription_is_therapist_only(client, seed):
     token = login(client, "patient-a")
     response = client.post(

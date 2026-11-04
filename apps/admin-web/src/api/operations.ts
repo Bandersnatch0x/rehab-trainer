@@ -19,7 +19,9 @@ import type {
   PatientPage,
   Prescription,
   PrescriptionCreate,
+  PrescriptionPage,
   PrescriptionPatch,
+  PrescriptionListQuery,
   RefreshRequestBody,
   SessionBatchRequest,
   SessionBatchResult,
@@ -131,6 +133,15 @@ export function getExercise(code: string): Promise<ApiResult<Exercise>> {
 }
 
 // ---------- prescriptions ----------
+
+/** 9.5 GET /prescriptions — 按患者读处方（倒序，第一条为当前有效处方） */
+export function listPrescriptions(
+  query: PrescriptionListQuery,
+): Promise<ApiResult<PrescriptionPage>> {
+  return toResult<PrescriptionPage>(
+    api.GET("/prescriptions", { params: { query } }),
+  );
+}
 
 /** 10. POST /prescriptions — 开具处方 */
 export function createPrescription(

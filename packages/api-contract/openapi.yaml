@@ -306,6 +306,27 @@ paths:
           $ref: "#/components/responses/NotFound"
 
   /prescriptions:
+    get:
+      tags: [prescriptions]
+      summary: 按患者读取处方
+      description: 按签发时间倒序返回；第一条即当前有效处方，用于调整处方时取得 If-Match 版本号。
+      parameters:
+        - name: patientId
+          in: query
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: 处方列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrescriptionPage"
+        "403":
+          $ref: "#/components/responses/Forbidden"
     post:
       tags: [prescriptions]
       summary: 开具处方
@@ -923,6 +944,18 @@ components:
         status:
           type: string
           enum: [draft, active, expired]
+
+    PrescriptionPage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Prescription"
+        nextCursor:
+          type: string
+          nullable: true
 
     SessionRecordCreate:
       type: object

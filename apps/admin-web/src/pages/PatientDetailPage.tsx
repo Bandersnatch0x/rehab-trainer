@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
-import { getPatient, listSessions } from "../api/operations";
-import type { Patient, SessionRecord } from "../api/types";
+import { getPatient, listPrescriptions, listSessions } from "../api/operations";
+import type { Patient, Prescription, SessionRecord } from "../api/types";
 import { useAuth } from "../auth/AuthProvider";
 
 const RISK_LABEL: Record<string, string> = {
@@ -27,6 +27,7 @@ export default function PatientDetailPage() {
   const encodedId = encodeURIComponent(patientId ?? "");
 
   const [patient, setPatient] = useState<Patient | null>(null);
+  const [prescription, setPrescription] = useState<Prescription | null>(null);
   const [sessions, setSessions] = useState<SessionRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,22 +42,28 @@ export default function PatientDetailPage() {
     setLoading(true);
     setError(null);
 
-    Promise.all([getPatient(patientId), listSessions({ patientId })]).then(
-      ([patientResult, sessionResult]) => {
-        if (cancelled) {
-          return;
-        }
-        setLoading(false);
-        if (!patientResult.ok) {
-          setError(patientResult.error.message);
-          return;
-        }
-        setPatient(patientResult.data);
-        if (sessionResult.ok) {
-          setSessions(sessionResult.data.items);
-        }
-      },
-    );
+    Promise.all([
+      getPatient(patientId),
+      listPrescriptions({ patientId }),
+      listSessions({ patientId }),
+    ]).then(([patientResult, prescriptionResult, sessionResult]) => {
+      if (cancelled) {
+        return;
+      }
+      setLoading(false);
+      if (!patientResult.ok) {
+        setError(patientResult.error.message);
+        return;
+      }
+      setPatient(patientResult.data);
+      if (prescriptionResult.ok) {
+        // 契约按签发时间倒序返回，第一条即当前有效处方。
+        setPrescription(prescriptionResult.data.items[0] ?? null);
+      }
+      if (sessionResult.ok) {
+        setSessions(sessionResult.data.items);
+      }
+    });
 
     return () => {
       cancelled = true;
@@ -136,12 +143,38 @@ export default function PatientDetailPage() {
         </div>
 
         <div className="card">
-          <div className="card-title">当前有效处方</div>
+          <div className="card-title">
+            当前有效处方{prescription ? `（版本 ${prescription.version}）` : ""}
+          </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <p className="hint" style={{ margin: 0 }}>
-              契约当前只提供开具与调整处方（POST/PATCH），没有按患者读取处方的操作，
-              因此本页不展示处方内容，避免与真实台账不一致。
-            </p>
+            {loading ? (
+              <p className="hint" style={{ margin: 0 }}>
+                正在读取处方…
+              </p>
+            ) : prescription ? (
+              <>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span className="hint">训练条目</span>
+                  <strong>
+                    {prescription.items.length > 0
+                      ? prescription.items.map((item) => item.exerciseCode).join("、")
+                      : "—"}
+                  </strong>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span className="hint">有效期至</span>
+                  <span>{prescription.validUntil?.slice(0, 10) ?? "—"}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span className="hint">签发治疗师</span>
+                  <span>{prescription.prescribedBy}</span>
+                </div>
+              </>
+            ) : (
+              <p className="hint" style={{ margin: 0 }}>
+                该患者暂无处方记录。
+              </p>
+            )}
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span className="hint">已提交训练记录</span>
               <strong>{loading ? "加载中…" : `${sessions.length} 条`}</strong>

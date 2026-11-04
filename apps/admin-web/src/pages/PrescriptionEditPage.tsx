@@ -1,7 +1,12 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router";
-import { createPrescription, listExercises } from "../api/operations";
-import type { Exercise } from "../api/types";
+import {
+  createPrescription,
+  listExercises,
+  listPrescriptions,
+  updatePrescription,
+} from "../api/operations";
+import type { Exercise, Prescription } from "../api/types";
 
 const CATEGORY_LABEL: Record<string, string> = {
   strength: "肌力维持（防肌少症）",
@@ -20,6 +25,7 @@ export default function PrescriptionEditPage() {
   const navigate = useNavigate();
 
   const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [current, setCurrent] = useState<Prescription | null>(null);
   const [exerciseCode, setExerciseCode] = useState<string>("");
   const [sets, setSets] = useState<number>(3);
   const [reps, setReps] = useState<number>(12);
@@ -30,7 +36,11 @@ export default function PrescriptionEditPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!patientId) {
+      return;
+    }
     let cancelled = false;
+
     listExercises({ limit: 100 }).then((result) => {
       if (cancelled || !result.ok) {
         return;
@@ -38,10 +48,27 @@ export default function PrescriptionEditPage() {
       setExercises(result.data.items);
       setExerciseCode((prev) => prev || (result.data.items[0]?.code ?? ""));
     });
+
+    listPrescriptions({ patientId }).then((result) => {
+      if (cancelled || !result.ok) {
+        return;
+      }
+      const latest = result.data.items[0] ?? null;
+      setCurrent(latest);
+      if (latest?.items[0]?.exerciseCode) {
+        setExerciseCode(latest.items[0].exerciseCode);
+        const dosage = latest.items[0].dosage;
+        if (dosage?.sets) setSets(dosage.sets);
+        if (dosage?.repetitions) setReps(dosage.repetitions);
+        if (dosage?.bpm) setBpm(dosage.bpm);
+        if (dosage?.frequencyPerWeek) setFrequency(dosage.frequencyPerWeek);
+      }
+    });
+
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [patientId]);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -56,29 +83,45 @@ export default function PrescriptionEditPage() {
     setSubmitting(true);
     setError(null);
 
-    const now = new Date();
-    const result = await createPrescription({
-      patientId,
-      items: [
-        {
-          exerciseCode,
-          dosage: {
-            sets,
-            repetitions: reps,
-            bpm,
-            frequencyPerWeek: frequency,
-          },
+    const items = [
+      {
+        exerciseCode,
+        dosage: {
+          sets,
+          repetitions: reps,
+          bpm,
+          frequencyPerWeek: frequency,
         },
-      ],
-      issuedAt: now.toISOString(),
-      validFrom: now.toISOString(),
-      validUntil: addDays(now, 30),
-      mappingTableVersion: "demo.1",
-    });
+      },
+    ];
+    const now = new Date();
+
+    // 已有处方走 PATCH + If-Match；没有才新建。绝不伪造版本号。
+    const result = current
+      ? await updatePrescription(current.id, { items }, current.version)
+      : await createPrescription({
+          patientId,
+          items,
+          issuedAt: now.toISOString(),
+          validFrom: now.toISOString(),
+          validUntil: addDays(now, 30),
+          mappingTableVersion: "demo.1",
+        });
 
     setSubmitting(false);
     if (result.ok) {
+      setCurrent(result.data);
       setSuccessVersion(result.data.version);
+      return;
+    }
+
+    if (result.error.status === 409) {
+      setError("处方版本冲突：另一端已更新，请刷新后基于最新版本重试。");
+      // 重新拉取最新版本，避免用户拿旧版本反复重试。
+      const latest = await listPrescriptions({ patientId });
+      if (latest.ok) {
+        setCurrent(latest.data.items[0] ?? null);
+      }
       return;
     }
     setError(result.error.message);
@@ -94,8 +137,9 @@ export default function PrescriptionEditPage() {
       <div className="notice">
         <div>
           <strong>处方版本乐观锁提示（D12 约束）：</strong>
-          契约当前只提供开具（POST）与调整（PATCH，需 If-Match 版本号），没有按患者读取当前处方的操作；
-          本页只执行开具新版本，避免在拿不到版本号时伪造乐观锁。
+          {current
+            ? `当前处方版本 ${current.version}。保存时以该版本作为 If-Match；另一端先更新则返回 409 并提示冲突。`
+            : "该患者暂无处方，本次保存将新建 v1.0.0。"}
         </div>
       </div>
 

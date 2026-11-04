@@ -496,7 +496,35 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * 按患者读取处方
+         * @description 按签发时间倒序返回；第一条即当前有效处方，用于调整处方时取得 If-Match 版本号。
+         */
+        get: {
+            parameters: {
+                query: {
+                    patientId: string;
+                    cursor?: components["parameters"]["Cursor"];
+                    limit?: components["parameters"]["Limit"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description 处方列表 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PrescriptionPage"];
+                    };
+                };
+                403: components["responses"]["Forbidden"];
+            };
+        };
         put?: never;
         /**
          * 开具处方
@@ -939,6 +967,10 @@ export interface components {
             mappingTableVersion?: string;
             /** @enum {string} */
             status: "draft" | "active" | "expired";
+        };
+        PrescriptionPage: {
+            items: components["schemas"]["Prescription"][];
+            nextCursor?: string | null;
         };
         SessionRecordCreate: {
             /** @description 客户端生成的幂等键 */

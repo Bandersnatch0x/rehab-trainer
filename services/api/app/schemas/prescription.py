@@ -55,3 +55,8 @@ class PrescriptionOut(APIModel):
     version: str
     mapping_table_version: str | None = None
     status: PrescriptionStatus
+
+
+class PrescriptionPage(APIModel):
+    items: list[PrescriptionOut] = Field(default_factory=list)
+    next_cursor: str | None = None

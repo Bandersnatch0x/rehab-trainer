@@ -1,12 +1,13 @@
 from typing import Annotated
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, Header, Path
+from fastapi import APIRouter, Depends, Header, Path, Query
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.access import get_patient_scoped
 from app.core.audit import record_audit
-from app.core.auth import Principal, require_roles
+from app.core.auth import Principal, get_principal, require_roles
 from app.core.clinical import (
     HIGH_RISK_LEVEL,
     HIGH_RISK_REQUIRES_CONFIRMED_STAGE,
@@ -14,6 +15,7 @@ from app.core.clinical import (
 )
 from app.core.database import get_db
 from app.core.errors import api_error
+from app.core.pagination import decode_cursor, encode_cursor
 from app.core.timeutils import to_utc_naive, utcnow
 from app.models.clinical import Patient
 from app.models.content import Exercise, ExerciseVariant
@@ -22,6 +24,7 @@ from app.schemas.prescription import (
     PrescriptionCreate,
     PrescriptionItemIn,
     PrescriptionOut,
+    PrescriptionPage,
     PrescriptionPatch,
 )
 
@@ -92,6 +95,36 @@ def _new_item(item: PrescriptionItemIn, prescription_id: str, position: int) -> 
         variant_code=item.variant_code,
         dosage=item.dosage.model_dump(by_alias=True) if item.dosage else None,
         position=position,
+    )
+
+
+@router.get("", response_model=PrescriptionPage, response_model_exclude_none=True)
+def list_prescriptions(
+    patient_id: str = Query(alias="patientId", min_length=1),
+    principal: Principal = Depends(get_principal),
+    db: Session = Depends(get_db),
+    cursor: str | None = Query(default=None),
+    limit: int = Query(default=20, ge=1, le=100),
+):
+    """按患者读取处方，按签发时间倒序；最新一条即当前有效处方。"""
+    get_patient_scoped(db, principal, patient_id)
+
+    offset = decode_cursor(cursor)
+    stmt = (
+        select(Prescription)
+        .where(
+            Prescription.patient_id == patient_id,
+            Prescription.org_id == principal.org_id,
+        )
+        .order_by(Prescription.issued_at.desc(), Prescription.id.desc())
+    )
+    rows = db.scalars(stmt.offset(offset).limit(limit + 1)).all()
+    has_more = len(rows) > limit
+    page = rows[:limit]
+
+    return PrescriptionPage(
+        items=[PrescriptionOut.model_validate(row) for row in page],
+        next_cursor=encode_cursor(offset + limit) if has_more else None,
     )
 
 

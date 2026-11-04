@@ -36,3 +36,15 @@ E2E 证据 `.agent/tmp/playwright.log`（e2e-tests-codex2）显示 5 条失败�
 1. 契约缺 `GET /prescriptions`（按患者读当前处方），因此「调整处方 + If-Match 版本冲突」在页面上无法真实完成，E2E 该条仍会失败。
 2. `Patient` 无最近训练字段，列表页该列改显示建档时间。
 3. `FollowUpsPage`、`PermissionsPage` 无对应契约操作，保持演示数据并保留「演示数据」性质。
+
+### 2026-11-05 补齐处方读取并全绿
+
+缺口 1 由协调者当场补口，不走降低断言的路：
+
+- 契约新增 `GET /prescriptions?patientId=`（按签发时间倒序，第一条即当前有效处方）与 `PrescriptionPage`。
+- 后端新增 `list_prescriptions`，复用 `get_patient_scoped` 做机构隔离与患者范围校验，分页沿用 cursor。
+- 补测试 `test_list_prescriptions_returns_latest_first`；后端全量 37 项通过。
+- 管理端：`PatientDetailPage` 展示当前处方版本与条目；`PrescriptionEditPage` 载入当前版本，保存走 PATCH + If-Match，409 显示「处方版本冲突」并自动重拉最新版本；无处方时才 POST。
+- 顺带修 `/forbidden` 路由：它原先在 `RequireAuth` 内，未登录会被弹回 `/login`，导致无权限账号永远看不到 403。现移到未受保护路由。
+
+复跑：`npx tsc --noEmit` 退出 0；`npx playwright test` **10 passed / 0 failed（26.6s）**。此前 5 条失败全部关闭。
