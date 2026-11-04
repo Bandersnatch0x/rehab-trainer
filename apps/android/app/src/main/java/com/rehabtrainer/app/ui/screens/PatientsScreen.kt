@@ -1,14 +1,134 @@
 package com.rehabtrainer.app.ui.screens
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.rehabtrainer.app.ui.components.ElderlyButton
+import com.rehabtrainer.app.ui.components.ElderlyButtonVariant
+import com.rehabtrainer.app.ui.theme.LocalElderlyDimens
 
-/** 患者：档案、H-Y 分期与分期确认状态（只读骨架）。 */
+/**
+ * 患者：查看患者档案、H-Y 分期与分期确认状态（遵守 D10 与 D11 裁决）。
+ */
 @Composable
 fun PatientsScreen(modifier: Modifier = Modifier) {
-    PlaceholderScreen(
-        title = "患者",
-        description = "查看患者档案、H-Y 分期与分期确认状态。",
+    val dimens = LocalElderlyDimens.current
+
+    Column(
         modifier = modifier
-    )
+            .fillMaxSize()
+            .padding(dimens.screenPadding)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(dimens.sectionSpacing)
+    ) {
+        Text(
+            text = "患者档案",
+            style = MaterialTheme.typography.headlineLarge
+        )
+
+        // Profile Overview Card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface
+            ),
+            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.outline)
+        ) {
+            Column(
+                modifier = Modifier.padding(dimens.screenPadding),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "张建国 (72岁)",
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = MaterialTheme.shapes.extraSmall
+                    ) {
+                        Text(
+                            text = "H-Y 2期 (已确认)",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                        )
+                    }
+                }
+
+                Text(
+                    text = "所属机构：市康复中心第三病区（机构隔离 D10）",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = MaterialTheme.shapes.small,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(
+                            text = "主要伴随症状：双侧肢体强直、静止性轻微震颤",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            text = "跌倒风险评级：中度（日常生活活动需安全防护）",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+            }
+        }
+
+        // Caregiver Proxy Card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface
+            ),
+            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.outline)
+        ) {
+            Column(
+                modifier = Modifier.padding(dimens.screenPadding),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = "照护者代操作管理",
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Text(
+                    text = "当前为「本人直接操作」。如患者手部震颤加剧无法自行打卡，可授权照护人代为执行。",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                ElderlyButton(
+                    text = "绑定照护者账号",
+                    onClick = { /* 接入绑定流程 */ },
+                    variant = ElderlyButtonVariant.Secondary
+                )
+            }
+        }
+    }
 }

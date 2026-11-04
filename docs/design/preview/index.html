@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>rehab-trainer 三端 UI/UX 设计与交互原型 (适老化与医疗康复系统)</title>
+  <style>
+    :root {
+      --color-primary: #1A4FA0;
+      --color-primary-dark: #0F3268;
+      --color-primary-light: #EAF1FB;
+      --color-success: #1B5E20;
+      --color-success-light: #E8F5E9;
+      --color-warning: #B45309;
+      --color-warning-light: #FEF3C7;
+      --color-danger: #B91C1C;
+      --color-danger-dark: #7F1D1D;
+      --color-danger-light: #FEE2E2;
+      --text-primary: #0F172A;
+      --text-secondary: #334155;
+      --text-tertiary: #475569;
+      --bg-page: #F8FAFC;
+      --bg-card: #FFFFFF;
+      --border-card: #CBD5E1;
+      --border-strong: #94A3B8;
+      --font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: #0F172A;
+      color: #F8FAFC;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Global Switcher Bar */
+    header.prototype-header {
+      background: #1E293B;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #334155;
+      flex-wrap: wrap;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      background: var(--color-primary);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+
+    .brand-desc {
+      font-size: 13px;
+      color: #94A3B8;
+    }
+
+    .device-tabs {
+      display: flex;
+      gap: 8px;
+      background: #0F172A;
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid #334155;
+    }
+
+    .device-tab {
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #94A3B8;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .device-tab:hover {
+      color: #FFFFFF;
+    }
+
+    .device-tab.active {
+      background: var(--color-primary);
+      color: #FFFFFF;
+      box-shadow: 0 2px 8px rgba(26, 79, 160, 0.4);
+    }
+
+    .page-nav-bar {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .page-chip {
+      padding: 6px 14px;
+      font-size: 13px;
+      color: #CBD5E1;
+      background: #334155;
+      border: 1px solid #475569;
+      border-radius: 999px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .page-chip:hover {
+      background: #475569;
+      color: #FFF;
+    }
+
+    .page-chip.active {
+      background: #38BDF8;
+      color: #0F172A;
+      font-weight: 700;
+      border-color: #38BDF8;
+    }
+
+    /* Main Container */
+    main.prototype-viewport {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px 48px;
+      overflow-y: auto;
+      background: radial-gradient(circle at center, #1E293B 0%, #0F172A 100%);
+    }
+
+    /* Device Mockup Shells */
+    .device-frame {
+      display: none;
+      background: #FFFFFF;
+      color: var(--text-primary);
+      border-radius: 36px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.6), 0 0 0 12px #334155;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .device-frame.active {
+      display: block;
+    }
+
+    /* Mobile Frame (Android / Mini-Program) */
+    .frame-phone {
+      width: 412px;
+      height: 870px;
+      display: none;
+      flex-direction: column;
+    }
+
+    .frame-phone.active {
+      display: flex;
+    }
+
+    .phone-notch {
+      height: 28px;
+      background: #111;
+      color: #EEE;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      font-weight: 600;
+      user-select: none;
+    }
+
+    .phone-screen {
+      flex: 1;
+      background: var(--bg-page);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Tablet Frame */
+    .frame-tablet {
+      width: 980px;
+      height: 680px;
+      display: none;
+      flex-direction: column;
+      border-radius: 28px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 0 14px #334155;
+    }
+
+    .frame-tablet.active {
+      display: flex;
+    }
+
+    .tablet-screen {
+      flex: 1;
+      background: var(--bg-page);
+      overflow-y: auto;
+      display: flex;
+    }
+
+    /* Web Desktop Frame */
+    .frame-desktop {
+      width: 1240px;
+      height: 760px;
+      display: none;
+      flex-direction: column;
+      border-radius: 12px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 0 8px #475569;
+    }
+
+    .frame-desktop.active {
+      display: flex;
+    }
+
+    .desktop-browser-bar {
+      height: 38px;
+      background: #E2E8F0;
+      border-bottom: 1px solid #CBD5E1;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 12px;
+    }
+
+    .browser-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .browser-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+    }
+
+    .dot-red { background: #EF4444; }
+    .dot-yellow { background: #F59E0B; }
+    .dot-green { background: #10B981; }
+
+    .browser-address {
+      flex: 1;
+      max-width: 520px;
+      height: 26px;
+      background: #FFFFFF;
+      border-radius: 6px;
+      border: 1px solid #CBD5E1;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      color: #475569;
+    }
+
+    .desktop-screen {
+      flex: 1;
+      background: var(--bg-page);
+      overflow-y: auto;
+      display: flex;
+    }
+
+    /* Common UI Elements inside Frames */
+    .ui-top-bar {
+      min-height: 72px;
+      background: #FFFFFF;
+      border-bottom: 2px solid var(--border-card);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .ui-top-bar__title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .ui-top-bar__btn {
+      min-height: 48px;
+      padding: 0 16px;
+      font-size: 16px;
+      font-weight: 600;
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      border: 2px solid var(--color-primary);
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    /* Elderly Primary Button: >= 80dp (approx 80px) */
+    .btn-elderly-primary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 80px;
+      background: var(--color-primary);
+      color: #FFFFFF;
+      font-size: 20px;
+      font-weight: 700;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      box-shadow: 0 6px 14px rgba(26, 79, 160, 0.28);
+      gap: 12px;
+      transition: all 0.15s ease;
+      touch-action: manipulation;
+    }
+
+    .btn-elderly-primary:hover, .btn-elderly-primary:active {
+      background: var(--color-primary-dark);
+      transform: scale(0.99);
+    }
+
+    /* Elderly Secondary Button */
+    .btn-elderly-secondary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 60px;
+      background: #FFFFFF;
+      color: var(--color-primary);
+      font-size: 18px;
+      font-weight: 600;
+      border: 2px solid var(--color-primary);
+      border-radius: 16px;
+      cursor: pointer;
+      gap: 10px;
+      transition: all 0.15s;
+    }
+
+    .btn-elderly-secondary:hover {
+      background: var(--color-primary-light);
+    }
+
+    /* Elderly Danger / Emergency Stop Button */
+    .btn-elderly-danger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 80px;
+      background: var(--color-danger);
+      color: #FFFFFF;
+      font-size: 22px;
+      font-weight: 700;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(185, 28, 28, 0.35);
+      gap: 12px;
+      animation: pulse-danger 2.5s infinite;
+    }
+
+    @keyframes pulse-danger {
+      0% { box-shadow: 0 0 0 0 rgba(185, 28, 28, 0.6); }
+      70% { box-shadow: 0 0 0 14px rgba(185, 28, 28, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(185, 28, 28, 0); }
+    }
+
+    .card-container {
+      background: #FFFFFF;
+      border: 2px solid var(--border-card);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .notice-box {
+      display: flex;
+      gap: 14px;
+      padding: 18px 20px;
+      border-radius: 14px;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      border-left: 8px solid;
+    }
+
+    .notice-info {
+      background: var(--color-primary-light);
+      border-left-color: var(--color-primary);
+      color: var(--color-primary-dark);
+    }
+
+    .notice-warning {
+      background: var(--color-warning-light);
+      border-left-color: var(--color-warning);
+      color: #78350F;
+    }
+
+    .notice-danger {
+      background: var(--color-danger-light);
+      border-left-color: var(--color-danger);
+      color: var(--color-danger-dark);
+      font-weight: 600;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .badge-success { background: var(--color-success-light); color: var(--color-success); }
+    .badge-warning { background: var(--color-warning-light); color: var(--color-warning); }
+    .badge-danger { background: var(--color-danger-light); color: var(--color-danger); }
+    .badge-primary { background: var(--color-primary-light); color: var(--color-primary); }
+
+    /* Bottom Navigation Bar for Mobile */
+    .mobile-bottom-nav {
+      min-height: 76px;
+      background: #FFFFFF;
+      border-top: 2px solid var(--border-card);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 4px 12px;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 12px;
+      transition: all 0.15s;
+    }
+
+    .nav-item.active {
+      color: var(--color-primary);
+      background: var(--color-primary-light);
+    }
+
+    .nav-item svg {
+      width: 26px;
+      height: 26px;
+    }
+
+    /* Metrics Grid */
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin: 16px 0;
+    }
+
+    .metric-card {
+      background: #F8FAFC;
+      border: 1px solid var(--border-card);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .metric-value {
+      font-size: 34px;
+      font-weight: 800;
+      color: var(--color-primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .metric-label {
+      font-size: 15px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* Metronome Tick Animation */
+    .metronome-visual {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 16px;
+      background: #0F172A;
+      color: #FFF;
+      border-radius: 16px;
+      margin: 16px 0;
+    }
+
+    .metronome-pulse {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #38BDF8;
+      box-shadow: 0 0 16px #38BDF8;
+      animation: beat-tick 1s infinite alternate ease-in-out;
+    }
+
+    @keyframes beat-tick {
+      0% { transform: scale(0.8); opacity: 0.4; }
+      100% { transform: scale(1.3); opacity: 1; }
+    }
+
+    /* Modal Backdrop */
+    .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 200;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .alert-modal-card {
+      background: #FFFFFF;
+      border-radius: 24px;
+      border: 4px solid var(--color-danger);
+      padding: 32px 24px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Desktop Sidebar & Workbench */
+    .admin-layout {
+      display: flex;
+      width: 100%;
+      height: 100%;
+    }
+
+    .admin-sidebar {
+      width: 240px;
+      background: #FFFFFF;
+      border-right: 2px solid var(--border-card);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      gap: 20px;
+    }
+
+    .admin-brand {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--color-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .admin-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .admin-nav-item {
+      padding: 12px 16px;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.15s;
+    }
+
+    .admin-nav-item:hover {
+      background: #F1F5F9;
+      color: var(--text-primary);
+    }
+
+    .admin-nav-item.active {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      font-weight: 700;
+      border-left: 4px solid var(--color-primary);
+    }
+
+    .admin-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-page);
+      overflow-y: auto;
+    }
+
+    .admin-header {
+      min-height: 64px;
+      background: #FFFFFF;
+      border-bottom: 1px solid var(--border-card);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+    }
+
+    .admin-content {
+      padding: 32px;
+      flex: 1;
+    }
+
+    /* Table styles */
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #FFFFFF;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-card);
+    }
+
+    .admin-table th {
+      background: #F1F5F9;
+      padding: 16px;
+      text-align: left;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      border-bottom: 2px solid var(--border-card);
+    }
+
+    .admin-table td {
+      padding: 16px;
+      font-size: 15px;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-card);
+    }
+
+    .admin-table tr:hover {
+      background: #F8FAFC;
+    }
+
+    /* WCAG AA Checklist Section in Header */
+    .spec-drawer-toggle {
+      background: #10B981;
+      color: #0F172A;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .spec-drawer {
+      display: none;
+      position: fixed;
+      top: 68px;
+      right: 20px;
+      width: 380px;
+      background: #1E293B;
+      border: 2px solid #475569;
+      border-radius: 16px;
+      padding: 20px;
+      color: #E2E8F0;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      z-index: 1001;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .spec-drawer.open {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Global Bar -->
+  <header class="prototype-header">
+    <div class="brand-title">
+      <span class="brand-badge">UI/UX 原型</span>
+      <div>
+        <div class="brand-name">rehab-trainer 帕金森康复训练系统</div>
+        <div class="brand-desc">适老化设计规范 · WCAG AA 对比度 · 医疗冷静色系</div>
+      </div>
+    </div>
+
+    <!-- Platform Selector -->
+    <div class="device-tabs">
+      <button class="device-tab active" onclick="switchPlatform('android-phone')">📱 Android 手机</button>
+      <button class="device-tab" onclick="switchPlatform('android-tablet')">📟 Android 平板</button>
+      <button class="device-tab" onclick="switchPlatform('miniprogram')">💬 微信小程序</button>
+      <button class="device-tab" onclick="switchPlatform('admin-web')">💻 Web 管理端</button>
+    </div>
+
+    <!-- Screen Navigation Chips (Dynamically changed per platform) -->
+    <div class="page-nav-bar" id="pageNavBar">
+      <!-- Injected by JS -->
+    </div>
+
+    <button class="spec-drawer-toggle" onclick="toggleSpecDrawer()">✓ 适老化指标检视</button>
+  </header>
+
+  <!-- Spec Inspector Drawer -->
+  <div class="spec-drawer" id="specDrawer">
+    <h3 style="color:#38BDF8; margin-bottom:12px;">适老化 & 医疗硬性约束标准</h3>
+    <ul style="font-size:14px; line-height:1.7; padding-left:18px;">
+      <li><strong>主操作按钮高度</strong>：≥ 80dp（小程序 160rpx / Web 56-64px）</li>
+      <li><strong>正文字号底线</strong>：≥ 16sp / 32rpx / 16px</li>
+      <li><strong>对比度达标</strong>：深海康复蓝 `#1A4FA0` 对纯白对比度 8.12:1（远超 AA 4.5:1）</li>
+      <li><strong>预警强提醒</strong>：警示红 `#B91C1C` + 语音停止标识 + 弹窗阻断</li>
+      <li><strong>动作计数</strong>：端上实时 CV + 48sp 等宽大数字</li>
+      <li><strong>平板端响应</strong>：支持 Expanded 双列自适应布局</li>
+    </ul>
+  </div>
+
+  <!-- Main Prototype Display -->
+  <main class="prototype-viewport">
+
+    <!-- ========================================== -->
+    <!-- 1. Android Phone Mockup (412 x 870)        -->
+    <!-- ========================================== -->
+    <div class="device-frame frame-phone active" id="androidPhoneFrame">
+      <div class="phone-notch">
+        <span>09:41</span>
+        <span>5G 📶 100%</span>
+      </div>
+
+      <div class="phone-screen" id="androidPhoneContent">
+        <!-- Content injected by JS according to selected sub-page -->
+      </div>
+
+      <!-- Android Bottom Nav -->
+      <nav class="mobile-bottom-nav">
+        <div class="nav-item active" onclick="switchAndroidScreen('home')">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          <span>首页</span>
+        </div>
+        <div class="nav-item" onclick="switchAndroidScreen('training')">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+          <span>训练</span>
+        </div>
+        <div class="nav-item" onclick="switchAndroidScreen('records')">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+          <span>记录</span>
+        </div>
+        <div class="nav-item" onclick="switchAndroidScreen('alerts')">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+          <span>预警</span>
+        </div>
+        <div class="nav-item" onclick="switchAndroidScreen('patient')">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          <span>患者</span>
+        </div>
+      </nav>
+
+      <!-- Risk Alert Modal Dialog -->
+      <div class="modal-overlay" id="androidEmergencyModal">
+        <div class="alert-modal-card">
+          <div style="font-size:48px; color:var(--color-danger); margin-bottom:12px;">⚠️</div>
+          <h2 style="font-size:26px; color:var(--color-danger); font-weight:800; margin-bottom:10px;">风险预警触发</h2>
+          <p style="font-size:18px; line-height:1.6; color:var(--text-secondary); margin-bottom:24px;">
+            系统检测到严重动作疲劳或剧烈晃动，请立即停止本次动作，并在平地安全休息！
+          </p>
+          <button class="btn-elderly-danger" onclick="closeEmergencyModal()">
+            🛑 立即停止并呼叫治疗师
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 2. Android Tablet Mockup (980 x 680)       -->
+    <!-- ========================================== -->
+    <div class="device-frame frame-tablet" id="androidTabletFrame">
+      <div class="phone-notch" style="background:#1E293B;">
+        <span>Android 平板 · Expanded 双列响应式布局</span>
+        <span>10:30 AM · 康复模式</span>
+      </div>
+      <div class="tablet-screen" id="androidTabletContent">
+        <!-- Tablet Two-Column View -->
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 3. WeChat Mini-Program (390 x 844)         -->
+    <!-- ========================================== -->
+    <div class="device-frame frame-phone" id="miniprogramFrame">
+      <div class="phone-notch" style="background:#000;">
+        <span>微信小程序</span>
+        <span>••• ⊚</span>
+      </div>
+      <div class="phone-screen" id="miniprogramContent">
+        <!-- Mini-program Content -->
+      </div>
+      <nav class="mobile-bottom-nav">
+        <div class="nav-item active" onclick="switchMiniScreen('home')">
+          <span>🏠 首页</span>
+        </div>
+        <div class="nav-item" onclick="switchMiniScreen('training')">
+          <span>🎯 训练</span>
+        </div>
+        <div class="nav-item" onclick="switchMiniScreen('records')">
+          <span>📋 记录</span>
+        </div>
+        <div class="nav-item" onclick="switchMiniScreen('assessment')">
+          <span>📝 自评</span>
+        </div>
+        <div class="nav-item" onclick="switchMiniScreen('alerts')">
+          <span>🔔 预警</span>
+        </div>
+      </nav>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 4. Web Admin Desktop Mockup (1240 x 760)   -->
+    <!-- ========================================== -->
+    <div class="device-frame frame-desktop" id="adminWebFrame">
+      <div class="desktop-browser-bar">
+        <div class="browser-dots">
+          <div class="browser-dot dot-red"></div>
+          <div class="browser-dot dot-yellow"></div>
+          <div class="browser-dot dot-green"></div>
+        </div>
+        <div class="browser-address">https://rehab-admin.hospital.org/patients</div>
+      </div>
+      <div class="desktop-screen" id="adminWebContent">
+        <!-- Web Admin content -->
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // State
+    let currentPlatform = 'android-phone';
+    let currentAndroidScreen = 'home';
+    let currentMiniScreen = 'home';
+    let currentAdminScreen = 'patients';
+
+    const screensByPlatform = {
+      'android-phone': [
+        { id: 'home', name: '首页 (工作台)' },
+        { id: 'training', name: '训练执行 (端上CV)' },
+        { id: 'records', name: '训练记录' },
+        { id: 'alerts', name: '风险预警' },
+        { id: 'patient', name: '患者档案' }
+      ],
+      'android-tablet': [
+        { id: 'tablet-home', name: '平板双栏首页' },
+        { id: 'tablet-training', name: '平板大屏训练' }
+      ],
+      'miniprogram': [
+        { id: 'home', name: '小程序首页' },
+        { id: 'training', name: '异步云端训练' },
+        { id: 'records', name: '训练记录' },
+        { id: 'assessment', name: '症状自评' },
+        { id: 'alerts', name: '风险预警' },
+        { id: 'patient', name: '患者档案' }
+      ],
+      'admin-web': [
+        { id: 'login', name: '管理端登录' },
+        { id: 'patients', name: '患者工作台' },
+        { id: 'patient-detail', name: '患者详情' },
+        { id: 'stage-confirmation', name: '分期确认' },
+        { id: 'prescription', name: '处方制定' },
+        { id: 'alerts', name: '预警处置' }
+      ]
+    };
+
+    function switchPlatform(platform) {
+      currentPlatform = platform;
+      document.querySelectorAll('.device-tab').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+
+      document.getElementById('androidPhoneFrame').classList.remove('active');
+      document.getElementById('androidTabletFrame').classList.remove('active');
+      document.getElementById('miniprogramFrame').classList.remove('active');
+      document.getElementById('adminWebFrame').classList.remove('active');
+
+      if (platform === 'android-phone') {
+        document.getElementById('androidPhoneFrame').classList.add('active');
+        renderAndroidPhone();
+      } else if (platform === 'android-tablet') {
+        document.getElementById('androidTabletFrame').classList.add('active');
+        renderAndroidTablet();
+      } else if (platform === 'miniprogram') {
+        document.getElementById('miniprogramFrame').classList.add('active');
+        renderMiniProgram();
+      } else if (platform === 'admin-web') {
+        document.getElementById('adminWebFrame').classList.add('active');
+        renderAdminWeb();
+      }
+      renderNavChips();
+    }
+
+    function renderNavChips() {
+      const container = document.getElementById('pageNavBar');
+      const list = screensByPlatform[currentPlatform] || [];
+      container.innerHTML = list.map((item, idx) => `
+        <button class="page-chip ${idx === 0 ? 'active' : ''}" onclick="onChipClick('${item.id}', this)">
+          ${item.name}
+        </button>
+      `).join('');
+    }
+
+    function onChipClick(screenId, el) {
+      document.querySelectorAll('.page-chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+
+      if (currentPlatform === 'android-phone') {
+        currentAndroidScreen = screenId;
+        renderAndroidPhone();
+      } else if (currentPlatform === 'android-tablet') {
+        renderAndroidTablet(screenId);
+      } else if (currentPlatform === 'miniprogram') {
+        currentMiniScreen = screenId;
+        renderMiniProgram();
+      } else if (currentPlatform === 'admin-web') {
+        currentAdminScreen = screenId;
+        renderAdminWeb();
+      }
+    }
+
+    /* =======================================
+       1. Android Phone Screen Renderers
+       ======================================= */
+    function switchAndroidScreen(screenId) {
+      currentAndroidScreen = screenId;
+      document.querySelectorAll('#androidPhoneFrame .nav-item').forEach((item, index) => {
+        const screens = ['home', 'training', 'records', 'alerts', 'patient'];
+        if (screens[index] === screenId) item.classList.add('active');
+        else item.classList.remove('active');
+      });
+      renderAndroidPhone();
+    }
+
+    function renderAndroidPhone() {
+      const container = document.getElementById('androidPhoneContent');
+      if (currentAndroidScreen === 'home') {
+        container.innerHTML = `
+          <div class="ui-top-bar">
+            <div class="ui-top-bar__title">今日康复训练</div>
+            <span class="badge-pill badge-success">● H-Y 2期 (已确认)</span>
+          </div>
+
+          <div style="padding: 24px;">
+            <div class="notice-box notice-info">
+              <div>
+                <strong>帕金森患者日常训练：</strong>请在家人或照护者陪同下开展，感到头晕或肌肉酸痛请随时休息。
+              </div>
+            </div>
+
+            <!-- Big Action Button (>= 80dp) -->
+            <button class="btn-elderly-primary" onclick="switchAndroidScreen('training')">
+              <span style="font-size:32px;">▶</span> 开始今日训练 (第 1/4 节)
+            </button>
+
+            <div style="height: 20px;"></div>
+
+            <!-- Prescription Summary Card -->
+            <div class="card-container">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                <h3 style="font-size:22px; font-weight:700;">当前康复处方</h3>
+                <span style="font-size:15px; color:var(--text-tertiary);">治疗师：李主任签发</span>
+              </div>
+              <p style="font-size:17px; color:var(--text-secondary); line-height:1.6; margin-bottom:16px;">
+                <strong>训练大类：</strong>节律步态（RAS 引导）+ 上肢牵伸放松
+              </p>
+              <div class="metrics-row">
+                <div class="metric-card">
+                  <div class="metric-value">64</div>
+                  <div class="metric-label">设定节拍 (BPM)</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-value">3 组</div>
+                  <div class="metric-label">每组 12 次</div>
+                </div>
+              </div>
+              <button class="btn-elderly-secondary" onclick="alert('进入处方详情')">
+                查看完整处方条目
+              </button>
+            </div>
+
+            <!-- Risk Status Card -->
+            <div class="card-container" style="border-left: 6px solid var(--color-success);">
+              <h3 style="font-size:20px; font-weight:700; margin-bottom:8px;">安全与跌倒防护状态</h3>
+              <p style="font-size:16px; color:var(--text-secondary); line-height:1.6;">
+                当前跌倒风险评级：<strong>低风险</strong>（STEADI 筛查合格）。训练环境光线良好。
+              </p>
+            </div>
+          </div>
+        `;
+      } else if (currentAndroidScreen === 'training') {
+        container.innerHTML = `
+          <div class="ui-top-bar" style="background:#0F172A; border-bottom:1px solid #334155;">
+            <div class="ui-top-bar__title" style="color:#FFF;">端上姿态动作识别</div>
+            <button class="badge-pill badge-danger" onclick="triggerEmergencyAlert()">🚨 紧急停止</button>
+          </div>
+
+          <!-- Video / CV Detection Area -->
+          <div style="position:relative; width:100%; height:320px; background:#1E293B; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+            <!-- Mock Pose Skeleton Lines -->
+            <svg viewBox="0 0 400 320" style="position:absolute; width:100%; height:100%;">
+              <!-- Skeleton connections -->
+              <circle cx="200" cy="80" r="16" fill="#38BDF8" opacity="0.9"/>
+              <line x1="200" y1="96" x2="200" y2="170" stroke="#38BDF8" stroke-width="6"/>
+              <line x1="200" y1="120" x2="150" y2="150" stroke="#38BDF8" stroke-width="6"/>
+              <line x1="150" y1="150" x2="130" y2="200" stroke="#10B981" stroke-width="6"/>
+              <line x1="200" y1="120" x2="250" y2="150" stroke="#38BDF8" stroke-width="6"/>
+              <line x1="250" y1="150" x2="270" y2="200" stroke="#10B981" stroke-width="6"/>
+              <line x1="200" y1="170" x2="175" y2="240" stroke="#38BDF8" stroke-width="6"/>
+              <line x1="175" y1="240" x2="170" y2="295" stroke="#10B981" stroke-width="6"/>
+              <line x1="200" y1="170" x2="225" y2="240" stroke="#38BDF8" stroke-width="6"/>
+              <line x1="225" y1="240" x2="230" y2="295" stroke="#10B981" stroke-width="6"/>
+            </svg>
+            <div style="position:absolute; bottom:14px; left:16px; background:rgba(0,0,0,0.7); padding:6px 14px; border-radius:999px; color:#10B981; font-size:14px; font-weight:700;">
+              ✓ 人体已捕获 · 脚部已入镜 (符合D17)
+            </div>
+            <div style="position:absolute; top:14px; right:16px; background:rgba(0,0,0,0.7); padding:6px 14px; border-radius:999px; color:#F59E0B; font-size:14px;">
+              有效帧: 96%
+            </div>
+          </div>
+
+          <div style="padding: 20px;">
+            <!-- Real-time Count & Metronome -->
+            <div class="card-container" style="padding:16px 20px; margin-bottom:16px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-size:16px; color:var(--text-secondary);">动作完成次数</div>
+                  <div style="font-size:48px; font-weight:900; color:var(--color-primary); line-height:1.1;">8 <span style="font-size:20px; font-weight:500;">/ 12 次</span></div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:15px; color:var(--text-secondary);">节律性听觉刺激</div>
+                  <div style="font-size:26px; font-weight:800; color:#0284C7;">64 BPM</div>
+                </div>
+              </div>
+
+              <!-- Metronome Pulse -->
+              <div class="metronome-visual">
+                <div class="metronome-pulse"></div>
+                <span style="font-size:15px; font-weight:600;">节拍音频引导中 (咚 - 嗒 - 咚 - 嗒)</span>
+              </div>
+            </div>
+
+            <!-- Operations (Pause / Stop >= 80dp) -->
+            <div style="display:flex; gap:12px;">
+              <button class="btn-elderly-secondary" style="flex:1; min-height:80px;" onclick="alert('已暂停')">
+                ⏸ 暂停训练
+              </button>
+              <button class="btn-elderly-primary" style="flex:2; min-height:80px;" onclick="alert('完成一组，休息60秒')">
+                ✓ 完成本组
+              </button>
+            </div>
+          </div>
+        `;
+      } else if (currentAndroidScreen === 'records') {
+        container.innerHTML = `
+          <div class="ui-top-bar">
+            <div class="ui-top-bar__title">训练历史记录</div>
+            <span class="badge-pill badge-primary">本周完成 5 次</span>
+          </div>
+
+          <div style="padding: 24px;">
+            <div class="card-container" style="border-left:6px solid var(--color-success);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h4 style="font-size:20px; font-weight:700;">今日 10:15 节律步态训练</h4>
+                <span class="badge-pill badge-success">正常通过</span>
+              </div>
+              <div class="metrics-row">
+                <div class="metric-card">
+                  <div class="metric-value">36 次</div>
+                  <div class="metric-label">总动作数</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-value">98.4%</div>
+                  <div class="metric-label">有效帧占比</div>
+                </div>
+              </div>
+              <div style="font-size:14px; color:var(--text-tertiary); margin-top:8px;">
+                动作错误: 1次 · 中断: 0次 · 模型版本: MediaPipe-Lite-v1 (无存疑标记)
+              </div>
+            </div>
+
+            <div class="card-container" style="border-left:6px solid var(--color-warning);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h4 style="font-size:20px; font-weight:700;">昨日 15:30 牵伸维持训练</h4>
+                <span class="badge-pill badge-warning">已存疑</span>
+              </div>
+              <p style="font-size:16px; color:var(--text-secondary); line-height:1.5;">
+                有效帧占比 71.2%（未达到 80% 质检线），脚部部分遮挡。记录已留存待治疗师核实。
+              </p>
+            </div>
+          </div>
+        `;
+      } else if (currentAndroidScreen === 'alerts') {
+        container.innerHTML = `
+          <div class="ui-top-bar">
+            <div class="ui-top-bar__title">风险预警中心</div>
+            <span class="badge-pill badge-danger">1 条严重</span>
+          </div>
+
+          <div style="padding:24px;">
+            <div class="notice-box notice-danger">
+              <div>
+                <strong>紧急安全原则：</strong>出现步态冻结、严重震颤或眩晕时，请立刻停下并呼叫照护人员。
+              </div>
+            </div>
+
+            <div class="card-container" style="border:3px solid var(--color-danger);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <span class="badge-pill badge-danger">严重预警 · 待处理</span>
+                <span style="font-size:14px; color:var(--text-tertiary);">今天 09:20</span>
+              </div>
+              <h3 style="font-size:22px; color:var(--color-danger); font-weight:800; margin-bottom:8px;">
+                连续3天报告主观晨僵加重
+              </h3>
+              <p style="font-size:17px; color:var(--text-secondary); line-height:1.6; margin-bottom:16px;">
+                触发临床预警规则 RULE-RIGIDITY-03。已同步上报机构康复治疗师。
+              </p>
+              <button class="btn-elderly-danger" style="min-height:72px;" onclick="alert('拨打康复科绿色电话: 400-880-9999')">
+                📞 立即一键联系康复主管
+              </button>
+            </div>
+          </div>
+        `;
+      } else if (currentAndroidScreen === 'patient') {
+        container.innerHTML = `
+          <div class="ui-top-bar">
+            <div class="ui-top-bar__title">患者基本档案</div>
+            <span class="badge-pill badge-primary">ID: PT-2026-081</span>
+          </div>
+
+          <div style="padding: 24px;">
+            <div class="card-container">
+              <h3 style="font-size:24px; font-weight:800; margin-bottom:12px;">张建国 (72岁)</h3>
+              <div style="margin-bottom:14px;">
+                <span class="badge-pill badge-success" style="font-size:16px;">H-Y 2期 (治疗师已确认)</span>
+              </div>
+              <p style="font-size:16px; color:var(--text-secondary); line-height:1.7;">
+                <strong>所属机构：</strong>市康复中心第三病区<br>
+                <strong>伴随症状：</strong>轻度右上肢震颤、齿轮样强直<br>
+                <strong>跌倒风险：</strong>中度 (已配置扶手训练处方)
+              </p>
+            </div>
+
+            <div class="card-container">
+              <h4 style="font-size:20px; font-weight:700; margin-bottom:10px;">照护人代操作状态</h4>
+              <p style="font-size:16px; color:var(--text-secondary); line-height:1.6; margin-bottom:16px;">
+                当前：<strong>本人直接操作</strong>。若由子女或护工代操作，请在设置中开启代操作并完成身份关联。
+              </p>
+              <button class="btn-elderly-secondary">
+                关联照护人微信
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function triggerEmergencyAlert() {
+      document.getElementById('androidEmergencyModal').classList.add('active');
+    }
+
+    function closeEmergencyModal() {
+      document.getElementById('androidEmergencyModal').classList.remove('active');
+    }
+
+    /* =======================================
+       2. Android Tablet Renderers
+       ======================================= */
+    function renderAndroidTablet(mode = 'tablet-home') {
+      const container = document.getElementById('androidTabletContent');
+      if (mode === 'tablet-home') {
+        container.innerHTML = `
+          <!-- Left Column (50% Width) -->
+          <div style="flex:1; padding:32px; border-right:2px solid var(--border-card); overflow-y:auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+              <div>
+                <h2 style="font-size:30px; font-weight:800; color:var(--text-primary);">今日康复任务</h2>
+                <p style="font-size:17px; color:var(--text-secondary);">患者：张建国 · H-Y 2期 (已确认)</p>
+              </div>
+              <span class="badge-pill badge-success" style="font-size:16px; padding:6px 16px;">状态良好</span>
+            </div>
+
+            <button class="btn-elderly-primary" style="margin-bottom:24px; min-height:88px;" onclick="renderAndroidTablet('tablet-training')">
+              <span style="font-size:36px;">▶</span> 进入大屏姿态识别训练
+            </button>
+
+            <div class="notice-box notice-info">
+              <div>平板大屏专享：画面视角宽广，建议将平板立于前方 1.5–2 米处稳固支架上。</div>
+            </div>
+
+            <div class="card-container">
+              <h3 style="font-size:22px; font-weight:700; margin-bottom:12px;">安全提示</h3>
+              <p style="font-size:17px; color:var(--text-secondary); line-height:1.6;">
+                H-Y 2期患者支持无支撑动作，但需预备稳固扶手座椅防滑防跌。
+              </p>
+            </div>
+          </div>
+
+          <!-- Right Column (50% Width) -->
+          <div style="flex:1; padding:32px; background:#FFFFFF; overflow-y:auto;">
+            <h3 style="font-size:24px; font-weight:700; margin-bottom:20px;">训练处方与最近进展</h3>
+            <div class="metrics-row">
+              <div class="metric-card">
+                <div class="metric-value">64 BPM</div>
+                <div class="metric-label">RAS 推荐步频</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">96.8%</div>
+                <div class="metric-label">近期姿态平均质量</div>
+              </div>
+            </div>
+
+            <div class="card-container" style="background:#F8FAFC; border:1px solid var(--border-card);">
+              <h4 style="font-size:18px; font-weight:700; margin-bottom:8px;">包含条目</h4>
+              <ul style="font-size:16px; line-height:1.8; color:var(--text-secondary); padding-left:20px;">
+                <li>节律步态原地踏步（3组 × 15次）</li>
+                <li>躯干旋转牵伸放松（2组 × 10次）</li>
+                <li>下肢肌力维持训练（2组 × 8次）</li>
+              </ul>
+            </div>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div style="flex:2; background:#0F172A; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative;">
+            <div style="color:#FFF; font-size:22px; margin-bottom:12px;">大屏人体关键点捕捉 (MediaPipe 实时)</div>
+            <div style="width:80%; height:70%; border:2px dashed #38BDF8; border-radius:16px; display:flex; align-items:center; justify-content:center; color:#38BDF8;">
+              <span style="font-size:28px;">📷 摄像头全身体位捕获正常</span>
+            </div>
+            <div style="position:absolute; bottom:20px; left:30px; color:#10B981; font-size:18px; font-weight:700;">
+              ✓ 双足定位准确 (D17 标准满足)
+            </div>
+          </div>
+          <div style="flex:1; padding:32px; background:#FFFFFF; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <h2 style="font-size:28px; font-weight:800; color:var(--color-primary); margin-bottom:12px;">动作实时计数</h2>
+              <div style="font-size:64px; font-weight:900; color:var(--color-primary);">10 <span style="font-size:24px; color:var(--text-tertiary);">/ 15</span></div>
+              <div class="metronome-visual">
+                <div class="metronome-pulse"></div>
+                <span>64 BPM 听觉节律</span>
+              </div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:16px;">
+              <button class="btn-elderly-primary" onclick="alert('完成一组')">完成本组动作</button>
+              <button class="btn-elderly-danger" onclick="renderAndroidTablet('tablet-home')">结束并返回</button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    /* =======================================
+       3. WeChat Mini-Program Renderers
+       ======================================= */
+    function switchMiniScreen(screenId) {
+      currentMiniScreen = screenId;
+      document.querySelectorAll('#miniprogramFrame .nav-item').forEach((item, index) => {
+        const screens = ['home', 'training', 'records', 'assessment', 'alerts'];
+        if (screens[index] === screenId) item.classList.add('active');
+        else item.classList.remove('active');
+      });
+      renderMiniProgram();
+    }
+
+    function renderMiniProgram() {
+      const container = document.getElementById('miniprogramContent');
+      if (currentMiniScreen === 'home') {
+        container.innerHTML = `
+          <div class="ui-top-bar" style="border-bottom:none;">
+            <div>
+              <div style="font-size:14px; color:var(--text-tertiary);">帕金森病肌肉保护康复系统</div>
+              <div class="ui-top-bar__title" style="font-size:24px;">微信小程序端</div>
+            </div>
+            <span class="badge-pill badge-primary">云端异步CV</span>
+          </div>
+
+          <div style="padding:20px;">
+            <div class="notice-box notice-warning">
+              <div>
+                <strong>异步分析提示：</strong>小程序端采用录制上传模式，由云端算法计算动作质量与步态指标，训练中无实时计数。
+              </div>
+            </div>
+
+            <!-- Big Action Button (160rpx / 80dp) -->
+            <button class="btn-elderly-primary" onclick="switchMiniScreen('training')">
+              <span>📹</span> 开始录制今日训练
+            </button>
+
+            <div style="height:20px;"></div>
+
+            <div class="card-container">
+              <h3 style="font-size:20px; font-weight:700; margin-bottom:12px;">快捷入口</h3>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <button class="btn-elderly-secondary" style="min-height:64px; font-size:16px;" onclick="switchMiniScreen('assessment')">
+                  📝 症状自评
+                </button>
+                <button class="btn-elderly-secondary" style="min-height:64px; font-size:16px;" onclick="switchMiniScreen('records')">
+                  📋 历史记录
+                </button>
+              </div>
+            </div>
+
+            <div class="card-container">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <h4 style="font-size:18px; font-weight:700;">当前模式：本人操作</h4>
+                  <div style="font-size:14px; color:var(--text-tertiary); margin-top:4px;">照护者代操作功能尚未开启</div>
+                </div>
+                <span class="badge-pill badge-primary">切换</span>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (currentMiniScreen === 'training') {
+        container.innerHTML = `
+          <div class="ui-top-bar">
+            <div class="ui-top-bar__title">训练视频录制</div>
+            <span class="badge-pill badge-warning">异步上传</span>
+          </div>
+          <div style="padding:20px;">
+            <div class="card-container" style="background:#1E293B; color:#FFF; text-align:center; padding:40px 20px;">
+              <div style="font-size:42px; margin-bottom:12px;">📹</div>
+              <div style="font-size:18px; font-weight:700; margin-bottom:8px;">请将手机横放或正对站立位置</div>
+              <div style="font-size:14px; color:#94A3B8;">录制全身（头至脚踝完整入镜）</div>
+            </div>
+
+            <div class="card-container">
+              <h4 style="font-size:18px; font-weight:700; margin-bottom:8px;">训练处方要求</h4>
+              <p style="font-size:16px; color:var(--text-secondary); line-height:1.6;">
+                条目：下肢原地节律踏步<br>
+                目标时长：3 分钟 · 推荐步频：64 BPM
+              </p>
+            </div>
+
+            <button class="btn-elderly-primary" onclick="alert('调起微信摄像头录制')">
+              ● 开始录制训练视频
+            </button>
+            <div style="height:12px;"></div>
+            <button class="btn-elderly-secondary" onclick="switchMiniScreen('home')">
+              返回首页
+            </button>
+          </div>
+        `;
+      } else if (currentMiniScreen === 'records') {
+        container.innerHTML = `
+          <div class="ui-top-bar">
+            <div class="ui-top-bar__title">小程序训练记录</div>
+          </div>
+          <div style="padding:20px;">
+            <div class="card-container">
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <strong>11月04日 上午</strong>
+                <span class="badge-pill badge-success">分析完成</span>
+              </div>
+              <div class="metrics-row">
+                <div class="metric-card"><div class="metric-value">32次</div><div class="metric-label">云端估算完成</div></div>
+                <div class="metric-card"><div class="metric-value">91%</div><div class="metric-label">有效帧占比</div></div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (currentMiniScreen === 'assessment') {
+        container.innerHTML = `
+          <div class="ui-top-bar">
+            <div class="ui-top-bar__title">症状与分期自评</div>
+          </div>
+          <div style="padding:20px;">
+            <div class="notice-box notice-info">
+              <div>量表自评结果将作为治疗师分期确认与处方开具的辅助依据。</div>
+            </div>
+            <div class="card-container">
+              <h3 style="font-size:20px; font-weight:700; margin-bottom:6px;">H-Y 分期自评量表</h3>
+              <p style="font-size:15px; color:var(--text-secondary); margin-bottom:14px;">1–5 级自主评定，评估单双侧受累及平衡情况。</p>
+              <button class="btn-elderly-primary" style="min-height:64px;" onclick="alert('进入自评问卷')">立即开始自评</button>
+            </div>
+            <div class="card-container">
+              <h3 style="font-size:20px; font-weight:700; margin-bottom:6px;">SARC-F 肌少症筛查</h3>
+              <p style="font-size:15px; color:var(--text-secondary); margin-bottom:14px;">力量、辅助行走、从椅子起立、爬楼梯与跌倒评估。</p>
+              <button class="btn-elderly-secondary" onclick="alert('进入SARC-F')">进入筛查</button>
+            </div>
+          </div>
+        `;
+      } else if (currentMiniScreen === 'alerts') {
+        container.innerHTML = `
+          <div class="ui-top-bar"><div class="ui-top-bar__title">风险预警通知</div></div>
+          <div style="padding:20px;">
+            <div class="card-container" style="border-left:6px solid var(--color-warning);">
+              <span class="badge-pill badge-warning" style="margin-bottom:8px;">警告</span>
+              <h4 style="font-size:18px; font-weight:700; margin-bottom:6px;">跌倒自评得分上升</h4>
+              <p style="font-size:15px; color:var(--text-secondary);">STEADI得分达到预警分界值，建议联系医生复查。</p>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    /* =======================================
+       4. Web Admin Renderers
+       ======================================= */
+    function renderAdminWeb() {
+      const container = document.getElementById('adminWebContent');
+      if (currentAdminScreen === 'login') {
+        container.innerHTML = `
+          <div style="flex:1; display:flex; align-items:center; justify-content:center; background:#F1F5F9; padding:40px;">
+            <div style="width:100%; max-width:440px; background:#FFF; border-radius:16px; border:1px solid var(--border-card); padding:36px; box-shadow:0 10px 25px rgba(0,0,0,0.06);">
+              <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+                <span class="brand-badge" style="font-size:14px;">机构端</span>
+                <h2 style="font-size:22px; font-weight:800; color:var(--color-primary);">rehab-trainer</h2>
+              </div>
+              <h1 style="font-size:26px; font-weight:800; color:var(--text-primary); margin-bottom:8px;">医护人员登录</h1>
+              <p style="font-size:15px; color:var(--text-secondary); margin-bottom:24px;">供康复治疗师与照护管理员登录机构工作站。</p>
+
+              <div style="margin-bottom:16px;">
+                <label style="display:block; font-size:15px; font-weight:600; margin-bottom:6px;">机构账号</label>
+                <input type="text" value="therapist_dr_li" style="width:100%; height:48px; border:2px solid var(--border-card); border-radius:8px; padding:0 14px; font-size:16px;">
+              </div>
+              <div style="margin-bottom:16px;">
+                <label style="display:block; font-size:15px; font-weight:600; margin-bottom:6px;">密码</label>
+                <input type="password" value="••••••••••••" style="width:100%; height:48px; border:2px solid var(--border-card); border-radius:8px; padding:0 14px; font-size:16px;">
+              </div>
+              <div style="margin-bottom:24px;">
+                <label style="display:block; font-size:15px; font-weight:600; margin-bottom:6px;">动态令牌 (TOTP)</label>
+                <input type="text" placeholder="6 位验证码" value="582194" style="width:100%; height:48px; border:2px solid var(--border-card); border-radius:8px; padding:0 14px; font-size:16px;">
+              </div>
+
+              <button class="btn-elderly-primary" style="min-height:56px; font-size:18px;" onclick="onChipClick('patients', document.querySelectorAll('.page-chip')[1])">
+                安全登录到机构后台
+              </button>
+            </div>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="admin-layout">
+            <!-- Sidebar -->
+            <aside class="admin-sidebar">
+              <div class="admin-brand">
+                <span style="font-size:24px;">🏥</span>
+                <span>康复工作站</span>
+              </div>
+              <nav class="admin-nav">
+                <div class="admin-nav-item ${currentAdminScreen === 'patients' ? 'active' : ''}" onclick="onChipClick('patients', document.querySelectorAll('.page-chip')[1])">
+                  👥 患者名册与分期
+                </div>
+                <div class="admin-nav-item ${currentAdminScreen === 'patient-detail' ? 'active' : ''}" onclick="onChipClick('patient-detail', document.querySelectorAll('.page-chip')[2])">
+                  📋 患者详情档案
+                </div>
+                <div class="admin-nav-item ${currentAdminScreen === 'stage-confirmation' ? 'active' : ''}" onclick="onChipClick('stage-confirmation', document.querySelectorAll('.page-chip')[3])">
+                  🩺 H-Y 分期确认 (D11)
+                </div>
+                <div class="admin-nav-item ${currentAdminScreen === 'prescription' ? 'active' : ''}" onclick="onChipClick('prescription', document.querySelectorAll('.page-chip')[4])">
+                  💊 处方开具与调整 (D12)
+                </div>
+                <div class="admin-nav-item ${currentAdminScreen === 'alerts' ? 'active' : ''}" onclick="onChipClick('alerts', document.querySelectorAll('.page-chip')[5])">
+                  🔔 预警处置台账
+                </div>
+              </nav>
+
+              <div style="margin-top:auto; font-size:13px; color:var(--text-tertiary);">
+                当前机构：第一康复医院<br>
+                登录身份：李医生 (康复治疗师)
+              </div>
+            </aside>
+
+            <!-- Main Body -->
+            <div class="admin-body">
+              <header class="admin-header">
+                <div style="font-size:18px; font-weight:700;">${getAdminTitle(currentAdminScreen)}</div>
+                <div style="display:flex; align-items:center; gap:16px;">
+                  <span class="badge-pill badge-primary">机构数据隔离 (D10)</span>
+                  <button style="padding:6px 14px; border:1px solid var(--border-card); border-radius:6px; background:#FFF; cursor:pointer;" onclick="onChipClick('login', document.querySelectorAll('.page-chip')[0])">退出</button>
+                </div>
+              </header>
+
+              <div class="admin-content">
+                ${renderAdminInnerContent(currentAdminScreen)}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function getAdminTitle(screen) {
+      if (screen === 'patients') return '患者工作台 (名册与分期状况)';
+      if (screen === 'patient-detail') return '患者详情与训练总览 (张建国)';
+      if (screen === 'stage-confirmation') return 'H-Y 临床分期权威确认';
+      if (screen === 'prescription') return '康复训练处方制定 (4大训练大类)';
+      if (screen === 'alerts') return '机构风险预警与随访处置中心';
+      return '';
+    }
+
+    function renderAdminInnerContent(screen) {
+      if (screen === 'patients') {
+        return `
+          <div class="card-container" style="padding:16px 20px; display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <div style="display:flex; gap:12px;">
+              <select style="height:40px; padding:0 12px; border:1px solid var(--border-card); border-radius:8px; font-size:15px;">
+                <option>全部 H-Y 分级 (1–5)</option>
+                <option>H-Y 1期</option>
+                <option selected>H-Y 2期</option>
+                <option>H-Y 3期 (中重度)</option>
+              </select>
+              <select style="height:40px; padding:0 12px; border:1px solid var(--border-card); border-radius:8px; font-size:15px;">
+                <option>确认状态: 全部</option>
+                <option>已确认</option>
+                <option>疑似 (待确认)</option>
+              </select>
+            </div>
+            <button class="btn-elderly-primary" style="width:auto; min-height:44px; padding:0 20px; font-size:15px; border-radius:8px;">
+              + 新建患者建档
+            </button>
+          </div>
+
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>患者编号</th>
+                <th>姓名</th>
+                <th>年龄</th>
+                <th>H-Y 分级</th>
+                <th>分期确认状态</th>
+                <th>跌倒风险</th>
+                <th>最近训练</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>PT-2026-081</strong></td>
+                <td><strong>张建国</strong></td>
+                <td>72</td>
+                <td><span class="badge-pill badge-primary">H-Y 2期</span></td>
+                <td><span class="badge-pill badge-success">✓ 治疗师已确认</span></td>
+                <td><span class="badge-pill badge-warning">中风险</span></td>
+                <td>今天 10:15 (有效帧98%)</td>
+                <td>
+                  <a href="javascript:void(0)" style="color:var(--color-primary); font-weight:700; margin-right:12px;" onclick="onChipClick('patient-detail', document.querySelectorAll('.page-chip')[2])">查看详情</a>
+                  <a href="javascript:void(0)" style="color:var(--color-primary); font-weight:700;" onclick="onChipClick('prescription', document.querySelectorAll('.page-chip')[4])">调处方</a>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>PT-2026-085</strong></td>
+                <td><strong>王秀英</strong></td>
+                <td>68</td>
+                <td><span class="badge-pill badge-warning">H-Y 3期 (疑似)</span></td>
+                <td><span class="badge-pill badge-warning">⚠️ 疑似待确认 (D11)</span></td>
+                <td><span class="badge-pill badge-danger">高风险</span></td>
+                <td>昨天 16:20 (存疑)</td>
+                <td>
+                  <a href="javascript:void(0)" style="color:var(--color-danger); font-weight:700;" onclick="onChipClick('stage-confirmation', document.querySelectorAll('.page-chip')[3])">临床确认分期</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        `;
+      } else if (screen === 'stage-confirmation') {
+        return `
+          <div class="card-container" style="max-width:800px;">
+            <div class="notice-box notice-warning">
+              <div>
+                <strong>临床分期权威确认 (D11 约束)：</strong>未确认的分期仅标记为「疑似」，高风险训练条目不可用。只有治疗师确认后才准入对应处方。
+              </div>
+            </div>
+
+            <h3 style="font-size:22px; font-weight:800; margin-bottom:16px;">确认患者：王秀英 (PT-2026-085)</h3>
+
+            <div style="margin-bottom:20px;">
+              <label style="display:block; font-size:16px; font-weight:700; margin-bottom:8px;">H-Y 分级确诊判定</label>
+              <div style="display:flex; gap:12px;">
+                <button class="btn-elderly-secondary" style="min-height:50px; font-size:16px;">1 期 (单侧)</button>
+                <button class="btn-elderly-secondary" style="min-height:50px; font-size:16px;">2 期 (双侧无姿势障碍)</button>
+                <button class="btn-elderly-primary" style="min-height:50px; font-size:16px;">3 期 (轻中度姿势不稳定)</button>
+                <button class="btn-elderly-secondary" style="min-height:50px; font-size:16px;">4 期 (严重受障仍可行走)</button>
+              </div>
+            </div>
+
+            <div style="margin-bottom:24px;">
+              <label style="display:block; font-size:16px; font-weight:700; margin-bottom:8px;">临床确认意见与禁忌评估</label>
+              <textarea style="width:100%; height:100px; border:2px solid var(--border-card); border-radius:8px; padding:12px; font-size:15px;" placeholder="填写患者步态、姿势反射检查及安全注意事项...">患者牵拉试验轻度后倾倒，判定为 H-Y 3期。禁用无支撑站立式高难度步态训练，必须由照护者近身监护。</textarea>
+            </div>
+
+            <button class="btn-elderly-primary" style="min-height:60px;" onclick="alert('分期确认完成！系统已自动匹配基础处方方案。')">
+              ✓ 签发分期确认 (StageConfirmation)
+            </button>
+          </div>
+        `;
+      } else if (screen === 'prescription') {
+        return `
+          <div class="card-container">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+              <div>
+                <h3 style="font-size:22px; font-weight:800;">制定处方：张建国 (H-Y 2期)</h3>
+                <p style="font-size:15px; color:var(--text-secondary);">版本号：v2.0 (乐观锁控制 D12)</p>
+              </div>
+              <button class="btn-elderly-primary" style="width:auto; min-height:48px; padding:0 24px; font-size:16px; border-radius:8px;" onclick="alert('处方签发成功，患者端实时同步！')">
+                💾 签发处方
+              </button>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+              <div class="card-container" style="background:#F8FAFC;">
+                <h4 style="font-size:18px; font-weight:700; margin-bottom:12px;">已选训练大类条目</h4>
+                <div style="background:#FFF; border:1px solid var(--border-card); padding:14px; border-radius:8px; margin-bottom:10px;">
+                  <div style="display:flex; justify-content:space-between;">
+                    <strong>[节律步态] RAS 踏步训练</strong>
+                    <span class="badge-pill badge-primary">核心机制</span>
+                  </div>
+                  <div style="font-size:14px; color:var(--text-secondary); margin-top:6px;">
+                    设定节拍：<strong>64 BPM</strong> · 3 组 × 15 次
+                  </div>
+                </div>
+                <div style="background:#FFF; border:1px solid var(--border-card); padding:14px; border-radius:8px;">
+                  <div style="display:flex; justify-content:space-between;">
+                    <strong>[牵伸放松] 坐位上肢躯干伸展</strong>
+                    <span class="badge-pill badge-success">安全条目</span>
+                  </div>
+                  <div style="font-size:14px; color:var(--text-secondary); margin-top:6px;">
+                    无节拍要求 · 2 组 × 10 次
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-container" style="background:#F8FAFC;">
+                <h4 style="font-size:18px; font-weight:700; margin-bottom:12px;">剂量参数调整</h4>
+                <div style="margin-bottom:16px;">
+                  <label style="display:block; font-size:14px; font-weight:600; margin-bottom:6px;">节律听觉刺激频率 (BPM: 50–90)</label>
+                  <input type="range" min="50" max="90" value="64" style="width:100%;">
+                  <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--text-tertiary);">
+                    <span>慢 (50)</span>
+                    <strong style="color:var(--color-primary); font-size:16px;">64 BPM (当前)</strong>
+                    <span>快 (90)</span>
+                  </div>
+                </div>
+                <div style="margin-bottom:16px;">
+                  <label style="display:block; font-size:14px; font-weight:600; margin-bottom:6px;">每周建议频次</label>
+                  <select style="width:100%; height:40px; border:1px solid var(--border-card); border-radius:6px; font-size:15px; padding:0 10px;">
+                    <option>每周 3 次</option>
+                    <option selected>每周 5 次 (推荐)</option>
+                    <option>每日 1 次</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (screen === 'alerts') {
+        return `
+          <div class="card-container">
+            <h3 style="font-size:22px; font-weight:800; margin-bottom:16px;">未处置风险事件 (需随访登记)</h3>
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>级别</th>
+                  <th>患者</th>
+                  <th>触发时间</th>
+                  <th>预警规则</th>
+                  <th>当前状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="badge-pill badge-danger">严重</span></td>
+                  <td><strong>张建国 (PT-081)</strong></td>
+                  <td>11-04 09:20</td>
+                  <td>主观僵硬感持续 3 天加重 (RULE-RIGIDITY-03)</td>
+                  <td><span class="badge-pill badge-danger">待随访处置</span></td>
+                  <td>
+                    <button class="btn-elderly-primary" style="width:auto; min-height:38px; font-size:14px; padding:0 14px; border-radius:6px;" onclick="alert('打开电话随访台账登记表')">
+                      登记随访处置
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="badge-pill badge-warning">警告</span></td>
+                  <td><strong>李素芬 (PT-092)</strong></td>
+                  <td>11-03 14:10</td>
+                  <td>跌倒风险 STEADI 达标异常</td>
+                  <td><span class="badge-pill badge-success">已电话回访</span></td>
+                  <td>
+                    <button class="btn-elderly-secondary" style="width:auto; min-height:38px; font-size:14px; padding:0 14px; border-radius:6px;">
+                      查看台账
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      } else if (screen === 'patient-detail') {
+        return `
+          <div style="display:flex; gap:24px;">
+            <div class="card-container" style="flex:1;">
+              <h3 style="font-size:22px; font-weight:800; margin-bottom:12px;">张建国 (男, 72岁)</h3>
+              <p style="font-size:16px; color:var(--text-secondary); line-height:1.8;">
+                <strong>H-Y 分期：</strong>2 期（李医生于 2026-11-01 确诊签发）<br>
+                <strong>主要症状：</strong>双手震颤、晨僵明显<br>
+                <strong>训练达标率：</strong>92% (本月累计训练 14 次)
+              </p>
+              <div style="margin-top:20px; display:flex; gap:12px;">
+                <button class="btn-elderly-primary" style="min-height:50px; font-size:16px;" onclick="onChipClick('prescription', document.querySelectorAll('.page-chip')[4])">调整处方</button>
+                <button class="btn-elderly-secondary" style="min-height:50px; font-size:16px;" onclick="onChipClick('stage-confirmation', document.querySelectorAll('.page-chip')[3])">重审分期</button>
+              </div>
+            </div>
+            <div class="card-container" style="flex:2;">
+              <h4 style="font-size:18px; font-weight:700; margin-bottom:12px;">训练有效性与存疑趋势 (T7跨版本比较合规)</h4>
+              <div style="height:140px; background:#F8FAFC; border:1px dashed var(--border-card); border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--text-tertiary);">
+                📈 [有效帧占比与步态对称性折线图 - 近14次训练曲线均为良好]
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      return '';
+    }
+
+    function toggleSpecDrawer() {
+      document.getElementById('specDrawer').classList.toggle('open');
+    }
+
+    // Initialize
+    switchPlatform('android-phone');
+  </script>
+</body>
+</html>

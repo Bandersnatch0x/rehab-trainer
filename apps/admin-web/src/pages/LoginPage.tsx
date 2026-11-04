@@ -53,8 +53,12 @@ export default function LoginPage() {
 
   return (
     <main className="login-page">
-      <h1>登录</h1>
-      <p className="hint">照护管理员与康复治疗师使用机构账号登录。</p>
+      <div className="login-brand">
+        <span className="app-brand">rehab-trainer</span>
+        <span className="app-brand-badge">机构工作站</span>
+      </div>
+      <h1>医护人员登录</h1>
+      <p className="hint">供照护管理员与康复治疗师使用机构认证账号登录。</p>
       <form onSubmit={onSubmit}>
         <label>
           账号

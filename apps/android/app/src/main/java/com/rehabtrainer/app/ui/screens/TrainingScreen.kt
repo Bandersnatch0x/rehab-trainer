@@ -9,16 +9,22 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -37,6 +43,9 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.rehabtrainer.app.core.pose.PoseAnalyzer
 import com.rehabtrainer.app.core.pose.PoseFrame
+import com.rehabtrainer.app.ui.components.ElderlyButton
+import com.rehabtrainer.app.ui.components.ElderlyButtonVariant
+import com.rehabtrainer.app.ui.theme.LocalElderlyDimens
 import java.util.concurrent.Executors
 
 /**
@@ -128,23 +137,105 @@ fun TrainingScreen(modifier: Modifier = Modifier) {
         }
     }
 
+    var metronomeEnabled by remember { mutableStateOf(true) }
+    val dimens = LocalElderlyDimens.current
+
     Column(modifier = modifier.fillMaxSize()) {
         Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
             AndroidView(factory = { previewView }, modifier = Modifier.fillMaxSize())
+
+            // Top Status Overlay
+            Surface(
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
+                shape = MaterialTheme.shapes.small,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "RAS 节拍: 64 BPM",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Switch(
+                        checked = metronomeEnabled,
+                        onCheckedChange = { metronomeEnabled = it }
+                    )
+                }
+            }
         }
-        Column(modifier = Modifier.padding(24.dp)) {
-            Text(
-                "抬臂次数：$armRaiseCount",
-                style = MaterialTheme.typography.headlineMedium
+
+        // Action Count & Controls Section
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.large,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface
             )
-            Spacer(Modifier.height(8.dp))
-            Text(statusText, style = MaterialTheme.typography.bodyLarge)
-            if (!footVisible) {
+        ) {
+            Column(
+                modifier = Modifier.padding(dimens.screenPadding),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "动作完成次数",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            text = "$armRaiseCount 次",
+                            style = MaterialTheme.typography.displayLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    Text(
+                        text = statusText,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+
+                if (!footVisible) {
+                    Text(
+                        text = "⚠️ 脚部未入镜，本次只能计数，无法计算步态指标（D17）",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+
                 Spacer(Modifier.height(8.dp))
-                Text(
-                    "脚部未入镜，本次只能计数，无法计算步态指标（D17）",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.error
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(dimens.itemSpacing)
+                ) {
+                    ElderlyButton(
+                        text = "暂停",
+                        onClick = { /* 暂停动作 */ },
+                        variant = ElderlyButtonVariant.Secondary,
+                        modifier = Modifier.weight(1f)
+                    )
+                    ElderlyButton(
+                        text = "完成本组",
+                        onClick = { /* 提交本组完成并进入休息 */ },
+                        variant = ElderlyButtonVariant.Primary,
+                        modifier = Modifier.weight(2f)
+                    )
+                }
+
+                ElderlyButton(
+                    text = "🛑 紧急停止训练",
+                    onClick = { /* 触发紧急安全停止与通知 */ },
+                    variant = ElderlyButtonVariant.Danger
                 )
             }
         }

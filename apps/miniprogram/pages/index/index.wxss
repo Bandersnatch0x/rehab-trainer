@@ -1,24 +1,30 @@
 .hero__eyebrow {
   margin-bottom: 8rpx;
-  color: #123a78;
+  color: #1a4fa0;
   font-size: 32rpx;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .entry {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 152rpx;
-  padding: 32rpx;
+  min-height: 160rpx;
+  padding: 36rpx;
   color: #ffffff;
   background-color: #1a4fa0;
   border-radius: 20rpx;
+  box-shadow: 0 6rpx 16rpx rgba(26, 79, 160, 0.25);
+}
+
+.entry:active {
+  opacity: 0.9;
+  transform: scale(0.99);
 }
 
 .entry__title {
-  font-size: 40rpx;
-  font-weight: 700;
+  font-size: 42rpx;
+  font-weight: 800;
 }
 
 .entry__desc {
@@ -41,22 +47,30 @@
 
 .entry-tile {
   width: calc(50% - 12rpx);
-  min-height: 184rpx;
+  min-height: 192rpx;
   padding: 28rpx;
   background-color: #ffffff;
-  border: 2rpx solid #d9d9d9;
+  border: 2rpx solid #cbd5e1;
   border-radius: 20rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.entry-tile:active {
+  background-color: #f1f5f9;
 }
 
 .entry-tile__title {
   font-size: 36rpx;
-  font-weight: 600;
+  font-weight: 700;
+  color: #0f172a;
 }
 
 .entry-tile__desc {
   margin-top: 8rpx;
-  color: #4a4a4a;
-  font-size: 32rpx;
+  color: #334155;
+  font-size: 30rpx;
   line-height: 1.5;
 }
 

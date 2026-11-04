@@ -43,7 +43,9 @@
 }
 
 .btn--tall {
-  min-height: 120rpx;
+  min-height: 160rpx;
+  font-size: 38rpx;
+  font-weight: 700;
 }
 
 .session-danger {

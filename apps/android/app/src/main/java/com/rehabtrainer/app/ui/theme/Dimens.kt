@@ -12,9 +12,12 @@ import androidx.compose.ui.unit.dp
  */
 data class ElderlyDimens(
     val minTouchTarget: Dp = 80.dp,
+    val secondaryTouchTarget: Dp = 56.dp,
     val screenPadding: Dp = 24.dp,
     val sectionSpacing: Dp = 28.dp,
     val itemSpacing: Dp = 16.dp,
+    val cardCornerRadius: Dp = 16.dp,
+    val buttonCornerRadius: Dp = 16.dp,
     val railWidth: Dp = 112.dp
 )
 
