@@ -1,0 +1,12 @@
+.stage {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+}
+
+.stage__value {
+  font-size: 56rpx;
+  font-weight: 700;
+  line-height: 1.3;
+}

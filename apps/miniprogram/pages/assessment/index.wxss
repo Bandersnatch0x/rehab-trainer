@@ -1,0 +1,7 @@
+.assessment .muted {
+  margin-top: 8rpx;
+}
+
+.assessment__action {
+  margin-top: 24rpx;
+}

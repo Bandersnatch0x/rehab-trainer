@@ -1,0 +1,28 @@
+.alert--critical {
+  border-left: 10rpx solid #b3261e;
+}
+
+.alert--warning {
+  border-left: 10rpx solid #8a5300;
+}
+
+.alert--info {
+  border-left: 10rpx solid #1a4fa0;
+}
+
+.alert__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-bottom: 12rpx;
+}
+
+.alert__time {
+  color: #4a4a4a;
+  font-size: 32rpx;
+}
+
+.alert__action {
+  margin-top: 24rpx;
+}

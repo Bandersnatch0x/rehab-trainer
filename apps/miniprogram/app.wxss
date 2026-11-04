@@ -1,5 +1,231 @@
+/**
+ * 全局样式：适老化基线。
+ * - 正文 32rpx 起，行高 1.6；
+ * - 正文与背景对比度按 WCAG AA 选取；
+ * - 可点击区域不小于 88rpx，主要操作按钮不小于 104rpx。
+ */
 page {
-  background-color: #f7f8fa;
-  color: #1f2329;
-  font-size: 28rpx;
+  background-color: #f2f4f7;
+  color: #1a1a1a;
+  font-size: 32rpx;
+  line-height: 1.6;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC",
+    "Microsoft YaHei", sans-serif;
+}
+
+view,
+text,
+navigator {
+  box-sizing: border-box;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 32rpx 24rpx 88rpx;
+}
+
+.page-title {
+  font-size: 46rpx;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.page-subtitle {
+  margin-top: 12rpx;
+  font-size: 32rpx;
+  color: #4a4a4a;
+}
+
+.section {
+  margin-top: 40rpx;
+}
+
+.section-title {
+  margin-bottom: 20rpx;
+  font-size: 38rpx;
+  font-weight: 700;
+}
+
+.card {
+  margin-bottom: 24rpx;
+  padding: 32rpx;
+  background-color: #ffffff;
+  border: 2rpx solid #d9d9d9;
+  border-radius: 20rpx;
+}
+
+.card-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.muted {
+  color: #4a4a4a;
+  font-size: 32rpx;
+}
+
+.hint {
+  margin-top: 24rpx;
+  color: #4a4a4a;
+  font-size: 32rpx;
+  line-height: 1.6;
+}
+
+.notice {
+  display: flex;
+  margin-bottom: 24rpx;
+  padding: 24rpx 28rpx;
+  color: #123a78;
+  font-size: 32rpx;
+  line-height: 1.6;
+  background-color: #eaf1fb;
+  border-left: 10rpx solid #1a4fa0;
+  border-radius: 12rpx;
+}
+
+.notice--warning {
+  color: #6b3f00;
+  background-color: #fff4e0;
+  border-left-color: #8a5300;
+}
+
+.notice--danger {
+  color: #8c1d18;
+  background-color: #fdecea;
+  border-left-color: #b3261e;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 104rpx;
+  padding: 0 32rpx;
+  font-size: 36rpx;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+  border-radius: 16rpx;
+}
+
+.btn--primary {
+  color: #ffffff;
+  background-color: #1a4fa0;
+}
+
+.btn--secondary {
+  color: #123a78;
+  background-color: #ffffff;
+  border: 4rpx solid #1a4fa0;
+}
+
+.btn--block {
+  width: 100%;
+}
+
+.btn--pressed {
+  opacity: 0.82;
+}
+
+.btn-row {
+  display: flex;
+  gap: 24rpx;
+  margin-top: 24rpx;
+}
+
+.btn-row .btn {
+  flex: 1;
+}
+
+.badge {
+  display: inline-block;
+  padding: 6rpx 18rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  line-height: 1.5;
+  border-radius: 999rpx;
+}
+
+.badge--info {
+  color: #123a78;
+  background-color: #e8f0fe;
+}
+
+.badge--success {
+  color: #14532d;
+  background-color: #e6f4ea;
+}
+
+.badge--warning {
+  color: #7a4a00;
+  background-color: #fff4e0;
+}
+
+.badge--danger {
+  color: #8c1d18;
+  background-color: #fdecea;
+}
+
+.badge--neutral {
+  color: #333333;
+  background-color: #eceff3;
+}
+
+.divider {
+  height: 2rpx;
+  margin: 24rpx 0;
+  background-color: #e0e0e0;
+}
+
+.info-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24rpx;
+  padding: 18rpx 0;
+  border-bottom: 2rpx solid #ececec;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-row__label {
+  flex: 0 0 200rpx;
+  color: #4a4a4a;
+  font-size: 32rpx;
+}
+
+.info-row__value {
+  flex: 1;
+  font-size: 32rpx;
+  font-weight: 600;
+  text-align: right;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  min-height: 88rpx;
+  padding: 0 28rpx;
+  color: #1a1a1a;
+  font-size: 32rpx;
+  background-color: #ffffff;
+  border: 2rpx solid #8a8a8a;
+  border-radius: 999rpx;
+}
+
+.chip--active {
+  color: #ffffff;
+  font-weight: 600;
+  background-color: #123a78;
+  border-color: #123a78;
 }

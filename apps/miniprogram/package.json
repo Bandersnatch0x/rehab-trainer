@@ -3,10 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "generate:api": "openapi-typescript ../../packages/api-contract/openapi.yaml -o types/api.d.ts"
   },
   "devDependencies": {
     "miniprogram-api-typings": "^5.2.3",
+    "openapi-typescript": "^7.13.0",
     "typescript": "~5.9.3"
   }
 }

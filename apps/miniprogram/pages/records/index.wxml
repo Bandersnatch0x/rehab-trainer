@@ -1,0 +1,76 @@
+<view class="page">
+  <view class="page-title">训练记录</view>
+  <view class="page-subtitle">记录含完成、错误、中断、有效帧占比与存疑标记。</view>
+
+  <view class="chip-row">
+    <view class="chip chip--active">近 7 天</view>
+    <view class="chip">近 30 天</view>
+    <view class="chip">全部</view>
+  </view>
+
+  <view class="card">
+    <view class="record__head">
+      <view class="card-title">— 月 — 日　—:—</view>
+      <text class="badge badge--success">已完成</text>
+    </view>
+    <view class="metric-grid">
+      <view class="metric">
+        <view class="metric__value">—</view>
+        <view class="metric__label">完成次数</view>
+      </view>
+      <view class="metric">
+        <view class="metric__value">—</view>
+        <view class="metric__label">动作错误</view>
+      </view>
+      <view class="metric">
+        <view class="metric__value">—</view>
+        <view class="metric__label">中断次数</view>
+      </view>
+      <view class="metric">
+        <view class="metric__value">—%</view>
+        <view class="metric__label">有效帧占比</view>
+      </view>
+    </view>
+    <view class="divider"></view>
+    <view class="muted">模型版本 —　指标算法 —　阈值配置 —</view>
+    <view class="record__flags">
+      <text class="badge badge--neutral">无存疑</text>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="record__head">
+      <view class="card-title">— 月 — 日　—:—</view>
+      <text class="badge badge--warning">已完成（存疑）</text>
+    </view>
+    <view class="metric-grid">
+      <view class="metric">
+        <view class="metric__value">—</view>
+        <view class="metric__label">完成次数</view>
+      </view>
+      <view class="metric">
+        <view class="metric__value">—</view>
+        <view class="metric__label">动作错误</view>
+      </view>
+      <view class="metric">
+        <view class="metric__value">—</view>
+        <view class="metric__label">中断次数</view>
+      </view>
+      <view class="metric">
+        <view class="metric__value">—%</view>
+        <view class="metric__label">有效帧占比</view>
+      </view>
+    </view>
+    <view class="divider"></view>
+    <view class="muted">模型版本 —　指标算法 —　阈值配置 —</view>
+    <view class="record__flags">
+      <text class="badge badge--warning">存在疑点</text>
+      <text class="record__flag-note">有效性校验未通过，打卡仍成功</text>
+    </view>
+  </view>
+
+  <view class="notice">
+    不同模型、指标算法或阈值配置版本的记录不可直接比较趋势；查看跨版本记录时会显示版本差异。
+  </view>
+  <view class="hint">本页为结构占位，记录数据待接入。</view>
+</view>

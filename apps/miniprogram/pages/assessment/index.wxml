@@ -1,0 +1,45 @@
+<view class="page">
+  <view class="page-title">症状自评</view>
+  <view class="page-subtitle">选择一项量表开始；结果仅作随访参考。</view>
+
+  <view class="notice">
+    量表分界值待临床签核，系统不据此输出诊断结论。如有明显不适，请直接联系治疗师。
+  </view>
+
+  <view class="card assessment">
+    <view class="card-title">H-Y 分期自评</view>
+    <view class="muted">1–5 级自评；最终分期以康复治疗师确认为准。</view>
+    <view class="btn btn--secondary btn--block assessment__action" hover-class="btn--pressed" aria-role="button">
+      开始自评
+    </view>
+  </view>
+
+  <view class="card assessment">
+    <view class="card-title">肌少症筛查</view>
+    <view class="muted">先做 SARC-F；达到分界值时加做小腿围（SARC-CalF）。</view>
+    <view class="btn btn--secondary btn--block assessment__action" hover-class="btn--pressed" aria-role="button">
+      开始自评
+    </view>
+  </view>
+
+  <view class="card assessment">
+    <view class="card-title">僵硬感自评</view>
+    <view class="muted">按 5 级主观僵硬感选择最符合的一项。</view>
+    <view class="btn btn--secondary btn--block assessment__action" hover-class="btn--pressed" aria-role="button">
+      开始自评
+    </view>
+  </view>
+
+  <view class="card assessment">
+    <view class="card-title">跌倒风险自评</view>
+    <view class="muted">STEADI 三问与跌倒史；必要时补充 Short FES-I。</view>
+    <view class="btn btn--secondary btn--block assessment__action" hover-class="btn--pressed" aria-role="button">
+      开始自评
+    </view>
+  </view>
+
+  <view class="notice notice--warning">
+    代操作时，提交记录会同时记录操作者与患者本人。
+  </view>
+  <view class="hint">本页为结构占位，量表内容与提交待接入。</view>
+</view>

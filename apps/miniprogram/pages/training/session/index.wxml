@@ -1,0 +1,62 @@
+<view class="page">
+  <view class="page-title">训练执行</view>
+  <view class="page-subtitle">条目名称（占位）</view>
+
+  <view class="notice notice--warning">
+    小程序端采用云端异步 CV：训练视频上传后由服务端分析，训练过程中没有实时动作反馈。
+  </view>
+
+  <view class="video-placeholder">
+    <view class="video-placeholder__icon">▶</view>
+    <view class="video-placeholder__text">训练视频采集区域（待接入）</view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">本次训练</view>
+    <view class="card">
+      <view class="info-row">
+        <text class="info-row__label">组数</text>
+        <text class="info-row__value">— 组</text>
+      </view>
+      <view class="info-row">
+        <text class="info-row__label">每组次数</text>
+        <text class="info-row__value">— 次</text>
+      </view>
+      <view class="info-row">
+        <text class="info-row__label">节拍</text>
+        <text class="info-row__value">— BPM</text>
+      </view>
+      <view class="info-row">
+        <text class="info-row__label">预计时长</text>
+        <text class="info-row__value">— 分钟</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">训练前确认</view>
+    <view class="card">
+      <view class="check-item"><text class="check-item__mark">✓</text><text>全身进入画面，光线充足</text></view>
+      <view class="check-item"><text class="check-item__mark">✓</text><text>身旁有稳固的椅子或扶手</text></view>
+      <view class="check-item"><text class="check-item__mark">✓</text><text>穿防滑鞋，地面无杂物</text></view>
+      <view class="check-item"><text class="check-item__mark">✓</text><text>照护者在旁，必要时可随时扶助</text></view>
+    </view>
+  </view>
+
+  <view class="btn-row">
+    <view class="btn btn--primary btn--tall" hover-class="btn--pressed" aria-role="button">
+      开始训练
+    </view>
+    <view class="btn btn--secondary btn--tall" hover-class="btn--pressed" aria-role="button">
+      结束并上传
+    </view>
+  </view>
+
+  <view class="notice notice--danger session-danger">
+    出现头晕、胸痛、心慌、呼吸困难或跌倒时，请立即停止训练，并联系治疗师或拨打急救电话。
+  </view>
+
+  <view class="hint">
+    训练有效性校验未通过时，记录会标记「存疑」，但不阻断打卡。本页为结构占位，录制与上传待接入。
+  </view>
+</view>

@@ -1,5 +1,2 @@
-Page({
-  data: {
-    title: 'rehab-trainer',
-  },
-});
+// 首页仅做结构与样式占位，不承载业务逻辑。
+Page({});

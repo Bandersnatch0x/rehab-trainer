@@ -1,4 +1,89 @@
 <view class="page">
-  <text class="title">{{title}}</text>
-  <text class="hint">小程序骨架已就位，业务页面待实现。</text>
+  <view class="hero card">
+    <view class="hero__eyebrow">帕金森康复训练</view>
+    <view class="page-title">今天也一起练习</view>
+    <view class="page-subtitle">请在照护者陪同下完成，量力而行。</view>
+  </view>
+
+  <view class="notice">
+    小程序训练使用云端异步姿态分析：训练视频上传后由服务端生成结果，训练过程中没有实时动作反馈。
+  </view>
+
+  <view class="section">
+    <view class="section-title">开始今天的训练</view>
+    <navigator
+      class="entry"
+      url="/pages/training/index"
+      open-type="switchTab"
+      aria-role="button"
+      aria-label="进入训练条目列表"
+    >
+      <view class="entry__body">
+        <view class="entry__title">训练条目</view>
+        <view class="entry__desc">按处方逐条完成动作</view>
+      </view>
+      <view class="entry__arrow">›</view>
+    </navigator>
+  </view>
+
+  <view class="section">
+    <view class="section-title">常用功能</view>
+    <view class="entry-grid">
+      <navigator
+        class="entry-tile"
+        url="/pages/patient/index"
+        aria-role="button"
+        aria-label="查看患者档案"
+      >
+        <view class="entry-tile__title">患者档案</view>
+        <view class="entry-tile__desc">分期、症状、跌倒风险</view>
+      </navigator>
+
+      <navigator
+        class="entry-tile"
+        url="/pages/assessment/index"
+        aria-role="button"
+        aria-label="进入症状自评"
+      >
+        <view class="entry-tile__title">症状自评</view>
+        <view class="entry-tile__desc">僵直、肌少症、跌倒风险</view>
+      </navigator>
+
+      <navigator
+        class="entry-tile"
+        url="/pages/records/index"
+        open-type="switchTab"
+        aria-role="button"
+        aria-label="查看训练记录"
+      >
+        <view class="entry-tile__title">训练记录</view>
+        <view class="entry-tile__desc">完成次数与存疑标记</view>
+      </navigator>
+
+      <navigator
+        class="entry-tile"
+        url="/pages/alerts/index"
+        open-type="switchTab"
+        aria-role="button"
+        aria-label="查看风险预警"
+      >
+        <view class="entry-tile__title">风险预警</view>
+        <view class="entry-tile__desc">预警级别与处理状态</view>
+      </navigator>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">当前身份</view>
+    <view class="card">
+      <view class="identity">
+        <view class="identity__body">
+          <view class="card-title">本人操作</view>
+          <view class="muted">照护者代操作：功能占位，尚未开放</view>
+        </view>
+        <view class="switch-placeholder" aria-role="switch" aria-checked="false">未开启</view>
+      </view>
+      <view class="hint">代操作时，写操作会同时记录操作者与患者本人。</view>
+    </view>
+  </view>
 </view>

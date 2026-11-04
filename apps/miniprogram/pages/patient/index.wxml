@@ -1,0 +1,63 @@
+<view class="page">
+  <view class="page-title">患者档案</view>
+  <view class="page-subtitle">档案由管理端建立，H-Y 分期由康复治疗师确认。</view>
+
+  <view class="notice notice--warning">
+    分期未经治疗师确认时标记为「疑似」，高风险训练条目不可用。
+  </view>
+
+  <view class="card">
+    <view class="info-row">
+      <text class="info-row__label">姓名</text>
+      <text class="info-row__value">—</text>
+    </view>
+    <view class="info-row">
+      <text class="info-row__label">出生年份</text>
+      <text class="info-row__value">—</text>
+    </view>
+    <view class="info-row">
+      <text class="info-row__label">所属机构</text>
+      <text class="info-row__value">—</text>
+    </view>
+    <view class="info-row">
+      <text class="info-row__label">档案状态</text>
+      <text class="info-row__value">—</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">H-Y 分期</view>
+    <view class="card">
+      <view class="stage">
+        <view class="stage__value">— 级</view>
+        <text class="badge badge--warning">疑似（待确认）</text>
+      </view>
+      <view class="divider"></view>
+      <view class="info-row">
+        <text class="info-row__label">确认人</text>
+        <text class="info-row__value">—</text>
+      </view>
+      <view class="info-row">
+        <text class="info-row__label">确认时间</text>
+        <text class="info-row__value">—</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">症状与风险</view>
+    <view class="card">
+      <view class="info-row">
+        <text class="info-row__label">跌倒风险</text>
+        <text class="info-row__value">—</text>
+      </view>
+      <view class="info-row">
+        <text class="info-row__label">症状标签</text>
+        <text class="info-row__value">暂无记录</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="notice">5 级仅提供健康宣教与转诊建议，不进入训练流程。</view>
+  <view class="hint">本页为结构占位，档案数据待接入。</view>
+</view>

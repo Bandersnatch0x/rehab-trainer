@@ -3,7 +3,1089 @@ info:
   title: rehab-trainer API
   version: 0.1.0
   description: |
-    占位契约。领域模型尚未定稿，业务端点不得在此凭空编写。
+    契约唯一真源。Android、微信小程序、管理端均从本文件生成客户端，不手写跨端类型。
+
+    约定：
+    - 所有资源访问按调用者的 org 隔离；跨机构访问返回 403 并写审计。
+    - 角色：patient / caregiver / care_admin / rehab_therapist。
+    - 训练记录批量上传幂等，以 clientRecordId 去重。
+    - 处方更新使用版本号做乐观锁。
+
+    本版本只覆盖核心链路：患者、评估、分期确认、处方、训练条目、训练记录、预警。
+    以下端点留待后续版本，不在此文件中：
+    - 微信绑定与代操作（未决项 3）
+    - 内容清单与签名 URL（未决项 8/9/10）
+    - 用药-训练协同（未决项 5）
+    - 审计导出（未决项 6 之后）
 servers:
-  - url: https://api.invalid
-    description: 占位地址，部署环境确定后替换
+  - url: https://api.rehab-trainer.local/v1
+    description: 占位地址，部署时替换
+security:
+  - bearerAuth: []
+tags:
+  - name: auth
+  - name: patients
+  - name: assessments
+  - name: prescriptions
+  - name: exercises
+  - name: sessions
+  - name: alerts
+
+paths:
+  /auth/bind:
+    post:
+      tags: [auth]
+      summary: 用一次性绑定码换取访问令牌
+      description: |
+        绑定码由管理端生成，短时有效、一次性使用。
+        本端点不依赖微信 openid；openid 只作为可撤销凭据另行绑定（后续版本）。
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bindingToken]
+              properties:
+                bindingToken:
+                  type: string
+                  description: 一次性绑定码
+                deviceId:
+                  type: string
+                  description: 设备标识，用于建立设备会话
+      responses:
+        "200":
+          description: 绑定成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenPair"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          description: 绑定码已使用或已过期
+
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: 内部账号登录
+      description: |
+        管理端与治疗师工作台使用内部账号 + 密码登录，不依赖微信。
+        启用二次验证的账号需额外提交 totp。
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: 登录成功，令牌与账号档案一次返回
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          description: 尝试次数过多，已限流
+
+  /me:
+    get:
+      tags: [auth]
+      summary: 当前账号信息
+      description: |
+        返回账号、角色与所属机构。前端据此决定菜单可见性与数据范围；
+        不得用前端隐藏代替后端 org 隔离。
+      responses:
+        "200":
+          description: 当前账号
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Me"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /auth/refresh:
+    post:
+      tags: [auth]
+      summary: 刷新访问令牌
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        "200":
+          description: 刷新成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenPair"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /patients:
+    get:
+      tags: [patients]
+      summary: 列出当前机构下的患者
+      description: 照护管理员与治疗师可见全部；患者与照护者只能看到自己关联的患者。
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+        - name: stage
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 5
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/PatientStatus"
+      responses:
+        "200":
+          description: 患者列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientPage"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      tags: [patients]
+      summary: 新建患者档案
+      description: 仅 care_admin 与 rehab_therapist。新建后分期状态为 suspected。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatientCreate"
+      responses:
+        "201":
+          description: 已创建
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Patient"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /patients/{patientId}:
+    get:
+      tags: [patients]
+      summary: 获取患者详情
+      parameters:
+        - $ref: "#/components/parameters/PatientId"
+      responses:
+        "200":
+          description: 患者详情
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Patient"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /patients/{patientId}/stage-confirmations:
+    post:
+      tags: [assessments]
+      summary: 康复治疗师确认 H-Y 分期
+      description: 仅 rehab_therapist。确认后患者分期状态变为 confirmed，才可用于高风险训练准入。
+      parameters:
+        - $ref: "#/components/parameters/PatientId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [stage, confirmedAt]
+              properties:
+                stage:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                confirmedAt:
+                  type: string
+                  format: date-time
+                note:
+                  type: string
+      responses:
+        "201":
+          description: 已确认
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StageConfirmation"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /patients/{patientId}/assessments:
+    post:
+      tags: [assessments]
+      summary: 提交一次评估
+      description: |
+        可提交 H-Y 自评、肌少症筛查、僵直自评、跌倒风险自评。
+        量表分界值待临床签核，服务端不据此输出诊断结论。
+      parameters:
+        - $ref: "#/components/parameters/PatientId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssessmentCreate"
+      responses:
+        "201":
+          description: 已提交
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Assessment"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /exercises:
+    get:
+      tags: [exercises]
+      summary: 列出训练条目
+      parameters:
+        - name: category
+          in: query
+          schema:
+            $ref: "#/components/schemas/ExerciseCategory"
+        - name: stage
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 5
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: 训练条目列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExercisePage"
+
+  /exercises/{code}:
+    get:
+      tags: [exercises]
+      summary: 获取训练条目详情
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 训练条目
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exercise"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /prescriptions:
+    post:
+      tags: [prescriptions]
+      summary: 开具处方
+      description: 仅 rehab_therapist。处方必须引用已发布的训练条目。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PrescriptionCreate"
+      responses:
+        "201":
+          description: 已创建
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Prescription"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /prescriptions/{prescriptionId}:
+    patch:
+      tags: [prescriptions]
+      summary: 调整处方
+      description: |
+        仅 rehab_therapist。使用 If-Match 传当前 version 做乐观锁；
+        变更后生成新版本，旧版本保留可追溯。
+      parameters:
+        - name: prescriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: If-Match
+          in: header
+          required: true
+          schema:
+            type: string
+            example: "1.0.0"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PrescriptionPatch"
+      responses:
+        "200":
+          description: 已更新
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Prescription"
+        "409":
+          description: 版本冲突
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /sessions:
+    post:
+      tags: [sessions]
+      summary: 批量上传训练记录
+      description: |
+        幂等：以 clientRecordId 去重，重复提交返回已存在记录。
+        App 离线产生的记录联网后批量补传。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [records]
+              properties:
+                records:
+                  type: array
+                  minItems: 1
+                  maxItems: 100
+                  items:
+                    $ref: "#/components/schemas/SessionRecordCreate"
+      responses:
+        "200":
+          description: 逐条接收结果
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionBatchResult"
+    get:
+      tags: [sessions]
+      summary: 查询训练记录
+      parameters:
+        - name: patientId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: 训练记录列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionRecordPage"
+
+  /alerts:
+    get:
+      tags: [alerts]
+      summary: 查询预警事件
+      parameters:
+        - name: patientId
+          in: query
+          schema:
+            type: string
+        - name: level
+          in: query
+          schema:
+            $ref: "#/components/schemas/AlertLevel"
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [open, acknowledged, followed_up, closed]
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: 预警列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlertPage"
+
+  /alerts/{alertId}:
+    patch:
+      tags: [alerts]
+      summary: 标记预警处理结果
+      description: 仅 care_admin 与 rehab_therapist。记录处理人与处理动作，形成随访台账。
+      parameters:
+        - name: alertId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [acknowledged, followed_up, closed]
+                note:
+                  type: string
+      responses:
+        "200":
+          description: 已更新
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Alert"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    PatientId:
+      name: patientId
+      in: path
+      required: true
+      schema:
+        type: string
+    Cursor:
+      name: cursor
+      in: query
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+  responses:
+    Unauthorized:
+      description: 未认证或令牌失效
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Forbidden:
+      description: 无权限或跨机构访问
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: 资源不存在
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    ValidationError:
+      description: 请求校验失败
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          examples: [FORBIDDEN, NOT_FOUND, VALIDATION_FAILED]
+        message:
+          type: string
+        detail:
+          type: object
+          additionalProperties: true
+
+    TokenPair:
+      type: object
+      required: [accessToken, refreshToken, expiresIn]
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+          description: 秒
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+        totp:
+          type: string
+          description: 二次验证码；未启用 2FA 的账号省略
+
+    LoginResponse:
+      allOf:
+        - $ref: "#/components/schemas/TokenPair"
+        - type: object
+          required: [profile]
+          properties:
+            profile:
+              $ref: "#/components/schemas/Me"
+
+    Me:
+      type: object
+      required: [accountId, displayName, roles, orgId]
+      properties:
+        accountId:
+          type: string
+        displayName:
+          type: string
+        roles:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            enum: [patient, caregiver, care_admin, rehab_therapist]
+        orgId:
+          type: string
+        orgName:
+          type: string
+
+    PatientStatus:
+      type: string
+      enum: [active, inactive]
+
+    StageConfirmationStatus:
+      type: string
+      enum: [confirmed, suspected]
+
+    ExerciseCategory:
+      type: string
+      enum: [stretching-relaxation, strength-maintenance, rhythmic-gait, postural-correction]
+
+    RiskLevel:
+      type: string
+      enum: [low, medium, high]
+
+    AlertLevel:
+      type: string
+      enum: [info, warning, critical]
+
+    Patient:
+      type: object
+      required: [id, orgId, displayName, hyStage, stageConfirmationStatus, status]
+      properties:
+        id:
+          type: string
+        orgId:
+          type: string
+        displayName:
+          type: string
+        birthYear:
+          type: integer
+        hyStage:
+          type: integer
+          minimum: 1
+          maximum: 5
+        stageConfirmationStatus:
+          $ref: "#/components/schemas/StageConfirmationStatus"
+        stageConfirmedBy:
+          type: string
+          nullable: true
+        stageConfirmedAt:
+          type: string
+          format: date-time
+          nullable: true
+        fallRisk:
+          $ref: "#/components/schemas/RiskLevel"
+        symptoms:
+          type: array
+          items:
+            type: string
+        status:
+          $ref: "#/components/schemas/PatientStatus"
+        createdAt:
+          type: string
+          format: date-time
+
+    PatientCreate:
+      type: object
+      required: [displayName]
+      properties:
+        displayName:
+          type: string
+        birthYear:
+          type: integer
+        note:
+          type: string
+
+    PatientPage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Patient"
+        nextCursor:
+          type: string
+          nullable: true
+
+    StageConfirmation:
+      type: object
+      required: [patientId, stage, status, confirmedBy, confirmedAt]
+      properties:
+        patientId:
+          type: string
+        stage:
+          type: integer
+          minimum: 1
+          maximum: 5
+        status:
+          $ref: "#/components/schemas/StageConfirmationStatus"
+        confirmedBy:
+          type: string
+        confirmedAt:
+          type: string
+          format: date-time
+        note:
+          type: string
+
+    AssessmentCreate:
+      type: object
+      required: [instrument, assessedAt]
+      properties:
+        instrument:
+          type: string
+          description: 量表编码，如 HY_SELF / SARC_F / SARC_CALF / RIGIDITY_5 / STEADI / FES_I
+        score:
+          type: number
+        answers:
+          type: object
+          additionalProperties: true
+        assessedAt:
+          type: string
+          format: date-time
+        assessedBy:
+          type: string
+          description: 操作者账号；代操作时与 subject 不同
+
+    Assessment:
+      type: object
+      required: [id, patientId, instrument, assessedAt, assessedBy]
+      properties:
+        id:
+          type: string
+        patientId:
+          type: string
+        instrument:
+          type: string
+        score:
+          type: number
+        riskLevel:
+          $ref: "#/components/schemas/RiskLevel"
+        assessedAt:
+          type: string
+          format: date-time
+        assessedBy:
+          type: string
+
+    Dosage:
+      type: object
+      properties:
+        sets:
+          type: integer
+        repetitions:
+          type: integer
+        bpm:
+          type: integer
+          description: 节拍；个体化规则待临床签核
+        durationMinutes:
+          type: number
+        frequencyPerWeek:
+          type: integer
+        restSeconds:
+          type: integer
+
+    ExerciseVariant:
+      type: object
+      required: [code, level]
+      properties:
+        code:
+          type: string
+        level:
+          type: integer
+        supportLevel:
+          type: string
+          enum: [unsupported-standing, supported-standing, seated]
+        applicableStages:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+            maximum: 5
+        defaultDosage:
+          $ref: "#/components/schemas/Dosage"
+
+    Exercise:
+      type: object
+      required: [code, label, category, publicationStatus]
+      properties:
+        code:
+          type: string
+        label:
+          type: string
+        category:
+          $ref: "#/components/schemas/ExerciseCategory"
+        publicationStatus:
+          type: string
+          enum: [draft, published, retired]
+        riskLevel:
+          $ref: "#/components/schemas/RiskLevel"
+        applicableStages:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+            maximum: 5
+        bodyParts:
+          type: array
+          items:
+            type: string
+        joints:
+          type: array
+          items:
+            type: string
+        contraindications:
+          type: array
+          items:
+            type: string
+          description: 至少一条，待临床签核
+        dangerSignals:
+          type: array
+          items:
+            type: string
+        variants:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExerciseVariant"
+        defaultDosage:
+          $ref: "#/components/schemas/Dosage"
+        videoUri:
+          type: string
+          format: uri
+        audioUri:
+          type: string
+          format: uri
+
+    ExercisePage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Exercise"
+        nextCursor:
+          type: string
+          nullable: true
+
+    PrescriptionItem:
+      type: object
+      required: [exerciseCode]
+      properties:
+        exerciseCode:
+          type: string
+        variantCode:
+          type: string
+        dosage:
+          $ref: "#/components/schemas/Dosage"
+
+    PrescriptionCreate:
+      type: object
+      required: [patientId, items, issuedAt, validFrom, validUntil, mappingTableVersion]
+      properties:
+        patientId:
+          type: string
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/PrescriptionItem"
+        issuedAt:
+          type: string
+          format: date-time
+        validFrom:
+          type: string
+          format: date-time
+        validUntil:
+          type: string
+          format: date-time
+        mappingTableVersion:
+          type: string
+          description: 分期→条目映射表版本，用于回溯
+
+    PrescriptionPatch:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/PrescriptionItem"
+        validUntil:
+          type: string
+          format: date-time
+        note:
+          type: string
+
+    Prescription:
+      type: object
+      required: [id, patientId, prescribedBy, items, issuedAt, version, status]
+      properties:
+        id:
+          type: string
+        patientId:
+          type: string
+        prescribedBy:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/PrescriptionItem"
+        issuedAt:
+          type: string
+          format: date-time
+        validFrom:
+          type: string
+          format: date-time
+        validUntil:
+          type: string
+          format: date-time
+        version:
+          type: string
+          description: 乐观锁版本
+        mappingTableVersion:
+          type: string
+        status:
+          type: string
+          enum: [draft, active, expired]
+
+    SessionRecordCreate:
+      type: object
+      required:
+        - clientRecordId
+        - patientId
+        - prescriptionId
+        - recordedAt
+        - modelVersion
+        - modelSha256
+        - metricAlgorithmVersion
+        - thresholdConfigVersion
+      properties:
+        clientRecordId:
+          type: string
+          description: 客户端生成的幂等键
+        patientId:
+          type: string
+        prescriptionId:
+          type: string
+        recordedAt:
+          type: string
+          format: date-time
+        recordedBy:
+          type: string
+          description: 操作者账号；代操作时与 subject 不同
+        checkedIn:
+          type: boolean
+        completionCount:
+          type: integer
+        movementErrorCount:
+          type: integer
+        interruptionCount:
+          type: integer
+        validFrameRatio:
+          type: number
+          minimum: 0
+          maximum: 1
+        isDoubtful:
+          type: boolean
+          description: 有效性校验未通过时标记，不阻断打卡
+        modelVersion:
+          type: string
+        modelSha256:
+          type: string
+        metricAlgorithmVersion:
+          type: string
+        thresholdConfigVersion:
+          type: string
+        metrics:
+          type: object
+          additionalProperties: true
+          description: 步态指标、关节角等；口径约束见决策记录
+
+    SessionBatchResult:
+      type: object
+      required: [results]
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            required: [clientRecordId, accepted]
+            properties:
+              clientRecordId:
+                type: string
+              accepted:
+                type: boolean
+              recordId:
+                type: string
+              error:
+                $ref: "#/components/schemas/Error"
+
+    SessionRecord:
+      type: object
+      properties:
+        id:
+          type: string
+        clientRecordId:
+          type: string
+        patientId:
+          type: string
+        prescriptionId:
+          type: string
+        recordedAt:
+          type: string
+          format: date-time
+        checkedIn:
+          type: boolean
+        completionCount:
+          type: integer
+        movementErrorCount:
+          type: integer
+        interruptionCount:
+          type: integer
+        validFrameRatio:
+          type: number
+        isDoubtful:
+          type: boolean
+        modelVersion:
+          type: string
+        metricAlgorithmVersion:
+          type: string
+        thresholdConfigVersion:
+          type: string
+
+    SessionRecordPage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/SessionRecord"
+        nextCursor:
+          type: string
+          nullable: true
+
+    NotificationDelivery:
+      type: object
+      required: [channel, status, deliveredAt]
+      properties:
+        channel:
+          type: string
+          enum: [in_app_popup, voice_prompt, push_notification, audit_log]
+        status:
+          type: string
+          enum: [pending, sent, failed, fallback]
+        deliveredAt:
+          type: string
+          format: date-time
+
+    Alert:
+      type: object
+      required: [id, patientId, ruleCode, level, triggeredAt, status]
+      properties:
+        id:
+          type: string
+        patientId:
+          type: string
+        ruleCode:
+          type: string
+        level:
+          $ref: "#/components/schemas/AlertLevel"
+        triggeredAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [open, acknowledged, followed_up, closed]
+        deliveries:
+          type: array
+          items:
+            $ref: "#/components/schemas/NotificationDelivery"
+
+    AlertPage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Alert"
+        nextCursor:
+          type: string
+          nullable: true

@@ -1,0 +1,114 @@
+:root {
+  font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  color: #1f2329;
+  background: #f5f6f8;
+}
+
+body {
+  margin: 0;
+}
+
+a {
+  color: #1a5fd0;
+}
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.app-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 220px;
+  padding: 20px 16px;
+  background: #ffffff;
+  border-right: 1px solid #e3e6ea;
+}
+
+.app-brand {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.app-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.app-nav a {
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: #1f2329;
+  text-decoration: none;
+}
+
+.app-nav a.active {
+  background: #e8f0fe;
+  color: #1a5fd0;
+  font-weight: 600;
+}
+
+.app-org {
+  margin-top: auto;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.app-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 12px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #e3e6ea;
+}
+
+.app-user {
+  font-size: 14px;
+}
+
+.app-main {
+  padding: 24px;
+}
+
+.page h1,
+.login-page h1 {
+  margin: 0 0 8px;
+  font-size: 22px;
+}
+
+.page-description {
+  margin: 0 0 16px;
+  color: #4b5563;
+}
+
+.hint {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.action-list {
+  display: flex;
+  gap: 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.login-page {
+  max-width: 640px;
+  margin: 80px auto;
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #e3e6ea;
+  border-radius: 8px;
+}
