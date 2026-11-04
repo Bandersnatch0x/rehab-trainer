@@ -28,7 +28,7 @@ App 与小程序功能清单一致;差异只在姿态识别的实现方式与实
 | Web 后台 `apps/admin-web` | 6 个页面已接真实 API(患者、详情、分期、处方、预警);Playwright E2E 10 条全部通过 |
 | 微信小程序 / Android | 契约客户端已生成,配置指向本地后端;小程序 async 云端 CV 与 App 端上实时推理按 D3 分级实现 |
 | 部署 | `services/api/Dockerfile` + `docker-compose.yml` + `deploy/`(Alembic、健康检查、自检);手册见 `docs/deployment/README.md` |
-| 联调 | `scripts/smoke-api.py` 覆盖 17 项契约操作,含批量幂等与重放 |
+| 联调 | `scripts/smoke-api.py` 覆盖 18 项契约操作,含批量幂等与重放 |
 
 演示版对未裁决与待临床签核内容使用 mock 并标注(D21);步态指标在完成标定前不进训练成绩(D23)。
 

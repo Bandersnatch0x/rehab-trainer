@@ -33,6 +33,7 @@ jobs:
             api:
               - 'services/api/**'
               - 'packages/api-contract/**'
+              - 'scripts/**'
             api_contract:
               - 'packages/api-contract/**'
               - 'packages/api-client-ts/**'
@@ -87,6 +88,11 @@ jobs:
           cache: pnpm
       - run: pnpm install --no-frozen-lockfile
       - run: pnpm --filter @rehab-trainer/admin-web build
+      - name: 生成物必须与契约一致
+        run: |
+          pnpm --filter @rehab-trainer/admin-web generate:api
+          pnpm --filter @rehab-trainer/miniprogram generate:api
+          git diff --exit-code -- apps/admin-web/src/api/schema.d.ts apps/miniprogram/types/api.d.ts
 
   api:
     needs: changes
@@ -102,6 +108,9 @@ jobs:
           python-version: '3.13'
       - run: python -m pip install -e '.[dev]'
       - run: python -m pytest -q
+      - name: 联调脚本回归测试
+        working-directory: .
+        run: python -m unittest discover -s scripts -p 'test_*.py'
 
   api-contract:
     needs: changes

@@ -15,6 +15,10 @@ export default function StageConfirmationPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    // 同步锁：disabled 要等重渲染，快速双击可能进第二次。
+    if (submitting) {
+      return;
+    }
     if (!patientId) {
       setError("缺少患者编号，无法签发分期");
       return;

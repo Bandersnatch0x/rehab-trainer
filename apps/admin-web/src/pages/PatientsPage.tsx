@@ -32,18 +32,34 @@ export default function PatientsPage() {
     setError(null);
 
     // 契约只支持按 stage 过滤；确认状态在本地筛选，避免臆造查询参数。
-    listPatients(stage ? { stage: Number(stage) } : {}).then((result) => {
-      if (cancelled) {
-        return;
-      }
+    async function loadAll() {
+      const collected: Patient[] = [];
+      let cursor: string | undefined;
+      do {
+        const result = await listPatients({
+          limit: 100,
+          ...(stage ? { stage: Number(stage) } : {}),
+          ...(cursor ? { cursor } : {}),
+        });
+        if (cancelled) {
+          return;
+        }
+        if (!result.ok) {
+          setError(result.error.message);
+          setPatients([]);
+          setLoading(false);
+          return;
+        }
+        collected.push(...result.data.items);
+        cursor = result.data.nextCursor ?? undefined;
+        // 防失控：单次筛选最多拉 1000 条。
+      } while (cursor && collected.length < 1000);
+
+      setPatients(collected);
       setLoading(false);
-      if (result.ok) {
-        setPatients(result.data.items);
-      } else {
-        setError(result.error.message);
-        setPatients([]);
-      }
-    });
+    }
+
+    void loadAll();
 
     return () => {
       cancelled = true;
@@ -83,6 +99,7 @@ export default function PatientsPage() {
             <option value="2">H-Y 2期 (双侧轻度)</option>
             <option value="3">H-Y 3期 (姿势不稳)</option>
             <option value="4">H-Y 4期 (严重受障)</option>
+            <option value="5">H-Y 5期 (轮椅/卧床，仅宣教)</option>
           </select>
         </label>
 
@@ -100,7 +117,11 @@ export default function PatientsPage() {
         </label>
 
         <span className="hint" style={{ marginLeft: "auto" }}>
-          {loading ? "加载中…" : `共 ${visible.length} 位在管患者`}
+          {loading
+            ? "加载中…"
+            : patients.length >= 1000
+              ? `已加载 ${visible.length} 位（超过 1000 条上限，请用筛选缩小范围）`
+              : `共 ${visible.length} 位患者`}
         </span>
       </div>
 

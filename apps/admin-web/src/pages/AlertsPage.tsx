@@ -143,7 +143,11 @@ export default function AlertsPage() {
         >
           提示 ({countByLevel("info")})
         </button>
-        {loading ? <span className="hint">加载中…</span> : null}
+        {loading ? (
+          <span className="hint">加载中…</span>
+        ) : alerts.length >= 100 ? (
+          <span className="hint">仅显示最近 100 条，计数不代表全部积压</span>
+        ) : null}
       </div>
 
       <div className="table-container">

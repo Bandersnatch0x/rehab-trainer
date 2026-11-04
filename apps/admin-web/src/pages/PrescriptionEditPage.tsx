@@ -31,39 +31,66 @@ export default function PrescriptionEditPage() {
   const [reps, setReps] = useState<number>(12);
   const [bpm, setBpm] = useState<number>(64);
   const [frequency, setFrequency] = useState<number>(5);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [successVersion, setSuccessVersion] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!patientId) {
+      setLoading(false);
+      setLoadError("缺少患者编号");
       return;
     }
     let cancelled = false;
+    setLoading(true);
+    setLoadError(null);
+    setCurrent(null);
+    setExercises([]);
 
-    listExercises({ limit: 100 }).then((result) => {
-      if (cancelled || !result.ok) {
-        return;
-      }
-      setExercises(result.data.items);
-      setExerciseCode((prev) => prev || (result.data.items[0]?.code ?? ""));
-    });
+    Promise.all([listExercises({ limit: 100 }), listPrescriptions({ patientId })]).then(
+      ([exerciseResult, prescriptionResult]) => {
+        if (cancelled) {
+          return;
+        }
+        setLoading(false);
 
-    listPrescriptions({ patientId }).then((result) => {
-      if (cancelled || !result.ok) {
-        return;
-      }
-      const latest = result.data.items[0] ?? null;
-      setCurrent(latest);
-      if (latest?.items[0]?.exerciseCode) {
-        setExerciseCode(latest.items[0].exerciseCode);
-        const dosage = latest.items[0].dosage;
-        if (dosage?.sets) setSets(dosage.sets);
-        if (dosage?.repetitions) setReps(dosage.repetitions);
-        if (dosage?.bpm) setBpm(dosage.bpm);
-        if (dosage?.frequencyPerWeek) setFrequency(dosage.frequencyPerWeek);
-      }
-    });
+        if (!exerciseResult.ok) {
+          // 读不到训练条目就不能签发，避免用默认值拼出一个处方。
+          setLoadError(`训练条目加载失败：${exerciseResult.error.message}`);
+          return;
+        }
+        setExercises(exerciseResult.data.items);
+
+        if (!prescriptionResult.ok) {
+          // 处方读取失败时绝不能落进"新建"分支，否则会凭空多一条处方。
+          setLoadError(`现有处方读取失败：${prescriptionResult.error.message}`);
+          return;
+        }
+
+        // 只在读全成功后才认定"当前处方"：active 且未过期，取最新签发。
+        const now = Date.now();
+        const active = prescriptionResult.data.items.find(
+          (item) =>
+            item.status === "active" &&
+            (!item.validUntil || Date.parse(item.validUntil) >= now),
+        );
+        setCurrent(active ?? null);
+
+        const first = active?.items[0];
+        if (first?.exerciseCode) {
+          setExerciseCode(first.exerciseCode);
+          const dosage = first.dosage;
+          if (dosage?.sets) setSets(dosage.sets);
+          if (dosage?.repetitions) setReps(dosage.repetitions);
+          if (dosage?.bpm) setBpm(dosage.bpm);
+          if (dosage?.frequencyPerWeek) setFrequency(dosage.frequencyPerWeek);
+        } else if (exerciseResult.data.items[0]) {
+          setExerciseCode(exerciseResult.data.items[0].code);
+        }
+      },
+    );
 
     return () => {
       cancelled = true;
@@ -72,6 +99,10 @@ export default function PrescriptionEditPage() {
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
+    // 同步锁：disabled 依赖重渲染，双击仍可能进第二次。
+    if (submitting || loading || loadError) {
+      return;
+    }
     if (!patientId) {
       setError("缺少患者编号，无法签发处方");
       return;
@@ -83,17 +114,17 @@ export default function PrescriptionEditPage() {
     setSubmitting(true);
     setError(null);
 
-    const items = [
-      {
-        exerciseCode,
-        dosage: {
-          sets,
-          repetitions: reps,
-          bpm,
-          frequencyPerWeek: frequency,
-        },
+    const edited = {
+      exerciseCode,
+      dosage: {
+        sets,
+        repetitions: reps,
+        bpm,
+        frequencyPerWeek: frequency,
       },
-    ];
+    };
+    // 后端 PATCH 是整表替换：保留当前处方里除被编辑条目外的其他条目，避免误删。
+    const items = current ? [edited, ...current.items.slice(1)] : [edited];
     const now = new Date();
 
     // 已有处方走 PATCH + If-Match；没有才新建。绝不伪造版本号。
@@ -105,6 +136,7 @@ export default function PrescriptionEditPage() {
           issuedAt: now.toISOString(),
           validFrom: now.toISOString(),
           validUntil: addDays(now, 30),
+          // 演示版映射表版本；真实版本应由分期→条目映射表提供（C2）。
           mappingTableVersion: "demo.1",
         });
 
@@ -120,7 +152,7 @@ export default function PrescriptionEditPage() {
       // 重新拉取最新版本，避免用户拿旧版本反复重试。
       const latest = await listPrescriptions({ patientId });
       if (latest.ok) {
-        setCurrent(latest.data.items[0] ?? null);
+        setCurrent(latest.data.items.find((item) => item.status === "active") ?? null);
       }
       return;
     }
@@ -137,11 +169,21 @@ export default function PrescriptionEditPage() {
       <div className="notice">
         <div>
           <strong>处方版本乐观锁提示（D12 约束）：</strong>
-          {current
-            ? `当前处方版本 ${current.version}。保存时以该版本作为 If-Match；另一端先更新则返回 409 并提示冲突。`
-            : "该患者暂无处方，本次保存将新建 v1.0.0。"}
+          {loading
+            ? "正在读取现有处方…"
+            : loadError
+              ? "现有处方读取失败，已禁用签发。"
+              : current
+                ? `当前处方版本 ${current.version}。保存时以该版本作为 If-Match；另一端先更新则返回 409 并提示冲突。`
+                : "该患者暂无有效处方，本次保存将新建 v1.0.0。"}
         </div>
       </div>
+
+      {loadError ? (
+        <p role="alert" className="notice notice--danger">
+          {loadError}。请刷新重试；读取成功前不会创建新处方。
+        </p>
+      ) : null}
 
       {successVersion ? (
         <div className="card" style={{ textAlign: "center", padding: "40px 24px" }}>
@@ -234,6 +276,18 @@ export default function PrescriptionEditPage() {
             </div>
           </div>
 
+          {current && current.items.length > 1 ? (
+            <div className="notice">
+              <div>
+                <strong>其余 {current.items.length - 1} 个训练条目将保持不变：</strong>
+                {current.items
+                  .slice(1)
+                  .map((item) => item.exerciseCode)
+                  .join("、")}
+              </div>
+            </div>
+          ) : null}
+
           <div className="card" style={{ borderLeft: "6px solid var(--color-warning)" }}>
             <div className="card-title">3. 禁忌症与危险信号核验</div>
             <p className="hint">
@@ -252,7 +306,11 @@ export default function PrescriptionEditPage() {
             <button type="button" className="btn-secondary" onClick={() => navigate(-1)}>
               取消
             </button>
-            <button type="submit" className="btn-primary" disabled={submitting}>
+            <button
+              type="submit"
+              className="btn-primary"
+              disabled={submitting || loading || Boolean(loadError)}
+            >
               {submitting ? "正在签发…" : "💾 签发并同步处方"}
             </button>
           </div>

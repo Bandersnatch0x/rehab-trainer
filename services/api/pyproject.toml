@@ -20,6 +20,8 @@ dependencies = [
 dev = [
   "pytest>=8.0,<9.0",
   "httpx>=0.27,<1.0",
+  # tests/test_contract.py 直接读 openapi.yaml，不能靠传递依赖。
+  "pyyaml>=6.0,<7.0",
 ]
 postgres = [
   "psycopg[binary]>=3.2,<4.0",

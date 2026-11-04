@@ -31,6 +31,8 @@ export default function PatientDetailPage() {
   const [sessions, setSessions] = useState<SessionRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [prescriptionError, setPrescriptionError] = useState<string | null>(null);
+  const [sessionsError, setSessionsError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!patientId) {
@@ -41,11 +43,17 @@ export default function PatientDetailPage() {
     let cancelled = false;
     setLoading(true);
     setError(null);
+    // 切换患者时必须清空上一位患者的数据，避免错误态下串档。
+    setPatient(null);
+    setPrescription(null);
+    setSessions([]);
+    setPrescriptionError(null);
+    setSessionsError(null);
 
     Promise.all([
       getPatient(patientId),
       listPrescriptions({ patientId }),
-      listSessions({ patientId }),
+      listSessions({ patientId, limit: 100 }),
     ]).then(([patientResult, prescriptionResult, sessionResult]) => {
       if (cancelled) {
         return;
@@ -56,12 +64,25 @@ export default function PatientDetailPage() {
         return;
       }
       setPatient(patientResult.data);
+
       if (prescriptionResult.ok) {
-        // 契约按签发时间倒序返回，第一条即当前有效处方。
-        setPrescription(prescriptionResult.data.items[0] ?? null);
+        // 只把 active 且未过期的处方当作"当前有效处方"。
+        const now = Date.now();
+        setPrescription(
+          prescriptionResult.data.items.find(
+            (item) =>
+              item.status === "active" &&
+              (!item.validUntil || Date.parse(item.validUntil) >= now),
+          ) ?? null,
+        );
+      } else {
+        setPrescriptionError(prescriptionResult.error.message);
       }
+
       if (sessionResult.ok) {
         setSessions(sessionResult.data.items);
+      } else {
+        setSessionsError(sessionResult.error.message);
       }
     });
 
@@ -151,6 +172,10 @@ export default function PatientDetailPage() {
               <p className="hint" style={{ margin: 0 }}>
                 正在读取处方…
               </p>
+            ) : prescriptionError ? (
+              <p role="alert" className="hint" style={{ margin: 0, color: "var(--color-danger)" }}>
+                处方读取失败：{prescriptionError}
+              </p>
             ) : prescription ? (
               <>
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -176,8 +201,14 @@ export default function PatientDetailPage() {
               </p>
             )}
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span className="hint">已提交训练记录</span>
-              <strong>{loading ? "加载中…" : `${sessions.length} 条`}</strong>
+              <span className="hint">最近训练记录</span>
+              <strong>
+                {loading
+                  ? "加载中…"
+                  : sessionsError
+                    ? "读取失败"
+                    : `${sessions.length} 条${sessions.length >= 100 ? "（仅显示最近 100 条）" : ""}`}
+              </strong>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span className="hint">处方调整</span>
@@ -208,6 +239,10 @@ export default function PatientDetailPage() {
               {loading ? (
                 <tr>
                   <td colSpan={7}>正在读取训练记录…</td>
+                </tr>
+              ) : sessionsError ? (
+                <tr>
+                  <td colSpan={7}>训练记录读取失败：{sessionsError}</td>
                 </tr>
               ) : sessions.length === 0 ? (
                 <tr>

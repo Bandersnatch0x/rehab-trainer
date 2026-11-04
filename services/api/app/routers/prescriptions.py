@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, Header, Path, Query
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.access import get_patient_scoped
 from app.core.audit import record_audit
@@ -112,6 +112,7 @@ def list_prescriptions(
     offset = decode_cursor(cursor)
     stmt = (
         select(Prescription)
+        .options(selectinload(Prescription.items))
         .where(
             Prescription.patient_id == patient_id,
             Prescription.org_id == principal.org_id,

@@ -26,7 +26,7 @@ from app.models.prescription import Prescription, PrescriptionItem
 from app.seed import _seed_exercises
 
 
-def seed_case():
+def seed_case(extra_patients: int = 0):
     case_id = uuid4().hex
     patient_id = f"patient-{case_id}"
     other_id = f"other-{case_id}"
@@ -43,6 +43,13 @@ def seed_case():
                            birth_year=1950, hy_stage=stage, stage_confirmation_status="confirmed",
                            stage_confirmed_by=therapist_id, stage_confirmed_at=now,
                            fall_risk="medium", symptoms=[], status="active"))
+        # 分页回归用：同一机构下再加若干患者，超过单页上限。
+        for index in range(extra_patients):
+            db.add(Patient(patient_id=f"extra-{case_id}-{index}", org_id=case_id,
+                           display_name=f"批量患者 {index + 1}", birth_year=1950,
+                           hy_stage=2, stage_confirmation_status="confirmed",
+                           stage_confirmed_by=therapist_id, stage_confirmed_at=now,
+                           fall_risk="low", symptoms=[], status="active"))
         db.flush()
         password_hash = hash_password(os.environ["E2E_PASSWORD"])
         for role, username in accounts.items():
@@ -57,8 +64,13 @@ def seed_case():
                                     prescribed_by=therapist_id, version="1.0.0",
                                     mapping_table_version="2026.11.0", issued_at=now,
                                     valid_from=now, valid_until=now + timedelta(days=30), status="active")
-        prescription.items = [PrescriptionItem(id=uuid4().hex, prescription_id=prescription_id,
-                                               exercise_code="ex-stretch-01", position=0)]
+        # 两条条目：用于验证调整处方时不会把未编辑的条目一起删掉。
+        prescription.items = [
+            PrescriptionItem(id=uuid4().hex, prescription_id=prescription_id,
+                             exercise_code="ex-stretch-01", position=0),
+            PrescriptionItem(id=uuid4().hex, prescription_id=prescription_id,
+                             exercise_code="ex-strength-01", position=1),
+        ]
         db.add(prescription)
         db.add(AlertEvent(id=alert_id, org_id=case_id, patient_id=patient_id,
                           rule_code="PAIN_PERSISTENT", level="warning", triggered_at=now, status="open"))
@@ -77,5 +89,8 @@ if __name__ == "__main__":
         uvicorn.run("app.main:app", host="127.0.0.1", port=18765)
     elif sys.argv[1:] == ["seed"]:
         seed_case()
+    elif sys.argv[1:] == ["seed-many"]:
+        # 25 位患者 = 两页（默认每页 20），用于验证列表不会静默截断。
+        seed_case(extra_patients=23)
     else:
         raise SystemExit("Usage: python e2e/backend.py serve|seed")

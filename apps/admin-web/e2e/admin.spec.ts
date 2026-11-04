@@ -1,4 +1,7 @@
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { test, expect, login } from './fixtures';
+import { PYTHON } from './python';
 
 test('登录成功后进入患者工作台', async ({ page, data }) => {
   await login(page, data);
@@ -97,6 +100,43 @@ test('预警处理结果保存后刷新仍然有效', async ({ page, data, reque
   expect(persisted.status()).toBe(200);
   const { items } = await persisted.json();
   expect(items).toEqual(expect.arrayContaining([expect.objectContaining({ id: data.alertId, status: 'followed_up' })]));
+});
+
+test('调整处方不会删除同一处方里的其他训练条目', async ({ page, data, request }) => {
+  const signedIn = await login(page, data);
+  const { accessToken } = await signedIn.json();
+  await page.goto(`/patients/${data.patientId}/prescription`);
+  await expect(page.getByText(/当前处方版本 1\.0\.0/)).toBeVisible();
+
+  const saved = page.waitForResponse(
+    (response) =>
+      response.url().endsWith(`/prescriptions/${data.prescriptionId}`) &&
+      response.request().method() === 'PATCH',
+  );
+  await page.getByRole('button', { name: /签发并同步处方/ }).click();
+  expect((await saved).status()).toBe(200);
+
+  const listed = await request.get(`/v1/prescriptions?patientId=${data.patientId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  const { items } = await listed.json();
+  const codes = (items[0].items as { exerciseCode: string }[])
+    .map((item) => item.exerciseCode)
+    .sort();
+  expect(codes).toEqual(['ex-strength-01', 'ex-stretch-01']);
+});
+
+test('患者超过单页上限时列表仍完整显示', async ({ page }) => {
+  const output = execFileSync(
+    PYTHON,
+    [fileURLToPath(new URL('./backend.py', import.meta.url)), 'seed-many'],
+    { encoding: 'utf8', timeout: 15_000 },
+  );
+  const many = JSON.parse(output);
+  await login(page, many);
+  await expect(page.getByRole('heading', { name: '患者工作台' })).toBeVisible();
+  await expect(page.locator('tbody tr')).toHaveCount(25);
+  await expect(page.getByText(/共 25 位患者/)).toBeVisible();
 });
 
 test('未知路由展示404并可返回患者列表', async ({ page, data }) => {

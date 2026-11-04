@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta, timezone
+
 from sqlalchemy import func, select
 
 from app.models.prescription import Prescription
@@ -5,6 +7,8 @@ from tests.helpers import API, auth_headers, login
 
 
 def _create_body(seed, patient_id=None, exercise_code="ex-low", variant_code=None):
+    # 用相对时间，避免固定日期在将来变成过去时导致测试失效。
+    now = datetime.now(timezone.utc)
     return {
         "patientId": patient_id or seed["patient_a"],
         "items": [
@@ -14,9 +18,9 @@ def _create_body(seed, patient_id=None, exercise_code="ex-low", variant_code=Non
                 "dosage": {"sets": 2, "repetitions": 8},
             }
         ],
-        "issuedAt": "2026-11-04T08:00:00Z",
-        "validFrom": "2026-11-04T08:00:00Z",
-        "validUntil": "2026-12-04T08:00:00Z",
+        "issuedAt": now.isoformat(),
+        "validFrom": now.isoformat(),
+        "validUntil": (now + timedelta(days=30)).isoformat(),
         "mappingTableVersion": "test.1",
     }
 
@@ -123,8 +127,8 @@ def test_list_prescriptions_returns_latest_first(client, seed):
     assert listed.json()["items"][0]["id"] == seed["prescription_a"]
 
     body = _create_body(seed)
-    # 明确晚于种子处方的签发时间，才能验证倒序。
-    body["issuedAt"] = "2027-01-01T08:00:00Z"
+    # 明确晚于种子处方的签发时间才能验证倒序；用相对时间，避免固定日期过期。
+    body["issuedAt"] = (datetime.now(timezone.utc) + timedelta(days=1)).isoformat()
     created = client.post(f"{API}/prescriptions", json=body, headers=headers)
     assert created.status_code == 201, created.text
 

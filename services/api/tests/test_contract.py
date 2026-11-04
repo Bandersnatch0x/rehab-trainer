@@ -3,7 +3,7 @@ from urllib.parse import urlparse
 
 import yaml
 
-from app.main import app
+from app.main import API_PREFIX, app
 
 CONTRACT = Path(__file__).resolve().parents[3] / "packages/api-contract/openapi.yaml"
 
@@ -14,38 +14,39 @@ def _contract_spec() -> dict:
     return yaml.safe_load(CONTRACT.read_text(encoding="utf-8"))
 
 
-def _prefix() -> str:
+def _contract_prefix() -> str:
     """契约 servers[0].url 可能是绝对地址；取其中的路径前缀（如 /v1）。"""
     url = _contract_spec()["servers"][0]["url"]
     prefix = urlparse(url).path.rstrip("/")
     return "" if prefix in ("", "/") else prefix
 
 
-def _strip(path: str) -> str:
-    prefix = _prefix()
-    if prefix and path.startswith(prefix):
-        return path[len(prefix) :] or "/"
-    return path
-
-
 def _contract_operations() -> set[tuple[str, str]]:
-    spec = _contract_spec()
+    # 契约路径是相对路径；补上前缀后再与实现比较，不做双向剥离。
+    prefix = _contract_prefix()
     return {
-        (_strip(path), method)
-        for path, item in spec["paths"].items()
+        (prefix + path, method)
+        for path, item in _contract_spec()["paths"].items()
         for method in item
         if method in HTTP_METHODS
     }
 
 
 def _app_operations() -> set[tuple[str, str]]:
-    spec = app.openapi()
     return {
-        (_strip(path), method)
-        for path, item in spec["paths"].items()
+        (path, method)
+        for path, item in app.openapi()["paths"].items()
         for method in item
         if method in HTTP_METHODS
     }
+
+
+def test_app_prefix_matches_contract_server():
+    """实现挂载前缀必须等于契约 servers[0] 的路径前缀。
+
+    否则客户端按契约拼出的 URL 会 404，而只比较操作集时可能仍然全绿。
+    """
+    assert API_PREFIX == _contract_prefix()
 
 
 def test_contract_and_app_expose_same_operations():

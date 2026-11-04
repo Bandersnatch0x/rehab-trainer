@@ -33,7 +33,7 @@ import type {
 } from "./types";
 
 /**
- * 契约 openapi.yaml 的 15 个操作，一一对应。
+ * 契约 openapi.yaml 的全部操作，一一对应（当前 18 个）。
  * 页面只调用本文件，不直接接触 openapi-fetch 的原始返回结构。
  */
 
