@@ -49,10 +49,11 @@ export default function AlertsPage() {
   const [error, setError] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
 
+  // 一次取回后在本地筛选：这样切换级别不会让“全部/严重/警告/提示”的计数互相污染。
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const result = await listAlerts(filter ? { level: filter } : {});
+    const result = await listAlerts({ limit: 100 });
     setLoading(false);
     if (result.ok) {
       setAlerts(result.data.items);
@@ -60,11 +61,13 @@ export default function AlertsPage() {
       setError(result.error.message);
       setAlerts([]);
     }
-  }, [filter]);
+  }, []);
 
   useEffect(() => {
     void load();
   }, [load]);
+
+  const visible = filter === "" ? alerts : alerts.filter((a) => a.level === filter);
 
   async function handleResolve(alert: Alert) {
     setPendingId(alert.id);
@@ -161,12 +164,12 @@ export default function AlertsPage() {
               <tr>
                 <td colSpan={7}>正在读取预警台账…</td>
               </tr>
-            ) : alerts.length === 0 ? (
+            ) : visible.length === 0 ? (
               <tr>
                 <td colSpan={7}>当前筛选条件下没有预警。</td>
               </tr>
             ) : (
-              alerts.map((a) => (
+              visible.map((a) => (
                 <tr key={a.id}>
                   <td>
                     <span className={LEVEL_CLASS[a.level] ?? "badge"}>
