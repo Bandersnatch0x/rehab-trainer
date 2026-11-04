@@ -13,16 +13,26 @@ import tempfile
 import time
 from datetime import datetime, timedelta, timezone
 from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
+from urllib.parse import urlparse
+from urllib.request import ProxyHandler, Request, build_opener
 
 
 ROOT = Path(__file__).resolve().parents[1]
 API_DIR = ROOT / "services/api"
 
+LOCAL_HOSTS = {"127.0.0.1", "localhost", "::1"}
+
+
+def opener_for(url):
+    """本机地址必须绕开 HTTP_PROXY，否则请求会打到代理上得到 502。"""
+    host = urlparse(url).hostname or ""
+    return build_opener(ProxyHandler({})) if host in LOCAL_HOSTS else build_opener()
+
 
 def run_smoke(base_url, username, password, binding_token):
     covered = set()
     token = None
+    opener = opener_for(base_url)
 
     def request(method, path, payload=None, status=200, check=None, headers=None):
         operation = method + " " + re.sub(r"\?.*$", "", path)
@@ -39,7 +49,7 @@ def run_smoke(base_url, username, password, binding_token):
         actual_status = None
         try:
             try:
-                response = urlopen(req, timeout=10)
+                response = opener.open(req, timeout=10)
             except HTTPError as error:
                 response = error
             with response:
@@ -187,7 +197,8 @@ def main():
                 if server.poll() is not None:
                     raise RuntimeError(f"服务启动失败，见 {run_dir / 'server.log'}")
                 try:
-                    with urlopen(base_url.removesuffix("/v1") + "/openapi.json", timeout=1) as response:
+                    probe_url = base_url.removesuffix("/v1") + "/openapi.json"
+                    with opener_for(probe_url).open(probe_url, timeout=1) as response:
                         response.read()
                         break
                 except (URLError, TimeoutError):
