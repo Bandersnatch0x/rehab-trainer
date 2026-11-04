@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path, Query
@@ -9,7 +10,7 @@ from app.core.audit import record_audit
 from app.core.auth import Principal, get_principal, require_roles
 from app.core.database import get_db
 from app.core.errors import api_error
-from app.core.pagination import decode_cursor, encode_cursor
+from app.core.pagination import apply_keyset, cursor_from, datetime_key, decode_cursor
 from app.core.timeutils import utcnow
 from app.models.alert import AlertEvent
 from app.schemas.alert import AlertOut, AlertPage, AlertPatch
@@ -28,7 +29,7 @@ def list_alerts(
     cursor: str | None = Query(default=None),
     limit: int = Query(default=20, ge=1, le=100),
 ):
-    offset = decode_cursor(cursor)
+    keyset = decode_cursor(cursor, keys=("k", "i"))
     stmt = select(AlertEvent).where(AlertEvent.org_id == principal.org_id)
 
     if patient_id is not None:
@@ -44,16 +45,27 @@ def list_alerts(
     if status is not None:
         stmt = stmt.where(AlertEvent.status == status.value)
 
-    stmt = stmt.order_by(
-        AlertEvent.triggered_at.desc(), AlertEvent.id.desc()
+    stmt = apply_keyset(
+        stmt,
+        AlertEvent.triggered_at,
+        AlertEvent.id,
+        keyset,
+        descending=True,
+        key_type=datetime.fromisoformat,
     )
-    rows = db.scalars(stmt.offset(offset).limit(limit + 1)).all()
+    stmt = stmt.order_by(AlertEvent.triggered_at.desc(), AlertEvent.id.desc())
+    rows = db.scalars(stmt.limit(limit + 1)).all()
     has_more = len(rows) > limit
     page = rows[:limit]
 
+    next_cursor = None
+    if has_more and page:
+        last = page[-1]
+        next_cursor = cursor_from(key=datetime_key(last.triggered_at), ident=last.id)
+
     return AlertPage(
         items=[AlertOut.model_validate(row) for row in page],
-        next_cursor=encode_cursor(offset + limit) if has_more else None,
+        next_cursor=next_cursor,
     )
 
 

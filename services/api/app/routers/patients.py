@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Annotated
 from uuid import uuid4
 
@@ -9,7 +10,7 @@ from app.core.access import get_patient_scoped
 from app.core.audit import record_audit
 from app.core.auth import Principal, get_principal, require_roles
 from app.core.database import get_db
-from app.core.pagination import decode_cursor, encode_cursor
+from app.core.pagination import apply_keyset, cursor_from, decode_cursor, datetime_key
 from app.models.clinical import Patient
 from app.schemas.enums import PatientStatus
 from app.schemas.patient import PatientCreate, PatientOut, PatientPage
@@ -43,7 +44,7 @@ def list_patients(
     cursor: str | None = Query(default=None),
     limit: int = Query(default=20, ge=1, le=100),
 ):
-    offset = decode_cursor(cursor)
+    keyset = decode_cursor(cursor, keys=("k", "i"))
     stmt = select(Patient).where(Patient.org_id == principal.org_id)
 
     # 照护管理员与治疗师可见全部；患者与照护者只看关联患者。
@@ -57,14 +58,29 @@ def list_patients(
     if status is not None:
         stmt = stmt.where(Patient.status == status.value)
 
+    stmt = apply_keyset(
+        stmt,
+        Patient.created_at,
+        Patient.patient_id,
+        keyset,
+        descending=False,
+        key_type=datetime.fromisoformat,
+    )
     stmt = stmt.order_by(Patient.created_at.asc(), Patient.patient_id.asc())
-    rows = db.scalars(stmt.offset(offset).limit(limit + 1)).all()
+    rows = db.scalars(stmt.limit(limit + 1)).all()
     has_more = len(rows) > limit
     page = rows[:limit]
 
+    next_cursor = None
+    if has_more and page:
+        last = page[-1]
+        next_cursor = cursor_from(
+            key=datetime_key(last.created_at), ident=last.patient_id
+        )
+
     return PatientPage(
         items=[_patient_out(row) for row in page],
-        next_cursor=encode_cursor(offset + limit) if has_more else None,
+        next_cursor=next_cursor,
     )
 
 

@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Annotated
 from uuid import uuid4
 
@@ -15,7 +16,7 @@ from app.core.clinical import (
 )
 from app.core.database import get_db
 from app.core.errors import api_error
-from app.core.pagination import decode_cursor, encode_cursor
+from app.core.pagination import apply_keyset, cursor_from, datetime_key, decode_cursor
 from app.core.timeutils import to_utc_naive, utcnow
 from app.models.clinical import Patient
 from app.models.content import Exercise, ExerciseVariant
@@ -109,7 +110,7 @@ def list_prescriptions(
     """按患者读取处方，按签发时间倒序；最新一条即当前有效处方。"""
     get_patient_scoped(db, principal, patient_id)
 
-    offset = decode_cursor(cursor)
+    keyset = decode_cursor(cursor, keys=("k", "i"))
     stmt = (
         select(Prescription)
         .options(selectinload(Prescription.items))
@@ -117,15 +118,28 @@ def list_prescriptions(
             Prescription.patient_id == patient_id,
             Prescription.org_id == principal.org_id,
         )
-        .order_by(Prescription.issued_at.desc(), Prescription.id.desc())
     )
-    rows = db.scalars(stmt.offset(offset).limit(limit + 1)).all()
+    stmt = apply_keyset(
+        stmt,
+        Prescription.issued_at,
+        Prescription.id,
+        keyset,
+        descending=True,
+        key_type=datetime.fromisoformat,
+    )
+    stmt = stmt.order_by(Prescription.issued_at.desc(), Prescription.id.desc())
+    rows = db.scalars(stmt.limit(limit + 1)).all()
     has_more = len(rows) > limit
     page = rows[:limit]
 
+    next_cursor = None
+    if has_more and page:
+        last = page[-1]
+        next_cursor = cursor_from(key=datetime_key(last.issued_at), ident=last.id)
+
     return PrescriptionPage(
         items=[PrescriptionOut.model_validate(row) for row in page],
-        next_cursor=encode_cursor(offset + limit) if has_more else None,
+        next_cursor=next_cursor,
     )
 
 

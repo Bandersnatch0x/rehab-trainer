@@ -211,6 +211,10 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
+                    /**
+                     * @description 不透明游标，取自上一页的 `nextCursor`。服务端按排序键定位，
+                     *     翻页期间有新增或删除也不会重复或漏行。客户端不应解析其内容。
+                     */
                     cursor?: components["parameters"]["Cursor"];
                     limit?: components["parameters"]["Limit"];
                     stage?: number;
@@ -422,6 +426,10 @@ export interface paths {
                 query?: {
                     category?: components["schemas"]["ExerciseCategory"];
                     stage?: number;
+                    /**
+                     * @description 不透明游标，取自上一页的 `nextCursor`。服务端按排序键定位，
+                     *     翻页期间有新增或删除也不会重复或漏行。客户端不应解析其内容。
+                     */
                     cursor?: components["parameters"]["Cursor"];
                     limit?: components["parameters"]["Limit"];
                 };
@@ -498,12 +506,16 @@ export interface paths {
         };
         /**
          * 按患者读取处方
-         * @description 按签发时间倒序返回；第一条即当前有效处方，用于调整处方时取得 If-Match 版本号。
+         * @description 按签发时间倒序返回。第一条是最近签发的处方；是否仍然有效由客户端按 status 与 validUntil 判断，服务端不过滤。
          */
         get: {
             parameters: {
                 query: {
                     patientId: string;
+                    /**
+                     * @description 不透明游标，取自上一页的 `nextCursor`。服务端按排序键定位，
+                     *     翻页期间有新增或删除也不会重复或漏行。客户端不应解析其内容。
+                     */
                     cursor?: components["parameters"]["Cursor"];
                     limit?: components["parameters"]["Limit"];
                 };
@@ -632,6 +644,10 @@ export interface paths {
                     patientId: string;
                     from?: string;
                     to?: string;
+                    /**
+                     * @description 不透明游标，取自上一页的 `nextCursor`。服务端按排序键定位，
+                     *     翻页期间有新增或删除也不会重复或漏行。客户端不应解析其内容。
+                     */
                     cursor?: components["parameters"]["Cursor"];
                     limit?: components["parameters"]["Limit"];
                 };
@@ -704,6 +720,10 @@ export interface paths {
                     patientId?: string;
                     level?: components["schemas"]["AlertLevel"];
                     status?: "open" | "acknowledged" | "followed_up" | "closed";
+                    /**
+                     * @description 不透明游标，取自上一页的 `nextCursor`。服务端按排序键定位，
+                     *     翻页期间有新增或删除也不会重复或漏行。客户端不应解析其内容。
+                     */
                     cursor?: components["parameters"]["Cursor"];
                     limit?: components["parameters"]["Limit"];
                 };
@@ -1090,6 +1110,10 @@ export interface components {
     };
     parameters: {
         PatientId: string;
+        /**
+         * @description 不透明游标，取自上一页的 `nextCursor`。服务端按排序键定位，
+         *     翻页期间有新增或删除也不会重复或漏行。客户端不应解析其内容。
+         */
         Cursor: string;
         Limit: number;
     };

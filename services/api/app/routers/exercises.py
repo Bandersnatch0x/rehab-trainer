@@ -71,7 +71,7 @@ def list_exercises(
     cursor: str | None = Query(default=None),
     limit: int = Query(default=20, ge=1, le=100),
 ):
-    offset = decode_cursor(cursor)
+    keyset = decode_cursor(cursor, keys=("k",))
     patient = _resolve_patient_context(db, principal)
 
     stmt = select(Exercise).where(Exercise.publication_status == "published")
@@ -86,11 +86,15 @@ def list_exercises(
     else:
         visible = rows
 
-    page = visible[offset : offset + limit]
-    has_more = len(visible) > offset + limit
+    # 训练条目按 code 升序且 code 唯一，游标只需记录最后一个 code。
+    if keyset is not None:
+        visible = [row for row in visible if row.code > keyset["k"]]
+
+    page = visible[:limit]
+    has_more = len(visible) > limit
     return ExercisePage(
         items=[ExerciseOut.model_validate(row) for row in page],
-        next_cursor=encode_cursor(offset + limit) if has_more else None,
+        next_cursor=encode_cursor(k=page[-1].code) if has_more and page else None,
     )
 
 

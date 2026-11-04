@@ -522,6 +522,9 @@ components:
     Cursor:
       name: cursor
       in: query
+      description: |
+        不透明游标，取自上一页的 `nextCursor`。服务端按排序键定位，
+        翻页期间有新增或删除也不会重复或漏行。客户端不应解析其内容。
       schema:
         type: string
     Limit:

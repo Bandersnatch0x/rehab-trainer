@@ -9,7 +9,7 @@ from app.core.access import get_patient_scoped
 from app.core.audit import record_audit
 from app.core.auth import Principal, get_principal
 from app.core.database import get_db
-from app.core.pagination import decode_cursor, encode_cursor
+from app.core.pagination import apply_keyset, cursor_from, datetime_key, decode_cursor
 from app.core.timeutils import to_utc_naive
 from app.models.clinical import Patient
 from app.models.prescription import Prescription
@@ -181,7 +181,7 @@ def list_sessions(
     cursor: str | None = Query(default=None),
     limit: int = Query(default=20, ge=1, le=100),
 ):
-    offset = decode_cursor(cursor)
+    keyset = decode_cursor(cursor, keys=("k", "i"))
     get_patient_scoped(db, principal, patient_id)
 
     stmt = select(SessionRecord).where(
@@ -195,14 +195,25 @@ def list_sessions(
     if to_naive is not None:
         stmt = stmt.where(SessionRecord.recorded_at <= to_naive)
 
-    stmt = stmt.order_by(
-        SessionRecord.recorded_at.desc(), SessionRecord.id.desc()
+    stmt = apply_keyset(
+        stmt,
+        SessionRecord.recorded_at,
+        SessionRecord.id,
+        keyset,
+        descending=True,
+        key_type=datetime.fromisoformat,
     )
-    rows = db.scalars(stmt.offset(offset).limit(limit + 1)).all()
+    stmt = stmt.order_by(SessionRecord.recorded_at.desc(), SessionRecord.id.desc())
+    rows = db.scalars(stmt.limit(limit + 1)).all()
     has_more = len(rows) > limit
     page = rows[:limit]
 
+    next_cursor = None
+    if has_more and page:
+        last = page[-1]
+        next_cursor = cursor_from(key=datetime_key(last.recorded_at), ident=last.id)
+
     return SessionRecordPage(
         items=[SessionRecordOut.model_validate(row) for row in page],
-        next_cursor=encode_cursor(offset + limit) if has_more else None,
+        next_cursor=next_cursor,
     )
