@@ -41,6 +41,13 @@ export default function PermissionsPage() {
         机构内角色权限与账号分配管理。系统严格执行多机构隔离，不可查看跨机构成员（D10）。
       </p>
 
+      <div className="notice notice--warning">
+        <div>
+          <strong>演示数据：</strong>
+          契约当前没有机构账号列表接口，本页账号为示例，不代表真实成员；权限矩阵按决策 D4/D10/D11/D12 展示。
+        </div>
+      </div>
+
       <div className="notice">
         <div>
           <strong>职责矩阵权限边界（D4 约束）：</strong>
