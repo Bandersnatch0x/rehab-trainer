@@ -1,38 +1,75 @@
-interface FollowUpRecord {
-  id: string;
-  patientName: string;
-  patientId: string;
-  date: string;
-  type: string;
-  content: string;
-  officer: string;
-  outcome: string;
+import { useEffect, useState } from "react";
+import { listAlerts } from "../api/operations";
+import type { Alert } from "../api/types";
+
+const LEVEL_LABEL: Record<string, string> = {
+  critical: "严重",
+  warning: "警告",
+  info: "提示",
+};
+
+const LEVEL_CLASS: Record<string, string> = {
+  critical: "badge badge--danger",
+  warning: "badge badge--warning",
+  info: "badge badge--info",
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  followed_up: "已随访",
+  closed: "已关闭",
+};
+
+const CHANNEL_LABEL: Record<string, string> = {
+  in_app_popup: "端上弹窗",
+  voice_prompt: "语音提示",
+  push_notification: "推送通知",
+  audit_log: "审计日志",
+};
+
+const DELIVERY_LABEL: Record<string, string> = {
+  pending: "待发送",
+  sent: "已发送",
+  failed: "发送失败",
+  fallback: "已转备用",
+};
+
+function formatTime(value: string): string {
+  return value.replace("T", " ").slice(0, 16);
 }
 
-const MOCK_FOLLOW_UPS: FollowUpRecord[] = [
-  {
-    id: "FU-2026-101",
-    patientName: "王秀英",
-    patientId: "PT-2026-085",
-    date: "昨日 15:30",
-    type: "跌倒风险自评异常电话随访",
-    content: "患者居家自行踏步自评出现轻微晃动，已指导家属近身监护，下调踏步 BPM 至 56，并已预约下周复诊。",
-    officer: "王照护主管",
-    outcome: "居家安全已确认",
-  },
-  {
-    id: "FU-2026-098",
-    patientName: "张建国",
-    patientId: "PT-2026-081",
-    date: "2026-11-01 10:00",
-    type: "分期确诊后首次训练随访",
-    content: "训练完成度良好，无冻结步态发作，听觉节律引导适应性佳。",
-    officer: "李康复治疗师",
-    outcome: "处方执行正常",
-  },
-];
-
 export default function FollowUpsPage() {
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    listAlerts({ limit: 100 }).then((result) => {
+      if (cancelled) {
+        return;
+      }
+      setLoading(false);
+      if (!result.ok) {
+        setError(result.error.message);
+        setAlerts([]);
+        return;
+      }
+      // 台账只收已处置的预警；契约没有单独的随访记录端点。
+      setAlerts(
+        result.data.items.filter(
+          (item) => item.status === "followed_up" || item.status === "closed",
+        ),
+      );
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="page">
       <h1>随访台账</h1>
@@ -42,10 +79,17 @@ export default function FollowUpsPage() {
 
       <div className="notice">
         <div>
-          <strong>随访数据来源与协同：</strong>
-          契约由预警处置记录（PATCH /alerts/&#123;id&#125;）与训练打卡数据沉淀汇总，机构内部协同留痕。
+          <strong>台账口径：</strong>
+          数据来自预警处置记录（PATCH /alerts/&#123;id&#125;）中状态为「已随访」或「已关闭」的条目。
+          契约未提供处理人与结论字段，处理明细需从审计日志导出，本页不臆造。
         </div>
       </div>
+
+      {error ? (
+        <p role="alert" className="notice notice--danger">
+          随访台账加载失败：{error}
+        </p>
+      ) : null}
 
       <div className="table-container">
         <table>
@@ -53,25 +97,60 @@ export default function FollowUpsPage() {
             <tr>
               <th>台账编号</th>
               <th>患者</th>
-              <th>随访时间</th>
-              <th>随访类型</th>
-              <th>随访记录摘要</th>
-              <th>执行人</th>
-              <th>处置结论</th>
+              <th>触发时间</th>
+              <th>触发规则</th>
+              <th>级别</th>
+              <th>通知进展</th>
+              <th>处置状态</th>
             </tr>
           </thead>
           <tbody>
-            {MOCK_FOLLOW_UPS.map((f) => (
-              <tr key={f.id}>
-                <td><strong>{f.id}</strong></td>
-                <td><strong>{f.patientName}</strong> ({f.patientId})</td>
-                <td>{f.date}</td>
-                <td><span className="badge badge--info">{f.type}</span></td>
-                <td style={{ maxWidth: 360 }}>{f.content}</td>
-                <td>{f.officer}</td>
-                <td><span className="badge badge--success">{f.outcome}</span></td>
+            {loading ? (
+              <tr>
+                <td colSpan={7}>正在读取随访台账…</td>
               </tr>
-            ))}
+            ) : alerts.length === 0 ? (
+              <tr>
+                <td colSpan={7}>暂无已处置的预警记录。</td>
+              </tr>
+            ) : (
+              alerts.map((alert) => (
+                <tr key={alert.id}>
+                  <td>
+                    <strong>{alert.id}</strong>
+                  </td>
+                  <td>{alert.patientId}</td>
+                  <td>{formatTime(alert.triggeredAt)}</td>
+                  <td>
+                    <code>{alert.ruleCode}</code>
+                  </td>
+                  <td>
+                    <span className={LEVEL_CLASS[alert.level] ?? "badge"}>
+                      {LEVEL_LABEL[alert.level] ?? alert.level}
+                    </span>
+                  </td>
+                  <td>
+                    <span className="hint">
+                      {alert.deliveries && alert.deliveries.length > 0
+                        ? alert.deliveries
+                            .map(
+                              (delivery) =>
+                                `${CHANNEL_LABEL[delivery.channel] ?? delivery.channel}：${
+                                  DELIVERY_LABEL[delivery.status] ?? delivery.status
+                                }`,
+                            )
+                            .join("；")
+                        : "—"}
+                    </span>
+                  </td>
+                  <td>
+                    <span className="badge badge--success">
+                      {STATUS_LABEL[alert.status] ?? alert.status}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
