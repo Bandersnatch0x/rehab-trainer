@@ -136,6 +136,8 @@ git diff --check
 | `pg_dump -Fc` | 46,593 字节 |
 | `createdb` + `pg_restore --exit-on-error` | 成功；恢复库表结构与 `alembic_version=0001` 与源库一致，行数等于备份时点 |
 | 联调脚本对容器 API | **18/18 契约操作通过**，含批量幂等与重放 |
+| 运行身份 | api 进程 `uid=10001(rehab)`，非 root |
+| 端口暴露 | api 仅 `127.0.0.1:8000`；postgres 无宿主机端口 |
 
 补充说明：该环境无法直连 Docker Hub，基础镜像经 `docker.m.daocloud.io` 镜像拉取后按原名打标签；这与镜像内容无关，但生产构建应配置可用的镜像仓库。未执行云上部署，也未做 hadolint 静态检查。
 
