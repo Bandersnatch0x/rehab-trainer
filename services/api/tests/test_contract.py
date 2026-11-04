@@ -96,6 +96,63 @@ def test_contract_and_app_expose_same_parameters():
     assert mismatches == {}, f"参数不一致：{mismatches}"
 
 
+def _flatten(spec: dict, schema: dict | None, depth: int = 0) -> set[str]:
+    """展开 $ref 与 allOf，返回响应对象的顶层字段名集合。"""
+    if not schema or depth > 8:
+        return set()
+    if "$ref" in schema:
+        name = schema["$ref"].split("/")[-1]
+        return _flatten(spec, spec["components"]["schemas"][name], depth + 1)
+
+    props = set(schema.get("properties") or {})
+    for sub in schema.get("allOf") or []:
+        props |= _flatten(spec, sub, depth + 1)
+    return props
+
+
+def _response_fields(spec: dict, op: dict, code: str) -> set[str] | None:
+    response = (op.get("responses") or {}).get(code)
+    if response is None:
+        return None
+    if "$ref" in response:
+        name = response["$ref"].split("/")[-1]
+        response = spec["components"]["responses"][name]
+    schema = (response.get("content") or {}).get("application/json", {}).get("schema")
+    if not schema:
+        return None
+    return _flatten(spec, schema)
+
+
+def test_success_response_fields_match_contract():
+    """成功响应的字段名必须与契约一致：加字段/改名会让生成客户端类型漂移。
+
+    只比较字段名集合，不比较 required 与嵌套类型（FastAPI 与契约对默认值的
+    表达不同，required 会误报）。
+    """
+    contract_spec = _contract_spec()
+    app_spec = app.openapi()
+    prefix = _contract_prefix()
+
+    mismatches = {}
+    for path, item in contract_spec["paths"].items():
+        for method, op in item.items():
+            if method not in HTTP_METHODS:
+                continue
+            app_op = app_spec["paths"].get(prefix + path, {}).get(method, {})
+            for code in ("200", "201"):
+                expected = _response_fields(contract_spec, op, code)
+                if expected is None:
+                    continue
+                actual = _response_fields(app_spec, app_op, code) or set()
+                if expected != actual:
+                    mismatches[f"{method.upper()} {path} {code}"] = {
+                        "contractOnly": sorted(expected - actual),
+                        "appOnly": sorted(actual - expected),
+                    }
+
+    assert mismatches == {}, f"响应字段与契约不一致：{mismatches}"
+
+
 def test_contract_and_app_expose_same_operations():
     """契约是唯一真源：实现多一个或少一个操作都要在这里失败。"""
     contract = _contract_operations()
