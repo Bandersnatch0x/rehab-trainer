@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { test as base, expect, type Page } from '@playwright/test';
+import { PYTHON } from './python';
 
 type Role = 'care_admin' | 'rehab_therapist' | 'patient';
 type CaseData = {
@@ -13,7 +14,7 @@ type CaseData = {
 
 export const test = base.extend<{ data: CaseData }>({
   data: async ({}, use) => {
-    const output = execFileSync('python', [fileURLToPath(new URL('./backend.py', import.meta.url)), 'seed'], {
+    const output = execFileSync(PYTHON, [fileURLToPath(new URL('./backend.py', import.meta.url)), 'seed'], {
       encoding: 'utf8', timeout: 15_000,
     });
     await use(JSON.parse(output));

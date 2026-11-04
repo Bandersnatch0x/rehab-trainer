@@ -2,6 +2,7 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, devices } from '@playwright/test';
+import { PYTHON } from './e2e/python';
 
 const artifacts = fileURLToPath(new URL('../../.agent/tmp/admin-e2e/', import.meta.url));
 mkdirSync(artifacts, { recursive: true });
@@ -33,7 +34,7 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: [
     {
-      command: 'python e2e/backend.py serve',
+      command: `"${PYTHON}" e2e/backend.py serve`,
       url: 'http://127.0.0.1:18765/openapi.json',
       reuseExistingServer: false,
       timeout: 30_000,
