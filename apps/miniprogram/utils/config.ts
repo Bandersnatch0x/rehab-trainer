@@ -1,10 +1,10 @@
 /**
  * 小程序运行时配置。
  *
- * API_BASE_URL 与 packages/api-contract/openapi.yaml 的 servers 占位地址一致，
- * 部署时替换为真实域名，并在微信公众平台配置 request 合法域名。
+ * 开发工具连接本机后端；真机需换成开发机局域网地址。
+ * 发布前替换为 HTTPS 域名、配置 request 合法域名并恢复域名校验。
  */
-export const API_BASE_URL = 'https://api.rehab-trainer.local/v1';
+export const API_BASE_URL = 'http://127.0.0.1:8000/v1';
 
 /** 单次请求默认超时（毫秒）。 */
 export const REQUEST_TIMEOUT_MS = 30000;
