@@ -49,18 +49,30 @@ export default function AlertsPage() {
   const [error, setError] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
 
-  // 一次取回后在本地筛选：这样切换级别不会让“全部/严重/警告/提示”的计数互相污染。
+  // 跟随游标取全量后在本地筛选：计数不会被分页截断，也不会随筛选互相污染。
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const result = await listAlerts({ limit: 100 });
+
+    const collected: Alert[] = [];
+    let cursor: string | undefined;
+    do {
+      const result = await listAlerts({
+        limit: 100,
+        ...(cursor ? { cursor } : {}),
+      });
+      if (!result.ok) {
+        setError(result.error.message);
+        setAlerts([]);
+        setLoading(false);
+        return;
+      }
+      collected.push(...result.data.items);
+      cursor = result.data.nextCursor ?? undefined;
+    } while (cursor && collected.length < 1000);
+
+    setAlerts(collected);
     setLoading(false);
-    if (result.ok) {
-      setAlerts(result.data.items);
-    } else {
-      setError(result.error.message);
-      setAlerts([]);
-    }
   }, []);
 
   useEffect(() => {
@@ -145,8 +157,8 @@ export default function AlertsPage() {
         </button>
         {loading ? (
           <span className="hint">加载中…</span>
-        ) : alerts.length >= 100 ? (
-          <span className="hint">仅显示最近 100 条，计数不代表全部积压</span>
+        ) : alerts.length >= 1000 ? (
+          <span className="hint">已达 1000 条上限，请按患者或状态缩小范围</span>
         ) : null}
       </div>
 
