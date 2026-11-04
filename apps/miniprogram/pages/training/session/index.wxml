@@ -1,5 +1,6 @@
 <view class="page">
   <view class="page-title">训练执行</view>
+  <view class="notice notice--warning">演示数据：本页不会录制、上传视频或生成训练记录。</view>
   <view class="page-subtitle">条目名称（占位）</view>
 
   <view class="notice notice--warning">

@@ -1,76 +1,47 @@
 <view class="page">
   <view class="page-title">训练记录</view>
-  <view class="page-subtitle">记录含完成、错误、中断、有效帧占比与存疑标记。</view>
+  <view class="page-subtitle">近 30 天的完成次数、有效帧占比与存疑标记。</view>
 
-  <view class="chip-row">
-    <view class="chip chip--active">近 7 天</view>
-    <view class="chip">近 30 天</view>
-    <view class="chip">全部</view>
+  <view wx:if="{{loading}}" class="card" aria-role="status">正在加载训练记录…</view>
+  <view wx:elif="{{error}}" class="card">
+    <view class="notice notice--danger" aria-role="alert">{{error}}</view>
+    <button class="btn btn--secondary" bindtap="loadData">重新加载</button>
   </view>
+  <view wx:elif="{{result && !result.context.patient}}" class="card">尚未关联患者，请联系管理员完成绑定。</view>
+  <view wx:elif="{{result && !result.records.length}}" class="card">近 30 天还没有训练记录，完成练习后再来看看吧。</view>
 
-  <view class="card">
+  <view wx:for="{{result.records}}" wx:key="id" class="card">
     <view class="record__head">
-      <view class="card-title">— 月 — 日　—:—</view>
-      <text class="badge badge--success">已完成</text>
+      <view class="card-title">{{item.recordedAt}}</view>
+      <text class="badge badge--neutral">{{item.status}}</text>
     </view>
     <view class="metric-grid">
       <view class="metric">
-        <view class="metric__value">—</view>
+        <view class="metric__value">{{item.completionCount}}</view>
         <view class="metric__label">完成次数</view>
       </view>
       <view class="metric">
-        <view class="metric__value">—</view>
+        <view class="metric__value">{{item.movementErrorCount}}</view>
         <view class="metric__label">动作错误</view>
       </view>
       <view class="metric">
-        <view class="metric__value">—</view>
+        <view class="metric__value">{{item.interruptionCount}}</view>
         <view class="metric__label">中断次数</view>
       </view>
       <view class="metric">
-        <view class="metric__value">—%</view>
+        <view class="metric__value">{{item.validFrameRatio}}</view>
         <view class="metric__label">有效帧占比</view>
       </view>
     </view>
     <view class="divider"></view>
-    <view class="muted">模型版本 —　指标算法 —　阈值配置 —</view>
+    <view class="muted">模型版本 {{item.modelVersion}} · 指标算法 {{item.metricAlgorithmVersion}} · 阈值配置 {{item.thresholdConfigVersion}}</view>
     <view class="record__flags">
-      <text class="badge badge--neutral">无存疑</text>
-    </view>
-  </view>
-
-  <view class="card">
-    <view class="record__head">
-      <view class="card-title">— 月 — 日　—:—</view>
-      <text class="badge badge--warning">已完成（存疑）</text>
-    </view>
-    <view class="metric-grid">
-      <view class="metric">
-        <view class="metric__value">—</view>
-        <view class="metric__label">完成次数</view>
-      </view>
-      <view class="metric">
-        <view class="metric__value">—</view>
-        <view class="metric__label">动作错误</view>
-      </view>
-      <view class="metric">
-        <view class="metric__value">—</view>
-        <view class="metric__label">中断次数</view>
-      </view>
-      <view class="metric">
-        <view class="metric__value">—%</view>
-        <view class="metric__label">有效帧占比</view>
-      </view>
-    </view>
-    <view class="divider"></view>
-    <view class="muted">模型版本 —　指标算法 —　阈值配置 —</view>
-    <view class="record__flags">
-      <text class="badge badge--warning">存在疑点</text>
-      <text class="record__flag-note">有效性校验未通过，打卡仍成功</text>
+      <text class="badge {{item.doubtful ? 'badge--warning' : 'badge--neutral'}}">{{item.flag}}</text>
+      <text wx:if="{{item.doubtful}}" class="record__flag-note">数据待核实，不影响已完成的打卡</text>
     </view>
   </view>
 
   <view class="notice">
-    不同模型、指标算法或阈值配置版本的记录不可直接比较趋势；查看跨版本记录时会显示版本差异。
+    不同模型、指标算法或阈值配置版本的记录不可直接比较趋势；请参考每条记录的版本信息。
   </view>
-  <view class="hint">本页为结构占位，记录数据待接入。</view>
 </view>

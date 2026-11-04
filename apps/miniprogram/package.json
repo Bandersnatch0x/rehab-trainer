@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "typecheck": "tsc --noEmit",
+    "test": "node --test tests/patient-data.cjs",
     "generate:api": "openapi-typescript ../../packages/api-contract/openapi.yaml -o types/api.d.ts"
   },
   "devDependencies": {

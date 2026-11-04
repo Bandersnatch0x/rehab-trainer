@@ -2,7 +2,6 @@
   <view class="page-title">活力健康档案</view>
   <view class="page-subtitle">记录坚持打卡的每一天，身体越来越轻松～</view>
 
-  <!-- Mascot Encouragement Card -->
   <view class="card card--mascot">
     <view class="mascot-box">
       <text class="mascot-avatar">🦌</text>
@@ -13,46 +12,53 @@
     </view>
   </view>
 
-  <!-- Training Progress Card (Positive Metrics per D20) -->
-  <view class="section">
+  <view wx:if="{{loading}}" class="card" aria-role="status">正在加载健康档案…</view>
+  <view wx:elif="{{error}}" class="card">
+    <view class="notice notice--danger" aria-role="alert">{{error}}</view>
+    <button class="btn btn--secondary" bindtap="loadData">重新加载</button>
+  </view>
+  <view wx:elif="{{overview && !overview.context.patient}}" class="card">尚未关联患者，请联系管理员完成绑定。</view>
+
+  <view wx:if="{{overview && overview.context.patient}}" class="section">
     <view class="section-title">坚持跟练成就</view>
     <view class="card">
       <view class="stat-grid">
         <view class="stat-item">
-          <view class="stat-value">36</view>
-          <view class="stat-label">累计训练 (次)</view>
+          <view class="stat-value">{{overview.trainingCount}}</view>
+          <view class="stat-label">近 30 天打卡 (次)</view>
         </view>
         <view class="stat-item">
-          <view class="stat-value">12</view>
-          <view class="stat-label">连续坚持 (天)</view>
+          <view class="stat-value">{{overview.streakDays}}</view>
+          <view class="stat-label">连续打卡 (天)</view>
         </view>
         <view class="stat-item">
-          <view class="stat-value">96%</view>
-          <view class="stat-label">本周完成率</view>
+          <view class="stat-value">{{overview.todayCount}}</view>
+          <view class="stat-label">今日打卡 (次)</view>
         </view>
       </view>
+      <view class="hint">按近 30 个自然日统计；今天尚未打卡时，连续天数从昨天计起。</view>
+      <view wx:if="{{!overview.records.length}}" class="hint">这段时间还没有训练记录，一起慢慢积累吧。</view>
     </view>
   </view>
 
-  <!-- Basic Profile Info (No Disease / Diagnosis Wording) -->
-  <view class="section">
+  <view wx:if="{{overview && overview.context.patient}}" class="section">
     <view class="section-title">基本信息</view>
     <view class="card">
       <view class="info-row">
         <text class="info-row__label">姓名</text>
-        <text class="info-row__value">张建国</text>
+        <text class="info-row__value">{{overview.context.patient.displayName}}</text>
       </view>
       <view class="info-row">
         <text class="info-row__label">出生年份</text>
-        <text class="info-row__value">1954 年</text>
+        <text class="info-row__value">{{overview.context.patient.birthYear}}</text>
       </view>
       <view class="info-row">
         <text class="info-row__label">所属机构</text>
-        <text class="info-row__value">市康复中心第三病区</text>
+        <text class="info-row__value">{{overview.context.orgName}}</text>
       </view>
       <view class="info-row">
-        <text class="info-row__label">照护代办</text>
-        <text class="info-row__value">已关联家人微信</text>
+        <text class="info-row__label">当前记录人</text>
+        <text class="info-row__value">{{overview.context.accountName}}</text>
       </view>
     </view>
   </view>

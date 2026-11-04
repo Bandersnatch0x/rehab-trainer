@@ -1,6 +1,7 @@
 <view class="page">
   <view class="page-title">训练条目</view>
-  <view class="page-subtitle">按治疗师处方展示；5 级仅宣教与转诊，不提供训练条目。</view>
+  <view class="notice notice--warning">演示数据：训练条目与上传功能尚未接入，当前页面仅供查看示例。</view>
+  <view class="page-subtitle">按治疗师安排选择适合自己的练习；本页为训练示例。</view>
 
   <view class="notice">
     小程序端为云端异步分析：训练结束后上传视频，由服务端生成姿态指标，训练过程中没有实时动作反馈。
@@ -20,7 +21,7 @@
       <text class="badge badge--success">低风险</text>
     </view>
     <view class="muted">训练大类：牵伸放松</view>
-    <view class="muted">适用分级：— 级　　剂量：— 组 × — 次</view>
+    <view class="muted">训练安排：— 组 × — 次</view>
     <view class="muted">节拍：— BPM　　时长：— 分钟</view>
     <navigator
       class="btn btn--primary btn--block exercise__action"
@@ -38,7 +39,7 @@
       <text class="badge badge--warning">中风险</text>
     </view>
     <view class="muted">训练大类：节律步态</view>
-    <view class="muted">适用分级：— 级　　剂量：— 组 × — 次</view>
+    <view class="muted">训练安排：— 组 × — 次</view>
     <view class="muted">节拍：— BPM　　时长：— 分钟</view>
     <navigator
       class="btn btn--primary btn--block exercise__action"
@@ -56,7 +57,7 @@
       <text class="badge badge--danger">高风险</text>
     </view>
     <view class="muted">训练大类：姿势矫正</view>
-    <view class="muted">适用分级：— 级　　剂量：— 组 × — 次</view>
+    <view class="muted">训练安排：— 组 × — 次</view>
     <view class="muted">节拍：— BPM　　时长：— 分钟</view>
     <navigator
       class="btn btn--primary btn--block exercise__action"
@@ -69,7 +70,7 @@
   </view>
 
   <view class="notice notice--warning">
-    高风险条目仅在分期经治疗师确认、且已开具处方时可用；如入口不可用，请联系治疗师。
+    高风险条目仅在治疗师确认适合、且已开具处方时可用；如入口不可用，请联系治疗师。
   </view>
   <view class="hint">本页为结构占位，条目与处方数据待接入。</view>
 </view>
