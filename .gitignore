@@ -1,0 +1,19 @@
+# 本地面：过程产物与个人票据，不入版本控制（AGENTS.md「过程产物另分一路」）
+.agents/
+
+# 临时产物：日志、截图、一次性证据（AGENTS.md「产物两分」）
+.agent/tmp/
+
+# 构建缓存与外部安装物
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+node_modules/
+build/
+dist/
+*.egg-info/
+.gradle/
