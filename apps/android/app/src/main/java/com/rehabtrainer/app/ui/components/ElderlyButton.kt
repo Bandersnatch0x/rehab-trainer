@@ -16,7 +16,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
+import com.rehabtrainer.app.data.local.AppPreferences
 import com.rehabtrainer.app.ui.theme.LocalElderlyDimens
 
 enum class ElderlyButtonVariant {
@@ -51,10 +54,20 @@ fun ElderlyButton(
     }
     val effectivePadding = contentPadding ?: defaultPadding
 
+    // 按键防颤振动确认：设置页的偏好在这里真实生效。
+    val context = LocalContext.current
+    val view = LocalView.current
+    val hapticAwareClick: () -> Unit = {
+        if (AppPreferences.isHapticFeedbackEnabled(context)) {
+            view.performHapticTap()
+        }
+        onClick()
+    }
+
     when (variant) {
         ElderlyButtonVariant.Primary -> {
             Button(
-                onClick = onClick,
+                onClick = hapticAwareClick,
                 enabled = enabled,
                 modifier = modifier
                     .fillMaxWidth()
@@ -67,7 +80,7 @@ fun ElderlyButton(
         }
         ElderlyButtonVariant.Secondary -> {
             OutlinedButton(
-                onClick = onClick,
+                onClick = hapticAwareClick,
                 enabled = enabled,
                 modifier = modifier
                     .fillMaxWidth()
@@ -84,7 +97,7 @@ fun ElderlyButton(
         }
         ElderlyButtonVariant.Danger -> {
             Button(
-                onClick = onClick,
+                onClick = hapticAwareClick,
                 enabled = enabled,
                 modifier = modifier
                     .fillMaxWidth()

@@ -135,8 +135,14 @@ fun PatientsScreen(modifier: Modifier = Modifier) {
                 )
                 ElderlyButton(
                     text = "绑定照护者账号",
-                    onClick = { /* 接入绑定流程 */ },
-                    variant = ElderlyButtonVariant.Secondary
+                    onClick = { /* 演示版置灰，见下方说明 */ },
+                    variant = ElderlyButtonVariant.Secondary,
+                    enabled = false
+                )
+                Text(
+                    text = "需机构管理员协助绑定照护者，演示版暂未开放。",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

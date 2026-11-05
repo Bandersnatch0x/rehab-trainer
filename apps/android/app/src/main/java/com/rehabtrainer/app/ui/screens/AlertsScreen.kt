@@ -18,9 +18,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.rehabtrainer.app.core.contact.DialResult
+import com.rehabtrainer.app.core.contact.TherapistDialer
 import com.rehabtrainer.app.ui.components.ElderlyButton
 import com.rehabtrainer.app.ui.components.ElderlyButtonVariant
 import com.rehabtrainer.app.ui.theme.LocalElderlyDimens
@@ -32,6 +39,8 @@ import com.rehabtrainer.app.ui.theme.LocalElderlyDimens
 @Composable
 fun AlertsScreen(modifier: Modifier = Modifier) {
     val dimens = LocalElderlyDimens.current
+    val context = LocalContext.current
+    var dialFeedback by remember { mutableStateOf("") }
 
     Column(
         modifier = modifier
@@ -105,7 +114,7 @@ fun AlertsScreen(modifier: Modifier = Modifier) {
                     Text(
                         text = "今日 09:20",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.outline
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
@@ -120,9 +129,30 @@ fun AlertsScreen(modifier: Modifier = Modifier) {
 
                 ElderlyButton(
                     text = "📞 呼叫康复治疗师",
-                    onClick = { /* 调起电话或语音服务 */ },
+                    onClick = {
+                        when (val resolved = TherapistDialer.currentNumber()) {
+                            is DialResult.Ready -> {
+                                val opened = TherapistDialer.dial(context, resolved.number)
+                                dialFeedback = if (opened) {
+                                    "已打开拨号盘，请按拨号键呼叫。"
+                                } else {
+                                    "本机没有可用的拨号应用，请联系机构。"
+                                }
+                            }
+                            DialResult.NotConfigured -> {
+                                dialFeedback = "未配置联系电话，请联系机构。"
+                            }
+                        }
+                    },
                     variant = ElderlyButtonVariant.Primary
                 )
+                if (dialFeedback.isNotEmpty()) {
+                    Text(
+                        text = dialFeedback,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
 

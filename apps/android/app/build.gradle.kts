@@ -18,6 +18,10 @@ android {
 
         // 契约 servers[0] 的占位地址，部署时在 buildConfigField 中替换。
         buildConfigField("String", "API_BASE_URL", "\"https://api.rehab-trainer.local/v1/\"")
+
+        // 呼叫治疗师拨号号码；空值表示未配置，界面提示「请联系机构」。
+        // 部署时用机构真实号码覆盖，代码内不硬编码。
+        buildConfigField("String", "CONTACT_PHONE", "\"\"")
     }
 
     buildTypes {
