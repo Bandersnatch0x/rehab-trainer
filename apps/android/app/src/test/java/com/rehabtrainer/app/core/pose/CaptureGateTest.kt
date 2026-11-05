@@ -26,4 +26,19 @@ class CaptureGateTest {
         assertFalse(CaptureGate.isFootVisible(0.0f))
         assertFalse(CaptureGate.isFootVisible(Float.NaN))
     }
+
+    @Test
+    fun upperBodyExerciseCountsWithoutFeet() {
+        assertTrue(CaptureGate.shouldCount(requiresFullBody = false, footVisibility = 0f))
+    }
+
+    @Test
+    fun fullBodyExerciseBlocksCountingWhenFeetHidden() {
+        assertFalse(CaptureGate.shouldCount(requiresFullBody = true, footVisibility = 0.49f))
+    }
+
+    @Test
+    fun fullBodyExerciseCountsWhenFeetVisible() {
+        assertTrue(CaptureGate.shouldCount(requiresFullBody = true, footVisibility = 0.5f))
+    }
 }

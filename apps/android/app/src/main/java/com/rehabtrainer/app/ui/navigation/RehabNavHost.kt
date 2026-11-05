@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.rehabtrainer.app.ui.TODAY_TRAINING_CODE
 import com.rehabtrainer.app.ui.screens.AlertsScreen
 import com.rehabtrainer.app.ui.screens.ExercisesScreen
 import com.rehabtrainer.app.ui.screens.HomeScreen
@@ -19,7 +20,7 @@ import com.rehabtrainer.app.ui.screens.TrainingScreen
 fun RehabNavHost(
     navController: NavHostController,
     widthSizeClass: WindowWidthSizeClass,
-    selectedExerciseCode: String = "EX-RAS-01",
+    selectedExerciseCode: String = TODAY_TRAINING_CODE,
     onSelectExercise: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -32,7 +33,7 @@ fun RehabNavHost(
             HomeScreen(
                 widthSizeClass = widthSizeClass,
                 onStartTraining = {
-                    onSelectExercise("EX-RAS-01")
+                    onSelectExercise(TODAY_TRAINING_CODE)
                     navController.navigate(RehabDestination.TRAINING.route)
                 },
                 onOpenPrescription = {

@@ -2,9 +2,12 @@ package com.rehabtrainer.app.ui
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
@@ -16,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -30,7 +34,7 @@ import com.rehabtrainer.app.ui.navigation.RehabNavigationRail
 import kotlinx.coroutines.launch
 
 /**
- * 训练动作元数据定义，用于顶栏与训练页联动 (P1-7)。
+ * 训练动作元数据定义，用于顶栏、训练页与组状态机联动。
  */
 data class ExerciseMeta(
     val code: String,
@@ -40,46 +44,65 @@ data class ExerciseMeta(
     val hasRas: Boolean,
     val bpm: Int = 64,
     val videoTitle: String,
-    val prompt: String
+    val prompt: String,
+    val sets: Int,
+    val repsPerSet: Int,
+    val requiresFullBody: Boolean,
+    val restSeconds: Int = 30
 )
+
+/** 首页「开始今日训练」与训练列表共用同一训练条目代码。 */
+const val TODAY_TRAINING_CODE = "EX-RAS-01"
 
 val DEFAULT_EXERCISES = listOf(
     ExerciseMeta(
         code = "EX-RAS-01",
         name = "下肢原地节律踏步",
         shortName = "原地踏步",
-        target = "目标 12 次 · 64 BPM · 第 1/3 组",
+        target = "目标 12 次 · 64 BPM",
         hasRas = true,
         bpm = 64,
         videoTitle = "原地节律踏步 · 标准示范",
-        prompt = "“保持挺胸直视前方，大腿抬高至水平，落地轻柔跟随 64 BPM 节奏”"
+        prompt = "“保持挺胸直视前方，大腿抬高至水平，落地轻柔跟随 64 BPM 节奏”",
+        sets = 3,
+        repsPerSet = 12,
+        requiresFullBody = true
     ),
     ExerciseMeta(
         code = "EX-STRETCH-01",
         name = "坐位双上肢躯干伸展",
         shortName = "躯干伸展",
-        target = "目标 10 次 · 自主节律 · 第 1/2 组",
+        target = "目标 10 次 · 自主节律",
         hasRas = false,
         videoTitle = "躯干牵伸放松 · 标准示范",
-        prompt = "“双臂自然上举过头顶，躯干轻柔向两侧延伸，深呼吸保持均匀”"
+        prompt = "“双臂自然上举过头顶，躯干轻柔向两侧延伸，深呼吸保持均匀”",
+        sets = 2,
+        repsPerSet = 10,
+        requiresFullBody = false
     ),
     ExerciseMeta(
         code = "EX-STRENGTH-01",
         name = "下肢靠墙微蹲训练",
         shortName = "靠墙微蹲",
-        target = "目标 8 次 · 稳固扶手 · 第 1/2 组",
+        target = "目标 8 次 · 稳固扶手",
         hasRas = false,
         videoTitle = "下肢靠墙微蹲 · 标准示范",
-        prompt = "“背部贴墙缓缓下蹲至膝屈 30°，双手扶稳把手，起身平稳”"
+        prompt = "“背部贴墙缓缓下蹲至膝屈 30°，双手扶稳把手，起身平稳”",
+        sets = 2,
+        repsPerSet = 8,
+        requiresFullBody = true
     ),
     ExerciseMeta(
         code = "EX-POSTURE-01",
         name = "站立位脊柱对齐矫正",
         shortName = "姿势矫正",
-        target = "目标 10 次 · 实时矫正 · 第 1/3 组",
+        target = "目标 10 次 · 实时矫正",
         hasRas = false,
         videoTitle = "站立脊柱矫正 · 标准示范",
-        prompt = "“双肩下沉放松，收腹挺胸，感受头顶向上延伸对齐重力垂线”"
+        prompt = "“双肩下沉放松，收腹挺胸，感受头顶向上延伸对齐重力垂线”",
+        sets = 3,
+        repsPerSet = 10,
+        requiresFullBody = true
     )
 )
 
@@ -102,7 +125,7 @@ fun RehabApp(
     val configuration = LocalConfiguration.current
     val isTablet = configuration.smallestScreenWidthDp >= 600
 
-    var selectedExerciseCode by remember { mutableStateOf("EX-RAS-01") }
+    var selectedExerciseCode by rememberSaveable { mutableStateOf(TODAY_TRAINING_CODE) }
     val currentExercise = DEFAULT_EXERCISES.firstOrNull { it.code == selectedExerciseCode }
         ?: DEFAULT_EXERCISES.first()
 
@@ -146,6 +169,21 @@ private fun CompactShell(
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val isTraining = currentRoute == RehabDestination.TRAINING.route
+
+    if (isTraining) {
+        // 沉浸模式：训练页不渲染顶栏与抽屉，避免误触离开；返回键与紧急停止仍可退出。
+        RehabNavHost(
+            navController = navController,
+            widthSizeClass = windowSizeClass.widthSizeClass,
+            selectedExerciseCode = selectedExerciseCode,
+            onSelectExercise = onSelectExercise,
+            modifier = modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.statusBars)
+        )
+        return
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -191,6 +229,22 @@ private fun ExpandedShell(
     onSelectExercise: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isTraining = currentRoute == RehabDestination.TRAINING.route
+
+    if (isTraining) {
+        // 沉浸模式：训练页隐藏顶栏与常驻侧栏，把宽度全部留给双播放/实景。
+        RehabNavHost(
+            navController = navController,
+            widthSizeClass = windowSizeClass.widthSizeClass,
+            selectedExerciseCode = selectedExerciseCode,
+            onSelectExercise = onSelectExercise,
+            modifier = modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.statusBars)
+        )
+        return
+    }
+
     Scaffold(
         topBar = { RehabTopBar(title = title, onMenuClick = null) },
         modifier = modifier

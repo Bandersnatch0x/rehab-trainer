@@ -30,14 +30,32 @@ sealed interface PoseFrame {
  *
  * 推理结果在 MediaPipe 内部线程回调，[onFrame] 可能在非主线程执行；
  * 调用方负责切回主线程更新 UI。
+ *
+ * D17：全身类条目在脚部可见度不足时清零并停止累计；
+ * 姿态检测继续运行，以便脚部重新入镜后自动恢复计数。
  */
 class PoseAnalyzer(
     context: Context,
     modelAssetPath: String = "pose_landmarker_lite.task",
+    private val requiresFullBody: Boolean = false,
     private val onFrame: (PoseFrame) -> Unit
 ) : ImageAnalysis.Analyzer {
 
     private val counter = ArmRaiseCounter()
+
+    @Volatile
+    private var isPaused = false
+
+    /** 手动暂停期间停止累计，恢复后从零开始，避免暂停时动作被补记。 */
+    fun setPaused(paused: Boolean) {
+        isPaused = paused
+        if (paused) counter.reset()
+    }
+
+    /** 完成一组后由 UI 调用，下一组计数从零开始。 */
+    fun resetCounter() {
+        counter.reset()
+    }
 
     private val landmarker: PoseLandmarker = run {
         val baseOptions = BaseOptions.builder()
@@ -96,6 +114,18 @@ class PoseAnalyzer(
         }
 
         val wristOffset = (landmarks[16].y() - shoulderY) / torso
+
+        if (isPaused) {
+            onFrame(PoseFrame.Detected(wristOffset, counter.count, footVisibility))
+            return
+        }
+
+        if (!CaptureGate.shouldCount(requiresFullBody, footVisibility)) {
+            counter.reset()
+            onFrame(PoseFrame.Detected(wristOffset, 0, footVisibility))
+            return
+        }
+
         val count = counter.update(wristOffset)
         onFrame(PoseFrame.Detected(wristOffset, count, footVisibility))
     }
