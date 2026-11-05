@@ -14,18 +14,20 @@
 
 本项目面向帕金森病高龄患者及其临床医护，色彩调性必须呈现**冷静、专业、可靠**的医疗康复特征。主色延续并标准化为深海康复蓝（Rehab Deep Blue, `#1A4FA0`）。
 
+> 下表数值由 WCAG 2.x 相对亮度公式实算得出（2026-11-05 校正）。此前版本的手工数值普遍偏大，且 `color-danger` 的 AAA 评级有误：白字在 `#B91C1C` 上为 6.47:1，只达 **AA**（AAA 需 7:1）。该色用于「紧急停止」按钮，评级不得虚标。
+
 | Token 变量 | 色值 Hex | 用途说明 | 推荐背景 | WCAG 对比度 | 评级 |
 | --- | --- | --- | --- | --- | --- |
-| `color-primary` | `#1A4FA0` | 品牌主色、主操作按钮背景、关键高亮 | `#FFFFFF` | **8.12 : 1** | AAA (Pass) |
-| `color-primary-dark` | `#0F3268` | 主色按下态（Hover/Pressed）、主标题字 | `#FFFFFF` | **12.45 : 1** | AAA (Pass) |
-| `color-primary-light` | `#EAF1FB` | 选框底色、主色次级浅容器背景 | `#0F3268`（文字） | **10.58 : 1** | AAA (Pass) |
-| `color-success` | `#1B5E20` | 安全、训练达标、分期已确认 | `#FFFFFF` | **7.15 : 1** | AAA (Pass) |
-| `color-success-light` | `#E8F5E9` | 达标背景浅色容器 | `#1B5E20`（文字） | **6.40 : 1** | AA (Pass) |
-| `color-warning` | `#B45309` | 警示、疑似分期、存疑记录标记 | `#FFFFFF` | **4.68 : 1** | AA (Pass) |
-| `color-warning-light` | `#FEF3C7` | 警示提示背景浅色容器 | `#78350F`（文字） | **8.52 : 1** | AAA (Pass) |
-| `color-danger` | `#B91C1C` | 风险预警、紧急停止、严重错误 | `#FFFFFF` | **6.18 : 1** | AAA (Pass) |
-| `color-danger-dark` | `#7F1D1D` | 严重预警按下态、强危险标题 | `#FFFFFF` | **9.82 : 1** | AAA (Pass) |
-| `color-danger-light` | `#FEE2E2` | 风险预警容器浅底色 | `#991B1B`（文字） | **6.35 : 1** | AA (Pass) |
+| `color-primary` | `#1A4FA0` | 品牌主色、主操作按钮背景、关键高亮 | `#FFFFFF` | **7.87 : 1** | AAA (Pass) |
+| `color-primary-dark` | `#0F3268` | 主色按下态（Hover/Pressed）、主标题字 | `#FFFFFF` | **12.53 : 1** | AAA (Pass) |
+| `color-primary-light` | `#EAF1FB` | 选框底色、主色次级浅容器背景 | `#0F3268`（文字） | **11.02 : 1** | AAA (Pass) |
+| `color-success` | `#1B5E20` | 安全、训练达标、分期已确认 | `#FFFFFF` | **7.87 : 1** | AAA (Pass) |
+| `color-success-light` | `#E8F5E9` | 达标背景浅色容器 | `#1B5E20`（文字） | **7.00 : 1** | AAA (临界, Pass) |
+| `color-warning` | `#B45309` | 警示、疑似分期、存疑记录标记 | `#FFFFFF` | **5.02 : 1** | AA (Pass) |
+| `color-warning-light` | `#FEF3C7` | 警示提示背景浅色容器 | `#78350F`（文字） | **8.15 : 1** | AAA (Pass) |
+| `color-danger` | `#B91C1C` | 风险预警、紧急停止、严重错误 | `#FFFFFF` | **6.47 : 1** | **AA (Pass)** |
+| `color-danger-dark` | `#7F1D1D` | 严重预警按下态、强危险标题 | `#FFFFFF` | **10.02 : 1** | AAA (Pass) |
+| `color-danger-light` | `#FEE2E2` | 风险预警容器浅底色 | `#991B1B`（文字） | **6.80 : 1** | AA (Pass) |
 
 ### 1.2 灰阶与文字对比度（Neutral Palette）
 
@@ -33,15 +35,15 @@
 
 | Token 变量 | 色值 Hex | 适用场景 | 底色 | 对比度 | 校验结果 |
 | --- | --- | --- | --- | --- | --- |
-| `text-primary` | `#0F172A` | 正文、卡片标题、数值主文案 | `#FFFFFF` | **16.20 : 1** | AAA (Pass) |
-| `text-secondary` | `#334155` | 次级说明、标签名、辅助信息 | `#FFFFFF` | **9.53 : 1** | AAA (Pass) |
-| `text-tertiary` | `#475569` | 占位提示、时间戳、算法版本号 | `#FFFFFF` | **7.08 : 1** | AAA (Pass) |
-| `text-on-primary` | `#FFFFFF` | 主按钮字、深色预警条白字 | `#1A4FA0` | **8.12 : 1** | AAA (Pass) |
-| `text-on-danger` | `#FFFFFF` | 紧急停止按钮白字 | `#B91C1C` | **6.18 : 1** | AAA (Pass) |
+| `text-primary` | `#0F172A` | 正文、卡片标题、数值主文案 | `#FFFFFF` | **17.85 : 1** | AAA (Pass) |
+| `text-secondary` | `#334155` | 次级说明、标签名、辅助信息 | `#FFFFFF` | **10.35 : 1** | AAA (Pass) |
+| `text-tertiary` | `#475569` | 占位提示、时间戳、算法版本号 | `#FFFFFF` | **7.58 : 1** | AAA (Pass) |
+| `text-on-primary` | `#FFFFFF` | 主按钮字、深色预警条白字 | `#1A4FA0` | **7.87 : 1** | AAA (Pass) |
+| `text-on-danger` | `#FFFFFF` | 紧急停止按钮白字 | `#B91C1C` | **6.47 : 1** | **AA (Pass)** |
 | `bg-page` | `#F8FAFC` | 全局页面背景（微冷白底，防眩光） | — | — | — |
 | `bg-card` | `#FFFFFF` | 卡片与容器主底色 | `#F8FAFC` | 层次清晰 | 边缘通过描边加强 |
-| `border-card` | `#CBD5E1` | 卡片边框、分割线（3:1 组件对比度）| `#FFFFFF` | **1.54 : 1** | 符合非文字组件标准 |
-| `border-strong` | `#94A3B8` | 输入框、选中态外轮廓 | `#FFFFFF` | **3.02 : 1** | 达到 UI 控件 AA |
+| `border-card` | `#CBD5E1` | 卡片边框、分割线 | `#FFFFFF` | **1.48 : 1** | **仅装饰用途**；不得用于区分可交互控件边界 |
+| `border-strong` | `#94A3B8` | 输入框、选中态外轮廓 | `#FFFFFF` | **2.56 : 1** | **未达 3:1**；输入框等 UI 控件须改用 `#64748B`（4.76:1）或更深 |
 
 ---
 
