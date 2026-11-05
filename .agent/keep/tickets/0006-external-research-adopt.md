@@ -1,7 +1,7 @@
 ---
 id: "0006"
 type: task
-status: open
+status: closed
 assignee: claude
 part-of: null
 blocked-by: []
@@ -51,3 +51,7 @@ created: 2026-11-05
 发现：`docs/design/design-system.md` 的手工对比度数值与 WCAG 标准公式有偏差（如主色白字文档 8.12:1、实际 7.87:1），本次未改文档，已在报告登记。
 
 被否选项：直接把客户端上报值落库（无法阻止自称无异常）；为触发测试编造已签核阈值（与未决项 12 冲突）；在小程序静态检查里引入测试框架（成本高于收益）；一次性实现下载与 LRU（任务明确要求只做骨架）。无未决实施项；本票保持 open，等待独立验收，未执行合并、推送或发布。
+
+### 2026-11-05 协调者验收与关票
+
+由协调者复核并合并（04fdb13 + 合并）。已独立复跑：pytest 50 项、Android 单测 18 项、static_check 0 问题。分页已在其后改为 keyset。

@@ -1,7 +1,7 @@
 ---
-id: "0009"
+id: "0010"
 type: task
-status: open
+status: closed
 assignee: claude
 part-of: null
 blocked-by: []
@@ -55,3 +55,7 @@ N1/N2/N3/N5/N7 全部落地，未做模型训练、行级导出、队列构建�
 回退验证：移除分子检查后 `test_ratio_is_suppressed_when_numerator_is_small` 失败（返回 `{'value': 0.1, 'suppressed': False}`），恢复后通过。
 
 验证：pytest 73 passed（新增 5 项）；tsc 通过；playwright 15 passed；契约描述同步更新并重新生成两份 d.ts；`git diff --check` exit 0。
+
+### 2026-11-05 协调者验收与关票
+
+由协调者复核并合并（dcafa23 + 合并 7e57e2d）。已独立复跑 pytest 72 项与 15 条 E2E；实调接口确认 demo 硬过滤生效（种子 1 名患者、patientCount=0）。二次抑制（差额防护）由 worker 自行发现并实现，超出原规格要求。

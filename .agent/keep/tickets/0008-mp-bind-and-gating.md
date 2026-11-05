@@ -1,7 +1,7 @@
 ---
 id: "0008"
 type: task
-status: open
+status: closed
 assignee: null
 part-of: null
 blocked-by: []
@@ -26,3 +26,7 @@ created: 2026-11-05
 ### 2026-11-05 建票
 
 来源：`.agent/tmp/orca-specs/10-mp-functional-fixes.md` 与 `.agent/tmp/REVIEW-MINIPROGRAM.md` 的 F1、F2。视觉层（F3–F6、F12 横幅覆盖等）由另一路 worker 负责，本票不碰 `app.wxss`。
+
+### 2026-11-05 协调者验收与关票
+
+由协调者复核并合并（1a69d85 + 合并）。已用微信开发者工具自动化实测 6/6：未登录出现「去绑定」、绑定页可打开、训练页无风险分级字样、需治疗师确认。遗留：演示账号密码明文写在 utils/config.ts，生产构建须移除。

@@ -1,7 +1,7 @@
 ---
 id: "0009"
 type: task
-status: open
+status: closed
 assignee: null
 part-of: null
 blocked-by: []
@@ -35,3 +35,7 @@ created: 2026-11-05
 - `gradlew :app:testDebugUnitTest :app:assembleDebug` 通过；34 项单测（原 18 + 新增 16）0 失败。
 - 详情与证据：`.agent/tmp/TRAINING-MODES.md`、`.agent/tmp/shots/`。
 - 待独立 code-reviewer 结论后关票；D17 真人自动恢复、12 次封顶与真平板布局未在设备上实测，已记录为残余风险。
+
+### 2026-11-05 协调者验收与关票
+
+由协调者复核并合并（c01d467 + 合并 a853f35）。已独立复跑 Android 单测 34 项全通过；真机验证：组状态机 1/3→3/3→完成、沉浸模式隐藏菜单、纯拍摄+语音、D17 拦截生效。未验证：真人入框自动恢复、手臂动作计数封顶、真平板布局。
