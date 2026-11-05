@@ -6,7 +6,8 @@
     "pages/alerts/index",
     "pages/patient/index",
     "pages/training/session/index",
-    "pages/assessment/index"
+    "pages/assessment/index",
+    "pages/bind/index"
   ],
   "window": {
     "backgroundTextStyle": "dark",
