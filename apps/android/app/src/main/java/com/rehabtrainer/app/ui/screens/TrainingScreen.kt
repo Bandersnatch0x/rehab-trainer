@@ -3,6 +3,8 @@ package com.rehabtrainer.app.ui.screens
 import android.Manifest
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.net.Uri
+import android.widget.VideoView
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
@@ -62,6 +64,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.rehabtrainer.app.R
 import com.rehabtrainer.app.core.pose.PoseAnalyzer
 import com.rehabtrainer.app.core.pose.PoseFrame
 import com.rehabtrainer.app.ui.components.ElderlyButton
@@ -82,6 +85,8 @@ import java.util.concurrent.Executors
 @Composable
 fun TrainingScreen(
     widthSizeClass: WindowWidthSizeClass = WindowWidthSizeClass.Compact,
+    exerciseCode: String = "",
+    onEmergencyStop: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -128,6 +133,8 @@ fun TrainingScreen(
     var armRaiseCount by remember { mutableIntStateOf(0) }
     var statusText by remember { mutableStateOf("正在寻找人体站位…") }
     var footVisible by remember { mutableStateOf(true) }
+    // D17：步态与下肢类必须全景，上肢类可用半身构图。
+    val requiresFullBody = exerciseCode in setOf("EX-RAS-01", "EX-STRENGTH-01", "EX-POSTURE-01")
     var metronomeEnabled by remember { mutableStateOf(true) }
     var isPaused by remember { mutableStateOf(false) }
 
@@ -138,7 +145,11 @@ fun TrainingScreen(
                 is PoseFrame.Detected -> {
                     armRaiseCount = frame.armRaiseCount
                     footVisible = frame.footVisibility >= 0.5f
-                    statusText = if (footVisible) "全身姿态识别正常" else "脚部不在画面内"
+                    statusText = when {
+                        !requiresFullBody -> "上半身姿态识别正常"
+                        footVisible -> "全身姿态识别正常"
+                        else -> "脚部不在画面内"
+                    }
                 }
                 PoseFrame.NoPose -> statusText = "未检测到人体，请站入画面中央"
                 is PoseFrame.Failure -> statusText = frame.message
@@ -208,6 +219,7 @@ fun TrainingScreen(
                     armRaiseCount = armRaiseCount,
                     statusText = statusText,
                     footVisible = footVisible,
+                    requiresFullBody = requiresFullBody,
                     metronomeEnabled = metronomeEnabled,
                     onToggleMetronome = { metronomeEnabled = it }
                 )
@@ -238,6 +250,7 @@ fun TrainingScreen(
                     armRaiseCount = armRaiseCount,
                     statusText = statusText,
                     footVisible = footVisible,
+                    requiresFullBody = requiresFullBody,
                     metronomeEnabled = metronomeEnabled,
                     onToggleMetronome = { metronomeEnabled = it }
                 )
@@ -248,8 +261,8 @@ fun TrainingScreen(
         PersistentControlFooter(
             isPaused = isPaused,
             onTogglePause = { isPaused = !isPaused },
-            onFinishSet = { /* 提交本组 */ },
-            onEmergencyStop = { /* 触发安全紧急停止 */ }
+            onFinishSet = { /* 演示版：不写训练记录 */ },
+            onEmergencyStop = onEmergencyStop
         )
     }
 }
@@ -272,7 +285,27 @@ private fun InstructionalVideoPane(
         border = androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF334155))
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // 教学示范模拟画面（深邃医疗蓝黑渐变背景）
+            // 真实教学视频（随包内置的演示片段，循环播放）。
+            AndroidView(
+                factory = { context ->
+                    VideoView(context).apply {
+                        setVideoURI(
+                            Uri.parse("android.resource://${context.packageName}/${R.raw.demo_exercise}")
+                        )
+                        setOnPreparedListener { player ->
+                            player.isLooping = true
+                            player.setVolume(0f, 0f)
+                            if (!isPaused) start()
+                        }
+                    }
+                },
+                update = { view ->
+                    if (isPaused) view.pause() else view.start()
+                },
+                modifier = Modifier.fillMaxSize()
+            )
+
+            // 叠层信息（标签、节拍、演示数据提示），不遮挡视频中心。
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -386,6 +419,7 @@ private fun PatientRealtimeCameraPane(
     armRaiseCount: Int,
     statusText: String,
     footVisible: Boolean,
+    requiresFullBody: Boolean,
     metronomeEnabled: Boolean,
     onToggleMetronome: (Boolean) -> Unit
 ) {
@@ -479,7 +513,7 @@ private fun PatientRealtimeCameraPane(
 
             // 叠加层 3：底部 足部入镜提示与姿态状态条 (D17 硬性检查)
             Surface(
-                color = if (!footVisible) Color(0xEEBA1A1A) else Color(0xDD0F172A),
+                color = if (requiresFullBody && !footVisible) Color(0xEEBA1A1A) else Color(0xDD0F172A),
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -491,7 +525,7 @@ private fun PatientRealtimeCameraPane(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    if (!footVisible) {
+                    if (requiresFullBody && !footVisible) {
                         Icon(
                             imageVector = Icons.Filled.Warning,
                             contentDescription = "脚部未入镜警告",

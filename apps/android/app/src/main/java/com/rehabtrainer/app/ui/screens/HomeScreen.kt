@@ -40,6 +40,8 @@ import com.rehabtrainer.app.ui.theme.LocalElderlyDimens
 @Composable
 fun HomeScreen(
     widthSizeClass: WindowWidthSizeClass,
+    onStartTraining: () -> Unit = {},
+    onOpenPrescription: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val dimens = LocalElderlyDimens.current
@@ -53,7 +55,10 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(dimens.sectionSpacing)
         ) {
             HomeStatusBanner()
-            HomeQuickActions()
+            HomeQuickActions(
+                onStartTraining = onStartTraining,
+                onOpenPrescription = onOpenPrescription
+            )
             HomeTodayPrescription()
             HomeSafetyGuide()
         }
@@ -69,7 +74,10 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.spacedBy(dimens.itemSpacing)
             ) {
                 HomeStatusBanner()
-                HomeQuickActions()
+                HomeQuickActions(
+                    onStartTraining = onStartTraining,
+                    onOpenPrescription = onOpenPrescription
+                )
             }
             Column(
                 modifier = Modifier
@@ -121,7 +129,10 @@ private fun HomeStatusBanner() {
 }
 
 @Composable
-private fun HomeQuickActions() {
+private fun HomeQuickActions(
+    onStartTraining: () -> Unit,
+    onOpenPrescription: () -> Unit
+) {
     val dimens = LocalElderlyDimens.current
     Column(verticalArrangement = Arrangement.spacedBy(dimens.itemSpacing)) {
         Text(
@@ -134,13 +145,13 @@ private fun HomeQuickActions() {
         )
         ElderlyButton(
             text = "开始今日训练（第 1/4 节）",
-            onClick = { /* 接入训练流程 */ },
+            onClick = onStartTraining,
             icon = Icons.Filled.PlayArrow,
             variant = ElderlyButtonVariant.Primary
         )
         ElderlyButton(
             text = "查看完整处方条目",
-            onClick = { /* 接入处方接口 */ },
+            onClick = onOpenPrescription,
             icon = Icons.Filled.List,
             variant = ElderlyButtonVariant.Secondary
         )

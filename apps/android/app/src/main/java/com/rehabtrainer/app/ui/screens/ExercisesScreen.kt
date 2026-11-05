@@ -56,7 +56,7 @@ fun ExercisesScreen(
             categoryDesc = "利用固定听觉节拍引导步伐，预防冻结步态 (FoG)。",
             exerciseName = "原地节律踏步训练",
             parameters = "节拍: 64 BPM · 3 组 × 12 次",
-            riskLevel = "低风险 (H-Y 2期适用)",
+            riskLevel = "低风险 · 适合当前阶段",
             onStart = { onSelectExercise("EX-RAS-01") }
         )
 
