@@ -14,11 +14,13 @@ import com.rehabtrainer.app.ui.screens.RecordsScreen
 import com.rehabtrainer.app.ui.screens.SettingsScreen
 import com.rehabtrainer.app.ui.screens.TrainingScreen
 
-/** 顶层路由表；页面均为骨架，业务内容在后续迭代填入。 */
+/** 顶层路由表；连接各业务页面。 */
 @Composable
 fun RehabNavHost(
     navController: NavHostController,
     widthSizeClass: WindowWidthSizeClass,
+    selectedExerciseCode: String = "EX-RAS-01",
+    onSelectExercise: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -27,16 +29,30 @@ fun RehabNavHost(
         modifier = modifier
     ) {
         composable(RehabDestination.HOME.route) {
-            HomeScreen(widthSizeClass = widthSizeClass)
+            HomeScreen(
+                widthSizeClass = widthSizeClass,
+                onStartTraining = {
+                    onSelectExercise("EX-RAS-01")
+                    navController.navigate(RehabDestination.TRAINING.route)
+                }
+            )
         }
         composable(RehabDestination.EXERCISES.route) {
-            ExercisesScreen(onSelectExercise = { navController.navigate(RehabDestination.TRAINING.route) })
+            ExercisesScreen(
+                onSelectExercise = { code ->
+                    onSelectExercise(code)
+                    navController.navigate(RehabDestination.TRAINING.route)
+                }
+            )
         }
         composable(RehabDestination.PATIENTS.route) {
             PatientsScreen()
         }
         composable(RehabDestination.TRAINING.route) {
-            TrainingScreen(widthSizeClass = widthSizeClass)
+            TrainingScreen(
+                exerciseCode = selectedExerciseCode,
+                widthSizeClass = widthSizeClass
+            )
         }
         composable(RehabDestination.RECORDS.route) {
             RecordsScreen()

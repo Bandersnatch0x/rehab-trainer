@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>帕金森肌力康复 - 适老关怀设置中心</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Atkinson Hyperlegible Next Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;0,700;1,400;1,700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config verbatim from design tokens -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "error": "#ba1a1a",
+            "on-primary-fixed": "#001a42",
+            "surface-container-low": "#eff4ff",
+            "on-error-container": "#93000a",
+            "inverse-surface": "#233144",
+            "on-primary": "#ffffff",
+            "on-tertiary-container": "#ffb39a",
+            "on-surface": "#0d1c2e",
+            "on-surface-variant": "#434751",
+            "on-tertiary-fixed": "#390c00",
+            "on-secondary": "#ffffff",
+            "error-container": "#ffdad6",
+            "secondary": "#006a63",
+            "surface-container": "#e6eeff",
+            "surface": "#f8f9ff",
+            "surface-variant": "#d5e3fc",
+            "surface-dim": "#ccdbf3",
+            "on-tertiary-fixed-variant": "#832600",
+            "on-primary-fixed-variant": "#024394",
+            "inverse-primary": "#aec6ff",
+            "secondary-container": "#99efe5",
+            "outline": "#737783",
+            "on-secondary-container": "#006f67",
+            "surface-tint": "#2c5cae",
+            "inverse-on-surface": "#eaf1ff",
+            "primary-fixed": "#d8e2ff",
+            "surface-container-high": "#dce9ff",
+            "secondary-fixed": "#9cf2e8",
+            "primary-fixed-dim": "#aec6ff",
+            "tertiary-container": "#962d00",
+            "background": "#f8f9ff",
+            "tertiary": "#6f1f00",
+            "on-tertiary": "#ffffff",
+            "surface-bright": "#f8f9ff",
+            "tertiary-fixed-dim": "#ffb59d",
+            "tertiary-fixed": "#ffdbd0",
+            "on-background": "#0d1c2e",
+            "surface-container-lowest": "#ffffff",
+            "primary-container": "#1a4fa0",
+            "on-error": "#ffffff",
+            "secondary-fixed-dim": "#80d5cb",
+            "primary": "#00387e",
+            "on-secondary-fixed": "#00201d",
+            "surface-container-highest": "#d5e3fc",
+            "on-secondary-fixed-variant": "#00504a",
+            "outline-variant": "#c3c6d3",
+            "on-primary-container": "#abc5ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin": "1.25rem",
+            "margin-tablet": "2rem",
+            "space-md": "1.25rem",
+            "space-xs": "0.5rem",
+            "space-lg": "1.75rem",
+            "margin-desktop": "3rem",
+            "gutter-tablet": "1.5rem",
+            "gutter": "1rem",
+            "space-xl": "2.5rem",
+            "space-sm": "0.75rem"
+          },
+          "fontFamily": {
+            "headline-md": ["Atkinson Hyperlegible Next"],
+            "label-lg": ["Atkinson Hyperlegible Next"],
+            "label-md": ["Atkinson Hyperlegible Next"],
+            "headline-sm": ["Atkinson Hyperlegible Next"],
+            "headline-lg": ["Atkinson Hyperlegible Next"],
+            "body-md": ["Atkinson Hyperlegible Next"],
+            "headline-xl": ["Atkinson Hyperlegible Next"],
+            "label-xl": ["Atkinson Hyperlegible Next"],
+            "headline-xl-mobile": ["Atkinson Hyperlegible Next"],
+            "body-xl": ["Atkinson Hyperlegible Next"],
+            "body-lg": ["Atkinson Hyperlegible Next"]
+          },
+          "fontSize": {
+            "headline-md": ["24px", { "lineHeight": "34px", "fontWeight": "700" }],
+            "label-lg": ["16px", { "lineHeight": "22px", "fontWeight": "700" }],
+            "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "headline-sm": ["20px", { "lineHeight": "30px", "fontWeight": "600" }],
+            "headline-lg": ["28px", { "lineHeight": "38px", "fontWeight": "700" }],
+            "body-md": ["16px", { "lineHeight": "26px", "fontWeight": "500" }],
+            "headline-xl": ["36px", { "lineHeight": "48px", "fontWeight": "700" }],
+            "label-xl": ["18px", { "lineHeight": "24px", "fontWeight": "700" }],
+            "headline-xl-mobile": ["30px", { "lineHeight": "40px", "fontWeight": "700" }],
+            "body-xl": ["20px", { "lineHeight": "32px", "fontWeight": "400" }],
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    /* Material symbols helper */
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 28px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* Anti-tremor target indicator */
+    .touch-target-senior {
+      min-height: 80px;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface antialiased selection:bg-secondary-container selection:text-on-secondary-container pb-28">
+<!-- ================= TOP APP BAR (Shared Anchor Pattern) ================= -->
+<header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-margin h-20 min-h-[80px] bg-surface-container-lowest shadow-sm border-b border-outline-variant">
+<div class="flex items-center gap-3">
+<!-- Back Navigation Button - Oversized for motor tremors -->
+<button aria-label="返回上一页" class="w-14 h-14 rounded-2xl bg-surface-container flex items-center justify-center text-primary active:scale-95 active:bg-surface-variant transition-all focus:outline-none focus:ring-2 focus:ring-primary" type="button">
+<span class="material-symbols-outlined text-[32px]">arrow_back</span>
+</button>
+<div>
+<h1 class="text-headline-sm font-headline-sm font-bold text-primary tracking-tight">设置中心</h1>
+<p class="text-label-md font-label-md text-on-surface-variant">适老防抖与辅助设备调优</p>
+</div>
+</div>
+<!-- Quick Audio Metronome Sound Test / Emergency Assist -->
+<button aria-label="快速试听节律" class="h-14 px-4 rounded-2xl bg-primary-container text-on-primary flex items-center gap-2 shadow-sm active:scale-95 active:bg-primary transition-all focus:outline-none" type="button">
+<span class="material-symbols-outlined text-[24px]">volume_up</span>
+<span class="text-label-md font-label-md font-bold">试音</span>
+</button>
+</header>
+<!-- Top Spacing Buffer for fixed header -->
+<div class="h-24"></div>
+<!-- MAIN SCROLL CONTAINER -->
+<main class="px-margin space-y-space-lg max-w-xl mx-auto pt-2">
+<!-- Clinical Safety & Patient Calibration Status Banner -->
+<section class="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant p-space-md shadow-sm">
+<div class="flex items-center justify-between pb-3 border-b-2 border-surface-container">
+<div class="flex items-center gap-2.5">
+<span class="w-3.5 h-3.5 rounded-full bg-secondary inline-block animate-pulse"></span>
+<span class="text-label-lg font-label-lg text-primary font-bold">当前模式：防震颤与超大字体保护</span>
+</div>
+<span class="px-3 py-1 rounded-full bg-surface-container-high text-on-primary-fixed-variant text-label-md font-label-md font-bold border border-outline-variant">
+          Hoehn &amp; Yahr II期
+        </span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant mt-2.5">
+        所有触控按钮均已适配 <span class="font-bold text-on-surface">80dp 宽幅防手抖区域</span>，并激活音频节律耳机直连。
+      </p>
+</section>
+<!-- SECTION A: 字号与显示调节 (Font Size & Display) -->
+<section aria-labelledby="section-font-heading" class="space-y-space-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">text_fields</span>
+<h2 class="text-headline-sm font-headline-sm font-bold text-on-surface" id="section-font-heading">字号与显示调节</h2>
+</div>
+<!-- Segmented Super-Large Selection Pills (min-h-[80px]) -->
+<div class="grid grid-cols-1 gap-3">
+<!-- Option 1: Standard (Inactive) -->
+<button aria-checked="false" class="touch-target-senior w-full bg-surface-container-lowest border-2 border-outline-variant rounded-2xl p-4 flex items-center justify-between text-left active:bg-surface-container transition-all" role="radio" type="button">
+<div class="flex items-center gap-4">
+<div class="w-9 h-9 rounded-full border-2 border-outline flex items-center justify-center bg-surface-bright">
+<span class="w-4 h-4 rounded-full bg-transparent"></span>
+</div>
+<div>
+<span class="block text-label-xl font-label-xl text-on-surface-variant font-bold">标准字号 (常规显示)</span>
+<span class="block text-body-md font-body-md text-outline">适合视力良好或陪护人员操作</span>
+</div>
+</div>
+<span class="text-label-md font-label-md text-outline font-bold">16sp</span>
+</button>
+<!-- Option 2: Senior Extra Large (Active State) -->
+<button aria-checked="true" class="touch-target-senior w-full bg-primary-container text-on-primary border-2 border-primary rounded-2xl p-4 flex items-center justify-between text-left shadow-md active:opacity-95 transition-all" role="radio" type="button">
+<div class="flex items-center gap-4">
+<div class="w-9 h-9 rounded-full bg-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-container font-bold text-[24px]">check</span>
+</div>
+<div>
+<span class="block text-headline-sm font-headline-sm font-bold text-on-primary">超大字号 (适老推荐 · 当前启用)</span>
+<span class="block text-body-md font-body-md text-on-primary-container">强化抗眩光、笔画增粗、防止阅读疲劳</span>
+</div>
+</div>
+<span class="px-2.5 py-1 rounded-lg bg-surface-container-lowest text-primary font-bold text-label-md font-label-md">24sp+</span>
+</button>
+</div>
+<!-- Real-time dynamic preview card -->
+<div class="bg-surface-container rounded-2xl border-2 border-outline-variant p-5 space-y-2 mt-2">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md font-bold text-primary flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+            实时字号与对比度预览
+          </span>
+<span class="text-label-md font-label-md text-on-surface-variant">高清晰度渲染</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant shadow-sm">
+<p class="text-headline-md font-headline-md text-on-surface font-bold leading-relaxed">
+            “今天的步态稳健有力，保持深呼吸，起步前先数节律。”
+          </p>
+</div>
+</div>
+</section>
+<!-- SECTION B: 外设与骨传导耳机联动 (Bone Conduction & Assistive Hardware) -->
+<section aria-labelledby="section-hardware-heading" class="space-y-space-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">headphones</span>
+<h2 class="text-headline-sm font-headline-sm font-bold text-on-surface" id="section-hardware-heading">外设与骨传导耳机联动</h2>
+</div>
+<!-- Bone Conduction Headset Card (min-h-[80px]) -->
+<div class="touch-target-senior bg-surface-container-lowest rounded-2xl border-2 border-primary-container p-4 shadow-sm flex flex-col justify-between gap-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3.5">
+<div class="w-14 h-14 rounded-2xl bg-secondary-container text-on-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[32px]">headset</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-label-xl font-label-xl font-bold text-on-surface">韶音 OpenRun Pro</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-label-md font-label-md font-bold">已配对</span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant flex items-center gap-3 mt-0.5">
+<span class="flex items-center gap-1 text-secondary font-bold">
+<span class="material-symbols-outlined text-[18px]">bluetooth_connected</span>
+                  蓝牙直连
+                </span>
+<span class="flex items-center gap-1 font-bold text-on-surface">
+<span class="material-symbols-outlined text-[18px]">battery_5_bar</span>
+                  电量 85%
+                </span>
+</p>
+</div>
+</div>
+<!-- Oversized Re-pair / Disconnect Action Pill -->
+<button class="h-14 px-5 rounded-2xl bg-surface-container text-primary font-bold text-label-lg font-label-lg border-2 border-outline-variant active:scale-95 transition-all" type="button">
+            重配对
+          </button>
+</div>
+<!-- Clinical Latency Protection Callout -->
+<div class="bg-surface-container-low rounded-xl p-3 border border-outline-variant flex items-start gap-2.5">
+<span class="material-symbols-outlined text-secondary text-[24px] shrink-0 mt-0.5">verified_user</span>
+<p class="text-body-md font-body-md text-on-surface leading-snug">
+<strong class="font-bold text-primary">RAS 专用双通道低延迟机制：</strong> 骨传导耳机不阻挡环境声，行走防冻结（FoG）提示音优先分流至耳机，外界交谈与报警两不误。
+          </p>
+</div>
+</div>
+</section>
+<!-- SECTION C: 步态节律 (RAS) 提示音效定制 (Rhythm Cues Sound Selection) -->
+<section aria-labelledby="section-ras-heading" class="space-y-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">file_map_stack</span>
+<h2 class="text-headline-sm font-headline-sm font-bold text-on-surface" id="section-ras-heading">步态节律提示音效</h2>
+</div>
+<span class="text-label-md font-label-md text-secondary font-bold">标准防冻结算法</span>
+</div>
+<!-- Sound Option 1: 沉稳木鱼声 (Selected) - min-h-[80px] -->
+<div class="touch-target-senior w-full bg-surface-container-lowest border-2 border-primary rounded-2xl p-4 flex items-center justify-between gap-3 shadow-sm">
+<div class="flex items-center gap-3.5">
+<div class="w-12 h-12 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">graphic_eq</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-label-xl font-label-xl font-bold text-primary">沉稳木鱼声</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-bold text-label-md font-label-md">已选用</span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant">推荐 · 降低起步焦虑，强化单步落地稳重感</p>
+</div>
+</div>
+<!-- Audition Button (>=60dp hit area) -->
+<button aria-label="试听木鱼声60拍" class="w-16 h-16 rounded-2xl bg-primary text-on-primary flex flex-col items-center justify-center shrink-0 active:scale-90 transition-transform shadow" type="button">
+<span class="material-symbols-outlined text-[24px]">play_arrow</span>
+<span class="text-label-md font-label-md font-bold leading-none mt-0.5">60拍</span>
+</button>
+</div>
+<!-- Sound Option 2: 柔和鼓点 - min-h-[80px] -->
+<div class="touch-target-senior w-full bg-surface-container-lowest border-2 border-outline-variant rounded-2xl p-4 flex items-center justify-between gap-3 active:bg-surface-container transition-all">
+<div class="flex items-center gap-3.5">
+<div class="w-12 h-12 rounded-xl bg-surface-container text-outline flex items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">music_note</span>
+</div>
+<div>
+<span class="text-label-xl font-label-xl font-bold text-on-surface">柔和鼓点音</span>
+<p class="text-body-md font-body-md text-on-surface-variant">清晰铿锵 · 适合户外散步或公园慢走</p>
+</div>
+</div>
+<!-- Audition Button -->
+<button aria-label="试听鼓点音" class="w-16 h-16 rounded-2xl bg-surface-container text-primary flex flex-col items-center justify-center shrink-0 border-2 border-outline-variant active:scale-90 transition-transform" type="button">
+<span class="material-symbols-outlined text-[24px]">play_arrow</span>
+<span class="text-label-md font-label-md font-bold leading-none mt-0.5">试听</span>
+</button>
+</div>
+<!-- Sound Booster Slider & Big Stepper Buttons (min-h-[80px] container) -->
+<div class="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant p-4 space-y-3">
+<div class="flex items-center justify-between">
+<span class="text-label-lg font-label-lg font-bold text-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[22px]">volume_up</span>
+            提示音听觉增强放大
+          </span>
+<span class="text-headline-sm font-headline-sm font-bold text-primary">85%</span>
+</div>
+<div class="flex items-center gap-4">
+<!-- Step Down Button >=60dp -->
+<button aria-label="降低音量" class="w-16 h-16 rounded-2xl bg-surface-container border-2 border-outline-variant flex items-center justify-center text-primary active:scale-90 transition-transform font-bold" type="button">
+<span class="material-symbols-outlined text-[32px]">remove</span>
+</button>
+<!-- Visual Bar Indicator -->
+<div class="flex-1 bg-surface-container-high h-7 rounded-full overflow-hidden p-1 flex items-center">
+<div class="bg-primary h-full rounded-full transition-all duration-300 w-[85%] flex items-center justify-end pr-2">
+<span class="w-2.5 h-2.5 rounded-full bg-on-primary"></span>
+</div>
+</div>
+<!-- Step Up Button >=60dp -->
+<button aria-label="提高音量" class="w-16 h-16 rounded-2xl bg-surface-container border-2 border-outline-variant flex items-center justify-center text-primary active:scale-90 transition-transform font-bold" type="button">
+<span class="material-symbols-outlined text-[32px]">add</span>
+</button>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant">提示音已开启户外高噪环境补偿，避免杂音覆盖。</p>
+</div>
+</section>
+<!-- SECTION D: 视力与触控增强防护 (Accessibility & Anti-Tremor Guard) -->
+<section aria-labelledby="section-accessibility-heading" class="space-y-space-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">accessibility_new</span>
+<h2 class="text-headline-sm font-headline-sm font-bold text-on-surface" id="section-accessibility-heading">视力与触控增强防护</h2>
+</div>
+<!-- Feature 1: High Contrast Mode (min-h-[80px]) -->
+<div class="touch-target-senior bg-surface-container-lowest rounded-2xl border-2 border-outline-variant p-4 flex items-center justify-between gap-4">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="text-label-xl font-label-xl font-bold text-on-surface">高对比度适老黑体模式</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-label-md font-label-md font-bold">已启用</span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant leading-snug">
+            加粗所有边框线条至 2px，消除背景模糊渐变，阳光下及轻度白内障更易识别。
+          </p>
+</div>
+<!-- Oversized Physical Toggle Switch (Width >= 72px, Height >= 44px) -->
+<button aria-checked="true" aria-label="切换高对比度模式" class="w-20 h-12 bg-primary rounded-full p-1 transition-colors relative shrink-0 focus:outline-none" role="switch" type="button">
+<div class="w-10 h-10 bg-on-primary rounded-full shadow-md transform translate-x-8 flex items-center justify-center text-primary font-bold text-label-md font-label-md">
+            开
+          </div>
+</button>
+</div>
+<!-- Feature 2: Tremor Filter & Debounce (min-h-[80px]) -->
+<div class="touch-target-senior bg-surface-container-lowest rounded-2xl border-2 border-outline-variant p-4 flex items-center justify-between gap-4">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="text-label-xl font-label-xl font-bold text-on-surface">触控防抖滤波与防误触</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-label-md font-label-md font-bold">400ms滤波</span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant leading-snug">
+            自动过滤因静止性手抖产生的快速连击，按压需稳固接触 0.4 秒方确认触发。
+          </p>
+</div>
+<!-- Oversized Switch Active -->
+<button aria-checked="true" aria-label="切换触控防抖滤波" class="w-20 h-12 bg-primary rounded-full p-1 transition-colors relative shrink-0 focus:outline-none" role="switch" type="button">
+<div class="w-10 h-10 bg-on-primary rounded-full shadow-md transform translate-x-8 flex items-center justify-center text-primary font-bold text-label-md font-label-md">
+            开
+          </div>
+</button>
+</div>
+</section>
+<!-- SECTION E: 离线演示与系统信息 (Offline Demo & System Info) -->
+<section aria-labelledby="section-system-heading" class="space-y-space-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">info</span>
+<h2 class="text-headline-sm font-headline-sm font-bold text-on-surface" id="section-system-heading">离线演示与系统信息</h2>
+</div>
+<!-- Offline Demo Mode Card (min-h-[80px]) -->
+<div class="touch-target-senior bg-surface-container-lowest rounded-2xl border-2 border-outline-variant p-4 flex items-center justify-between gap-4">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="text-label-xl font-label-xl font-bold text-on-surface">离线临床演示模式</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-primary-fixed-variant text-label-md font-label-md font-bold border border-outline-variant">脱机就绪</span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant leading-snug">
+            在无移动网络或医院候诊屏蔽室中，本地缓存步态音频，保证评估与锻炼不中断。
+          </p>
+</div>
+<!-- Offline Toggle Inactive -->
+<button aria-checked="false" aria-label="开启离线临床演示" class="w-20 h-12 bg-surface-variant rounded-full p-1 transition-colors relative shrink-0 focus:outline-none" role="switch" type="button">
+<div class="w-10 h-10 bg-on-primary rounded-full shadow-md transform translate-x-0 flex items-center justify-center text-on-surface-variant font-bold text-label-md font-label-md">
+            关
+          </div>
+</button>
+</div>
+<!-- Medical Software Registration Details Card -->
+<div class="bg-surface-container-low rounded-2xl border-2 border-outline-variant p-5 space-y-3">
+<div class="flex items-start justify-between">
+<div>
+<p class="text-label-xl font-label-xl font-bold text-primary">华东神经康复系统</p>
+<p class="text-label-md font-label-md text-on-surface-variant">版本号：v4.8.2-medR (适老专属稳定版)</p>
+</div>
+<span class="material-symbols-outlined text-secondary text-[32px]">verified</span>
+</div>
+<div class="pt-2 border-t-2 border-surface-container space-y-1.5 text-body-md font-body-md text-on-surface-variant">
+<p class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+            医疗器械软件认证编号：沪械注准 20242210886
+          </p>
+<p class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+            国家老年神经疾病康复联盟技术支持
+          </p>
+<p class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+            随访专线：400-880-9921 (每日 08:00 - 20:00)
+          </p>
+</div>
+</div>
+<!-- Giant Reset to Senior Defaults Button (min-h-[80px]) -->
+<div class="pt-2">
+<button class="touch-target-senior w-full bg-surface-container-lowest border-2 border-primary text-primary rounded-2xl p-4 flex items-center justify-center gap-3 active:bg-surface-container active:scale-95 transition-all shadow-sm" type="button">
+<span class="material-symbols-outlined text-[32px]">restart_alt</span>
+<span class="text-headline-sm font-headline-sm font-bold">重置为默认适老防抖预设</span>
+</button>
+<p class="text-center text-label-md font-label-md text-outline mt-2">
+          重置将恢复最大字号、防抖滤波 400ms 及木鱼节律音
+        </p>
+</div>
+</section>
+</main>
+<!-- ================= BOTTOM NAVIGATION BAR (Shared Anchor Pattern) ================= -->
+<!-- Contextual Active Tab: Settings belongs to the "患者" (Patient/Profile) ecosystem destination -->
+<nav aria-label="主导航" class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-space-xs h-[76px] bg-surface-container-lowest shadow-sm border-t border-outline-variant">
+<!-- Tab 1: 首页 (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1.5 min-h-[56px] active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-[28px]">home</span>
+<span class="text-label-md font-label-md">首页</span>
+</a>
+<!-- Tab 2: 训练 (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1.5 min-h-[56px] active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-[28px]">fitness_center</span>
+<span class="text-label-md font-label-md">训练</span>
+</a>
+<!-- Tab 3: 记录 (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1.5 min-h-[56px] active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-[28px]">assignment</span>
+<span class="text-label-md font-label-md">记录</span>
+</a>
+<!-- Tab 4: 预警 (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1.5 min-h-[56px] active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-[28px]">warning</span>
+<span class="text-label-md font-label-md">预警</span>
+</a>
+<!-- Tab 5: 患者 (ACTIVE STATE - Matches current settings / patient profile ecosystem) -->
+<a aria-current="page" class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-xl px-3 py-1.5 min-h-[56px] active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="text-label-md font-label-md font-bold">患者</span>
+</a>
+</nav>
+</body></html>

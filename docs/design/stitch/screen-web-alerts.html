@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-surface-container-low" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>华东神经康复中心 - 临床异常与跌倒风险预警处置中心</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Atkinson Hyperlegible Next Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary": "#5c2f00",
+            "surface-container-low": "#f2f3ff",
+            "on-primary": "#ffffff",
+            "primary-fixed-dim": "#aec6ff",
+            "on-surface-variant": "#434751",
+            "on-primary-container": "#abc5ff",
+            "surface-bright": "#faf8ff",
+            "inverse-on-surface": "#eef0ff",
+            "primary-fixed": "#d8e2ff",
+            "on-tertiary-container": "#ffb579",
+            "on-surface": "#131b2e",
+            "on-error-container": "#93000a",
+            "error": "#ba1a1a",
+            "secondary-fixed-dim": "#72d8c8",
+            "on-tertiary": "#ffffff",
+            "tertiary-container": "#7e4200",
+            "surface-variant": "#dae2fd",
+            "on-tertiary-fixed-variant": "#6e3900",
+            "tertiary-fixed": "#ffdcc3",
+            "surface": "#faf8ff",
+            "secondary-container": "#8ef4e4",
+            "on-primary-fixed": "#001a42",
+            "inverse-primary": "#aec6ff",
+            "outline": "#737783",
+            "outline-variant": "#c3c6d3",
+            "on-tertiary-fixed": "#2f1500",
+            "surface-dim": "#d2d9f4",
+            "primary-container": "#1a4fa0",
+            "on-error": "#ffffff",
+            "surface-container-highest": "#dae2fd",
+            "on-secondary-fixed": "#00201c",
+            "on-secondary-container": "#007166",
+            "primary": "#00387e",
+            "on-secondary": "#ffffff",
+            "on-primary-fixed-variant": "#024394",
+            "on-background": "#131b2e",
+            "background": "#faf8ff",
+            "surface-container-high": "#e2e7ff",
+            "secondary": "#006a60",
+            "inverse-surface": "#283044",
+            "surface-container-lowest": "#ffffff",
+            "error-container": "#ffdad6",
+            "surface-tint": "#2c5cae",
+            "secondary-fixed": "#8ef4e4",
+            "surface-container": "#eaedff",
+            "tertiary-fixed-dim": "#ffb77d",
+            "on-secondary-fixed-variant": "#005048"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xs": "0.5rem",
+            "space-xl": "2.25rem",
+            "space-lg": "1.5rem",
+            "gutter": "1.5rem",
+            "space-sm": "0.75rem",
+            "margin": "1.5rem",
+            "space-2xl": "3rem",
+            "space-md": "1rem"
+          },
+          "fontFamily": {
+            "label-lg": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "headline-md": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "display-counter": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "label-md": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "headline-lg": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "headline-sm": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "body-lg": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "display-counter-lg": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "body-xl": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "body-md": ["Atkinson Hyperlegible Next", "sans-serif"]
+          },
+          "fontSize": {
+            "label-lg": ["18px", {"lineHeight": "24px", "letterSpacing": "0.02em", "fontWeight": "700"}],
+            "headline-md": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+            "display-counter": ["64px", {"lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "label-md": ["16px", {"lineHeight": "22px", "letterSpacing": "0.03em", "fontWeight": "600"}],
+            "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+            "headline-sm": ["22px", {"lineHeight": "30px", "fontWeight": "600"}],
+            "body-lg": ["20px", {"lineHeight": "30px", "fontWeight": "400"}],
+            "display-counter-lg": ["72px", {"lineHeight": "80px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+            "body-xl": ["22px", {"lineHeight": "32px", "fontWeight": "500"}],
+            "body-md": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-fill {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Subtle custom scrollbar for clinical density */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f2f3ff;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c3c6d3;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #737783;
+    }
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.08); }
+    }
+    .animate-pulse-beacon {
+      animation: pulse-subtle 1.8s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col font-body-md text-on-surface bg-surface-container-low antialiased overflow-hidden">
+<!-- ================= TOP NAV BAR (Anchor: Shared Component) ================= -->
+<header class="flex justify-between items-center h-16 px-space-lg w-full z-40 bg-surface-container-lowest border-b border-outline-variant shadow-sm shrink-0">
+<!-- Left: Brand / Tenant Identity & Quick Search -->
+<div class="flex items-center gap-space-lg">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-on-primary shadow-sm">
+<span class="material-symbols-outlined text-2xl" data-icon="neurology">neurology</span>
+</div>
+<div>
+<span class="font-headline-sm text-headline-sm text-primary font-bold tracking-tight">华东神经康复中心 (D10隔离租户)</span>
+<div class="flex items-center gap-2">
+<span class="inline-block w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-md text-xs text-on-surface-variant">国家老年神经退行性疾病临床多中心节点 · 实时系统在线</span>
+</div>
+</div>
+</div>
+<!-- Global Search Bar (on_left as specified) -->
+<div class="relative w-80 ml-4">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-2 text-sm bg-surface-container rounded-lg border border-transparent focus:border-primary focus:bg-surface-container-lowest text-on-surface placeholder-outline focus:outline-none transition-colors duration-150" placeholder="全局检索：患者姓名 / PID病案号 / 身份证 / 智能手环ID..." type="text"/>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono px-1.5 py-0.5 rounded bg-surface-variant text-on-surface-variant">⌘K</span>
+</div>
+</div>
+<!-- Right: Trailing Actions, Profile & Badges -->
+<div class="flex items-center gap-space-md">
+<!-- 实时预警待办提醒徽章 -->
+<button class="relative p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-colors duration-150 cursor-pointer" title="当前有3起紧急未处置风险">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-error text-on-error font-label-md text-xs font-bold ring-2 ring-surface-container-lowest animate-pulse-beacon">3</span>
+</button>
+<!-- 帮助中心 -->
+<button class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-colors duration-150 cursor-pointer" title="临床操作帮助指南">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<div class="h-6 w-px bg-outline-variant"></div>
+<!-- Current Expert Profile -->
+<div class="flex items-center gap-3 pl-1">
+<img alt="李副主任医师工作头像" class="w-9 h-9 rounded-full object-cover ring-2 ring-primary-container shadow-xs" data-alt="Close up professional portrait of a senior Chinese neurologist Dr Li wearing a crisp white clinical medical coat and stethoscope with a warm authoritative reassuring smile inside a high tech modern clinical research rehabilitation center with subtle blue medical ambient lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsCx9LMkDXavp_aO9rgmncI5XHcJNTycwyMw683tmCnLwlwoNkoBNi1clysaL4dZwPxgBnDu_gO2Ro4wpDFXPqEJxUfdBJRUqx6wZNQq9J36f3Lg3VSfOF8GYDEqthwF1otcKoOoVCzQkZdXdDxvm7U_p4Jj0kwIZaY5d4uVuJoFPi2v5kvbQMb884Il-Q5_zfhiJwgUkhAbpLS2zW0MHTKEN6lHY3qf0dfUOB3hgECe3OJ20LzPRcbR1B8_WHh6EAM6HVldvnxsUV"/>
+<div class="flex flex-col text-left">
+<span class="font-label-md text-sm font-bold text-on-surface leading-tight">李副主任医师</span>
+<span class="font-body-md text-xs text-on-surface-variant">神经退行性病变专病组 (组长)</span>
+</div>
+</div>
+<!-- 退出 Action -->
+<button class="flex items-center gap-1 ml-2 px-3 py-1.5 text-xs font-label-md rounded-lg text-error hover:bg-error-container hover:text-on-error-container transition-colors duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-sm" data-icon="logout">logout</span>
+<span>退出</span>
+</button>
+</div>
+</header>
+<!-- ================= MAIN LAYOUT WRAPPER (Sidebar + Central Content + Drawer) ================= -->
+<div class="flex-1 flex overflow-hidden">
+<!-- ================= LEFT SIDEBAR (Anchor: SideNavBar) ================= -->
+<aside class="w-64 h-full z-30 flex flex-col justify-between py-space-md px-space-sm border-r border-outline-variant bg-surface-container-low shrink-0 select-none">
+<!-- Top Section: Header & Main Tabs -->
+<div class="space-y-4">
+<!-- Sidebar Brand Header -->
+<div class="px-3 py-2 border-b border-outline-variant/60 flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary-container flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-xl" data-icon="clinical_notes">clinical_notes</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-sm text-primary font-bold leading-tight">帕金森临床康复系统</h2>
+<p class="font-body-md text-xs text-on-surface-variant">UPDRS &amp; H-Y 分期平台</p>
+</div>
+</div>
+<!-- 6 Main Tabs (Tab 4: 预警处置中心 Active with Badge) -->
+<nav class="space-y-1">
+<!-- 1. 患者工作台 -->
+<a class="flex items-center gap-3 px-space-md py-2.5 text-on-surface-variant font-body-md text-sm hover:bg-surface-container-high hover:text-primary rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="clinical_notes">clinical_notes</span>
+<span>患者工作台</span>
+</a>
+<!-- 2. 分期确认 -->
+<a class="flex items-center gap-3 px-space-md py-2.5 text-on-surface-variant font-body-md text-sm hover:bg-surface-container-high hover:text-primary rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="fact_check">fact_check</span>
+<span>分期确认</span>
+</a>
+<!-- 3. 处方编辑 -->
+<a class="flex items-center gap-3 px-space-md py-2.5 text-on-surface-variant font-body-md text-sm hover:bg-surface-container-high hover:text-primary rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="edit_calendar">edit_calendar</span>
+<span>处方编辑</span>
+</a>
+<!-- 4. 预警处置中心 (ACTIVE STATE) -->
+<a class="flex items-center justify-between px-space-md py-2.5 bg-primary-container text-white font-label-lg text-sm rounded-lg border-l-4 border-primary shadow-xs transition-all duration-200" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-xl text-white" data-icon="warning">warning</span>
+<span class="font-bold">预警处置中心</span>
+</div>
+<span class="px-2 py-0.5 text-xs font-bold rounded-full bg-error text-on-error shadow-sm animate-pulse-beacon">3</span>
+</a>
+<!-- 5. 随访台账 -->
+<a class="flex items-center gap-3 px-space-md py-2.5 text-on-surface-variant font-body-md text-sm hover:bg-surface-container-high hover:text-primary rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="inventory_2">inventory_2</span>
+<span>随访台账</span>
+</a>
+<!-- 6. 权限管理 -->
+<a class="flex items-center gap-3 px-space-md py-2.5 text-on-surface-variant font-body-md text-sm hover:bg-surface-container-high hover:text-primary rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="admin_panel_settings">admin_panel_settings</span>
+<span>权限管理</span>
+</a>
+</nav>
+</div>
+<!-- Bottom Section: CTA & Footer Nav -->
+<div class="space-y-3 pt-3 border-t border-outline-variant/60">
+<!-- CTA: 发起紧急干预 -->
+<button class="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-error text-on-error rounded-lg font-label-md text-sm font-bold shadow-sm hover:bg-on-error-container hover:shadow transition-colors duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-lg" data-icon="e911_emergency">e911_emergency</span>
+<span>发起紧急干预</span>
+</button>
+<!-- Footer Tabs -->
+<div class="space-y-0.5">
+<a class="flex items-center gap-3 px-space-md py-2 text-on-surface-variant font-body-md text-xs hover:bg-surface-container-high hover:text-primary rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="settings">settings</span>
+<span>系统配置</span>
+</a>
+<a class="flex items-center gap-3 px-space-md py-2 text-on-surface-variant font-body-md text-xs hover:bg-surface-container-high hover:text-primary rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="support_agent">support_agent</span>
+<span>临床帮助指南</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- ================= CENTER CANVAS: ALERTS WORKBENCH (Main Area) ================= -->
+<main class="flex-1 flex flex-col min-w-0 bg-surface overflow-y-auto">
+<!-- Top Action Bar & Breadcrumb Header -->
+<section class="p-space-lg pb-space-sm border-b border-outline-variant/50 bg-surface-container-lowest">
+<!-- Breadcrumb -->
+<nav class="flex items-center gap-2 text-xs font-label-md text-outline mb-2">
+<span>康复工作台</span>
+<span class="material-symbols-outlined text-xs" data-icon="chevron_right">chevron_right</span>
+<span>预警处置中心</span>
+<span class="material-symbols-outlined text-xs" data-icon="chevron_right">chevron_right</span>
+<span class="text-primary font-bold">异常事件与跌倒风险台账</span>
+</nav>
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<div>
+<div class="flex items-center gap-3">
+<h1 class="font-headline-md text-headline-md text-primary tracking-tight">临床异常与跌倒风险预警处置中心</h1>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-xs font-bold">
+<span class="w-2 h-2 rounded-full bg-secondary animate-ping"></span>
+<span>10Hz 实时同步运行中</span>
+</span>
+</div>
+<p class="font-body-md text-sm text-on-surface-variant mt-1">
+              实时捕获可穿戴传感器（心率带、60FPS姿态捕捉、脚底压力）与居家跟练端上报的异常事件，形成研判闭环。
+            </p>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-3 shrink-0">
+<button class="flex items-center gap-1.5 px-3.5 py-2 text-sm font-label-md rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high border border-outline-variant transition-colors">
+<span class="material-symbols-outlined text-base" data-icon="tune">tune</span>
+<span>预警阈值规则配置</span>
+</button>
+<button class="flex items-center gap-1.5 px-3.5 py-2 text-sm font-label-md rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high border border-outline-variant transition-colors">
+<span class="material-symbols-outlined text-base" data-icon="file_download">file_download</span>
+<span>导出预警审计报表</span>
+</button>
+<button class="flex items-center gap-1.5 px-4 py-2 text-sm font-label-md rounded-lg bg-primary text-on-primary hover:bg-on-primary-fixed-variant transition-colors shadow-xs">
+<span class="material-symbols-outlined text-base" data-icon="refresh">refresh</span>
+<span>一键刷新数据流</span>
+</button>
+</div>
+</div>
+</section>
+<!-- KPI Metrics Overview (Level 1 Elevation Bento Cards) -->
+<section class="p-space-lg py-space-md grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4">
+<!-- Card 1: 今日总预警 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/70 shadow-xs flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<span class="font-label-md text-xs text-on-surface-variant font-semibold">今日总预警触发</span>
+<span class="p-1.5 rounded-lg bg-surface-container text-primary">
+<span class="material-symbols-outlined text-lg" data-icon="notifications_active">notifications_active</span>
+</span>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<span class="font-display-counter text-3xl font-extrabold text-on-surface">18<span class="text-sm font-normal text-outline ml-1">起</span></span>
+<span class="text-xs font-semibold text-secondary flex items-center">
+<span class="material-symbols-outlined text-xs" data-icon="arrow_downward">arrow_downward</span> 12% 较昨日
+            </span>
+</div>
+</div>
+<!-- Card 2: 紧急红标待处理 (High Alert) -->
+<div class="bg-error-container/40 p-4 rounded-xl border-2 border-error/50 shadow-xs flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-error animate-ping"></span>
+<span class="font-label-md text-xs text-error font-bold">紧急红标待处理</span>
+</div>
+<span class="p-1 rounded-md bg-error text-on-error">
+<span class="material-symbols-outlined text-base" data-icon="emergency">emergency</span>
+</span>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<span class="font-display-counter text-3xl font-extrabold text-error">3<span class="text-sm font-normal text-on-error-container ml-1">起 (需≤30m研判)</span></span>
+<span class="text-xs px-2 py-0.5 rounded bg-error text-on-error font-bold">倒计时中</span>
+</div>
+</div>
+<!-- Card 3: 高危橙标处置中 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/70 shadow-xs flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<span class="font-label-md text-xs text-tertiary-container font-semibold">高危橙标处置中</span>
+<span class="p-1.5 rounded-lg bg-tertiary-fixed text-tertiary-container">
+<span class="material-symbols-outlined text-lg" data-icon="report_problem">report_problem</span>
+</span>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<span class="font-display-counter text-3xl font-extrabold text-tertiary-container">6<span class="text-sm font-normal text-outline ml-1">起</span></span>
+<span class="text-xs text-on-surface-variant">RAS对抗/步态冻结</span>
+</div>
+</div>
+<!-- Card 4: 日常黄标/轻度提醒 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/70 shadow-xs flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<span class="font-label-md text-xs text-on-surface-variant font-semibold">日常黄标 / 轻度提醒</span>
+<span class="p-1.5 rounded-lg bg-surface-container text-outline">
+<span class="material-symbols-outlined text-lg" data-icon="info">info</span>
+</span>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<span class="font-display-counter text-3xl font-extrabold text-on-surface">9<span class="text-sm font-normal text-outline ml-1">起</span></span>
+<span class="text-xs text-on-surface-variant">打卡延误/信号微弱</span>
+</div>
+</div>
+<!-- Card 5: 今日闭环处置率 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/70 shadow-xs flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<span class="font-label-md text-xs text-secondary font-semibold">今日闭环处置率</span>
+<span class="p-1.5 rounded-lg bg-secondary-fixed text-on-secondary-container">
+<span class="material-symbols-outlined text-lg" data-icon="task_alt">task_alt</span>
+</span>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<span class="font-display-counter text-3xl font-extrabold text-secondary">83.3<span class="text-base font-normal ml-0.5">%</span></span>
+<span class="text-xs text-on-surface-variant">平均响应 8.5 分钟</span>
+</div>
+</div>
+</section>
+<!-- Multi-dimensional Filters & Query Section -->
+<section class="px-space-lg pb-space-sm space-y-3">
+<!-- Quick Capsules: Alert Level & Status -->
+<div class="bg-surface-container-lowest p-3.5 rounded-xl border border-outline-variant/70 flex flex-wrap items-center justify-between gap-4">
+<!-- Alert Level Pills -->
+<div class="flex items-center gap-2">
+<span class="text-xs font-label-md text-on-surface-variant mr-1">预警级别:</span>
+<button class="px-3 py-1 rounded-full text-xs font-label-md bg-surface-container-high text-primary hover:bg-surface-variant font-bold transition-colors">
+              全部级别 (18)
+            </button>
+<button class="px-3 py-1 rounded-full text-xs font-label-md bg-error text-on-error font-bold flex items-center gap-1 shadow-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+              🔴 紧急红标 (3)
+            </button>
+<button class="px-3 py-1 rounded-full text-xs font-label-md bg-tertiary-fixed text-on-tertiary-fixed font-bold hover:bg-tertiary-fixed-dim transition-colors">
+              🟠 高危橙标 (6)
+            </button>
+<button class="px-3 py-1 rounded-full text-xs font-label-md bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors">
+              🟡 日常黄标 (9)
+            </button>
+</div>
+<!-- Incident Status Filters -->
+<div class="flex items-center gap-2">
+<span class="text-xs font-label-md text-on-surface-variant mr-1">处置状态:</span>
+<div class="inline-flex rounded-lg bg-surface-container p-0.5 text-xs font-label-md">
+<button class="px-3 py-1 rounded-md text-on-surface-variant hover:text-on-surface">全部状态</button>
+<button class="px-3 py-1 rounded-md bg-surface-container-lowest text-primary font-bold shadow-xs">待处置 (3)</button>
+<button class="px-3 py-1 rounded-md text-on-surface-variant hover:text-on-surface">电话跟进中 (4)</button>
+<button class="px-3 py-1 rounded-md text-on-surface-variant hover:text-on-surface">专家研判中 (2)</button>
+<button class="px-3 py-1 rounded-md text-on-surface-variant hover:text-on-surface">已闭环归档 (9)</button>
+</div>
+</div>
+</div>
+<!-- Secondary Filters Row (Type, Patient input, Date) -->
+<div class="flex flex-wrap items-center gap-3">
+<div class="w-56">
+<select class="w-full text-xs font-body-md bg-surface-container-lowest border border-outline-variant rounded-lg py-2 px-3 text-on-surface focus:border-primary focus:outline-none">
+<option selected="">事件类型: 全部类型</option>
+<option>可疑跌倒姿态失稳 / 触地冲击</option>
+<option>训练心率偏高 (&gt;120 bpm)</option>
+<option>严重步态冻结 FoG 锁死</option>
+<option>血压或外周血氧异常</option>
+<option>姿势反射减弱 / 躯干前倾突变</option>
+</select>
+</div>
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-outline text-base" data-icon="search">search</span>
+<input class="w-full pl-8 pr-3 py-1.5 text-xs bg-surface-container-lowest border border-outline-variant rounded-lg text-on-surface placeholder-outline focus:border-primary focus:outline-none" placeholder="搜索患者姓名 / PID / 床位号" type="text"/>
+</div>
+<div class="flex items-center gap-1 bg-surface-container-lowest border border-outline-variant rounded-lg p-0.5 text-xs">
+<button class="px-2.5 py-1 rounded bg-primary-container text-white font-semibold">今日</button>
+<button class="px-2.5 py-1 rounded text-on-surface-variant hover:text-on-surface">近3日</button>
+<button class="px-2.5 py-1 rounded text-on-surface-variant hover:text-on-surface">本周</button>
+</div>
+<span class="text-xs text-outline ml-auto">共命中 18 条预警记录，已按风险等级优先排序</span>
+</div>
+</section>
+<!-- Alert Incidents Table Section -->
+<section class="flex-1 px-space-lg pb-space-lg min-h-0">
+<div class="h-full bg-surface-container-lowest rounded-xl border border-outline-variant/80 shadow-xs flex flex-col overflow-hidden">
+<div class="overflow-x-auto flex-1">
+<table class="w-full text-left border-collapse text-xs">
+<thead class="sticky top-0 bg-surface-container text-on-surface-variant uppercase font-label-md tracking-wider border-b border-outline-variant z-10">
+<tr>
+<th class="py-3 px-4 w-28">紧急等级</th>
+<th class="py-3 px-4 w-44">患者基本信息</th>
+<th class="py-3 px-4 min-w-[280px]">预警类型与特征指标</th>
+<th class="py-3 px-4 w-48">触发时间与场景</th>
+<th class="py-3 px-4 w-48">责任人 / 紧急监护人</th>
+<th class="py-3 px-4 w-32">处置状态</th>
+<th class="py-3 px-4 w-52 text-right">临床响应操作</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/50 font-body-md">
+<!-- ROW 1: 张建国 (CURRENT ACTIVE FOCUS ROW - Emergency Red) -->
+<tr class="bg-primary/5 border-l-4 border-primary hover:bg-primary/10 transition-colors">
+<td class="py-3.5 px-4">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-error text-on-error font-bold shadow-xs">
+<span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+<span>紧急红标</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="font-bold text-sm text-on-surface">张建国</span>
+<span class="text-xs text-on-surface-variant">男 / 68岁</span>
+</div>
+<div class="flex items-center gap-1.5 text-xs text-outline mt-0.5">
+<span class="font-mono">PID-20240012</span>
+<span class="px-1.5 py-0.2 rounded bg-surface-container text-primary font-semibold">H-Y 2.0期</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="space-y-1">
+<div class="font-bold text-error flex items-center gap-1">
+<span class="material-symbols-outlined text-base" data-icon="personal_injury">personal_injury</span>
+<span>可疑跌倒姿态失稳 (AI置信度 89.4%)</span>
+</div>
+<p class="text-xs text-on-surface-variant line-clamp-1">
+                        特征指标: 垂直加速度骤降+触地无缓冲，躯干倾角突变达 42°，心率突升至 112 bpm
+                      </p>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex flex-col">
+<span class="font-mono font-bold text-on-surface">10:24:18 (4分前)</span>
+<span class="text-xs text-on-surface-variant mt-0.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs text-secondary" data-icon="tablet_android">tablet_android</span>
+                        居家跟练小程序端
+                      </span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex flex-col text-xs">
+<span class="text-on-surface font-semibold">主治: 李副主任 (专病组)</span>
+<span class="text-on-surface-variant mt-0.5">女: 张晓华 (138****0123)</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-error-container text-on-error-container font-bold text-xs ring-1 ring-error/30 animate-pulse">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                      待处置
+                    </span>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-3 py-1.5 bg-primary text-on-primary font-bold rounded-lg text-xs hover:bg-on-primary-fixed-variant transition-colors flex items-center gap-1 shadow-xs cursor-pointer">
+<span class="material-symbols-outlined text-sm" data-icon="edit_document">edit_document</span>
+<span>处置抽屉</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg" title="调阅当时姿态录像/心电波形">
+<span class="material-symbols-outlined text-base" data-icon="videocam">videocam</span>
+</button>
+<button class="p-1.5 text-error hover:bg-error-container rounded-lg" title="转急救干预">
+<span class="material-symbols-outlined text-base" data-icon="e911_emergency">e911_emergency</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 2: 李桂英 (High Heart Rate - Red Alert) -->
+<tr class="hover:bg-surface-container transition-colors">
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-error text-on-error font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+                      紧急红标
+                    </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="font-bold text-sm text-on-surface">李桂英</span>
+<span class="text-xs text-on-surface-variant">女 / 72岁</span>
+</div>
+<div class="flex items-center gap-1.5 text-xs text-outline mt-0.5">
+<span class="font-mono">PID-20240034</span>
+<span class="px-1.5 py-0.2 rounded bg-surface-container text-primary font-semibold">H-Y 2.5期</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="space-y-0.5">
+<div class="font-bold text-error flex items-center gap-1">
+<span class="material-symbols-outlined text-base" data-icon="cardiology">cardiology</span>
+<span>训练心率持续过高 (心电带)</span>
+</div>
+<p class="text-xs text-on-surface-variant">特征指标: 心率达 128 bpm 持续超过 90 秒 (超设定红线 115 bpm)</p>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex flex-col">
+<span class="font-mono font-bold text-on-surface">10:18:05</span>
+<span class="text-xs text-on-surface-variant mt-0.5">日间上肢阻力训练区</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex flex-col text-xs">
+<span class="text-on-surface font-semibold">主治: 李副主任 (专病组)</span>
+<span class="text-on-surface-variant mt-0.5">配偶: 刘国安 (139****4412)</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-variant text-primary font-bold text-xs">
+<span class="material-symbols-outlined text-xs" data-icon="phone_in_talk">phone_in_talk</span>
+                      电话跟进中
+                    </span>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-3 py-1.5 bg-surface-container text-primary font-bold rounded-lg text-xs hover:bg-surface-container-high transition-colors">查看</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg"><span class="material-symbols-outlined text-base" data-icon="ecg">ecg</span></button>
+</div>
+</td>
+</tr>
+<!-- ROW 3: 陈淑芬 (Severe FoG Freeze of Gait - Orange Alert) -->
+<tr class="hover:bg-surface-container transition-colors">
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-tertiary-fixed text-on-tertiary-fixed font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                      高危橙标
+                    </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="font-bold text-sm text-on-surface">陈淑芬</span>
+<span class="text-xs text-on-surface-variant">女 / 65岁</span>
+</div>
+<div class="flex items-center gap-1.5 text-xs text-outline mt-0.5">
+<span class="font-mono">PID-20240089</span>
+<span class="px-1.5 py-0.2 rounded bg-surface-container text-primary font-semibold">H-Y 3.0期</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="space-y-0.5">
+<div class="font-bold text-tertiary flex items-center gap-1">
+<span class="material-symbols-outlined text-base" data-icon="directions_walk">directions_walk</span>
+<span>严重步态冻结 (FoG 步态锁死)</span>
+</div>
+<p class="text-xs text-on-surface-variant">特征指标: 原地踏步停滞 &gt;16秒，脚底压力前后中心震颤指数异常上升</p>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex flex-col">
+<span class="font-mono font-bold text-on-surface">09:50:32</span>
+<span class="text-xs text-on-surface-variant mt-0.5">RAS声光节律步行训练</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex flex-col text-xs">
+<span class="text-on-surface font-semibold">主治: 王主治医师</span>
+<span class="text-on-surface-variant mt-0.5">护工: 周阿姨 (136****9910)</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface font-bold text-xs">
+<span class="material-symbols-outlined text-xs" data-icon="psychology">psychology</span>
+                      专家研判中
+                    </span>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-3 py-1.5 bg-surface-container text-primary font-bold rounded-lg text-xs hover:bg-surface-container-high transition-colors">查看</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg"><span class="material-symbols-outlined text-base" data-icon="graphic_eq">graphic_eq</span></button>
+</div>
+</td>
+</tr>
+<!-- ROW 4: 王茂盛 (Orange Alert - RAS Conflict) -->
+<tr class="hover:bg-surface-container transition-colors">
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-tertiary-fixed text-on-tertiary-fixed font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                      高危橙标
+                    </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="font-bold text-sm text-on-surface">王茂盛</span>
+<span class="text-xs text-on-surface-variant">男 / 71岁</span>
+</div>
+<div class="flex items-center gap-1.5 text-xs text-outline mt-0.5">
+<span class="font-mono">PID-20240105</span>
+<span class="px-1.5 py-0.2 rounded bg-surface-container text-primary font-semibold">H-Y 2.0期</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="space-y-0.5">
+<div class="font-bold text-tertiary flex items-center gap-1">
+<span class="material-symbols-outlined text-base" data-icon="metronome">file_map_stack</span>
+<span>RAS 节律重度脱节对抗</span>
+</div>
+<p class="text-xs text-on-surface-variant">特征指标: 步频与 64 BPM 听觉节律偏差 &gt;45%，下肢摆幅不对称度 38%</p>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex flex-col">
+<span class="font-mono font-bold text-on-surface">09:32:11</span>
+<span class="text-xs text-on-surface-variant mt-0.5">智能节律步态走廊</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex flex-col text-xs">
+<span class="text-on-surface font-semibold">主治: 李副主任 (专病组)</span>
+<span class="text-on-surface-variant mt-0.5">儿子: 王明 (135****6789)</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface font-bold text-xs">
+<span class="material-symbols-outlined text-xs" data-icon="phone_in_talk">phone_in_talk</span>
+                      电话跟进中
+                    </span>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-3 py-1.5 bg-surface-container text-primary font-bold rounded-lg text-xs hover:bg-surface-container-high transition-colors">查看</button>
+</div>
+</td>
+</tr>
+<!-- ROW 5: 赵秀兰 (Yellow Alert - Sensor Weak) -->
+<tr class="hover:bg-surface-container transition-colors">
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container text-on-surface font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+                      日常黄标
+                    </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="font-bold text-sm text-on-surface">赵秀兰</span>
+<span class="text-xs text-on-surface-variant">女 / 63岁</span>
+</div>
+<div class="flex items-center gap-1.5 text-xs text-outline mt-0.5">
+<span class="font-mono">PID-20240142</span>
+<span class="px-1.5 py-0.2 rounded bg-surface-container text-primary font-semibold">H-Y 1.5期</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="space-y-0.5">
+<div class="font-bold text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-base" data-icon="sensors_off">sensors_off</span>
+<span>心率传感器接触电极阻抗过高</span>
+</div>
+<p class="text-xs text-on-surface-variant">特征指标: 信号间歇丢包 &gt;30%，建议患者或家属调紧胸带接触位</p>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex flex-col">
+<span class="font-mono font-bold text-on-surface">08:45:00</span>
+<span class="text-xs text-on-surface-variant mt-0.5">晨间训练打卡</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex flex-col text-xs">
+<span class="text-on-surface font-semibold">康复治疗师: 张健</span>
+<span class="text-on-surface-variant mt-0.5">本人: 赵秀兰 (131****8823)</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-bold text-xs">
+<span class="material-symbols-outlined text-xs" data-icon="check_circle">check_circle</span>
+                      已闭环归档
+                    </span>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-3 py-1.5 bg-surface-container text-outline font-semibold rounded-lg text-xs hover:bg-surface-container-high transition-colors">归档凭证</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Bottom Pagination & Summary -->
+<div class="p-3 bg-surface-container-low border-t border-outline-variant flex items-center justify-between text-xs text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span>显示 1 至 5 条，共 18 条预警记录</span>
+<select class="bg-surface-container-lowest border border-outline-variant rounded px-2 py-0.5 text-xs">
+<option>10条/页</option>
+<option>20条/页</option>
+<option>50条/页</option>
+</select>
+</div>
+<div class="flex items-center gap-1 font-label-md">
+<button class="px-2 py-1 rounded border border-outline-variant bg-surface-container-lowest text-outline" disabled="">上一页</button>
+<button class="px-2.5 py-1 rounded bg-primary text-on-primary font-bold">1</button>
+<button class="px-2.5 py-1 rounded bg-surface-container-lowest border border-outline-variant text-on-surface hover:bg-surface-container">2</button>
+<button class="px-2 py-1 rounded border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container">下一页</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- ================= RIGHT COLLAPSIBLE TRIAGE DRAWER (Width: 460px) ================= -->
+<aside class="w-[460px] h-full bg-surface-container-lowest border-l-2 border-outline-variant shadow-xl flex flex-col shrink-0 z-30 select-none overflow-hidden">
+<!-- Drawer Header -->
+<div class="p-4 border-b border-outline-variant bg-surface-container flex items-center justify-between">
+<div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-error text-xl" data-icon="troubleshoot">troubleshoot</span>
+<h3 class="font-headline-sm text-base text-primary font-bold">异常事件协同处置工作台</h3>
+</div>
+<p class="font-mono text-xs text-outline mt-0.5">工单编号: ALT-20241024-003 · 临床最高优先级</p>
+</div>
+<button class="p-1.5 rounded-lg hover:bg-surface-container-high text-on-surface-variant transition-colors" title="最小化/关闭抽屉">
+<span class="material-symbols-outlined text-lg" data-icon="close">close</span>
+</button>
+</div>
+<!-- Drawer Scrollable Content -->
+<div class="flex-1 overflow-y-auto p-4 space-y-4">
+<!-- Patient & Incident Target Card -->
+<div class="bg-surface-container-low rounded-xl p-3.5 border border-outline-variant space-y-3">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="w-11 h-11 rounded-full bg-error-container text-error flex items-center justify-center font-bold text-lg ring-2 ring-error">
+                张
+              </div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-base font-bold text-on-surface">张建国</span>
+<span class="text-xs px-1.5 py-0.5 rounded bg-surface-container-highest text-primary font-semibold">男 / 68岁</span>
+<span class="text-xs px-1.5 py-0.5 rounded bg-surface-container-highest text-tertiary-container font-semibold">H-Y 2.0期</span>
+</div>
+<span class="font-mono text-xs text-on-surface-variant mt-0.5 block">PID: 20240012 · 智能居家康复组</span>
+</div>
+</div>
+<span class="px-2 py-0.5 rounded bg-error text-on-error font-bold text-xs">紧急红标</span>
+</div>
+<!-- Alert summary banner -->
+<div class="p-2.5 rounded-lg bg-error-container/50 border border-error/30 text-xs space-y-1">
+<div class="font-bold text-error flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm" data-icon="warning">warning</span>
+<span>[紧急红标] 训练可疑跌倒与步态失稳警报</span>
+</div>
+<p class="text-on-error-container">触发时间: 今日 10:24:18 (已过去 4 分 20 秒，要求 ≤30 分钟闭环)</p>
+</div>
+</div>
+<!-- Clinical Telemetry Provenance Panel (数据溯源) -->
+<div class="bg-surface-container-lowest rounded-xl p-3.5 border border-outline-variant shadow-xs space-y-2.5">
+<div class="flex items-center justify-between border-b border-outline-variant/60 pb-2">
+<span class="font-label-md text-xs font-bold text-primary flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm" data-icon="sensors">sensors</span>
+              关键临床传感器体征快照 (10Hz 捕获)
+            </span>
+<span class="text-xs font-mono text-secondary font-bold">置信度: 89.4%</span>
+</div>
+<div class="grid grid-cols-3 gap-2 text-center">
+<div class="bg-surface-container-low p-2 rounded-lg">
+<span class="text-xs text-outline block">触发时心率</span>
+<span class="font-display-counter text-lg font-bold text-error">112 <span class="text-xs font-normal">bpm</span></span>
+</div>
+<div class="bg-surface-container-low p-2 rounded-lg">
+<span class="text-xs text-outline block">躯干倾斜角突变</span>
+<span class="font-display-counter text-lg font-bold text-tertiary-container">42° <span class="text-xs font-normal">前倾</span></span>
+</div>
+<div class="bg-surface-container-low p-2 rounded-lg">
+<span class="text-xs text-outline block">垂直加速度</span>
+<span class="font-display-counter text-lg font-bold text-on-surface">-1.82 <span class="text-xs font-normal">g</span></span>
+</div>
+</div>
+<!-- Video Replay & Biomechanical Waveform Quick Link -->
+<div class="flex gap-2 pt-1">
+<button class="flex-1 py-1.5 px-2 bg-surface-container hover:bg-surface-container-high rounded-lg text-xs font-label-md text-primary flex items-center justify-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="videocam">videocam</span>
+<span>姿态录像回放 (前后5秒)</span>
+</button>
+<button class="flex-1 py-1.5 px-2 bg-surface-container hover:bg-surface-container-high rounded-lg text-xs font-label-md text-primary flex items-center justify-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="stacked_line_chart">stacked_line_chart</span>
+<span>脚底三维压力点云</span>
+</button>
+</div>
+</div>
+<!-- Action Pipeline (三步闭环处置流) -->
+<div class="space-y-3">
+<!-- STEP 1: 电话快速跟进 -->
+<div class="bg-surface-container-lowest rounded-xl p-3.5 border border-outline-variant shadow-xs space-y-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-5 h-5 rounded-full bg-primary text-on-primary font-bold text-xs flex items-center justify-center">1</span>
+<span class="font-label-md text-xs font-bold text-on-surface">步骤一：快速电话联络跟进 (Phone Follow-up)</span>
+</div>
+<span class="text-xs px-2 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed font-bold">已连通监护人</span>
+</div>
+<!-- Call Buttons -->
+<div class="grid grid-cols-2 gap-2">
+<button class="py-2 px-3 rounded-lg border border-outline-variant hover:border-primary text-xs font-label-md flex items-center justify-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-sm text-outline" data-icon="phone">phone</span>
+<span>呼叫患者本人 (1380012****)</span>
+</button>
+<button class="py-2 px-3 rounded-lg bg-primary-container text-on-primary hover:bg-primary text-xs font-label-md flex items-center justify-center gap-1.5 transition-colors shadow-xs">
+<span class="material-symbols-outlined text-sm" data-icon="phone_in_talk">phone_in_talk</span>
+<span>呼叫女儿晓华 (138****0123)</span>
+</button>
+</div>
+<!-- Quick Follow-up Log Area -->
+<div>
+<label class="block text-xs font-label-md text-on-surface-variant mb-1">通话核实反馈摘要:</label>
+<textarea class="w-full text-xs bg-surface-container-low border border-outline-variant rounded-lg p-2 text-on-surface focus:border-primary focus:outline-none" rows="2">已接通女儿，患者当前在客厅扶手椅上坐稳休息。自述系跟练右转步态时重心不稳踉跄了一下跌坐在沙发边缘，未发生硬地面撞击与骨折，意识清晰，无头晕。</textarea>
+</div>
+</div>
+<!-- STEP 2: 医生临床研判 -->
+<div class="bg-surface-container-lowest rounded-xl p-3.5 border border-outline-variant shadow-xs space-y-2.5">
+<div class="flex items-center gap-2">
+<span class="w-5 h-5 rounded-full bg-primary text-on-primary font-bold text-xs flex items-center justify-center">2</span>
+<span class="font-label-md text-xs font-bold text-on-surface">步骤二：医生临床研判与处方联动</span>
+</div>
+<!-- Assessment Dropdown -->
+<div>
+<label class="block text-xs font-label-md text-on-surface-variant mb-1">临床研判结论:</label>
+<select class="w-full text-xs bg-surface-container-low border border-outline-variant rounded-lg p-2 text-on-surface focus:border-primary focus:outline-none">
+<option selected="">轻微重心失稳(已平复，排查姿势反射减退)</option>
+<option>多巴胺开期药效减退致动作迟滞与冻结</option>
+<option>需暂停今日下肢平衡训练并下调RAS节律</option>
+<option>疑似急性体位性低血压发作</option>
+<option>传感器误报/非跌倒偶发剧烈位移</option>
+</select>
+</div>
+<!-- Temporary Intervention Checkboxes -->
+<div class="space-y-1.5 pt-1">
+<label class="flex items-center gap-2 text-xs text-on-surface cursor-pointer">
+<input checked="" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" type="checkbox"/>
+<span class="font-semibold">立即向患者端下发「暂停今日阻力训练」临时指令</span>
+</label>
+<label class="flex items-center gap-2 text-xs text-on-surface cursor-pointer">
+<input checked="" class="rounded text-primary focus:ring-primary h-3.5 w-3.5" type="checkbox"/>
+<span class="font-semibold">下调下次节律跟练速度为 54 BPM (原 64 BPM)</span>
+</label>
+<label class="flex items-center gap-2 text-xs text-on-surface cursor-pointer">
+<input class="rounded text-primary focus:ring-primary h-3.5 w-3.5" type="checkbox"/>
+<span>预约明日下午 14:00 线上专病视频随访复评</span>
+</label>
+</div>
+<!-- Doctor Notes -->
+<div>
+<label class="block text-xs font-label-md text-on-surface-variant mb-1">研判处置医嘱与家属交代:</label>
+<textarea class="w-full text-xs bg-surface-container-low border border-outline-variant rounded-lg p-2 text-on-surface focus:border-primary focus:outline-none" rows="2">建议患者饮用温开水静卧休息30分钟，今日勿再进行站立式复杂转身跟练。如出现四肢麻木或疼痛加重，随时联系绿色急救通道。</textarea>
+</div>
+</div>
+<!-- STEP 3: 工单闭环与电子签名 -->
+<div class="bg-surface-container-lowest rounded-xl p-3.5 border border-outline-variant shadow-xs space-y-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-5 h-5 rounded-full bg-primary text-on-primary font-bold text-xs flex items-center justify-center">3</span>
+<span class="font-label-md text-xs font-bold text-on-surface">步骤三：责任医生签名与归档</span>
+</div>
+<div class="flex items-center gap-1 text-secondary text-xs font-semibold">
+<span class="material-symbols-outlined text-sm" data-icon="verified">verified</span>
+<span>CA数字证书已验签</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-low border border-outline-variant/60 text-xs">
+<div>
+<span class="text-outline">归档执业医生:</span>
+<span class="font-bold text-on-surface ml-1">李副主任医师 (工号: D10-8802)</span>
+</div>
+<span class="font-mono text-xs text-outline">2024-10-24 10:28:40</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Drawer Footer Sticky Actions -->
+<div class="p-3.5 border-t border-outline-variant bg-surface-container-lowest flex items-center justify-between gap-3">
+<button class="py-2.5 px-4 rounded-lg border border-outline-variant text-on-surface font-label-md text-xs hover:bg-surface-container transition-colors">
+          暂存跟进记录
+        </button>
+<button class="flex-1 py-2.5 px-4 rounded-lg bg-secondary text-on-secondary font-label-md text-xs font-bold hover:bg-on-secondary-container transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+<span class="material-symbols-outlined text-base" data-icon="check_circle">check_circle</span>
+<span>确认研判并关闭工单 (完成闭环)</span>
+</button>
+</div>
+</aside>
+</div>
+</body></html>

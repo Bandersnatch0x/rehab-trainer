@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>帕金森肌力康复 - 康复历程记录</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Atkinson Hyperlegible Next Google Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400..700;1,400..700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container-high": "#dce9ff",
+            "on-tertiary-container": "#ffb39a",
+            "inverse-on-surface": "#eaf1ff",
+            "on-primary-fixed": "#001a42",
+            "on-error": "#ffffff",
+            "secondary-fixed": "#9cf2e8",
+            "on-tertiary-fixed": "#390c00",
+            "on-secondary-fixed": "#00201d",
+            "background": "#f8f9ff",
+            "surface-container-lowest": "#ffffff",
+            "on-error-container": "#93000a",
+            "outline-variant": "#c3c6d3",
+            "surface-container-highest": "#d5e3fc",
+            "on-surface": "#0d1c2e",
+            "on-secondary-container": "#006f67",
+            "secondary": "#006a63",
+            "primary-fixed": "#d8e2ff",
+            "on-secondary": "#ffffff",
+            "error-container": "#ffdad6",
+            "primary-container": "#1a4fa0",
+            "secondary-fixed-dim": "#80d5cb",
+            "inverse-primary": "#aec6ff",
+            "on-primary": "#ffffff",
+            "surface-tint": "#2c5cae",
+            "on-background": "#0d1c2e",
+            "surface-container": "#e6eeff",
+            "error": "#ba1a1a",
+            "tertiary-fixed": "#ffdbd0",
+            "on-surface-variant": "#434751",
+            "on-secondary-fixed-variant": "#00504a",
+            "on-primary-fixed-variant": "#024394",
+            "on-primary-container": "#abc5ff",
+            "surface": "#f8f9ff",
+            "surface-variant": "#d5e3fc",
+            "surface-dim": "#ccdbf3",
+            "surface-container-low": "#eff4ff",
+            "primary": "#00387e",
+            "inverse-surface": "#233144",
+            "on-tertiary": "#ffffff",
+            "tertiary-fixed-dim": "#ffb59d",
+            "tertiary": "#6f1f00",
+            "surface-bright": "#f8f9ff",
+            "tertiary-container": "#962d00",
+            "outline": "#737783",
+            "primary-fixed-dim": "#aec6ff",
+            "on-tertiary-fixed-variant": "#832600",
+            "secondary-container": "#99efe5"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "1rem",
+            "space-xl": "2.5rem",
+            "gutter-tablet": "1.5rem",
+            "margin-tablet": "2rem",
+            "margin-desktop": "3rem",
+            "margin": "1.25rem",
+            "space-sm": "0.75rem",
+            "space-lg": "1.75rem",
+            "space-xs": "0.5rem",
+            "space-md": "1.25rem"
+          },
+          "fontFamily": {
+            "headline-md": ["Atkinson Hyperlegible Next"],
+            "label-md": ["Atkinson Hyperlegible Next"],
+            "body-md": ["Atkinson Hyperlegible Next"],
+            "body-xl": ["Atkinson Hyperlegible Next"],
+            "headline-sm": ["Atkinson Hyperlegible Next"],
+            "headline-xl-mobile": ["Atkinson Hyperlegible Next"],
+            "body-lg": ["Atkinson Hyperlegible Next"],
+            "label-lg": ["Atkinson Hyperlegible Next"],
+            "headline-xl": ["Atkinson Hyperlegible Next"],
+            "headline-lg": ["Atkinson Hyperlegible Next"],
+            "label-xl": ["Atkinson Hyperlegible Next"]
+          },
+          "fontSize": {
+            "headline-md": ["24px", { "lineHeight": "34px", "fontWeight": "700" }],
+            "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "body-md": ["16px", { "lineHeight": "26px", "fontWeight": "500" }],
+            "body-xl": ["20px", { "lineHeight": "32px", "fontWeight": "400" }],
+            "headline-sm": ["20px", { "lineHeight": "30px", "fontWeight": "600" }],
+            "headline-xl-mobile": ["30px", { "lineHeight": "40px", "fontWeight": "700" }],
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "label-lg": ["16px", { "lineHeight": "22px", "fontWeight": "700" }],
+            "headline-xl": ["36px", { "lineHeight": "48px", "fontWeight": "700" }],
+            "headline-lg": ["28px", { "lineHeight": "38px", "fontWeight": "700" }],
+            "label-xl": ["18px", { "lineHeight": "24px", "fontWeight": "700" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface antialiased min-h-screen pb-32 font-body-lg text-body-lg selection:bg-secondary-container selection:text-on-secondary-container">
+<!-- TopAppBar: Fixed docked full-width top-0 with shadow-sm and zero top/bottom border lines -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin h-16 min-h-[64px] bg-surface-container-lowest shadow-sm">
+<div class="flex items-center gap-3">
+<button aria-label="返回或关怀状态" class="min-w-[56px] min-h-[56px] flex items-center justify-center rounded-xl text-primary hover:bg-surface-container-high active:bg-surface-container active:scale-95 transition-all duration-150" type="button">
+<span class="material-symbols-outlined text-[30px]" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="flex items-center gap-2.5">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-headline-sm text-headline-sm ring-2 ring-secondary/30">
+<span class="material-symbols-outlined text-[24px]" data-icon="sentiment_very_satisfied">sentiment_very_satisfied</span>
+</div>
+<div class="flex flex-col">
+<span class="text-label-lg font-label-lg text-on-surface leading-tight">张建国 叔叔</span>
+<span class="text-label-md font-label-md text-secondary font-bold">身心平稳度 · 优良</span>
+</div>
+</div>
+</div>
+<!-- Center/Right Title & Share -->
+<div class="flex items-center gap-2">
+<button aria-label="导出报告给医生或家属" class="min-h-[56px] px-4 py-2 bg-surface-container-low hover:bg-surface-container-high active:scale-95 transition-all text-primary font-label-xl text-label-xl rounded-xl flex items-center gap-2 border border-outline-variant/60 shadow-xs" type="button">
+<span class="material-symbols-outlined text-[26px]" data-icon="share">share</span>
+<span class="font-bold">报告分享</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas (Single-Axis Guardrail Grid, Mobile 4-Column flow) -->
+<main class="w-full max-w-lg mx-auto pt-20 px-margin flex flex-col gap-6">
+<!-- 1. Warm Hero Banner: Positive Encouragement & Golden Achievement Badge Card -->
+<section class="bg-surface-container-lowest rounded-3xl p-6 border-[1.5px] border-outline-variant shadow-sm relative overflow-hidden">
+<!-- Ambient warm subtle background decorative halo -->
+<div class="absolute -right-8 -top-8 w-44 h-44 rounded-full bg-secondary-fixed/40 blur-2xl pointer-events-none"></div>
+<div class="flex flex-col gap-5 relative z-10">
+<!-- Title & Slogan -->
+<div>
+<div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant mb-2">
+<span class="material-symbols-outlined text-[20px]" data-icon="verified">verified</span>
+<span class="text-label-lg font-label-lg">今日目标已顺利达成</span>
+</div>
+<h1 class="text-headline-md font-headline-md text-primary tracking-tight">步履不停，今天也是充满活力的一天！</h1>
+<p class="text-body-lg font-body-lg text-on-surface-variant mt-1.5">身体活动状态优异，步调从容稳健</p>
+</div>
+<!-- Big Achievement Showcase Bento Card -->
+<div class="bg-gradient-to-br from-amber-50 via-orange-50/60 to-surface-container-lowest rounded-2xl p-5 border-2 border-amber-200/80 flex items-center gap-4 shadow-sm">
+<!-- Tactile Golden Medallion Badge -->
+<div class="w-20 h-20 shrink-0 rounded-2xl bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-200 flex flex-col items-center justify-center text-amber-950 shadow-md ring-4 ring-amber-100">
+<span class="material-symbols-outlined text-[38px] text-amber-950" data-icon="workspace_premium" data-weight="fill" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+<span class="text-label-md font-label-md font-bold tracking-tight text-amber-950">14天</span>
+</div>
+<div class="flex flex-col justify-center flex-1">
+<div class="flex items-center gap-1.5">
+<span class="text-headline-sm font-headline-sm text-amber-900 font-bold">金牌稳健达人</span>
+<span class="px-2 py-0.5 rounded-md bg-amber-200/80 text-amber-900 text-label-md font-label-md font-bold">已连续14天</span>
+</div>
+<p class="text-body-lg font-body-lg text-amber-950/80 mt-1 font-medium">
+              自律打卡超群，步态连贯性<span class="font-bold text-amber-900">超越 92%</span> 同龄长辈伙伴！
+            </p>
+</div>
+</div>
+<!-- Metric Snapshot Bar -->
+<div class="grid grid-cols-2 gap-3 pt-1">
+<div class="bg-surface-container-low rounded-2xl p-4 border border-outline-variant/60 flex flex-col">
+<span class="text-label-lg font-label-lg text-on-surface-variant">本周累计康复</span>
+<div class="flex items-baseline gap-1.5 mt-1">
+<span class="text-headline-md font-headline-md text-primary font-bold">145</span>
+<span class="text-body-lg font-body-lg text-on-surface">分钟</span>
+</div>
+<span class="text-label-md font-label-md text-secondary mt-1 font-semibold">▲ 超出计划 25 分钟</span>
+</div>
+<div class="bg-surface-container-low rounded-2xl p-4 border border-outline-variant/60 flex flex-col">
+<span class="text-label-lg font-label-lg text-on-surface-variant">稳步完成率</span>
+<div class="flex items-baseline gap-1.5 mt-1">
+<span class="text-headline-md font-headline-md text-secondary font-bold">100%</span>
+<span class="text-body-lg font-body-lg text-on-surface">达标</span>
+</div>
+<span class="text-label-md font-label-md text-on-surface-variant mt-1 font-semibold">已达标 5 / 5 计划次</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 2. Compliance Calendar: Weekly Adherence & Progress View -->
+<section class="bg-surface-container-lowest rounded-3xl p-6 border-[1.5px] border-outline-variant shadow-sm flex flex-col gap-5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[26px]" data-icon="calendar_month">calendar_month</span>
+</div>
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface font-bold">本周训练依从度</h2>
+<p class="text-label-lg font-label-lg text-on-surface-variant">保持日常微习惯，动作更自然</p>
+</div>
+</div>
+<span class="px-3.5 py-1.5 rounded-full bg-secondary-container text-on-secondary-container font-label-lg font-label-lg font-bold">全勤达标</span>
+</div>
+<!-- Calendar Strip Monday to Sunday -->
+<div class="grid grid-cols-7 gap-2 text-center pt-2">
+<!-- Mon (Done) -->
+<div class="flex flex-col items-center gap-2">
+<span class="text-label-lg font-label-lg text-on-surface-variant font-bold">一</span>
+<div class="w-12 h-12 rounded-2xl bg-secondary text-on-secondary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[26px]" data-icon="check">check</span>
+</div>
+<span class="text-label-md font-label-md text-on-surface-variant">25m</span>
+</div>
+<!-- Tue (Done) -->
+<div class="flex flex-col items-center gap-2">
+<span class="text-label-lg font-label-lg text-on-surface-variant font-bold">二</span>
+<div class="w-12 h-12 rounded-2xl bg-secondary text-on-secondary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[26px]" data-icon="check">check</span>
+</div>
+<span class="text-label-md font-label-md text-on-surface-variant">30m</span>
+</div>
+<!-- Wed (Rest / Stretch) -->
+<div class="flex flex-col items-center gap-2">
+<span class="text-label-lg font-label-lg text-on-surface-variant font-bold">三</span>
+<div class="w-12 h-12 rounded-2xl bg-surface-container-high text-primary flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-[24px]" data-icon="self_improvement">self_improvement</span>
+</div>
+<span class="text-label-md font-label-md text-on-surface-variant">休整</span>
+</div>
+<!-- Thu (Done) -->
+<div class="flex flex-col items-center gap-2">
+<span class="text-label-lg font-label-lg text-on-surface-variant font-bold">四</span>
+<div class="w-12 h-12 rounded-2xl bg-secondary text-on-secondary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[26px]" data-icon="check">check</span>
+</div>
+<span class="text-label-md font-label-md text-on-surface-variant">30m</span>
+</div>
+<!-- Fri (Done) -->
+<div class="flex flex-col items-center gap-2">
+<span class="text-label-lg font-label-lg text-on-surface-variant font-bold">五</span>
+<div class="w-12 h-12 rounded-2xl bg-secondary text-on-secondary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[26px]" data-icon="check">check</span>
+</div>
+<span class="text-label-md font-label-md text-on-surface-variant">30m</span>
+</div>
+<!-- Sat (Today - Highlight Selected Active) -->
+<div class="flex flex-col items-center gap-2">
+<span class="text-label-lg font-label-lg text-primary font-bold">六(今)</span>
+<div class="w-12 h-12 rounded-2xl bg-primary-container text-on-primary flex items-center justify-center ring-4 ring-primary/20 shadow-md">
+<span class="material-symbols-outlined text-[26px]" data-icon="check">check</span>
+</div>
+<span class="text-label-md font-label-md text-primary font-bold">30m</span>
+</div>
+<!-- Sun (Upcoming) -->
+<div class="flex flex-col items-center gap-2 opacity-60">
+<span class="text-label-lg font-label-lg text-on-surface-variant font-bold">日</span>
+<div class="w-12 h-12 rounded-2xl bg-surface-container-low border-2 border-dashed border-outline-variant flex items-center justify-center text-outline">
+<span class="material-symbols-outlined text-[22px]" data-icon="schedule">schedule</span>
+</div>
+<span class="text-label-md font-label-md text-on-surface-variant">待开始</span>
+</div>
+</div>
+<!-- Compliance summary badge alert card -->
+<div class="bg-secondary-fixed/30 rounded-2xl p-4 flex items-center gap-3 border border-secondary-fixed">
+<span class="material-symbols-outlined text-[32px] text-secondary shrink-0" data-icon="recommend">recommend</span>
+<p class="text-body-lg font-body-lg text-on-surface">
+          训练规律性极高！规律的肌肉节律反馈极大促进了日常躯干平衡和自信出行。
+        </p>
+</div>
+</section>
+<!-- 3. History Stream: Detailed Session Records -->
+<section class="flex flex-col gap-4">
+<div class="flex items-center justify-between px-1">
+<h2 class="text-headline-md font-headline-md text-on-surface font-bold">训练历程与动作评估</h2>
+<span class="text-label-lg font-label-lg text-primary font-bold">共 42 次完成记录</span>
+</div>
+<!-- Record Card 1 (Today) -->
+<div class="bg-surface-container-lowest rounded-3xl p-6 border-[1.5px] border-outline-variant shadow-sm flex flex-col gap-4 hover:shadow-md transition-shadow">
+<!-- Date Stamp & Session Tags -->
+<div class="flex items-center justify-between border-b-[1.5px] border-outline-variant/40 pb-3">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-secondary"></span>
+<span class="text-label-xl font-label-xl text-on-surface font-bold">今天 10:20</span>
+</div>
+<span class="px-3 py-1 bg-surface-container text-primary rounded-full text-label-lg font-label-lg font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]" data-icon="audiotrack">audiotrack</span>
+            听觉节律引导 (RAS)
+          </span>
+</div>
+<!-- Exercise Details -->
+<div class="flex items-start gap-4">
+<div class="w-16 h-16 rounded-2xl bg-primary-fixed flex items-center justify-center text-primary shrink-0 ring-2 ring-primary/20">
+<span class="material-symbols-outlined text-[36px]" data-icon="directions_walk">directions_walk</span>
+</div>
+<div class="flex-1 flex flex-col">
+<h3 class="text-headline-sm font-headline-sm text-on-surface font-bold leading-tight">
+              下肢防拖拽踏步与重心节律训练
+            </h3>
+<p class="text-body-lg font-body-lg text-on-surface-variant mt-1">
+              完成 <strong class="text-primary font-bold">3 组 × 12 次</strong> · 累计用时 <strong class="text-on-surface font-bold">18 分钟</strong>
+</p>
+</div>
+</div>
+<!-- Quality & Medical Feedback Pill -->
+<div class="bg-surface-container-low rounded-2xl p-4 flex flex-col gap-2 border border-outline-variant/60">
+<div class="flex items-center justify-between">
+<span class="text-label-lg font-label-lg text-on-surface-variant">动作协调质量</span>
+<div class="flex items-center gap-1 text-amber-500">
+<span class="material-symbols-outlined text-[24px]" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[24px]" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[24px]" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[24px]" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[24px]" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-label-xl font-label-xl text-amber-900 font-bold ml-1">5.0 满分优秀</span>
+</div>
+</div>
+<div class="flex items-center gap-2 text-secondary font-bold text-body-lg font-body-lg pt-1">
+<span class="material-symbols-outlined text-[22px]" data-icon="health_and_safety">health_and_safety</span>
+<span>专业正向反馈：下肢离地充分，步态稳健有力，重心转换流畅自然！</span>
+</div>
+</div>
+<!-- Action Target: Oversized accessible touch button -->
+<button class="w-full min-h-[56px] py-3.5 px-4 bg-surface-container hover:bg-surface-container-high active:scale-95 transition-all rounded-2xl text-primary font-label-xl text-label-xl flex items-center justify-center gap-2 border border-outline-variant/80 font-bold" type="button">
+<span>查看节律与步幅对称报告</span>
+<span class="material-symbols-outlined text-[24px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+<!-- Record Card 2 (Yesterday) -->
+<div class="bg-surface-container-lowest rounded-3xl p-6 border-[1.5px] border-outline-variant shadow-sm flex flex-col gap-4 hover:shadow-md transition-shadow">
+<!-- Date Stamp & Session Tags -->
+<div class="flex items-center justify-between border-b-[1.5px] border-outline-variant/40 pb-3">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-outline"></span>
+<span class="text-label-xl font-label-xl text-on-surface font-bold">昨天 15:30</span>
+</div>
+<span class="px-3 py-1 bg-surface-container text-primary rounded-full text-label-lg font-label-lg font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]" data-icon="accessibility_new">accessibility_new</span>
+            躯干大动作伸展
+          </span>
+</div>
+<!-- Exercise Details -->
+<div class="flex items-start gap-4">
+<div class="w-16 h-16 rounded-2xl bg-secondary-container flex items-center justify-center text-on-secondary-container shrink-0 ring-2 ring-secondary/20">
+<span class="material-symbols-outlined text-[36px]" data-icon="sports_gymnastics">sports_gymnastics</span>
+</div>
+<div class="flex-1 flex flex-col">
+<h3 class="text-headline-sm font-headline-sm text-on-surface font-bold leading-tight">
+              坐位交替大摆臂与躯干抗旋训练
+            </h3>
+<p class="text-body-lg font-body-lg text-on-surface-variant mt-1">
+              完成 <strong class="text-primary font-bold">2 组 × 10 次</strong> · 累计用时 <strong class="text-on-surface font-bold">12 分钟</strong>
+</p>
+</div>
+</div>
+<!-- Quality & Medical Feedback Pill -->
+<div class="bg-surface-container-low rounded-2xl p-4 flex flex-col gap-2 border border-outline-variant/60">
+<div class="flex items-center justify-between">
+<span class="text-label-lg font-label-lg text-on-surface-variant">动作协调质量</span>
+<div class="flex items-center gap-1 text-amber-500">
+<span class="material-symbols-outlined text-[24px]" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[24px]" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[24px]" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[24px]" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[24px] text-outline-variant" data-icon="star">star</span>
+<span class="text-label-xl font-label-xl text-amber-900 font-bold ml-1">4.0 表现良好</span>
+</div>
+</div>
+<div class="flex items-center gap-2 text-secondary font-bold text-body-lg font-body-lg pt-1">
+<span class="material-symbols-outlined text-[22px]" data-icon="health_and_safety">health_and_safety</span>
+<span>专业正向反馈：双侧肩关节活动充分，躯干伸展大幅度延展！</span>
+</div>
+</div>
+<!-- Action Target: Oversized accessible touch button -->
+<button class="w-full min-h-[56px] py-3.5 px-4 bg-surface-container hover:bg-surface-container-high active:scale-95 transition-all rounded-2xl text-primary font-label-xl text-label-xl flex items-center justify-center gap-2 border border-outline-variant/80 font-bold" type="button">
+<span>查看动作幅度曲线详情</span>
+<span class="material-symbols-outlined text-[24px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+<!-- Record Card 3 (2 Days Ago) -->
+<div class="bg-surface-container-lowest rounded-3xl p-6 border-[1.5px] border-outline-variant shadow-sm flex flex-col gap-4 hover:shadow-md transition-shadow">
+<!-- Date Stamp & Session Tags -->
+<div class="flex items-center justify-between border-b-[1.5px] border-outline-variant/40 pb-3">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-outline"></span>
+<span class="text-label-xl font-label-xl text-on-surface font-bold">前天 09:45</span>
+</div>
+<span class="px-3 py-1 bg-surface-container text-primary rounded-full text-label-lg font-label-lg font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]" data-icon="fitness_center">fitness_center</span>
+            肌力弹力抗阻
+          </span>
+</div>
+<!-- Exercise Details -->
+<div class="flex items-start gap-4">
+<div class="w-16 h-16 rounded-2xl bg-primary-fixed flex items-center justify-center text-primary shrink-0 ring-2 ring-primary/20">
+<span class="material-symbols-outlined text-[36px]" data-icon="exercise">exercise</span>
+</div>
+<div class="flex-1 flex flex-col">
+<h3 class="text-headline-sm font-headline-sm text-on-surface font-bold leading-tight">
+              坐位弹力带胸前推举抗阻
+            </h3>
+<p class="text-body-lg font-body-lg text-on-surface-variant mt-1">
+              完成 <strong class="text-primary font-bold">3 组 × 10 次</strong> · 累计用时 <strong class="text-on-surface font-bold">15 分钟</strong>
+</p>
+</div>
+</div>
+<!-- Quality & Medical Feedback Pill -->
+<div class="bg-surface-container-low rounded-2xl p-4 flex flex-col gap-2 border border-outline-variant/60">
+<div class="flex items-center justify-between">
+<span class="text-label-lg font-label-lg text-on-surface-variant">动作协调质量</span>
+<div class="flex items-center gap-1 text-amber-500">
+<span class="material-symbols-outlined text-[24px]" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[24px]" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[24px]" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[24px]" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[24px]" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-label-xl font-label-xl text-amber-900 font-bold ml-1">5.0 满分优秀</span>
+</div>
+</div>
+<div class="flex items-center gap-2 text-secondary font-bold text-body-lg font-body-lg pt-1">
+<span class="material-symbols-outlined text-[22px]" data-icon="health_and_safety">health_and_safety</span>
+<span>专业正向反馈：发力平稳无顿挫，上肢肌肉激活度达标！</span>
+</div>
+</div>
+<!-- Action Target: Oversized accessible touch button -->
+<button class="w-full min-h-[56px] py-3.5 px-4 bg-surface-container hover:bg-surface-container-high active:scale-95 transition-all rounded-2xl text-primary font-label-xl text-label-xl flex items-center justify-center gap-2 border border-outline-variant/80 font-bold" type="button">
+<span>查看肌力阻抗与心率曲线</span>
+<span class="material-symbols-outlined text-[24px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</section>
+<!-- 4. One-Click Family/Doctor Report Generation Call-To-Action Card -->
+<section class="bg-gradient-to-r from-primary to-primary-container text-on-primary rounded-3xl p-6 shadow-md flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-white shrink-0">
+<span class="material-symbols-outlined text-[30px]" data-icon="description">description</span>
+</div>
+<div>
+<h3 class="text-headline-sm font-headline-sm font-bold text-white">康复进度月报已生成</h3>
+<p class="text-body-lg font-body-lg text-primary-fixed-dim">已整理近 30 天各项稳定指标数据</p>
+</div>
+</div>
+<p class="text-body-lg font-body-lg text-white/90">
+        门诊随访或家属关怀时，可一键发送 PDF 高清图表给医生，辅助评估日常活动能力。
+      </p>
+<button class="min-h-[60px] w-full bg-white text-primary hover:bg-surface-container-lowest active:scale-95 transition-all rounded-2xl text-label-xl font-label-xl font-bold flex items-center justify-center gap-2 shadow-sm" type="button">
+<span class="material-symbols-outlined text-[26px]" data-icon="download">download</span>
+<span>立即导出并微信发送报告</span>
+</button>
+</section>
+</main>
+<!-- BottomNavBar: Docked full-width bottom-0, H=76px, active destination is '记录' (index 2) -->
+<nav aria-label="底栏主导航" class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-space-xs h-[76px] bg-surface-container-lowest shadow-sm">
+<!-- 0: 首页 (Inactive) -->
+<a aria-label="首页" class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high px-3 py-1.5 min-h-[56px] active:scale-95 transition-transform duration-150 rounded-xl" href="#">
+<span class="material-symbols-outlined text-[28px]" data-icon="home">home</span>
+<span class="text-label-md font-label-md mt-0.5">首页</span>
+</a>
+<!-- 1: 训练 (Inactive) -->
+<a aria-label="训练" class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high px-3 py-1.5 min-h-[56px] active:scale-95 transition-transform duration-150 rounded-xl" href="#">
+<span class="material-symbols-outlined text-[28px]" data-icon="fitness_center">fitness_center</span>
+<span class="text-label-md font-label-md mt-0.5">训练</span>
+</a>
+<!-- 2: 记录 (Active Tab: style_active_navigation applied from JSON) -->
+<a aria-current="page" aria-label="记录" class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-xl px-4 py-1.5 min-h-[56px] active:scale-95 transition-transform duration-150 shadow-xs" href="#">
+<span class="material-symbols-outlined text-[28px]" data-icon="assignment" data-weight="fill" style="font-variation-settings: 'FILL' 1;">assignment</span>
+<span class="text-label-md font-label-md font-bold mt-0.5">记录</span>
+</a>
+<!-- 3: 预警 (Inactive) -->
+<a aria-label="预警" class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high px-3 py-1.5 min-h-[56px] active:scale-95 transition-transform duration-150 rounded-xl" href="#">
+<span class="material-symbols-outlined text-[28px]" data-icon="warning">warning</span>
+<span class="text-label-md font-label-md mt-0.5">预警</span>
+</a>
+<!-- 4: 患者 (Inactive) -->
+<a aria-label="患者" class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high px-3 py-1.5 min-h-[56px] active:scale-95 transition-transform duration-150 rounded-xl" href="#">
+<span class="material-symbols-outlined text-[28px]" data-icon="person">person</span>
+<span class="text-label-md font-label-md mt-0.5">患者</span>
+</a>
+</nav>
+</body></html>

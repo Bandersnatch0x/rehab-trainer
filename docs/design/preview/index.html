@@ -480,6 +480,8 @@
     .badge-pill {
       display: inline-flex;
       align-items: center;
+      white-space: nowrap;
+      flex-shrink: 0;
       padding: 4px 12px;
       border-radius: 999px;
       font-size: 15px;
@@ -1332,19 +1334,32 @@
           </div>
         `;
       } else if (currentAndroidScreen === 'training') {
+        const isDual = (window.trainingDisplayMode || 'dual') === 'dual';
         container.innerHTML = `
-          <div class="ui-top-bar" style="background:#0F172A; border-bottom:1px solid #334155; min-height:56px; padding:6px 16px;">
-            <div class="ui-top-bar__title" style="color:#FFF; font-size:18px;">双播放实时跟练 (D22)</div>
-            <span class="stat-badge-pill" style="font-size:11px; padding:2px 8px;">【演示数据】</span>
+          <div class="ui-top-bar" style="background:#0F172A; border-bottom:1px solid #334155; min-height:56px; padding:6px 12px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div class="ui-top-bar__title" style="color:#FFF; font-size:16px; font-weight:bold;">原地节律踏步 · 第1/3组</div>
+              <div style="color:#94A3B8; font-size:11px;">目标 12 次 · 64 BPM 【演示数据】</div>
+            </div>
+            <!-- Mode Selector Switcher Pills (User Supplemental Requirement: 3 Modes) -->
+            <div style="background:#1E293B; border-radius:20px; padding:3px; display:flex; gap:4px; border:1px solid #334155;">
+              <button onclick="window.trainingDisplayMode='dual'; renderAndroidPhone();" style="border:none; cursor:pointer; border-radius:16px; padding:4px 10px; font-size:12px; font-weight:bold; background:${isDual ? '#0284C7' : 'transparent'}; color:${isDual ? '#FFF' : '#94A3B8'};">
+                🎬 同屏示范
+              </button>
+              <button onclick="window.trainingDisplayMode='camera-only'; renderAndroidPhone();" style="border:none; cursor:pointer; border-radius:16px; padding:4px 10px; font-size:12px; font-weight:bold; background:${!isDual ? '#0284C7' : 'transparent'}; color:${!isDual ? '#FFF' : '#94A3B8'};">
+                📷 纯拍摄+语音
+              </button>
+            </div>
           </div>
 
-          <!-- Dual Video Playback Container (Phone: Top/Bottom Split, each approx 50%) -->
-          <div style="display:flex; flex-direction:column; gap:10px; padding:10px; background:#0F172A; flex:1; min-height:0;">
+          <!-- Video Playback Container (Mode 1: Dual 38/62 split, Mode 2: Camera-Only 100% + Voice Banner) -->
+          <div style="display:flex; flex-direction:column; gap:8px; padding:10px; background:#0F172A; flex:1; min-height:0;">
 
-            <!-- 1. Top Pane: Instructional Video (教学示范视频) -->
-            <div style="flex:1; background:#1E293B; border-radius:14px; border:1.5px solid #334155; position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:space-between; padding:12px;">
+            ${isDual ? `
+            <!-- 1. Top Pane: Instructional Video (教学示范视频 Weight ~0.38) -->
+            <div style="flex:0.38; background:#1E293B; border-radius:14px; border:1.5px solid #334155; position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:space-between; padding:10px;">
               <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="background:#1A4FA0; color:#FFF; font-size:12px; font-weight:700; padding:2px 8px; border-radius:6px;">
+                <span style="background:#1A4FA0; color:#FFF; font-size:11px; font-weight:700; padding:2px 8px; border-radius:6px;">
                   🎬 示范动作：原地节律踏步 【演示数据】
                 </span>
                 <span style="background:#0F172A; color:#80D5CB; font-size:11px; padding:2px 6px; border-radius:4px;">
@@ -1353,18 +1368,18 @@
               </div>
 
               <!-- Coach Skeleton Silhouette Demo -->
-              <div style="display:flex; align-items:center; justify-content:center; gap:14px; margin:4px 0;">
-                <div style="width:44px; height:44px; border-radius:50%; background:#0F172A; border:2px solid #38BDF8; display:flex; align-items:center; justify-content:center; color:#38BDF8; font-size:22px;">
+              <div style="display:flex; align-items:center; justify-content:center; gap:12px; margin:2px 0;">
+                <div style="width:38px; height:38px; border-radius:50%; background:#0F172A; border:2px solid #38BDF8; display:flex; align-items:center; justify-content:center; color:#38BDF8; font-size:18px;">
                   ▶
                 </div>
                 <div>
-                  <div style="font-size:15px; font-weight:700; color:#FFF;">屈髋踏步 · 舒适节拍 64 BPM 【演示数据】</div>
-                  <div style="font-size:12px; color:#94A3B8;">李主任示范视频 · 跟随标准幅度与速度练习</div>
+                  <div style="font-size:14px; font-weight:700; color:#FFF;">屈髋踏步 · 节拍 64 BPM 【演示数据】</div>
+                  <div style="font-size:11px; color:#94A3B8;">李主任示范录制 · 跟随标准动作练习</div>
                 </div>
               </div>
 
               <div>
-                <div style="display:flex; justify-content:space-between; font-size:11px; color:#94A3B8; margin-bottom:2px;">
+                <div style="display:flex; justify-content:space-between; font-size:10px; color:#94A3B8; margin-bottom:2px;">
                   <span>示范进度 01:24 / 03:00</span>
                   <span>目标 12 次 【演示数据】</span>
                 </div>
@@ -1373,9 +1388,26 @@
                 </div>
               </div>
             </div>
+            ` : `
+            <!-- Mode 2 Voice Guidance Capsule Bar (Collapsed Video, 100% Camera Area) -->
+            <div style="background:#1E293B; border-radius:12px; border:1.5px solid #0284C7; padding:8px 12px; display:flex; align-items:center; gap:10px; flex-shrink:0;">
+              <div style="width:32px; height:32px; border-radius:50%; background:#0284C7; display:flex; align-items:center; justify-content:center; font-size:16px;">
+                🔊
+              </div>
+              <div style="flex:1;">
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span style="font-size:12px; font-weight:bold; color:#38BDF8;">动作语音指导中</span>
+                  <span style="background:#0F172A; color:#80D5CB; font-size:10px; padding:1px 5px; border-radius:3px;">AI 语音教练 【演示数据】</span>
+                </div>
+                <div style="font-size:12px; color:#FFF; font-weight:500; margin-top:2px;">
+                  “保持挺胸直视前方，大腿抬高至水平，落地轻柔跟随 64 BPM 节奏”
+                </div>
+              </div>
+            </div>
+            `}
 
-            <!-- 2. Bottom Pane: Real-time Patient Camera with Live Overlays -->
-            <div style="flex:1; background:#000; border-radius:14px; border:2px solid #0284C7; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center;">
+            <!-- 2. Patient Real-time Camera Pane (Flex 0.62 in Dual, Flex 1 in Camera-Only) -->
+            <div style="flex:${isDual ? '0.62' : '1'}; background:#000; border-radius:14px; border:2px solid #0284C7; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center;">
               <!-- Simulated Pose Tracking Lines -->
               <svg viewBox="0 0 400 240" style="position:absolute; width:100%; height:100%;">
                 <circle cx="200" cy="50" r="14" fill="#38BDF8" opacity="0.9"/>
@@ -1407,33 +1439,30 @@
                 <div class="metronome-pulse" style="width:14px; height:14px;"></div>
               </div>
 
-              <!-- Overlay: Bottom Foot-in-frame Status (D17 requirement) -->
-              <div style="position:absolute; bottom:8px; left:8px; right:8px; background:rgba(15,23,42,0.85); border-radius:8px; padding:5px 10px; display:flex; align-items:center; gap:6px;">
-                <span style="color:#10B981; font-size:14px;">●</span>
-                <span style="font-size:12px; color:#E2E8F0; font-weight:600;">
-                  脚部完整入镜 (足踝可见度 94%) · 患者实时摄像头画面 【演示数据】
+              <!-- Overlay: Bottom Foot-in-frame Status (D17 requirement, placed at lower edge) -->
+              <div style="position:absolute; bottom:6px; left:8px; right:8px; background:rgba(15,23,42,0.85); border-radius:8px; padding:4px 10px; display:flex; align-items:center; gap:6px;">
+                <span style="color:#10B981; font-size:12px;">●</span>
+                <span style="font-size:11px; color:#E2E8F0; font-weight:600;">
+                  脚部完整入镜 (足踝可见度 94%) · 患者实时端上画面 【演示数据】
                 </span>
               </div>
             </div>
 
           </div>
 
-          <!-- Bottom Fixed Controls: Emergency Stop MUST BE >= 80dp -->
-          <div style="padding:12px 16px; background:#FFFFFF; border-top:1.5px solid var(--border-card); display:flex; flex-direction:column; gap:8px;">
-            <div style="display:flex; gap:10px;">
-              <button class="btn-elderly-secondary" style="flex:1; min-height:56px; font-size:16px;" onclick="alert('跟练已暂停')">
-                ⏸ 暂停
-              </button>
-              <button class="btn-elderly-primary" style="flex:1.5; min-height:56px; font-size:16px;" onclick="alert('完成本组，休息60秒')">
-                ✓ 完成本组 (第 1/3 组)
-              </button>
-            </div>
-
-            <!-- Emergency Stop Button: >= 80dp Height constraint (D22 / Accessibility) -->
-            <button class="btn-elderly-danger" style="min-height:80px; font-size:22px; width:100%; border-radius:18px;" onclick="triggerEmergencyAlert()">
-              🛑 紧急停止训练
+          <!-- Bottom Fixed Controls: Emergency Stop MUST BE >= 80dp (Unclipped in all modes) -->
+          <div style="padding:10px 12px; background:#FFFFFF; border-top:1.5px solid var(--border-card); display:flex; gap:8px; align-items:center;">
+            <button class="btn-elderly-secondary" style="flex:1; min-height:80px; font-size:17px; font-weight:bold; border-radius:16px;" onclick="alert('跟练已暂停')">
+              ⏸ 暂停
+            </button>
+            <button class="btn-elderly-primary" style="flex:1.3; min-height:80px; font-size:17px; font-weight:bold; border-radius:16px;" onclick="alert('完成本组，休息60秒')">
+              ✓ 完成本组
+            </button>
+            <button class="btn-elderly-danger" style="flex:1.2; min-height:80px; font-size:17px; font-weight:bold; border-radius:16px;" onclick="triggerEmergencyAlert()">
+              🛑 紧急停止
             </button>
           </div>
+        `;
         `;
       } else if (currentAndroidScreen === 'records') {
         container.innerHTML = `
@@ -1570,18 +1599,24 @@
 
           <div style="padding: 24px;">
             <div class="card-container">
-              <span class="badge-pill badge-primary">节律步态 (RAS)</span>
+              <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+                <span class="badge-pill badge-primary">节律步态 (RAS)</span>
+                <span class="badge-pill badge-success">低风险 · 适合当前阶段</span>
+              </div>
               <h3 style="font-size:22px; font-weight:800; margin:8px 0;">原地节律踏步训练</h3>
-              <p style="font-size:16px; color:var(--text-secondary); margin-bottom:12px;">以 64 BPM 听觉节律引导步态，预防冻结步态 (FoG)。</p>
+              <p style="font-size:16px; color:var(--text-secondary); margin-bottom:12px;">以 64 BPM 听觉节律引导步态，跟随节奏平稳踏步。</p>
               <button class="btn-elderly-primary" onclick="switchAndroidScreen('training')">
                 ▶ 开始此项训练 (80dp)
               </button>
             </div>
 
             <div class="card-container">
-              <span class="badge-pill badge-success">牵伸放松</span>
+              <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+                <span class="badge-pill badge-success">牵伸放松</span>
+                <span class="badge-pill badge-primary">安全推荐 · 自主完成</span>
+              </div>
               <h3 style="font-size:22px; font-weight:800; margin:8px 0;">坐位上肢躯干伸展</h3>
-              <p style="font-size:16px; color:var(--text-secondary); margin-bottom:12px;">缓解齿轮样强直，维持关节活动度。</p>
+              <p style="font-size:16px; color:var(--text-secondary); margin-bottom:12px;">轻柔舒展上肢与躯干，保持身体轻松自如。</p>
               <button class="btn-elderly-secondary" onclick="switchAndroidScreen('training')">
                 开始牵伸 (56dp)
               </button>

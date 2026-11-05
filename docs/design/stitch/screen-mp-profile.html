@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>个人档案与家属绑定 - 帕金森肌力康复</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-bright": "#f8f9ff",
+            "on-secondary-container": "#006f67",
+            "tertiary-fixed": "#ffdbd0",
+            "surface-dim": "#ccdbf3",
+            "on-tertiary-fixed": "#390c00",
+            "on-surface": "#0d1c2e",
+            "on-primary-fixed-variant": "#024394",
+            "outline": "#737783",
+            "on-secondary-fixed-variant": "#00504a",
+            "on-tertiary-container": "#ffb39a",
+            "primary-fixed-dim": "#aec6ff",
+            "on-primary-fixed": "#001a42",
+            "outline-variant": "#c3c6d3",
+            "on-error-container": "#93000a",
+            "surface-tint": "#2c5cae",
+            "surface-container": "#e6eeff",
+            "surface-container-low": "#eff4ff",
+            "on-surface-variant": "#434751",
+            "on-primary-container": "#abc5ff",
+            "secondary-container": "#99efe5",
+            "tertiary-container": "#962d00",
+            "on-secondary-fixed": "#00201d",
+            "inverse-surface": "#233144",
+            "surface": "#f8f9ff",
+            "surface-variant": "#d5e3fc",
+            "error-container": "#ffdad6",
+            "background": "#f8f9ff",
+            "primary-container": "#1a4fa0",
+            "inverse-primary": "#aec6ff",
+            "secondary-fixed-dim": "#80d5cb",
+            "surface-container-highest": "#d5e3fc",
+            "on-primary": "#ffffff",
+            "surface-container-high": "#dce9ff",
+            "surface-container-lowest": "#ffffff",
+            "tertiary-fixed-dim": "#ffb59d",
+            "on-secondary": "#ffffff",
+            "inverse-on-surface": "#eaf1ff",
+            "on-background": "#0d1c2e",
+            "on-tertiary-fixed-variant": "#832600",
+            "error": "#ba1a1a",
+            "on-error": "#ffffff",
+            "tertiary": "#6f1f00",
+            "secondary-fixed": "#9cf2e8",
+            "primary-fixed": "#d8e2ff",
+            "on-tertiary": "#ffffff",
+            "primary": "#00387e",
+            "secondary": "#006a63"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin-desktop": "3rem",
+            "space-lg": "1.75rem",
+            "gutter-tablet": "1.5rem",
+            "gutter": "1rem",
+            "space-md": "1.25rem",
+            "margin-tablet": "2rem",
+            "space-xs": "0.5rem",
+            "margin": "1.25rem",
+            "space-xl": "2.5rem",
+            "space-sm": "0.75rem"
+          },
+          "fontFamily": {
+            "headline-md": ["Atkinson Hyperlegible Next"],
+            "headline-xl-mobile": ["Atkinson Hyperlegible Next"],
+            "label-lg": ["Atkinson Hyperlegible Next"],
+            "headline-sm": ["Atkinson Hyperlegible Next"],
+            "body-xl": ["Atkinson Hyperlegible Next"],
+            "body-md": ["Atkinson Hyperlegible Next"],
+            "label-xl": ["Atkinson Hyperlegible Next"],
+            "body-lg": ["Atkinson Hyperlegible Next"],
+            "label-md": ["Atkinson Hyperlegible Next"],
+            "headline-xl": ["Atkinson Hyperlegible Next"],
+            "headline-lg": ["Atkinson Hyperlegible Next"]
+          },
+          "fontSize": {
+            "headline-md": ["24px", { "lineHeight": "34px", "fontWeight": "700" }],
+            "headline-xl-mobile": ["30px", { "lineHeight": "40px", "fontWeight": "700" }],
+            "label-lg": ["16px", { "lineHeight": "22px", "fontWeight": "700" }],
+            "headline-sm": ["20px", { "lineHeight": "30px", "fontWeight": "600" }],
+            "body-xl": ["20px", { "lineHeight": "32px", "fontWeight": "400" }],
+            "body-md": ["16px", { "lineHeight": "26px", "fontWeight": "500" }],
+            "label-xl": ["18px", { "lineHeight": "24px", "fontWeight": "700" }],
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "headline-xl": ["36px", { "lineHeight": "48px", "fontWeight": "700" }],
+            "headline-lg": ["28px", { "lineHeight": "38px", "fontWeight": "700" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    /* Anti-tremor focus transition and senior tactile feedback */
+    .tactile-card {
+      border: 1.5px solid #cbd5e1;
+      box-shadow: 0px 3px 8px rgba(15, 23, 42, 0.05);
+    }
+    .tactile-card-active {
+      border: 2px solid #1a4fa0;
+      box-shadow: 0px 6px 14px rgba(26, 79, 160, 0.12);
+    }
+    .senior-toggle-track {
+      transition: background-color 0.2s ease-in-out;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface antialiased min-h-screen flex flex-col font-body-md select-none">
+<!-- 1. TopAppBar: WeChat Mini-Program Header & Care Mode Switch -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin h-16 min-h-[64px] bg-surface-container-lowest shadow-sm border-b border-outline-variant">
+<!-- Left: Mini Program Back & Patient Avatar / Clinic Stage Badge -->
+<div class="flex items-center gap-space-sm">
+<button aria-label="返回上一步" class="w-10 h-10 rounded-full flex items-center justify-center text-primary hover:bg-surface-container-high active:bg-surface-container active:scale-95 transition-all duration-150">
+<span class="material-symbols-outlined text-[24px]">arrow_back_ios_new</span>
+</button>
+<div class="flex items-center gap-2">
+<div class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center border border-outline-variant overflow-hidden text-primary">
+<span class="material-symbols-outlined text-[22px]">person</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm font-bold text-primary leading-tight">个人档案与家属绑定</span>
+<span class="text-[12px] font-label-md text-on-surface-variant leading-none">帕金森康复·专属档案</span>
+</div>
+</div>
+</div>
+<!-- Right: Mini Program Capsule & Accessibility Mode Toggle -->
+<div class="flex items-center gap-2">
+<!-- Big Font Care Toggle Pill -->
+<button class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary-container text-on-secondary-container font-label-md text-label-md border border-secondary shadow-xs active:scale-95 transition-all" id="seniorModeToggle">
+<span class="material-symbols-outlined text-[18px]">text_fields</span>
+<span id="seniorModeText">大字关怀模式</span>
+</button>
+<!-- Simulated WeChat Native Capsule Controls -->
+<div class="flex items-center bg-surface-container-high/90 border border-outline-variant/70 rounded-full px-2.5 py-1 gap-2 shadow-xs">
+<button aria-label="小程序操作选项" class="text-on-surface-variant hover:text-primary active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[18px]">more_horiz</span>
+</button>
+<div class="w-[1px] h-3.5 bg-outline-variant"></div>
+<button aria-label="小程序关闭" class="text-on-surface-variant hover:text-primary active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[18px]">circle</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Mobile Quick Elder Banner Switch (Sticky below nav) -->
+<div class="pt-16 sm:hidden bg-surface-container-low px-margin py-2 border-b border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-secondary text-[20px]">accessibility_new</span>
+<span class="font-label-md text-label-md font-bold">适老化关怀大字模式</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-secondary font-bold" id="mobileModeState">已开启</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" id="mobileFontSizeToggle" type="checkbox"/>
+<div class="w-12 h-7 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[3px] after:bg-white after:border-outline-variant after:border after:rounded-full after:h-6 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+</div>
+<!-- Main Scrollable Canvas -->
+<main class="flex-1 w-full max-w-2xl mx-auto px-margin pt-4 pb-28 space-y-space-lg">
+<!-- Section 1: Patient Basic Identity Card (张建国叔叔) -->
+<section class="bg-surface-container-lowest rounded-[16px] tactile-card p-space-md">
+<div class="flex items-start justify-between gap-space-sm pb-space-sm border-b border-outline-variant/60">
+<div class="flex items-center gap-3.5">
+<div class="relative">
+<div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center text-primary border-2 border-primary-fixed-dim">
+<span class="material-symbols-outlined text-[36px]">face</span>
+</div>
+<span class="absolute -bottom-1 -right-1 bg-secondary text-on-secondary text-[11px] font-bold px-2 py-0.5 rounded-full border border-white">
+              已建档
+            </span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h1 class="font-headline-md text-headline-md text-on-surface tracking-tight">张建国 叔叔</h1>
+<span class="font-label-md text-label-md text-on-surface-variant font-normal">68岁</span>
+</div>
+<div class="mt-1 flex items-center gap-2">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-label-md bg-surface-container text-primary font-semibold border border-outline-variant/40">
+                Hoehn-Yahr 2期
+              </span>
+<span class="text-on-surface-variant font-label-md text-[13px]">病程 3.5年</span>
+</div>
+</div>
+</div>
+<!-- Safe Status Indicator Badge -->
+<div class="flex flex-col items-end">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container/40 text-on-secondary-container text-[13px] font-bold border border-secondary/30">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+            晨间状态良好
+          </span>
+<span class="text-[12px] text-on-surface-variant mt-1">今日步态已记录</span>
+</div>
+</div>
+<!-- Medical Card Number & Clinic Team Details -->
+<div class="mt-space-sm space-y-2.5">
+<div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low border border-outline-variant/40">
+<div class="flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-primary text-[20px]">badge</span>
+<span class="font-body-md text-body-md font-medium text-on-surface-variant">就诊卡号：</span>
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface tracking-wider" id="patientMedId">MED-2024-883920</span>
+</div>
+<button class="min-h-[40px] px-3.5 rounded-lg bg-surface-container-lowest border border-primary text-primary font-label-md text-label-md flex items-center gap-1 active:bg-primary-fixed hover:bg-surface-container transition-all" onclick="navigator.clipboard?.writeText('MED-2024-883920'); alert('卡号 MED-2024-883920 已成功复制');">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+<span>一键复制</span>
+</button>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-on-surface pt-1">
+<div class="flex items-center gap-2 p-2.5 rounded-lg bg-surface-bright border border-outline-variant/30">
+<span class="material-symbols-outlined text-primary text-[20px]">local_hospital</span>
+<div class="text-[14px]">
+<span class="text-on-surface-variant block text-[12px]">定点医院</span>
+<span class="font-bold text-on-surface">省第一人民医院·神经内科</span>
+</div>
+</div>
+<div class="flex items-center gap-2 p-2.5 rounded-lg bg-surface-bright border border-outline-variant/30">
+<span class="material-symbols-outlined text-primary text-[20px]">stethoscope</span>
+<div class="text-[14px]">
+<span class="text-on-surface-variant block text-[12px]">负责医生与康复师</span>
+<span class="font-bold text-on-surface">林副主任医师 / 陈康复师</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 2: Current Rehabilitation Stage Card (阶段2·稳定提升期) -->
+<section class="bg-surface-container-lowest rounded-[16px] tactile-card-active p-space-md relative overflow-hidden">
+<!-- Accent Top Banner -->
+<div class="absolute top-0 left-0 right-0 h-1.5 bg-primary-container"></div>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-outline-variant/50">
+<div>
+<span class="text-[13px] font-label-md text-primary font-bold tracking-wide uppercase block">Rehabilitation Phase</span>
+<h2 class="font-headline-md text-headline-md text-on-surface font-bold mt-0.5">
+            当前康复阶段：<span class="text-primary">阶段2·稳定提升期</span>
+</h2>
+</div>
+<span class="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container text-primary font-label-md text-label-md font-bold border border-primary/20">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+          适合温和有氧与步态训练
+        </span>
+</div>
+<!-- Safety Guidance Metrics -->
+<div class="grid grid-cols-3 gap-2.5 my-space-sm">
+<div class="p-3 rounded-xl bg-surface-container-low text-center border border-outline-variant/40">
+<div class="flex items-center justify-center text-primary mb-1">
+<span class="material-symbols-outlined text-[22px]">favorite</span>
+</div>
+<div class="font-label-md text-[13px] text-on-surface-variant">目标建议心率</div>
+<div class="font-headline-sm text-headline-sm text-primary font-bold mt-0.5">85~105<span class="text-[12px] font-normal text-on-surface-variant ml-0.5">次/分</span></div>
+</div>
+<div class="p-3 rounded-xl bg-surface-container-low text-center border border-outline-variant/40">
+<div class="flex items-center justify-center text-secondary mb-1">
+<span class="material-symbols-outlined text-[22px]">speed</span>
+</div>
+<div class="font-label-md text-[13px] text-on-surface-variant">防冻步动作节拍</div>
+<div class="font-headline-sm text-headline-sm text-secondary font-bold mt-0.5">80<span class="text-[12px] font-normal text-on-surface-variant ml-0.5">BPM节拍</span></div>
+</div>
+<div class="p-3 rounded-xl bg-surface-container-low text-center border border-outline-variant/40">
+<div class="flex items-center justify-center text-tertiary-container mb-1">
+<span class="material-symbols-outlined text-[22px]">security</span>
+</div>
+<div class="font-label-md text-[13px] text-on-surface-variant">跌倒防范关注</div>
+<div class="font-headline-sm text-headline-sm text-tertiary-container font-bold mt-0.5">低危<span class="text-[12px] font-normal text-on-surface-variant ml-0.5">助行安全</span></div>
+</div>
+</div>
+<!-- Plain Language Doctor Advice Box -->
+<div class="p-3.5 rounded-xl bg-surface-bright border border-outline-variant/60 flex items-start gap-3">
+<div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[20px]">tips_and_updates</span>
+</div>
+<div class="flex-1">
+<div class="font-label-lg text-label-lg text-on-surface font-bold flex items-center justify-between">
+<span>林医生医嘱通俗解读</span>
+<span class="text-[12px] text-on-surface-variant font-normal">3天前更新</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1 leading-relaxed">
+            “建国叔叔最近上肢稳定性好转，下肢起步偶有小碎步。每天上午服药后30分钟配合系统音乐节拍踏步15分钟，转弯时牢记‘大步慢转’，家属需随时留意居室地毯障碍。”
+          </p>
+</div>
+</div>
+</section>
+<!-- Section 3: Family Caregivers WeChat Binding Card -->
+<section class="bg-surface-container-lowest rounded-[16px] tactile-card p-space-md">
+<div class="flex items-center justify-between pb-3 border-b border-outline-variant/60">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[24px]">diversity_1</span>
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">照护家属微信快捷绑定</h2>
+<p class="font-body-md text-[13px] text-on-surface-variant">运动打卡、异常心率与步态卡顿将实时推送至微信</p>
+</div>
+</div>
+<span class="px-2.5 py-1 rounded-full bg-secondary-container/40 text-on-secondary text-[12px] font-bold">
+          已绑 1 位
+        </span>
+</div>
+<!-- Bound Caregiver 1: Daughter (晓华) -->
+<div class="mt-space-sm p-4 rounded-xl bg-surface-container-low border border-outline-variant/50">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-[18px] border border-secondary/40">
+              晓
+            </div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">女儿（晓华）</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary text-white text-[12px] font-bold">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                  微信已绑定
+                </span>
+</div>
+<div class="flex items-center gap-2 text-[13px] text-on-surface-variant mt-1">
+<span>实时接收训练日报</span>
+<span>•</span>
+<span>异常跌倒优先接收人</span>
+</div>
+</div>
+</div>
+<!-- Direct One-Touch Phone Call Button (Senior Accommodated Hit-Area) -->
+<a class="min-h-[52px] px-4 rounded-xl bg-surface-container-lowest border-2 border-primary text-primary font-label-lg text-label-lg flex items-center justify-center gap-2 active:bg-primary active:text-white transition-all shadow-xs" href="tel:13800138000">
+<span class="material-symbols-outlined text-[20px]">phone_in_talk</span>
+<span>拨打电话 (晓华)</span>
+</a>
+</div>
+<!-- WeChat Sync Dynamic Status Strip -->
+<div class="mt-3 pt-3 border-t border-outline-variant/30 flex items-center justify-between text-[13px] text-on-surface-variant">
+<span class="flex items-center gap-1.5 text-secondary font-bold">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+            今日训练微信推送：已同步 (10:30 完成打卡)
+          </span>
+<button class="text-primary hover:underline text-[13px]">权限管理</button>
+</div>
+</div>
+<!-- Add New Family Member / WeChat Invitation Section -->
+<div class="mt-space-sm p-4 rounded-xl bg-surface-bright border-2 border-dashed border-outline-variant/80 flex flex-col items-center text-center">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-primary mb-2">
+<span class="material-symbols-outlined text-[28px]">group_add</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">新增绑定备用联系人</h3>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-md mt-1">
+          建议同时绑定老伴或住家护工，当主监护人忙碌时确保康复预警及时送达
+        </p>
+<!-- Action Row: WeChat Invite & QR Code Trigger -->
+<div class="mt-4 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+<!-- Button 1: WeChat One-Touch Share -->
+<button class="w-full sm:w-auto min-h-[56px] px-6 rounded-xl bg-primary text-on-primary font-label-lg text-label-lg flex items-center justify-center gap-2 active:bg-primary-container shadow-sm transition-all" onclick="alert('微信邀请卡片已生成，请在微信中分享给老伴或护工');">
+<span class="material-symbols-outlined text-[22px]">send</span>
+<span>微信一键转发邀请老伴/护工</span>
+</button>
+<!-- Button 2: Show QR Code Modal Trigger -->
+<button class="w-full sm:w-auto min-h-[56px] px-5 rounded-xl bg-surface-container-lowest border-1.5 border-outline-variant text-on-surface font-label-lg text-label-lg flex items-center justify-center gap-2 active:bg-surface-container transition-all" onclick="document.getElementById('qrModal').classList.remove('hidden');">
+<span class="material-symbols-outlined text-[22px]">qr_code_2</span>
+<span>面对面扫码绑定</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Section 4: Accessibility & Parkinson's Specialized Controls -->
+<section class="bg-surface-container-lowest rounded-[16px] tactile-card p-space-md">
+<div class="flex items-center gap-2 pb-3 border-b border-outline-variant/60">
+<span class="material-symbols-outlined text-secondary text-[24px]">tune</span>
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">适老化与辅助关怀设置</h2>
+<p class="font-body-md text-[13px] text-on-surface-variant">针对震颤、视力减退及动作迟缓量身定制的操作辅助</p>
+</div>
+</div>
+<div class="mt-space-sm space-y-4">
+<!-- Control 1: Font Size Adjustment -->
+<div class="flex items-center justify-between p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/40">
+<div class="space-y-0.5 max-w-[70%]">
+<div class="font-headline-sm text-headline-sm text-on-surface font-bold">字号显示模式</div>
+<div class="font-body-md text-body-md text-on-surface-variant">大字清晰排版，文字高对比度护眼展示</div>
+</div>
+<div class="flex items-center bg-surface-container p-1 rounded-xl border border-outline-variant">
+<button class="px-3 py-2 rounded-lg text-on-surface-variant font-label-md text-label-md transition-colors" id="btnFontStandard">标准</button>
+<button class="px-3 py-2 rounded-lg bg-primary text-white font-label-md text-label-md font-bold shadow-xs" id="btnFontSenior">关怀大字</button>
+</div>
+</div>
+<!-- Control 2: Voice Readout Assistant -->
+<div class="flex items-center justify-between p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/40">
+<div class="space-y-0.5 max-w-[70%]">
+<div class="font-headline-sm text-headline-sm text-on-surface font-bold">语音朗读医嘱与步频节拍</div>
+<div class="font-body-md text-body-md text-on-surface-variant">点击文本或进入训练时自动大声播报，减轻视觉疲劳</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-14 h-8 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-outline-variant after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+<!-- Control 3: Anti-Tremor Tap Buffer (触控防抖延时) -->
+<div class="flex items-center justify-between p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/40">
+<div class="space-y-0.5 max-w-[70%]">
+<div class="font-headline-sm text-headline-sm text-on-surface font-bold">按键触控防抖缓冲</div>
+<div class="font-body-md text-body-md text-on-surface-variant">过滤手指轻微手抖造成的误按与重复双击（建议开启）</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-14 h-8 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-outline-variant after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+</div>
+</section>
+<!-- Section 5: Emergency Safety Lifeline Card (紧急安全保障) -->
+<section class="bg-tertiary-fixed/30 rounded-[16px] border-2 border-tertiary-container/80 p-space-md shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full bg-tertiary-container text-white flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[28px]">emergency_home</span>
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface font-bold">紧急安全保障与跌倒直呼</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">遇起步困难、身体晃动无法站立或突发状况，一键直连</p>
+</div>
+</div>
+<!-- Critical Giant Emergency Button (Minimum 72dp high for Tremor Safety) -->
+<div class="mt-4">
+<a class="w-full min-h-[72px] bg-tertiary-container text-on-tertiary rounded-xl font-label-xl text-label-xl flex items-center justify-center gap-3 active:scale-95 transition-all shadow-md active:bg-tertiary" href="tel:13800138000">
+<span class="material-symbols-outlined text-[32px]">e911_emergency</span>
+<span class="tracking-wide">一键紧急呼叫照护人（长按或点击）</span>
+</a>
+</div>
+<!-- Anti-misoperation reminder note -->
+<div class="mt-3 flex items-center justify-center gap-1.5 text-on-surface-variant text-[13px]">
+<span class="material-symbols-outlined text-[16px] text-tertiary-container">info</span>
+<span>防误触提示：点击后将自动弹出确认框并发出短提示音，安全放心</span>
+</div>
+</section>
+</main>
+<!-- Face-to-Face Binding QR Modal (Hidden by default) -->
+<div class="hidden fixed inset-0 z-50 bg-[#0F172A]/70 flex items-center justify-center p-4" id="qrModal">
+<div class="bg-surface-container-lowest max-w-sm w-full rounded-2xl p-6 border-2 border-outline-variant shadow-2xl text-center space-y-4">
+<div class="flex justify-between items-center pb-2 border-b border-outline-variant">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">微信扫码快捷绑定</h3>
+<button class="text-on-surface-variant p-1 rounded-full hover:bg-surface-container" onclick="document.getElementById('qrModal').classList.add('hidden');">
+<span class="material-symbols-outlined text-[24px]">close</span>
+</button>
+</div>
+<p class="text-body-md text-on-surface-variant text-left">
+        请家属或护工打开<strong>微信「扫一扫」</strong>，扫描下方专属二维码即刻同步患者档案：
+      </p>
+<!-- Simulated High-Contrast QR Pattern Box -->
+<div class="w-52 h-52 mx-auto bg-surface-container-low border-2 border-primary rounded-xl flex flex-col items-center justify-center p-3 relative">
+<div class="w-full h-full border-4 border-dashed border-primary/50 rounded-lg flex flex-col items-center justify-center bg-white text-center">
+<span class="material-symbols-outlined text-[64px] text-primary">qr_code_2</span>
+<span class="text-[12px] font-bold text-primary mt-1">张建国·专属关怀码</span>
+</div>
+</div>
+<div class="text-[12px] text-on-surface-variant">
+        有效时间：24小时内有效 · 仅限家庭授权
+      </div>
+<button class="w-full min-h-[50px] bg-primary text-white rounded-xl font-label-lg text-label-lg active:scale-95 transition-transform" onclick="document.getElementById('qrModal').classList.add('hidden');">
+        完成返回
+      </button>
+</div>
+</div>
+<!-- 2. BottomNavBar: Anchored 5-destination bar from Shared Components JSON -->
+<!-- Active Destination strictly mapped: "患者" is active -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-space-xs h-[76px] bg-surface-container-lowest shadow-sm border-t border-outline-variant">
+<!-- Tab 1: 首页 (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1.5 min-h-[56px] hover:bg-surface-container-high active:scale-95 transition-transform duration-150 rounded-xl" href="#">
+<span class="material-symbols-outlined text-[28px]">home</span>
+<span class="font-label-md text-label-md mt-0.5">首页</span>
+</a>
+<!-- Tab 2: 训练 (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1.5 min-h-[56px] hover:bg-surface-container-high active:scale-95 transition-transform duration-150 rounded-xl" href="#">
+<span class="material-symbols-outlined text-[28px]">fitness_center</span>
+<span class="font-label-md text-label-md mt-0.5">训练</span>
+</a>
+<!-- Tab 3: 记录 (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1.5 min-h-[56px] hover:bg-surface-container-high active:scale-95 transition-transform duration-150 rounded-xl" href="#">
+<span class="material-symbols-outlined text-[28px]">assignment</span>
+<span class="font-label-md text-label-md mt-0.5">记录</span>
+</a>
+<!-- Tab 4: 预警 (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1.5 min-h-[56px] hover:bg-surface-container-high active:scale-95 transition-transform duration-150 rounded-xl" href="#">
+<span class="material-symbols-outlined text-[28px]">warning</span>
+<span class="font-label-md text-label-md mt-0.5">预警</span>
+</a>
+<!-- Tab 5: 患者 (Active: Mapped directly to this profile screen) -->
+<a aria-current="page" class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-xl px-3 py-1.5 min-h-[56px] active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-label-md text-label-md font-bold mt-0.5">患者</span>
+</a>
+</nav>
+<!-- Interactive Logic for Senior Mode and Sensory Feedback -->
+<script>
+    let isSeniorBigFont = true;
+
+    const seniorToggle = document.getElementById('seniorModeToggle');
+    const mobileToggle = document.getElementById('mobileFontSizeToggle');
+    const seniorText = document.getElementById('seniorModeText');
+    const mobileStateText = document.getElementById('mobileModeState');
+    const btnFontStandard = document.getElementById('btnFontStandard');
+    const btnFontSenior = document.getElementById('btnFontSenior');
+
+    function updateFontState(enable) {
+      isSeniorBigFont = enable;
+      if (enable) {
+        document.documentElement.classList.add('text-lg');
+        if (seniorText) seniorText.innerText = '大字关怀模式 (已开启)';
+        if (mobileStateText) mobileStateText.innerText = '已开启';
+        if (mobileToggle) mobileToggle.checked = true;
+        if (btnFontSenior) {
+          btnFontSenior.className = 'px-3 py-2 rounded-lg bg-primary text-white font-label-md text-label-md font-bold shadow-xs';
+          btnFontStandard.className = 'px-3 py-2 rounded-lg text-on-surface-variant font-label-md text-label-md transition-colors';
+        }
+      } else {
+        document.documentElement.classList.remove('text-lg');
+        if (seniorText) seniorText.innerText = '标准字号模式';
+        if (mobileStateText) mobileStateText.innerText = '标准';
+        if (mobileToggle) mobileToggle.checked = false;
+        if (btnFontStandard) {
+          btnFontStandard.className = 'px-3 py-2 rounded-lg bg-primary text-white font-label-md text-label-md font-bold shadow-xs';
+          btnFontSenior.className = 'px-3 py-2 rounded-lg text-on-surface-variant font-label-md text-label-md transition-colors';
+        }
+      }
+    }
+
+    if (seniorToggle) {
+      seniorToggle.addEventListener('click', () => {
+        updateFontState(!isSeniorBigFont);
+      });
+    }
+
+    if (mobileToggle) {
+      mobileToggle.addEventListener('change', (e) => {
+        updateFontState(e.target.checked);
+      });
+    }
+
+    if (btnFontStandard) {
+      btnFontStandard.addEventListener('click', () => updateFontState(false));
+    }
+    if (btnFontSenior) {
+      btnFontSenior.addEventListener('click', () => updateFontState(true));
+    }
+
+    // Default initialization to Elder-Friendly mode
+    updateFontState(true);
+  </script>
+</body></html>

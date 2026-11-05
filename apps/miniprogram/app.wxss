@@ -8,7 +8,7 @@
 page {
   background-color: #f8fafc;
   color: #0f172a;
-  font-size: 32rpx;
+  font-size: 36rpx;
   line-height: 1.6;
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue",
     "Microsoft YaHei", sans-serif;
@@ -22,7 +22,7 @@ navigator {
 
 .page {
   min-height: 100vh;
-  padding: 32rpx 28rpx 96rpx;
+  padding: 32rpx 28rpx 160rpx;
 }
 
 .page-title {
@@ -34,7 +34,7 @@ navigator {
 
 .page-subtitle {
   margin-top: 12rpx;
-  font-size: 32rpx;
+  font-size: 34rpx;
   color: #334155;
   line-height: 1.5;
 }
@@ -45,7 +45,7 @@ navigator {
 
 .section-title {
   margin-bottom: 20rpx;
-  font-size: 38rpx;
+  font-size: 40rpx;
   font-weight: 700;
   color: #0f172a;
 }
@@ -61,7 +61,7 @@ navigator {
 }
 
 .card-title {
-  font-size: 38rpx;
+  font-size: 40rpx;
   font-weight: 700;
   line-height: 1.4;
   color: #0f172a;
@@ -69,13 +69,13 @@ navigator {
 
 .muted {
   color: #334155;
-  font-size: 32rpx;
+  font-size: 34rpx;
 }
 
 .hint {
   margin-top: 24rpx;
   color: #475569;
-  font-size: 30rpx;
+  font-size: 32rpx;
   line-height: 1.6;
 }
 
@@ -85,7 +85,7 @@ navigator {
   margin-bottom: 24rpx;
   padding: 24rpx 28rpx;
   color: #0f3268;
-  font-size: 32rpx;
+  font-size: 34rpx;
   line-height: 1.6;
   background-color: #eaf1fb;
   border-left: 10rpx solid #1a4fa0;
@@ -113,7 +113,7 @@ navigator {
   width: 100%;
   min-height: 112rpx;
   padding: 0 36rpx;
-  font-size: 34rpx;
+  font-size: 36rpx;
   font-weight: 600;
   line-height: 1.4;
   text-align: center;
@@ -121,11 +121,46 @@ navigator {
   touch-action: manipulation;
 }
 
+/* F5 修复：确保微信原生 button 元素为 100% 全宽且达到 160rpx 适老化高度 */
+button.btn {
+  width: 100% !important;
+  min-height: 160rpx !important;
+  box-sizing: border-box !important;
+}
+
+button.btn::after {
+  border: none;
+}
+
+/* 禁用态高对比度可读性修复（替代默认 1.52:1 的淡灰色，达到 WCAG AA 4.5:1+） */
+button[disabled].btn,
+button.btn[disabled],
+.btn[disabled],
+.btn--disabled {
+  color: #334155 !important;
+  background-color: #cbd5e1 !important;
+  border: 2rpx solid #94a3b8 !important;
+  opacity: 1 !important;
+  cursor: not-allowed;
+}
+
+.btn-disabled-hint {
+  margin-top: 16rpx;
+  margin-bottom: 8rpx;
+  padding: 16rpx 20rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #78350f;
+  background-color: #fef3c7;
+  border-left: 8rpx solid #b45309;
+  border-radius: 8rpx;
+}
+
 .btn--primary,
 .btn--elderly,
 .btn--tall {
   min-height: 160rpx;
-  font-size: 38rpx;
+  font-size: 40rpx;
   font-weight: 700;
   color: #ffffff;
   background-color: #1a4fa0;
@@ -135,7 +170,7 @@ navigator {
 
 .btn--danger {
   min-height: 160rpx;
-  font-size: 38rpx;
+  font-size: 40rpx;
   font-weight: 700;
   color: #ffffff;
   background-color: #b91c1c;
@@ -171,8 +206,10 @@ navigator {
 /* Status Badges */
 .badge {
   display: inline-block;
+  white-space: nowrap;
+  flex-shrink: 0;
   padding: 8rpx 20rpx;
-  font-size: 30rpx;
+  font-size: 32rpx;
   font-weight: 700;
   line-height: 1.4;
   border-radius: 999rpx;
@@ -225,12 +262,12 @@ navigator {
 .info-row__label {
   flex: 0 0 220rpx;
   color: #334155;
-  font-size: 32rpx;
+  font-size: 34rpx;
 }
 
 .info-row__value {
   flex: 1;
-  font-size: 32rpx;
+  font-size: 36rpx;
   font-weight: 700;
   color: #0f172a;
   text-align: right;
@@ -249,10 +286,10 @@ navigator {
   min-height: 88rpx;
   padding: 0 32rpx;
   color: #0f172a;
-  font-size: 32rpx;
+  font-size: 34rpx;
   font-weight: 600;
   background-color: #ffffff;
-  border: 2rpx solid #94a3b8;
+  border: 2rpx solid #475569;
   border-radius: 999rpx;
 }
 

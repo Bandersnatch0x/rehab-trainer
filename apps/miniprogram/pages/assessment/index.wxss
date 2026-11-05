@@ -18,7 +18,7 @@
   height: 280rpx;
   margin-top: 16rpx;
   padding: 24rpx;
-  border: 2rpx solid #94a3b8;
+  border: 2rpx solid #475569;
   border-radius: 16rpx;
   background-color: #f8fafc;
   font-size: 34rpx;

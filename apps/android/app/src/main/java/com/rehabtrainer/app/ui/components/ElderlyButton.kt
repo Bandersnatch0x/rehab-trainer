@@ -38,10 +38,18 @@ fun ElderlyButton(
     modifier: Modifier = Modifier,
     variant: ElderlyButtonVariant = ElderlyButtonVariant.Primary,
     enabled: Boolean = true,
-    icon: ImageVector? = null
+    icon: ImageVector? = null,
+    minHeight: androidx.compose.ui.unit.Dp? = null,
+    contentPadding: PaddingValues? = null
 ) {
     val dimens = LocalElderlyDimens.current
-    val minHeight = if (variant == ElderlyButtonVariant.Secondary) dimens.secondaryTouchTarget else dimens.minTouchTarget
+    val effectiveMinHeight = minHeight ?: if (variant == ElderlyButtonVariant.Secondary) dimens.secondaryTouchTarget else dimens.minTouchTarget
+    val defaultPadding = if (variant == ElderlyButtonVariant.Secondary) {
+        PaddingValues(horizontal = 24.dp, vertical = 16.dp)
+    } else {
+        PaddingValues(horizontal = 24.dp, vertical = 20.dp)
+    }
+    val effectivePadding = contentPadding ?: defaultPadding
 
     when (variant) {
         ElderlyButtonVariant.Primary -> {
@@ -50,8 +58,8 @@ fun ElderlyButton(
                 enabled = enabled,
                 modifier = modifier
                     .fillMaxWidth()
-                    .heightIn(min = minHeight),
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 20.dp),
+                    .heightIn(min = effectiveMinHeight),
+                contentPadding = effectivePadding,
                 shape = MaterialTheme.shapes.medium
             ) {
                 ButtonInnerContent(text, icon)
@@ -63,8 +71,8 @@ fun ElderlyButton(
                 enabled = enabled,
                 modifier = modifier
                     .fillMaxWidth()
-                    .heightIn(min = minHeight),
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+                    .heightIn(min = effectiveMinHeight),
+                contentPadding = effectivePadding,
                 shape = MaterialTheme.shapes.medium,
                 border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
                 colors = ButtonDefaults.outlinedButtonColors(
@@ -80,8 +88,8 @@ fun ElderlyButton(
                 enabled = enabled,
                 modifier = modifier
                     .fillMaxWidth()
-                    .heightIn(min = minHeight),
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 20.dp),
+                    .heightIn(min = effectiveMinHeight),
+                contentPadding = effectivePadding,
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.error,

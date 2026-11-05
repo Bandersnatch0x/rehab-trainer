@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>帕金森肌力康复 - 动作示范与节拍跟练</title>
+<!-- Tailwind CSS CDN with forms & container queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Material Symbols Outlined Font -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Atkinson Hyperlegible Font for High Readability / Low Vision Care -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary-fixed-variant": "#832600",
+            "surface": "#f8f9ff",
+            "outline": "#737783",
+            "on-secondary": "#ffffff",
+            "tertiary-container": "#962d00",
+            "tertiary-fixed": "#ffdbd0",
+            "secondary-fixed": "#9cf2e8",
+            "surface-container": "#e6eeff",
+            "secondary": "#006a63",
+            "primary-fixed": "#d8e2ff",
+            "surface-variant": "#d5e3fc",
+            "error": "#ba1a1a",
+            "error-container": "#ffdad6",
+            "primary-container": "#1a4fa0",
+            "on-tertiary": "#ffffff",
+            "tertiary": "#6f1f00",
+            "on-primary-fixed": "#001a42",
+            "on-primary-container": "#abc5ff",
+            "surface-container-high": "#dce9ff",
+            "inverse-surface": "#233144",
+            "inverse-on-surface": "#eaf1ff",
+            "surface-container-highest": "#d5e3fc",
+            "inverse-primary": "#aec6ff",
+            "surface-tint": "#2c5cae",
+            "on-secondary-fixed": "#00201d",
+            "on-tertiary-fixed": "#390c00",
+            "on-surface": "#0d1c2e",
+            "surface-container-lowest": "#ffffff",
+            "background": "#f8f9ff",
+            "secondary-container": "#99efe5",
+            "on-secondary-container": "#006f67",
+            "on-primary-fixed-variant": "#024394",
+            "surface-dim": "#ccdbf3",
+            "on-surface-variant": "#434751",
+            "on-secondary-fixed-variant": "#00504a",
+            "on-background": "#0d1c2e",
+            "tertiary-fixed-dim": "#ffb59d",
+            "secondary-fixed-dim": "#80d5cb",
+            "primary-fixed-dim": "#aec6ff",
+            "on-error-container": "#93000a",
+            "surface-container-low": "#eff4ff",
+            "on-primary": "#ffffff",
+            "primary": "#00387e",
+            "on-error": "#ffffff",
+            "outline-variant": "#c3c6d3",
+            "on-tertiary-container": "#ffb39a",
+            "surface-bright": "#f8f9ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xs": "0.5rem",
+            "gutter-tablet": "1.5rem",
+            "space-lg": "1.75rem",
+            "margin-tablet": "2rem",
+            "margin": "1.25rem",
+            "gutter": "1rem",
+            "space-sm": "0.75rem",
+            "space-xl": "2.5rem",
+            "space-md": "1.25rem",
+            "margin-desktop": "3rem"
+          },
+          "fontFamily": {
+            "headline-md": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "headline-sm": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "headline-xl": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "body-lg": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "headline-xl-mobile": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "body-md": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "label-xl": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "label-lg": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "label-md": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "body-xl": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "headline-lg": ["Atkinson Hyperlegible Next", "sans-serif"]
+          },
+          "fontSize": {
+            "headline-md": ["24px", { "lineHeight": "34px", "fontWeight": "700" }],
+            "headline-sm": ["20px", { "lineHeight": "30px", "fontWeight": "600" }],
+            "headline-xl": ["36px", { "lineHeight": "48px", "fontWeight": "700" }],
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "headline-xl-mobile": ["30px", { "lineHeight": "40px", "fontWeight": "700" }],
+            "body-md": ["16px", { "lineHeight": "26px", "fontWeight": "500" }],
+            "label-xl": ["18px", { "lineHeight": "24px", "fontWeight": "700" }],
+            "label-lg": ["16px", { "lineHeight": "22px", "fontWeight": "700" }],
+            "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "body-xl": ["20px", { "lineHeight": "32px", "fontWeight": "400" }],
+            "headline-lg": ["28px", { "lineHeight": "38px", "fontWeight": "700" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined[data-weight="fill"] {
+      font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Rhythmic Metronome Pulse Animation */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.92); opacity: 0.9; }
+      50% { transform: scale(1.06); opacity: 0.35; }
+      100% { transform: scale(0.92); opacity: 0.9; }
+    }
+    @keyframes beat-swing {
+      0%, 100% { transform: translateX(-24px); }
+      50% { transform: translateX(24px); }
+    }
+    .pulse-ring-anim {
+      animation: pulse-ring 0.937s infinite ease-in-out; /* 64 BPM is ~0.9375s per beat */
+    }
+    .beat-swing-anim {
+      animation: beat-swing 0.937s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface antialiased min-h-screen pb-36 select-none font-body-md text-body-md">
+<!-- ========================================================
+       TOP APP BAR: WeChat Mini Program Navigation & Capsule
+       ======================================================== -->
+<header class="fixed top-0 left-0 w-full z-50 bg-surface-container-lowest shadow-sm h-16 min-h-[64px] px-margin flex items-center justify-between">
+<!-- Left Navigation: Back & Page Title Anchor -->
+<div class="flex items-center gap-2">
+<button aria-label="返回上一步" class="w-12 h-12 flex items-center justify-center rounded-xl bg-surface-container text-primary active:scale-95 transition-all duration-150">
+<span class="material-symbols-outlined text-[28px]" data-icon="arrow_back">arrow_back</span>
+</button>
+<div>
+<h1 class="font-headline-sm text-headline-sm font-bold text-primary tracking-tight leading-tight">原地踏步节律跟练</h1>
+<p class="font-label-md text-label-md text-secondary font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="graphic_eq">graphic_eq</span>
+          听觉节律(RAS) 诱导训练
+        </p>
+</div>
+</div>
+<!-- Right Controls: Audio Guidance & WeChat Capsule Simulation -->
+<div class="flex items-center gap-2">
+<!-- Voice / Volume Quick Toggle -->
+<button aria-label="音量与语音引导" class="w-11 h-11 rounded-xl bg-surface-container text-primary flex items-center justify-center active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[24px]" data-icon="volume_up">volume_up</span>
+</button>
+<!-- WeChat Capsule (Simulated Native Component for Senior Confidence) -->
+<div class="flex items-center bg-surface-container-high rounded-full px-2.5 py-1.5 border border-outline-variant shadow-xs">
+<button aria-label="小程序操作" class="px-1 text-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]" data-icon="more_horiz">more_horiz</span>
+</button>
+<span class="w-[1px] h-3.5 bg-outline-variant mx-1.5"></span>
+<button aria-label="关闭小程序" class="px-1 text-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]" data-icon="radio_button_checked">radio_button_checked</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Training Container (Single-Axis Guardrail Grid) -->
+<main class="pt-20 px-margin max-w-xl mx-auto space-y-space-md">
+<!-- ========================================================
+         SECTION 1: Action Demonstration Video Window
+         ======================================================== -->
+<section aria-label="动作示范视窗" class="bg-surface-container-lowest rounded-2xl border-[1.5px] border-outline-variant shadow-sm overflow-hidden">
+<!-- Video Stage -->
+<div class="relative w-full aspect-[16/10] bg-inverse-surface flex items-center justify-center overflow-hidden">
+<!-- Main Demonstration Visual Context -->
+<img class="w-full h-full object-cover opacity-90" data-alt="A clinical physical therapist demonstrating seated and standing Parkinson rehabilitation stepping in an airy, brightly lit clinic room with soft natural daylight. The therapist wears clean clinical training attire, emphasizing high knee elevation and dorsal toe flexation. Clean pastel walls, safety grab bar in the background, sharp professional focus, light calm aesthetic with soft cyan and slate blue accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGfG-v-tmANWKnXQ_ouw90LX4eUYlaI9UM0zss-jBPoMGWcCiBCxrvlPpjS-asS0x9f0jJijw4jgFBAwXRiCISm2eIBvzSl9_kx9SfNl5cWA7ikM-C16MsoPDKncbY4lWne0r_Q2hhzpdeK8l6Y-bHsbioa142Cz4kVB-XGLaH-Tm1WZX5Y2_c8rMEE7U5w29VymgpvXCJU0k2YDVbnFYkf53YOcQbSY1Oga28-QJC-N4sDEYjDog97CeAze2kPFq8iWvZzXNvgiyg"/>
+<!-- Top Left Clinical Window Badge -->
+<div class="absolute top-3 left-3 bg-inverse-surface/85 backdrop-blur-md px-3 py-1.5 rounded-full border border-secondary-fixed/50 flex items-center gap-1.5 shadow-sm">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-fixed animate-ping"></span>
+<span class="font-label-md text-label-md text-surface font-bold tracking-wide">开期黄金运动窗口 (药效充沛)</span>
+</div>
+<!-- Top Right Mode Badges (Mirror Mode & Speed) -->
+<div class="absolute top-3 right-3 flex items-center gap-1.5">
+<span class="bg-surface-container-lowest/90 backdrop-blur-md text-primary font-label-md text-label-md px-2.5 py-1 rounded-full border border-primary-fixed font-bold shadow-xs">
+            镜像跟练已开
+          </span>
+<span class="bg-surface-container-high/90 backdrop-blur-md text-on-surface font-label-md text-label-md px-2.5 py-1 rounded-full font-bold">
+            0.75x 慢速
+          </span>
+</div>
+<!-- Playback Active Overlay Indicator -->
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<div class="w-16 h-16 rounded-full bg-primary/75 text-on-primary flex items-center justify-center shadow-lg backdrop-blur-xs border border-surface/30">
+<span class="material-symbols-outlined text-[36px]" data-icon="play_arrow" data-weight="fill">play_arrow</span>
+</div>
+</div>
+<!-- Bottom Guidance Subtitle Strip -->
+<div class="absolute bottom-2 left-3 right-3 bg-inverse-surface/90 backdrop-blur-sm text-surface px-3 py-2 rounded-xl border border-outline-variant/30 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary-fixed text-[22px]" data-icon="accessibility_new">accessibility_new</span>
+<span class="font-label-lg text-label-lg text-surface font-bold">双脚交替抬腿 · 脚尖微勾防拖拽</span>
+</div>
+<span class="font-label-md text-label-md text-surface-container-highest">00:32 / 02:00</span>
+</div>
+</div>
+<!-- Action Section Progress Tracker -->
+<div class="p-space-sm bg-surface-container-low flex items-center justify-between border-t border-outline-variant">
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-1 rounded-lg bg-primary-container text-on-primary font-label-md text-label-md font-bold">
+            第 2 组 / 共 3 组
+          </span>
+<span class="font-label-lg text-label-lg text-on-surface font-bold">下肢防拖拽踏步</span>
+</div>
+<div class="flex items-center gap-1 text-secondary font-label-md text-label-md font-bold">
+<span class="material-symbols-outlined text-[18px]" data-icon="check_circle" data-weight="fill">check_circle</span>
+          姿态传感器已就绪
+        </div>
+</div>
+</section>
+<!-- ========================================================
+         SECTION 2: 64 BPM Rhythmic Auditory Cueing (RAS) Pulse Ring
+         ======================================================== -->
+<section aria-label="节律脉冲与计数区" class="bg-surface-container-lowest rounded-2xl border-2 border-primary-container shadow-md p-space-md text-center relative overflow-hidden">
+<!-- Top Rhythm Status Tag -->
+<div class="flex items-center justify-between mb-space-sm">
+<div class="inline-flex items-center gap-2 bg-secondary-container text-on-secondary-container px-3 py-1.5 rounded-full border border-secondary font-bold">
+<span class="material-symbols-outlined text-[20px]" data-icon="music_note">music_note</span>
+<span class="font-label-lg text-label-lg">64 步/分 · 沉稳木鱼声已开启</span>
+</div>
+<!-- Sound Type Switcher Pill -->
+<button class="bg-surface-container-high hover:bg-surface-container text-primary font-label-md text-label-md px-3 py-1.5 rounded-xl border border-outline-variant flex items-center gap-1 font-bold">
+<span class="material-symbols-outlined text-[18px]" data-icon="tune">tune</span>
+          切换音效
+        </button>
+</div>
+<!-- Center Metronome Pulsing Widget (130dp Circle with Expanding Rings) -->
+<div class="relative py-4 flex flex-col items-center justify-center">
+<!-- Concentric Ring 2 (Outer Glowing Pulse) -->
+<div class="absolute w-44 h-44 rounded-full bg-secondary-fixed/30 pulse-ring-anim pointer-events-none"></div>
+<!-- Concentric Ring 1 (Inner Secondary Ring) -->
+<div class="absolute w-36 h-36 rounded-full bg-secondary/15 pointer-events-none"></div>
+<!-- Central Tactile Beat Disc -->
+<div class="relative z-10 w-28 h-28 rounded-full bg-gradient-to-br from-secondary to-primary text-on-primary flex flex-col items-center justify-center shadow-lg border-4 border-surface-container-lowest">
+<span class="material-symbols-outlined text-[32px] mb-0.5" data-icon="motion_photos_on">motion_photos_on</span>
+<span class="font-headline-sm text-headline-sm font-bold tracking-wider">64 BPM</span>
+<span class="font-label-md text-label-md text-secondary-fixed uppercase">跟准节拍</span>
+</div>
+<!-- Left/Right Foot Dynamic Beat Swing Guidance Bar -->
+<div class="w-full max-w-xs mt-6 px-4 py-2.5 bg-surface-container-low rounded-2xl border border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-label-md">左</span>
+<span class="font-label-lg text-label-lg font-bold text-primary">咚 (抬起)</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-3 h-3 rounded-full bg-secondary animate-bounce"></span>
+<span class="w-3 h-3 rounded-full bg-outline-variant"></span>
+<span class="w-3 h-3 rounded-full bg-secondary animate-bounce delay-150"></span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="font-label-lg text-label-lg font-bold text-secondary">哒 (落稳)</span>
+<span class="w-7 h-7 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-bold text-label-md">右</span>
+</div>
+</div>
+</div>
+<!-- Big Typography Count & Timer Metrics (Elderly Optimized) -->
+<div class="grid grid-cols-2 gap-space-sm pt-2 mt-2 border-t-2 border-surface-container">
+<!-- Stepping Counter -->
+<div class="p-3 bg-surface-container-low rounded-xl border border-outline-variant flex flex-col items-center justify-center">
+<span class="font-label-md text-label-md text-on-surface-variant font-bold mb-1">当前组完成次数</span>
+<div class="flex items-baseline gap-1">
+<span class="font-headline-xl text-headline-xl text-primary font-bold">08</span>
+<span class="font-headline-md text-headline-md text-outline">/ 12 次</span>
+</div>
+<span class="mt-1 inline-flex items-center gap-1 bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded-full font-label-md text-label-md font-bold">
+<span class="material-symbols-outlined text-[16px]" data-icon="task_alt">task_alt</span>
+            抬脚幅度达标 ≥ 15cm
+          </span>
+</div>
+<!-- Countdown Timer -->
+<div class="p-3 bg-surface-container-low rounded-xl border border-outline-variant flex flex-col items-center justify-center">
+<span class="font-label-md text-label-md text-on-surface-variant font-bold mb-1">本节训练倒计时</span>
+<div class="flex items-baseline gap-1">
+<span class="font-headline-xl text-headline-xl text-primary font-bold">01:45</span>
+</div>
+<span class="mt-1 inline-flex items-center gap-1 bg-surface-container-high text-primary px-2.5 py-0.5 rounded-full font-label-md text-label-md font-bold">
+<span class="material-symbols-outlined text-[16px]" data-icon="timer">timer</span>
+            节奏平稳无冻结
+          </span>
+</div>
+</div>
+</section>
+<!-- ========================================================
+         SECTION 3: Mascot Coaching & Safe Step-by-Step Breakdown
+         ======================================================== -->
+<section aria-label="动作要领与吉祥物陪伴指导" class="bg-surface-container-lowest rounded-2xl border-[1.5px] border-outline-variant shadow-sm p-space-md">
+<!-- Mascot Header Card (Warm & Anxiety-Free Tone) -->
+<div class="flex items-center gap-3 bg-surface-container-low p-3 rounded-xl border border-outline-variant mb-space-sm">
+<div class="w-16 h-16 rounded-full overflow-hidden bg-surface-container shrink-0 border-2 border-primary/20 shadow-xs">
+<!-- Mascot Image from User Asset Reference -->
+<img alt="康复小鹿吉祥物" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1Xb8o0u1632jlMAjrWXAh194c_ZSVgRVJ9OtIIUh2d-82rPoWX6J7j30UqYjH6aiCtgsRlZaCsh7_cfNQKKa1rhzLxA6rNCMG1jojBQ_liZ5dlSvCXpyy5hArf8onTd7ZP-cmFBTy51TGuMA3nG2G6V10k-Kyx4grmm0e9K_ex8jtQYtknuFxQPt_2c97FwNS-90djhyyAAZcJadPVGzwpCuG-0iowa9Td1TH54asehm6K3_MEoUtUXPLs"/>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-1.5">
+<h2 class="font-headline-sm text-headline-sm text-primary font-bold">康复小鹿伴您练</h2>
+<span class="bg-primary-fixed text-on-primary-fixed text-label-md font-bold px-2 py-0.5 rounded-full">动作导师</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5 leading-snug">
+            “深呼吸，不要着急。脚掌抬高一步，重心稳固一分，小鹿陪您稳稳走！”
+          </p>
+</div>
+</div>
+<!-- Action Steps Breakdown (Step 1, Step 2, Step 3) -->
+<div class="space-y-2.5">
+<!-- Step 1 -->
+<div class="flex items-start gap-3 p-3 rounded-xl bg-surface-container-low border border-outline-variant">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-label-lg shrink-0 mt-0.5">
+            1
+          </div>
+<div>
+<h3 class="font-label-xl text-label-xl text-on-surface font-bold">双手扶牢椅背或平稳墙面</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">双脚与肩同宽，身体挺直，核心微收，重心居中不前倾。</p>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="flex items-start gap-3 p-3 rounded-xl bg-surface-container-low border border-outline-variant">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-label-lg shrink-0 mt-0.5">
+            2
+          </div>
+<div>
+<h3 class="font-label-xl text-label-xl text-on-surface font-bold">跟随木鱼节拍，呼气抬膝、脚尖上翘</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">每响一声抬起单侧膝盖，脚尖主动向上勾起，杜绝脚趾蹭地拖曳。</p>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="flex items-start gap-3 p-3 rounded-xl bg-surface-container-low border border-outline-variant">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-label-lg shrink-0 mt-0.5">
+            3
+          </div>
+<div>
+<h3 class="font-label-xl text-label-xl text-on-surface font-bold">脚后跟先着地，步伐稳健不慌张</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">平稳过渡到全脚掌落地，保持呼吸自然，步点清晰不赶拍。</p>
+</div>
+</div>
+</div>
+<!-- Safe Resting Reminder (Warm Peach / Amber Warning Shield) -->
+<div class="mt-space-sm bg-[#FFF7ED] rounded-xl border-2 border-[#C2410C] p-3 flex items-start gap-3">
+<span class="material-symbols-outlined text-[#C2410C] text-[28px] shrink-0 mt-0.5" data-icon="report" data-weight="fill">report</span>
+<div>
+<h4 class="font-label-lg text-label-lg text-[#C2410C] font-bold">贴心安全提醒 (防跌倒第一)</h4>
+<p class="font-body-md text-body-md text-[#9A3412] mt-0.5 leading-snug">
+            若训练中出现<strong>腿软、头晕、气促或步态发僵</strong>，请立即轻按下方「暂停训练」，并在身旁牢固座椅上坐稳休息。
+          </p>
+</div>
+</div>
+</section>
+</main>
+<!-- ========================================================
+       SECTION 4: FIXED BOTTOM BAR - Safety Guardrail Controls
+       (Strict adherence to senior-friendly high hit-target >= 60dp)
+       ======================================================== -->
+<footer class="fixed bottom-0 left-0 w-full z-50 bg-surface-container-lowest border-t-2 border-outline-variant px-margin pt-3 pb-5 shadow-lg">
+<div class="max-w-xl mx-auto space-y-2.5">
+<!-- Main Action Split Bar -->
+<div class="grid grid-cols-12 gap-3 items-center">
+<!-- Secondary Action: Complete Set / Finish Early -->
+<button aria-label="完成本组" class="col-span-5 h-[64px] min-h-[60dp] rounded-2xl bg-surface-container-high hover:bg-surface-container text-primary border-2 border-primary-container font-label-xl text-label-xl font-bold flex items-center justify-center gap-1.5 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[24px]" data-icon="check_circle_outline">check_circle_outline</span>
+          完成本组
+        </button>
+<!-- Primary Action: Pause / Resume Stepping Training (Massive Pill) -->
+<button aria-label="暂停或继续训练" class="col-span-7 h-[64px] min-h-[60dp] rounded-2xl bg-primary hover:bg-[#133E7C] text-on-primary font-label-xl text-label-xl font-bold flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[28px]" data-icon="pause_circle" data-weight="fill">pause_circle</span>
+          暂停训练 (可恢复)
+        </button>
+</div>
+<!-- Emergency Assistance Alert Bar (High Contrast Quick Call) -->
+<div class="flex items-center justify-between bg-[#FFF7ED] border border-[#EA580C] px-3.5 py-2 rounded-xl">
+<div class="flex items-center gap-2 text-[#9A3412]">
+<span class="material-symbols-outlined text-[#C2410C] text-[22px]" data-icon="emergency_home" data-weight="fill">emergency_home</span>
+<span class="font-label-md text-label-md font-bold">感觉不适或站立不稳？</span>
+</div>
+<button aria-label="一键呼叫家属或求助" class="bg-[#C2410C] hover:bg-[#9A3412] text-on-tertiary px-3.5 py-1.5 rounded-lg font-label-md text-label-md font-bold flex items-center gap-1 shadow-xs active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="phone_in_talk">phone_in_talk</span>
+          一键呼叫家属
+        </button>
+</div>
+</div>
+</footer>
+<!-- Micro-interactions Script for Play/Pause and Metronome Visual Feedback -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Toggle play/pause simulation with user feedback
+      const mainBtn = document.querySelector('button[aria-label="暂停或继续训练"]');
+      let isPaused = false;
+      if (mainBtn) {
+        mainBtn.addEventListener('click', () => {
+          isPaused = !isPaused;
+          if (isPaused) {
+            mainBtn.innerHTML = `
+              <span class="material-symbols-outlined text-[28px]" data-icon="play_circle" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+              继续跟练 (点击开始)
+            `;
+            mainBtn.classList.replace('bg-primary', 'bg-secondary');
+          } else {
+            mainBtn.innerHTML = `
+              <span class="material-symbols-outlined text-[28px]" data-icon="pause_circle" style="font-variation-settings: 'FILL' 1;">pause_circle</span>
+              暂停训练 (可恢复)
+            `;
+            mainBtn.classList.replace('bg-secondary', 'bg-primary');
+          }
+        });
+      }
+    });
+  </script>
+</body></html>

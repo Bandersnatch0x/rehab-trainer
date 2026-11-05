@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>华东神经康复中心 - 临床分期复核确认工作台</title>
+<!-- Atkinson Hyperlegible Next & Material Symbols -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with custom configuration -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-fixed-dim": "#aec6ff",
+            "tertiary-fixed": "#ffdcc3",
+            "secondary-fixed-dim": "#72d8c8",
+            "on-surface-variant": "#434751",
+            "outline": "#737783",
+            "tertiary-fixed-dim": "#ffb77d",
+            "surface-container-highest": "#dae2fd",
+            "surface-container-low": "#f2f3ff",
+            "surface-tint": "#2c5cae",
+            "tertiary-container": "#7e4200",
+            "inverse-primary": "#aec6ff",
+            "on-secondary-container": "#007166",
+            "primary-fixed": "#d8e2ff",
+            "surface-container": "#eaedff",
+            "inverse-surface": "#283044",
+            "on-secondary-fixed-variant": "#005048",
+            "on-tertiary-fixed-variant": "#6e3900",
+            "on-tertiary-container": "#ffb579",
+            "surface-container-high": "#e2e7ff",
+            "on-secondary-fixed": "#00201c",
+            "on-tertiary-fixed": "#2f1500",
+            "on-error": "#ffffff",
+            "on-primary-fixed": "#001a42",
+            "primary": "#00387e",
+            "error-container": "#ffdad6",
+            "surface-variant": "#dae2fd",
+            "on-primary-container": "#abc5ff",
+            "surface-container-lowest": "#ffffff",
+            "outline-variant": "#c3c6d3",
+            "secondary-container": "#8ef4e4",
+            "on-surface": "#131b2e",
+            "surface-bright": "#faf8ff",
+            "on-primary": "#ffffff",
+            "surface": "#faf8ff",
+            "tertiary": "#5c2f00",
+            "on-error-container": "#93000a",
+            "inverse-on-surface": "#eef0ff",
+            "on-tertiary": "#ffffff",
+            "error": "#ba1a1a",
+            "background": "#faf8ff",
+            "on-secondary": "#ffffff",
+            "on-primary-fixed-variant": "#024394",
+            "secondary-fixed": "#8ef4e4",
+            "surface-dim": "#d2d9f4",
+            "secondary": "#006a60",
+            "on-background": "#131b2e",
+            "primary-container": "#1a4fa0"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-lg": "1.5rem",
+            "space-2xl": "3rem",
+            "space-sm": "0.75rem",
+            "space-xs": "0.5rem",
+            "margin": "1.5rem",
+            "gutter": "1.5rem",
+            "space-xl": "2.25rem",
+            "space-md": "1rem"
+          },
+          "fontFamily": {
+            "display-counter": ["Atkinson Hyperlegible Next"],
+            "label-md": ["Atkinson Hyperlegible Next"],
+            "display-counter-lg": ["Atkinson Hyperlegible Next"],
+            "body-xl": ["Atkinson Hyperlegible Next"],
+            "body-lg": ["Atkinson Hyperlegible Next"],
+            "headline-md": ["Atkinson Hyperlegible Next"],
+            "headline-sm": ["Atkinson Hyperlegible Next"],
+            "label-lg": ["Atkinson Hyperlegible Next"],
+            "body-md": ["Atkinson Hyperlegible Next"],
+            "headline-lg": ["Atkinson Hyperlegible Next"]
+          },
+          "fontSize": {
+            "display-counter": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "label-md": ["16px", { "lineHeight": "22px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+            "display-counter-lg": ["72px", { "lineHeight": "80px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+            "body-xl": ["22px", { "lineHeight": "32px", "fontWeight": "500" }],
+            "body-lg": ["20px", { "lineHeight": "30px", "fontWeight": "400" }],
+            "headline-md": ["26px", { "lineHeight": "34px", "fontWeight": "700" }],
+            "headline-sm": ["22px", { "lineHeight": "30px", "fontWeight": "600" }],
+            "label-lg": ["18px", { "lineHeight": "24px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+            "body-md": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f2f3ff;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #c3c6d3;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md text-body-md h-full flex flex-col antialiased selection:bg-primary selection:text-on-primary">
+<!-- ================= TOP NAV BAR (Shared Component Anchor) ================= -->
+<header class="flex justify-between items-center h-16 px-margin w-full z-40 bg-surface-container-lowest dark:bg-inverse-surface border-b border-outline-variant shadow-sm fixed top-0 left-0">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary-container text-white flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">neurology</span>
+</div>
+<div>
+<span class="font-headline-sm text-headline-sm text-primary font-bold tracking-tight">华东神经康复中心 (D10隔离租户)</span>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="inline-flex items-center px-1.5 py-0.2 rounded text-[11px] font-semibold bg-secondary-fixed text-on-secondary-fixed-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary mr-1 animate-pulse"></span>
+              CDSS智算节点正常 (9ms)
+            </span>
+<span class="text-xs text-on-surface-variant font-mono">专科云通道：TLS 1.3 / EMR-V4.2</span>
+</div>
+</div>
+</div>
+<!-- Top Search -->
+<div class="hidden lg:flex items-center relative ml-6">
+<span class="material-symbols-outlined absolute left-3 text-outline text-lg">search</span>
+<input class="pl-9 pr-4 py-1.5 w-72 rounded-lg bg-surface-container-low border border-outline-variant text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-on-surface" placeholder="输入病案号 / 身份证 / 姓名搜索患者..." type="text"/>
+</div>
+</div>
+<!-- Trailing Actions & Profile -->
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors duration-150 relative" title="系统提醒">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-surface-container-lowest"></span>
+</button>
+<button class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors duration-150" title="临床帮助">
+<span class="material-symbols-outlined">help</span>
+</button>
+<div class="h-6 w-px bg-outline-variant"></div>
+<!-- User Badge -->
+<div class="flex items-center gap-3 pl-2">
+<div class="w-9 h-9 rounded-full ring-2 ring-primary/20 bg-surface-container flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A portrait of a senior Chinese medical neurologist in clinical white coat with stethoscope, soft modern hospital lighting, calm and professional expression, clinical digital photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwcY8fk-hIaoDMdSniYkkRZkuoHjbKZ7dWQfMUoy6inRhoLXnI3EMFR7grXLbTRWvwpS0Zb4U60peFo69AQF_t6uXnn6mJ5eRB-8TG7Ea9ZKnDPoxe-fbV8YDGQrU80eZT7jECjihNBMXnxT9vGumQoE4lSNiUY5I1wHC2WtmdktHWDjsBh3Uc7JpzJz2VqLIl3rNQXzOAlFWGO2ejtEIQfZOtJuF4UknusdTCDo8inptEiHhLCl94EnNbt89fiFr9QCmICW3Y-EfU"/>
+</div>
+<div class="text-left">
+<p class="font-label-lg text-label-lg text-primary leading-tight font-bold">李副主任医师</p>
+<p class="text-xs text-on-surface-variant font-mono">神经退行性病变专科 · 门诊3室</p>
+</div>
+<button class="ml-2 px-3 py-1 text-sm font-medium text-error hover:bg-error-container/60 rounded-lg transition-colors duration-150 flex items-center gap-1">
+<span class="material-symbols-outlined text-base">logout</span>
+<span>退出</span>
+</button>
+</div>
+</div>
+</header>
+<!-- ================= MAIN LAYOUT WITH SIDE NAV ================= -->
+<div class="flex pt-16 h-full flex-1 overflow-hidden">
+<!-- SideNavBar (Shared Component Anchor) -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 z-30 flex flex-col justify-between py-space-lg px-space-md border-r border-outline-variant bg-surface-container-low shadow-sm">
+<div class="space-y-6">
+<!-- Subheader Unit -->
+<div class="px-2 pb-3 border-b border-outline-variant/60">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">clinical_notes</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold text-base leading-snug">帕金森临床康复系统</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-1">UPDRS &amp; H-Y 分期平台</p>
+</div>
+<!-- Navigation Tabs: Exact Labels & Icons from JSON, Active on "分期确认" -->
+<nav class="space-y-1.5">
+<!-- 1. 患者工作台 -->
+<a class="flex items-center gap-3 px-space-md py-space-sm text-on-surface-variant font-body-md text-body-md hover:bg-surface-container-high rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined">clinical_notes</span>
+<span>患者工作台</span>
+</a>
+<!-- 2. 分期确认 (ACTIVE STATE as per instructions) -->
+<a class="flex items-center justify-between px-space-md py-space-sm bg-primary-container text-on-primary-container font-label-lg text-label-lg rounded-lg border-l-4 border-primary transition-all duration-200 shadow-sm" href="#">
+<div class="flex items-center gap-3 text-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">fact_check</span>
+<span class="font-bold">分期确认</span>
+</div>
+<span class="px-2 py-0.5 text-xs font-bold bg-error text-white rounded-full">3 待核</span>
+</a>
+<!-- 3. 处方编辑 -->
+<a class="flex items-center gap-3 px-space-md py-space-sm text-on-surface-variant font-body-md text-body-md hover:bg-surface-container-high rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined">edit_calendar</span>
+<span>处方编辑</span>
+</a>
+<!-- 4. 预警处置中心 -->
+<a class="flex items-center justify-between px-space-md py-space-sm text-on-surface-variant font-body-md text-body-md hover:bg-surface-container-high rounded-lg transition-all duration-200" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined">warning</span>
+<span>预警处置中心</span>
+</div>
+<span class="w-2 h-2 rounded-full bg-tertiary-container"></span>
+</a>
+<!-- 5. 随访台账 -->
+<a class="flex items-center gap-3 px-space-md py-space-sm text-on-surface-variant font-body-md text-body-md hover:bg-surface-container-high rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span>随访台账</span>
+</a>
+<!-- 6. 权限管理 -->
+<a class="flex items-center gap-3 px-space-md py-space-sm text-on-surface-variant font-body-md text-body-md hover:bg-surface-container-high rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined">admin_panel_settings</span>
+<span>权限管理</span>
+</a>
+</nav>
+</div>
+<!-- CTA & Footer Tabs -->
+<div class="space-y-4 pt-4 border-t border-outline-variant">
+<!-- Emergency CTA -->
+<button class="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-error text-white font-label-md text-label-md rounded-lg shadow hover:bg-red-700 transition-colors">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">emergency</span>
+<span>发起紧急干预</span>
+</button>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-space-md py-2 text-on-surface-variant text-sm hover:bg-surface-container-high rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-lg">settings</span>
+<span>系统配置</span>
+</a>
+<a class="flex items-center gap-3 px-space-md py-2 text-on-surface-variant text-sm hover:bg-surface-container-high rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-lg">support_agent</span>
+<span>临床帮助指南</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- ================= MAIN CONTENT WORKBENCH CANVAS ================= -->
+<main class="ml-64 flex-1 h-[calc(100vh-4rem)] overflow-y-auto custom-scrollbar bg-background p-6 space-y-6">
+<!-- BREADCRUMB & PATIENT CLINICAL BANNER -->
+<div class="bg-surface-container-lowest border-2 border-outline-variant rounded-xl p-5 shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-4 border-b border-outline-variant/60 pb-4">
+<!-- Breadcrumb -->
+<nav class="flex items-center gap-2 text-sm text-on-surface-variant">
+<span>患者工作台</span>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+<span class="text-primary font-semibold">临床分期复核</span>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+<span class="text-on-surface font-bold">张建国 (PID-20240012)</span>
+</nav>
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-tertiary-fixed text-tertiary-container flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">pending_actions</span>
+              待专家终审定级
+            </span>
+<span class="text-xs text-on-surface-variant">本次建档时间：2025-02-28 09:42 门诊神经电生理室</span>
+</div>
+</div>
+<!-- Patient Demographics & Key Metrics Banner -->
+<div class="mt-4 grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 items-center">
+<div class="flex items-center gap-3 col-span-2">
+<div class="w-12 h-12 rounded-xl bg-primary-fixed flex items-center justify-center text-primary font-bold text-lg border border-primary-container/20">
+              建国
+            </div>
+<div>
+<div class="flex items-center gap-2">
+<h1 class="font-headline-md text-headline-md text-on-surface">张建国</h1>
+<span class="text-xs font-bold px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant">男 · 68岁</span>
+<span class="text-xs font-mono text-outline">PID-20240012</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-0.5">主诉：原发性帕金森病4.5年 · 现口服多巴丝肼片(美多芭) 125mg tid</p>
+</div>
+</div>
+<!-- Metric: Berg Balance -->
+<div class="p-3 bg-surface-container-low rounded-lg border border-outline-variant/70">
+<div class="text-xs text-on-surface-variant font-medium">Berg平衡量表 (BBS)</div>
+<div class="flex items-baseline gap-2 mt-0.5">
+<span class="font-headline-sm text-headline-sm text-primary font-bold">82</span>
+<span class="text-xs text-on-surface-variant">/ 100分</span>
+<span class="text-[11px] font-semibold text-secondary ml-auto bg-secondary-fixed/50 px-1.5 py-0.5 rounded">低跌倒风险</span>
+</div>
+</div>
+<!-- Metric: UPDRS-III Motor Score -->
+<div class="p-3 bg-surface-container-low rounded-lg border border-outline-variant/70">
+<div class="text-xs text-on-surface-variant font-medium">UPDRS-III 运动评分</div>
+<div class="flex items-baseline gap-2 mt-0.5">
+<span class="font-headline-sm text-headline-sm text-primary font-bold">24.5</span>
+<span class="text-xs text-on-surface-variant">轻度双侧受累</span>
+<span class="text-xs text-error font-medium ml-auto">↑ 较上期+1.5</span>
+</div>
+</div>
+<!-- Metric: Wearable RAS Cadence -->
+<div class="p-3 bg-surface-container-low rounded-lg border border-outline-variant/70">
+<div class="text-xs text-on-surface-variant font-medium">RAS步态节律靶值</div>
+<div class="flex items-baseline gap-2 mt-0.5">
+<span class="font-headline-sm text-headline-sm text-secondary font-bold">64</span>
+<span class="text-xs text-on-surface-variant">BPM</span>
+<span class="text-xs text-on-surface-variant ml-auto font-mono">对称性 88%</span>
+</div>
+</div>
+<!-- Quick Action -->
+<div class="flex justify-end">
+<button class="px-4 py-2 border border-outline rounded-lg text-sm font-semibold hover:bg-surface-container-high transition-colors flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-base">folder_shared</span>
+              完整病历调阅
+            </button>
+</div>
+</div>
+</div>
+<!-- MODULE 2: DUAL CLINICAL DECISION COMPARISON (AI Inference vs Doctor Final) -->
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<!-- AI Inference Card -->
+<div class="bg-surface-container-lowest border-2 border-outline-variant rounded-2xl p-6 shadow-sm relative overflow-hidden">
+<div class="absolute top-0 right-0 transform translate-x-2 -translate-y-2">
+<div class="w-24 h-24 bg-primary/5 rounded-full blur-xl pointer-events-none"></div>
+</div>
+<div class="flex items-center justify-between pb-4 border-b border-outline-variant">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">AI 智能算法初筛分期</h2>
+<p class="text-xs text-on-surface-variant">多模态运动学卷积模型 (V3.8-BioKinetics)</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-3 py-1 bg-surface-container-high text-primary font-bold text-xs rounded-full border border-primary/20">
+                算法置信度 94.6%
+              </span>
+</div>
+</div>
+<div class="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+<div class="sm:col-span-1 p-4 bg-surface-container-low rounded-xl border border-outline-variant text-center">
+<span class="text-xs font-semibold uppercase text-on-surface-variant">初步推断分期</span>
+<div class="font-display-counter text-display-counter text-primary leading-none my-2 font-bold tracking-tight">
+                2.0
+              </div>
+<span class="inline-block px-2.5 py-0.5 rounded text-xs font-bold bg-primary text-white">
+                Hoehn &amp; Yahr 2.0 期
+              </span>
+</div>
+<div class="sm:col-span-2 space-y-2 text-sm">
+<p class="font-semibold text-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base text-secondary">verified</span>
+                双侧轻度受累 · 尚未检测出姿势平衡障碍
+              </p>
+<div class="grid grid-cols-2 gap-2 text-xs text-on-surface-variant pt-1">
+<div class="bg-surface p-2 rounded border border-outline-variant/50">
+<span class="text-outline">骨传导传感器FoG:</span>
+<span class="font-semibold text-on-surface ml-1">0.12 (无冻结)</span>
+</div>
+<div class="bg-surface p-2 rounded border border-outline-variant/50">
+<span class="text-outline">步频对称性:</span>
+<span class="font-semibold text-on-surface ml-1">88% (轻微差)</span>
+</div>
+<div class="bg-surface p-2 rounded border border-outline-variant/50">
+<span class="text-outline">躯干旋转角:</span>
+<span class="font-semibold text-tertiary-container ml-1">76% (轻度受限)</span>
+</div>
+<div class="bg-surface p-2 rounded border border-outline-variant/50">
+<span class="text-outline">双手静止性震颤:</span>
+<span class="font-semibold text-on-surface ml-1">双侧2级 (左&gt;右)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Alert Box -->
+<div class="mt-5 p-3.5 bg-amber-50 border-l-4 border-amber-500 rounded-r-lg flex items-start gap-3">
+<span class="material-symbols-outlined text-amber-600 text-xl shrink-0 mt-0.5">warning</span>
+<div class="text-xs">
+<span class="font-bold text-amber-900">关键预警标记 (Axial Rigidity Warning)：</span>
+<p class="text-amber-800 mt-0.5">算法在 180° 原地转弯任务中捕捉到轻微轴向僵硬与拖步步态，提示存在向 <span class="font-bold underline">2.5 期</span> 发展的潜在倾向。强烈建议主治专家重点复核后拉试验(Pull Test)与抗阻恢复动态。</p>
+</div>
+</div>
+</div>
+<!-- Doctor Workbench Card -->
+<div class="bg-surface-container-lowest border-2 border-primary rounded-2xl p-6 shadow-sm relative flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between pb-4 border-b border-outline-variant">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-primary-container text-white flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">assignment_turned_in</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-primary">主治专家复核状态</h2>
+<p class="text-xs text-on-surface-variant">李副主任医师 · 医疗电子确认终审权</p>
+</div>
+</div>
+<span class="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-full flex items-center gap-1 border border-amber-300">
+<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                待签字确认生效
+              </span>
+</div>
+<!-- Current Stage Selector in Focus -->
+<div class="mt-5 flex items-center justify-between bg-primary-fixed/20 p-4 rounded-xl border border-primary/30">
+<div>
+<span class="text-xs font-bold text-primary uppercase tracking-wide">拟定最终生效分期</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-headline-lg text-headline-lg text-primary font-bold">H-Y 2.0 期</span>
+<span class="text-xs text-on-surface-variant font-medium">(双侧受累，平衡正常)</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<label class="text-xs text-on-surface-variant font-medium">专家微调:</label>
+<select class="bg-surface-container-lowest border-2 border-primary rounded-lg text-sm font-bold text-primary px-3 py-1.5 focus:ring-2 focus:ring-primary focus:outline-none" id="stageAdjustmentSelect">
+<option value="1.0">H-Y 1.0 期</option>
+<option value="1.5">H-Y 1.5 期</option>
+<option selected="" value="2.0">H-Y 2.0 期 (当前推荐)</option>
+<option value="2.5">H-Y 2.5 期 (轻度平衡受累)</option>
+<option value="3.0">H-Y 3.0 期</option>
+</select>
+</div>
+</div>
+<!-- CDSS Clinical Decision Support Info -->
+<div class="mt-4 p-3 bg-surface-container-low rounded-xl border border-outline-variant/60 flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-2xl">auto_stories</span>
+<div class="text-xs text-on-surface-variant leading-relaxed">
+<strong class="text-on-surface">CDSS 临床辅助提示：</strong>
+                完全符合《2024 中华医学会神经病学分会帕金森康复指导规范》。当前姿势反射检查(Pull test)能自发在2步内维持稳定，未出现中度姿势反射受损，无需跃升至 3.0 期。
+              </div>
+</div>
+</div>
+<!-- Bottom Micro State -->
+<div class="mt-4 pt-3 border-t border-outline-variant flex items-center justify-between text-xs text-on-surface-variant">
+<span class="flex items-center gap-1 font-mono">
+<span class="material-symbols-outlined text-sm text-secondary">verified_user</span>
+              CFDA 三类医疗器械智能辅助判定合规
+            </span>
+<span class="text-outline">最后修改时间：今日 10:14</span>
+</div>
+</div>
+</section>
+<!-- MODULE 3: FIVE-TIER HOEHN & YAHR INTERACTIVE STAGING CARDS -->
+<section class="space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">linear_scale</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Hoehn &amp; Yahr (H-Y) 临床规范分期阶梯标定</h2>
+</div>
+<span class="text-xs text-on-surface-variant">点击卡片可快速切换复核目标级别并关联特征</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
+<!-- Stage 1.0 -->
+<div class="bg-surface-container-lowest border-2 border-outline-variant rounded-xl p-4 flex flex-col justify-between hover:border-primary/50 transition-all cursor-pointer">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-bold text-outline">STAGE 1</span>
+<span class="text-xs font-mono px-2 py-0.5 rounded bg-surface-container-low text-on-surface">1.0 期</span>
+</div>
+<h3 class="font-label-lg text-label-lg text-on-surface mb-1">单侧肢体受累</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed mb-3">单侧肢体轻微震颤、强直或动作迟缓，对日常起居与步态无明显功能限制。</p>
+<div class="space-y-1.5 pt-2 border-t border-outline-variant/60 text-xs">
+<label class="flex items-center gap-2 cursor-pointer text-on-surface-variant">
+<input class="rounded border-outline text-primary focus:ring-primary w-3.5 h-3.5" type="checkbox"/>
+<span>单侧手部静止震颤</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer text-on-surface-variant">
+<input class="rounded border-outline text-primary focus:ring-primary w-3.5 h-3.5" type="checkbox"/>
+<span>同侧上肢摆幅变小</span>
+</label>
+</div>
+</div>
+<div class="mt-4 pt-2 text-[11px] text-outline border-t border-outline-variant/40 text-center">
+              单侧病变阶段
+            </div>
+</div>
+<!-- Stage 2.0 (ACTIVE / HIGHLIGHTED) -->
+<div class="bg-surface-container-lowest border-2 border-primary rounded-xl p-4 flex flex-col justify-between shadow-md relative ring-2 ring-primary/20">
+<span class="absolute -top-2.5 right-3 px-2 py-0.5 bg-primary text-white text-[11px] font-bold rounded-full uppercase tracking-wider">
+              当前拟定分期
+            </span>
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-bold text-primary">STAGE 2</span>
+<span class="text-xs font-mono px-2 py-0.5 rounded bg-primary text-white font-bold">2.0 期</span>
+</div>
+<h3 class="font-label-lg text-label-lg text-primary mb-1">双侧受累 · 无姿势受损</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed mb-3">双侧肢体或躯干受累，后拉试验(Pull test)维持正常，无平衡反射受损。</p>
+<!-- Clinical Checklist with preselected states -->
+<div class="space-y-1.5 pt-2 border-t border-outline-variant/60 text-xs">
+<label class="flex items-center gap-2 cursor-pointer text-primary font-semibold">
+<input checked="" class="rounded border-primary text-primary focus:ring-primary w-3.5 h-3.5" type="checkbox"/>
+<span>[√] 双侧肌张力轻度增高</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer text-primary font-semibold">
+<input checked="" class="rounded border-primary text-primary focus:ring-primary w-3.5 h-3.5" type="checkbox"/>
+<span>[√] 面部表情减少 (面具脸)</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer text-on-surface-variant">
+<input class="rounded border-outline text-primary focus:ring-primary w-3.5 h-3.5" type="checkbox"/>
+<span>[ ] 轴向扭转明显受限</span>
+</label>
+</div>
+</div>
+<div class="mt-4 pt-2 text-[11px] text-secondary font-bold border-t border-outline-variant/40 flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+              与AI推断完全吻合
+            </div>
+</div>
+<!-- Stage 2.5 (Transition) -->
+<div class="bg-surface-container-lowest border-2 border-outline-variant hover:border-tertiary-container/80 rounded-xl p-4 flex flex-col justify-between transition-all cursor-pointer">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-bold text-tertiary-container">STAGE 2.5</span>
+<span class="text-xs font-mono px-2 py-0.5 rounded bg-tertiary-fixed text-tertiary font-bold">2.5 期 (过渡)</span>
+</div>
+<h3 class="font-label-lg text-label-lg text-on-surface mb-1">轻度双侧受累 · 后拉自复</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed mb-3">轻度双侧病变，后拉试验出现后退多步但能自发纠正恢复，无跌倒危险。</p>
+<div class="space-y-1.5 pt-2 border-t border-outline-variant/60 text-xs">
+<label class="flex items-center gap-2 cursor-pointer text-on-surface-variant">
+<input class="rounded border-outline text-primary focus:ring-primary w-3.5 h-3.5" type="checkbox"/>
+<span>后拉试验退步≥2步</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer text-on-surface-variant">
+<input class="rounded border-outline text-primary focus:ring-primary w-3.5 h-3.5" type="checkbox"/>
+<span>转弯时轻度步态迟缓</span>
+</label>
+</div>
+</div>
+<div class="mt-4 pt-2 text-[11px] text-amber-700 bg-amber-50 px-2 py-1 rounded text-center font-medium">
+              AI标记发展倾向候选
+            </div>
+</div>
+<!-- Stage 3.0 (Critical turning point) -->
+<div class="bg-surface-container-lowest border-2 border-outline-variant rounded-xl p-4 flex flex-col justify-between hover:border-error/60 transition-all cursor-pointer">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-bold text-error">STAGE 3</span>
+<span class="text-xs font-mono px-2 py-0.5 rounded bg-error-container text-on-error-container font-bold">3.0 期界线</span>
+</div>
+<h3 class="font-label-lg text-label-lg text-on-surface mb-1">姿势反射受损 · 自理存续</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed mb-3">轻至中度受累，关键姿势平衡受损，后拉试验阳性跌仆，但日常生活可自理。</p>
+<div class="space-y-1.5 pt-2 border-t border-outline-variant/60 text-xs">
+<label class="flex items-center gap-2 cursor-pointer text-on-surface-variant">
+<input class="rounded border-outline text-primary focus:ring-primary w-3.5 h-3.5" type="checkbox"/>
+<span>后拉试验阳性(需抓扶)</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer text-on-surface-variant">
+<input class="rounded border-outline text-primary focus:ring-primary w-3.5 h-3.5" type="checkbox"/>
+<span>日常生活轻度受限</span>
+</label>
+</div>
+</div>
+<div class="mt-4 pt-2 text-[11px] text-outline border-t border-outline-variant/40 text-center">
+              残疾转折警戒期
+            </div>
+</div>
+<!-- Stage 4.0 & 5.0 Combined Summary Card -->
+<div class="bg-surface-container-low border-2 border-outline-variant/80 rounded-xl p-4 flex flex-col justify-between opacity-80 hover:opacity-100 transition-opacity">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-bold text-outline">STAGE 4-5</span>
+<span class="text-xs font-mono px-2 py-0.5 rounded bg-surface-container-high text-on-surface">重度残疾</span>
+</div>
+<h3 class="font-label-lg text-label-lg text-on-surface mb-1">重度功能障碍</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed mb-3">4.0期严重障碍仍可独立立行；5.0期完全依赖轮椅或卧床不起，全天需专人照料。</p>
+<div class="space-y-1.5 pt-2 border-t border-outline-variant/60 text-xs">
+<label class="flex items-center gap-2 cursor-not-allowed text-outline">
+<input class="rounded border-outline text-outline w-3.5 h-3.5" disabled="" type="checkbox"/>
+<span>无法独立自主起立</span>
+</label>
+<label class="flex items-center gap-2 cursor-not-allowed text-outline">
+<input class="rounded border-outline text-outline w-3.5 h-3.5" disabled="" type="checkbox"/>
+<span>轮椅或卧床状态</span>
+</label>
+</div>
+</div>
+<div class="mt-4 pt-2 text-[11px] text-outline border-t border-outline-variant/40 text-center">
+              终末功能衰退阶段
+            </div>
+</div>
+</div>
+</section>
+<!-- MODULE 4: CLINICAL RATIONALE & PRESCRIPTION LINKAGE -->
+<section class="bg-surface-container-lowest border-2 border-outline-variant rounded-2xl p-6 shadow-sm space-y-5">
+<div class="flex items-center justify-between border-b border-outline-variant pb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">rate_review</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">专家临床复核意见与处方联动设定</h2>
+</div>
+<span class="text-xs text-on-surface-variant">电子病历签名编码：MD-SIGN-20250228-0994</span>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Rationale Textarea and Quick chips -->
+<div class="lg:col-span-2 space-y-3">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-on-surface font-bold" for="doctorRationale">
+                主治专家复核依据及病程小结 (Clinical Rationale):
+              </label>
+<span class="text-xs text-on-surface-variant">已输入 86 字</span>
+</div>
+<textarea class="w-full rounded-xl border-2 border-outline-variant p-3.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary text-on-surface leading-relaxed resize-none" id="doctorRationale" placeholder="请阐明针对患者本次H-Y分期的判定依据，若推翻AI预判请详细记录体征证据..." rows="4">查体见患者双侧肢体肌张力呈齿轮样增高，左侧重于右侧；步态检查原地踏步及180度转弯稍有迟滞，但后拉试验（Pull test）后退1步即能稳固恢复自平衡，未见跌倒征象。故维持Hoehn &amp; Yahr 2.0期评定，暂不下调至2.5期。建议加强听觉节律(RAS 64BPM)下肢协调训练。</textarea>
+<!-- Quick Template Chips -->
+<div class="flex flex-wrap items-center gap-2 pt-1">
+<span class="text-xs font-semibold text-outline">快捷体征插入:</span>
+<button class="px-2.5 py-1 bg-surface-container rounded-lg text-xs text-primary font-medium hover:bg-surface-container-highest transition-colors">
+                + 后拉试验正常，维持2期
+              </button>
+<button class="px-2.5 py-1 bg-surface-container rounded-lg text-xs text-primary font-medium hover:bg-surface-container-highest transition-colors">
+                + 建议下肢抗阻维持
+              </button>
+<button class="px-2.5 py-1 bg-surface-container rounded-lg text-xs text-primary font-medium hover:bg-surface-container-highest transition-colors">
+                + 需密切监测傍晚关期步态
+              </button>
+<button class="px-2.5 py-1 bg-surface-container rounded-lg text-xs text-primary font-medium hover:bg-surface-container-highest transition-colors">
+                + 警惕夜间翻身困难
+              </button>
+</div>
+</div>
+<!-- Action Plan Linkage Switches -->
+<div class="bg-surface-container-low rounded-xl p-4 border border-outline-variant flex flex-col justify-between">
+<div>
+<h3 class="font-label-md text-label-md text-on-surface font-bold mb-3 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary text-lg">sync_saved_locally</span>
+                处方与家属端自动联动
+              </h3>
+<div class="space-y-4 text-xs">
+<label class="flex items-start gap-3 cursor-pointer">
+<input checked="" class="mt-0.5 rounded border-primary text-primary focus:ring-primary w-4 h-4" type="checkbox"/>
+<span class="text-on-surface leading-snug">
+<strong class="block font-semibold">自动同步更新患者平板端运动处方</strong>
+                    匹配 RAS 64 BPM 听觉节律步频强化，并派发核心肌群抗阻力 2 级训练包。
+                  </span>
+</label>
+<label class="flex items-start gap-3 cursor-pointer">
+<input checked="" class="mt-0.5 rounded border-primary text-primary focus:ring-primary w-4 h-4" type="checkbox"/>
+<span class="text-on-surface leading-snug">
+<strong class="block font-semibold">推送分期变更通知至家属微信端</strong>
+                    推送患者 张建国 最新阶段评定及家庭跌倒防范指南(低风险照护宣教)。
+                  </span>
+</label>
+<label class="flex items-start gap-3 cursor-pointer">
+<input class="mt-0.5 rounded border-primary text-primary focus:ring-primary w-4 h-4" type="checkbox"/>
+<span class="text-on-surface leading-snug">
+<strong class="block font-semibold">预约4周后门诊步态平衡复查</strong>
+                    系统将提前3日触发微信与短信自动随访提醒。
+                  </span>
+</label>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant/60 flex items-center justify-between text-[11px] text-outline">
+<span>关联责任护师：张敏主管护师</span>
+<span>处方模板：PD-REHAB-B2</span>
+</div>
+</div>
+</div>
+<!-- Master Actions Bar -->
+<div class="pt-4 border-t border-outline-variant flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<button class="px-5 py-2.5 rounded-lg border-2 border-outline-variant hover:bg-surface-container font-label-md text-label-md text-on-surface-variant transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-lg">save</span>
+<span>暂存草稿</span>
+</button>
+<button class="px-5 py-2.5 rounded-lg border-2 border-outline-variant hover:bg-surface-container font-label-md text-label-md text-on-surface-variant transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-lg">radar</span>
+<span>查看AI多维步态雷达原图</span>
+</button>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-xs text-on-surface-variant hidden sm:inline">
+              已启用高风险定级防误触保护
+            </span>
+<button class="px-8 py-3 bg-primary-container text-white font-label-lg text-label-lg rounded-xl shadow-md hover:bg-primary transition-all flex items-center gap-2 ring-2 ring-primary/30 active:scale-[0.98]">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">lock</span>
+<span>确认分期并签署生效 (生成医疗电子签名)</span>
+</button>
+</div>
+</div>
+</section>
+<!-- MODULE 5: STAGING AUDIT TRAIL TABLE (Historical Clinical Path) -->
+<section class="bg-surface-container-lowest border-2 border-outline-variant rounded-2xl p-6 shadow-sm space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">history_edu</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">历史分期变更轨迹与随访台账 (Audit Trail)</h2>
+</div>
+<span class="text-xs text-on-surface-variant font-mono">共调取 4 次定级记录 · 区块链存证已校验</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse text-sm">
+<thead>
+<tr class="bg-surface-container-low border-b-2 border-outline-variant text-on-surface-variant text-xs uppercase tracking-wider font-semibold">
+<th class="py-3 px-4">评估日期</th>
+<th class="py-3 px-3">评定前分期</th>
+<th class="py-3 px-3">变更后分期</th>
+<th class="py-3 px-4">评定来源</th>
+<th class="py-3 px-4">经手医师</th>
+<th class="py-3 px-6">临床指征 / 变更原因</th>
+<th class="py-3 px-4">数字签名状态</th>
+<th class="py-3 px-4 text-right">操作</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/60 font-normal">
+<!-- Record 1: Current In-Review (Pending) -->
+<tr class="bg-primary-fixed/10 hover:bg-primary-fixed/20 transition-colors">
+<td class="py-3 px-4 font-mono font-bold text-on-surface">2025-02-28 (今日)</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded bg-surface-container text-xs font-mono">H-Y 2.0</span>
+</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded bg-primary text-white text-xs font-bold font-mono">H-Y 2.0 (拟定)</span>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 text-xs text-primary font-semibold">
+<span class="material-symbols-outlined text-sm">psychology</span>
+                    AI初筛 + 专家终审
+                  </span>
+</td>
+<td class="py-3 px-4 font-semibold text-primary">李副主任医师</td>
+<td class="py-3 px-6 text-xs text-on-surface-variant max-w-md">
+                  双侧轻度肌张力增高，轻微轴向僵硬；后拉试验阴性，决定继续维持2.0期。
+                </td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-300">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
+                    待签署
+                  </span>
+</td>
+<td class="py-3 px-4 text-right">
+<span class="text-xs text-primary font-bold cursor-pointer hover:underline">正在复核</span>
+</td>
+</tr>
+<!-- Record 2: 6 Months ago -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-3 px-4 font-mono text-on-surface-variant">2024-08-15</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded bg-surface-container text-xs font-mono">H-Y 1.5</span>
+</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded bg-surface-container-highest text-primary text-xs font-bold font-mono">H-Y 2.0</span>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 text-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">local_hospital</span>
+                    住院期中复查
+                  </span>
+</td>
+<td class="py-3 px-4 font-medium">王主任医师</td>
+<td class="py-3 px-6 text-xs text-on-surface-variant max-w-md">
+                  右侧肢体震颤波及左上肢，出现面具脸，符合向双侧进展特征，上调至2.0期。
+                </td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 text-xs text-secondary font-semibold bg-secondary-fixed/50 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-sm">verified</span>
+                    已签署生效
+                  </span>
+</td>
+<td class="py-3 px-4 text-right">
+<button class="text-xs text-primary hover:underline font-medium">查看存道</button>
+</td>
+</tr>
+<!-- Record 3: 1 Year ago -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-3 px-4 font-mono text-on-surface-variant">2024-02-10</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded bg-surface-container text-xs font-mono">H-Y 1.0</span>
+</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded bg-surface-container-highest text-primary text-xs font-bold font-mono">H-Y 1.5</span>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 text-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">stethoscope</span>
+                    专家门诊定标
+                  </span>
+</td>
+<td class="py-3 px-4 font-medium">李副主任医师</td>
+<td class="py-3 px-6 text-xs text-on-surface-variant max-w-md">
+                  单侧受累累及中轴躯干，翻身时阻力轻度增大，微调评定为1.5过渡期。
+                </td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 text-xs text-secondary font-semibold bg-secondary-fixed/50 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-sm">verified</span>
+                    已签署生效
+                  </span>
+</td>
+<td class="py-3 px-4 text-right">
+<button class="text-xs text-primary hover:underline font-medium">查看存道</button>
+</td>
+</tr>
+<!-- Record 4: Initial Staging -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-3 px-4 font-mono text-on-surface-variant">2023-09-02</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded bg-surface-container text-xs text-outline font-mono">首诊建档</span>
+</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded bg-surface-container-highest text-primary text-xs font-bold font-mono">H-Y 1.0</span>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 text-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">domain</span>
+                    多学科会诊(MDT)
+                  </span>
+</td>
+<td class="py-3 px-4 font-medium">陈教授</td>
+<td class="py-3 px-6 text-xs text-on-surface-variant max-w-md">
+                  首发右侧拇指搓丸样静止性震颤，经DaTscan确诊原发性帕金森病，定为1.0期。
+                </td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 text-xs text-secondary font-semibold bg-secondary-fixed/50 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-sm">verified</span>
+                    已签署生效
+                  </span>
+</td>
+<td class="py-3 px-4 text-right">
+<button class="text-xs text-primary hover:underline font-medium">查看存道</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- System Disclaimer Footer -->
+<footer class="text-center text-xs text-outline py-4">
+<p>华东神经康复专科平台 · 临床分期决策支持系统 (CDSS) · 符合国家卫健委《帕金森病医疗质量控制标准(2024版)》与 DICOM / HL7-FHIR 接口规范</p>
+</footer>
+</main>
+</div>
+</body></html>

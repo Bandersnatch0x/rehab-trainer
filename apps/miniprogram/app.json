@@ -16,26 +16,35 @@
     "navigationBarTextStyle": "black"
   },
   "tabBar": {
-    "color": "#4a4a4a",
-    "selectedColor": "#123a78",
+    "custom": true,
+    "color": "#475569",
+    "selectedColor": "#1a4fa0",
     "backgroundColor": "#ffffff",
     "borderStyle": "black",
     "list": [
       {
         "pagePath": "pages/index/index",
-        "text": "首页"
+        "text": "首页",
+        "iconPath": "images/tab-home.png",
+        "selectedIconPath": "images/tab-home-active.png"
       },
       {
         "pagePath": "pages/training/index",
-        "text": "训练"
+        "text": "训练",
+        "iconPath": "images/tab-training.png",
+        "selectedIconPath": "images/tab-training-active.png"
       },
       {
         "pagePath": "pages/records/index",
-        "text": "记录"
+        "text": "记录",
+        "iconPath": "images/tab-records.png",
+        "selectedIconPath": "images/tab-records-active.png"
       },
       {
         "pagePath": "pages/alerts/index",
-        "text": "预警"
+        "text": "预警",
+        "iconPath": "images/tab-alerts.png",
+        "selectedIconPath": "images/tab-alerts-active.png"
       }
     ]
   },

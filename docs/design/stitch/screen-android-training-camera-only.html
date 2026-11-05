@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RehabTrack D22 - Gait &amp; Posture Therapy</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Atkinson Hyperlegible Next Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-fixed-dim": "#ffb77d",
+            "outline-variant": "#c3c6d3",
+            "surface-variant": "#dae2fd",
+            "on-surface-variant": "#434751",
+            "inverse-surface": "#283044",
+            "surface-dim": "#d2d9f4",
+            "surface-tint": "#2c5cae",
+            "inverse-on-surface": "#eef0ff",
+            "surface-container": "#eaedff",
+            "surface-bright": "#faf8ff",
+            "background": "#faf8ff",
+            "surface": "#faf8ff",
+            "outline": "#737783",
+            "on-tertiary": "#ffffff",
+            "on-secondary-fixed-variant": "#005048",
+            "inverse-primary": "#aec6ff",
+            "tertiary": "#5c2f00",
+            "error-container": "#ffdad6",
+            "on-tertiary-container": "#ffb579",
+            "on-secondary": "#ffffff",
+            "primary-fixed": "#d8e2ff",
+            "tertiary-container": "#7e4200",
+            "surface-container-highest": "#dae2fd",
+            "on-tertiary-fixed-variant": "#6e3900",
+            "on-primary-fixed": "#001a42",
+            "secondary-fixed": "#8ef4e4",
+            "secondary": "#006a60",
+            "secondary-fixed-dim": "#72d8c8",
+            "primary-fixed-dim": "#aec6ff",
+            "surface-container-lowest": "#ffffff",
+            "on-error": "#ffffff",
+            "on-secondary-container": "#007166",
+            "on-primary-fixed-variant": "#024394",
+            "on-primary-container": "#abc5ff",
+            "tertiary-fixed": "#ffdcc3",
+            "on-primary": "#ffffff",
+            "surface-container-low": "#f2f3ff",
+            "on-background": "#131b2e",
+            "on-surface": "#131b2e",
+            "on-error-container": "#93000a",
+            "surface-container-high": "#e2e7ff",
+            "primary-container": "#1a4fa0",
+            "secondary-container": "#8ef4e4",
+            "on-tertiary-fixed": "#2f1500",
+            "on-secondary-fixed": "#00201c",
+            "primary": "#00387e",
+            "error": "#ba1a1a"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xl": "2.25rem",
+            "space-sm": "0.75rem",
+            "space-lg": "1.5rem",
+            "space-md": "1rem",
+            "space-xs": "0.5rem",
+            "space-2xl": "3rem",
+            "margin": "1.5rem",
+            "gutter": "1.5rem"
+          },
+          "fontFamily": {
+            "headline-lg": ["Atkinson Hyperlegible Next"],
+            "headline-md": ["Atkinson Hyperlegible Next"],
+            "label-md": ["Atkinson Hyperlegible Next"],
+            "body-md": ["Atkinson Hyperlegible Next"],
+            "label-lg": ["Atkinson Hyperlegible Next"],
+            "body-lg": ["Atkinson Hyperlegible Next"],
+            "display-counter-lg": ["Atkinson Hyperlegible Next"],
+            "headline-sm": ["Atkinson Hyperlegible Next"],
+            "display-counter": ["Atkinson Hyperlegible Next"],
+            "body-xl": ["Atkinson Hyperlegible Next"]
+          },
+          "fontSize": {
+            "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+            "headline-md": ["26px", { "lineHeight": "34px", "fontWeight": "700" }],
+            "label-md": ["16px", { "lineHeight": "22px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+            "body-md": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "label-lg": ["18px", { "lineHeight": "24px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+            "body-lg": ["20px", { "lineHeight": "30px", "fontWeight": "400" }],
+            "display-counter-lg": ["72px", { "lineHeight": "80px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+            "headline-sm": ["22px", { "lineHeight": "30px", "fontWeight": "600" }],
+            "display-counter": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-xl": ["22px", { "lineHeight": "32px", "fontWeight": "500" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 28;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-fill {
+      font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 28;
+    }
+    @keyframes pulse-metronome {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.15); opacity: 1; }
+    }
+    .pulse-rhythm {
+      animation: pulse-metronome 0.9375s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased select-none overflow-hidden h-screen w-screen flex flex-col font-body-md text-body-md">
+<!-- ==================== TOP BAR & CLINICAL HEADER (TopAppBar Anchor) ==================== -->
+<header class="fixed top-0 left-0 w-full h-20 z-50 flex items-center justify-between px-gutter bg-surface-container-lowest dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm">
+<!-- Left Section: Back action & Therapy Stage Info -->
+<div class="flex items-center space-x-space-md">
+<button aria-label="退出本节" class="flex items-center gap-2 min-h-[56px] px-5 rounded-full bg-surface-container-high hover:bg-surface-container hover:text-primary text-on-surface font-label-lg text-label-lg border-2 border-outline-variant active:scale-95 transition-all focus:outline-none focus:ring-4 focus:ring-primary-fixed">
+<span class="material-symbols-outlined text-primary text-[28px]">arrow_back</span>
+<span>退出本节</span>
+</button>
+<!-- Active Period Tag (开期黄金窗口) -->
+<div class="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary-container text-on-secondary-fixed-variant border border-secondary font-label-md text-label-md shadow-sm">
+<span class="w-3 h-3 rounded-full bg-secondary animate-ping"></span>
+<span class="font-bold">开期黄金反应期</span>
+<span class="text-xs px-2 py-0.5 rounded-full bg-surface-container-lowest text-secondary font-bold">药效充沛</span>
+</div>
+<!-- Current Session Info -->
+<div class="hidden xl:flex flex-col justify-center">
+<span class="text-outline font-label-md text-label-md tracking-wider">训练阶段 · REHAB STAGE</span>
+<h1 class="text-primary dark:text-inverse-primary font-headline-sm text-headline-sm font-bold truncate max-w-md">
+          第 2/4 节：下肢防拖拽踏步与重心转移训练
+        </h1>
+</div>
+</div>
+<!-- Center Section: Mode Switch Segmented Control -->
+<div class="flex items-center bg-surface-container-high p-1.5 rounded-full border-2 border-outline-variant shadow-inner">
+<!-- Mode 1: Split Screen -->
+<button aria-label="切换同屏示范模式" class="flex items-center gap-2 px-6 py-3 min-h-[52px] rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-lowest font-label-lg text-label-lg transition-all active:scale-95 focus:outline-none">
+<span class="material-symbols-outlined text-[24px]">view_column</span>
+<span>🎬 同屏示范</span>
+</button>
+<!-- Mode 2: Active Full Camera + Voice Coaching -->
+<button aria-label="当前模式：纯拍摄+语音提示" class="flex items-center gap-2 px-8 py-3 min-h-[52px] rounded-full bg-primary text-on-primary font-label-lg text-label-lg font-bold shadow-md ring-2 ring-primary-container transition-all active:scale-95 focus:outline-none">
+<span class="material-symbols-outlined text-[24px] material-symbols-fill">videocam</span>
+<span>📷 纯拍摄+语音</span>
+</button>
+</div>
+<!-- Right Section: Medical Telemetry & Devices & Safety -->
+<div class="flex items-center space-x-space-md">
+<!-- Bone-conduction Audio Status -->
+<div class="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-low border border-outline-variant">
+<span class="material-symbols-outlined text-secondary text-[24px]">headset_mic</span>
+<div class="flex flex-col text-left">
+<span class="text-xs text-outline font-semibold">骨传导音频</span>
+<span class="font-label-md text-label-md text-on-surface font-bold">已立体声同步</span>
+</div>
+</div>
+<!-- Real-time Heart Rate -->
+<div class="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-low border border-outline-variant">
+<span class="material-symbols-outlined text-error text-[24px] material-symbols-fill animate-pulse">favorite</span>
+<div class="flex flex-col text-left">
+<span class="text-xs text-outline font-semibold">心率监测</span>
+<span class="font-label-md text-label-md text-on-surface font-bold">78 <span class="text-xs font-normal text-on-surface-variant">BPM (平稳)</span></span>
+</div>
+</div>
+<!-- Trailing Action Icons from JSON Blueprint -->
+<div class="flex items-center gap-2 pl-2">
+<button class="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high text-primary active:scale-95 transition-all border border-outline-variant" title="音量调节">
+<span class="material-symbols-outlined text-[26px]">volume_up</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high text-primary active:scale-95 transition-all border border-outline-variant" title="肢体辅助">
+<span class="material-symbols-outlined text-[26px]">accessibility_new</span>
+</button>
+</div>
+</div>
+</header>
+<!-- ==================== MAIN CANVAS (FULL-VIEW CAMERA REHABILITATION SUITE) ==================== -->
+<main class="relative flex-1 w-full mt-20 mb-24 overflow-hidden bg-surface-container-lowest">
+<!-- Realistic Camera Stream Layer -->
+<div class="absolute inset-0 w-full h-full bg-cover bg-center overflow-hidden" data-alt="A warm, bright rehabilitation living room or clinical motion lab bathed in soft natural light, featuring safety handrails and non-slip light hardwood flooring. High-definition wide-angle perspective captures a clear exercise space. The setting conveys calm, professional medical rigor with warm tones, crisp contrast, and anti-fatigue clarity." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCjayO4fdBVslzgJN5CYrgbmrXT0NvFMh1lI8jgDGW6kSDW_edUX-J-zuFy3OgC2B5lczvZ_Mc3OUHFYLtf5lS6hCpZIwt0v3mviR6laHO2fTR0LVTqEBz4VQV9uHvmMsqVDY1aZ-GDxy6jsdnCC2QfIJ-UJHTS26zNY5xaIPuMC4EUOM-zPwx3V9h81qsv0LWzJSvKAXZ0Egrl7q21HnVNMcIFrSBxFELk8y4p9MomQCwaBzae5n5ksFr4LAVyO6mfAf4qcLg__Crz');">
+<!-- Video Tint & Contrast Balance Overlay -->
+<div class="absolute inset-0 bg-primary/5 pointer-events-none"></div>
+<!-- Real-time AI Biomechanical Skeleton Overlay (SVG Vector Layer) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none drop-shadow-md" fill="none" viewbox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+<!-- Center Target Safe Alignment Guidelines -->
+<rect height="840" opacity="0.45" rx="32" stroke="#8ef4e4" stroke-dasharray="10 8" stroke-width="2.5" width="500" x="710" y="160"></rect>
+<line opacity="0.3" stroke="#8ef4e4" stroke-dasharray="6 6" stroke-width="1.5" x1="960" x2="960" y1="160" y2="1000"></line>
+<!-- Biomechanical Skeleton Lines (Blue 1a4fa0 & Teal 00877a) -->
+<!-- Spine & Torso -->
+<line stroke="#1a4fa0" stroke-linecap="round" stroke-width="6" x1="960" x2="960" y1="310" y2="520"></line>
+<!-- Shoulders -->
+<line stroke="#1a4fa0" stroke-linecap="round" stroke-width="6" x1="860" x2="1060" y1="360" y2="360"></line>
+<!-- Arms -->
+<line stroke="#1a4fa0" stroke-linecap="round" stroke-width="5" x1="860" x2="810" y1="360" y2="470"></line>
+<line stroke="#1a4fa0" stroke-linecap="round" stroke-width="5" x1="810" x2="790" y1="470" y2="580"></line>
+<line stroke="#1a4fa0" stroke-linecap="round" stroke-width="5" x1="1060" x2="1110" y1="360" y2="470"></line>
+<line stroke="#1a4fa0" stroke-linecap="round" stroke-width="5" x1="1110" x2="1130" y1="470" y2="580"></line>
+<!-- Pelvis / Hip Axis -->
+<line stroke="#006a60" stroke-linecap="round" stroke-width="6" x1="890" x2="1030" y1="530" y2="530"></line>
+<!-- Legs & Active High Stepping Kinematics -->
+<!-- Right Stance Leg (Firm on ground) -->
+<line stroke="#006a60" stroke-linecap="round" stroke-width="6" x1="1010" x2="1020" y1="530" y2="720"></line>
+<line stroke="#006a60" stroke-linecap="round" stroke-width="6" x1="1020" x2="1025" y1="720" y2="920"></line>
+<!-- Left Lifted Leg (Active ROM 85° - Highlighted in vibrant Cyan/Blue) -->
+<line stroke="#1a4fa0" stroke-linecap="round" stroke-width="7" x1="910" x2="840" y1="530" y2="670"></line>
+<line stroke="#1a4fa0" stroke-linecap="round" stroke-width="7" x1="840" x2="850" y1="670" y2="840"></line>
+<!-- Kinematic Joint Nodes (12px circular anchors with solid 3px white rings) -->
+<!-- Head -->
+<circle cx="960" cy="260" fill="#1a4fa0" r="14" stroke="#ffffff" stroke-width="3.5"></circle>
+<!-- Shoulders -->
+<circle cx="860" cy="360" fill="#1a4fa0" r="10" stroke="#ffffff" stroke-width="3"></circle>
+<circle cx="1060" cy="360" fill="#1a4fa0" r="10" stroke="#ffffff" stroke-width="3"></circle>
+<!-- Elbows & Wrists -->
+<circle cx="810" cy="470" fill="#1a4fa0" r="8" stroke="#ffffff" stroke-width="2.5"></circle>
+<circle cx="790" cy="580" fill="#1a4fa0" r="8" stroke="#ffffff" stroke-width="2.5"></circle>
+<circle cx="1110" cy="470" fill="#1a4fa0" r="8" stroke="#ffffff" stroke-width="2.5"></circle>
+<circle cx="1130" cy="580" fill="#1a4fa0" r="8" stroke="#ffffff" stroke-width="2.5"></circle>
+<!-- Hips -->
+<circle cx="890" cy="530" fill="#006a60" r="11" stroke="#ffffff" stroke-width="3"></circle>
+<circle cx="1030" cy="530" fill="#006a60" r="11" stroke="#ffffff" stroke-width="3"></circle>
+<!-- Knees (Active Gait Metric highlighted) -->
+<circle cx="840" cy="670" fill="#8ef4e4" r="13" stroke="#00387e" stroke-width="3.5"></circle>
+<circle cx="1020" cy="720" fill="#006a60" r="10" stroke="#ffffff" stroke-width="3"></circle>
+<!-- Ankles -->
+<circle cx="850" cy="840" fill="#1a4fa0" r="10" stroke="#ffffff" stroke-width="3"></circle>
+<circle cx="1025" cy="920" fill="#006a60" r="10" stroke="#ffffff" stroke-width="3"></circle>
+</svg>
+</div>
+<!-- ==================== TOP FLOATING: AUDIO COACHING BANNER ==================== -->
+<div class="absolute top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-4xl z-30">
+<div class="flex items-center justify-between px-6 py-3.5 rounded-full bg-on-background/90 backdrop-blur-md text-surface-bright border-2 border-outline/30 shadow-xl">
+<!-- Audio Pulse & Speaking indicator -->
+<div class="flex items-center gap-4 flex-1">
+<div class="w-12 h-12 rounded-full bg-secondary flex items-center justify-center text-on-secondary shadow-md shrink-0">
+<span class="material-symbols-outlined text-[28px] material-symbols-fill">volume_up</span>
+</div>
+<!-- Dynamic Voice Text -->
+<div class="flex flex-col">
+<span class="text-xs text-secondary-fixed font-bold tracking-wide flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed animate-pulse"></span>
+              AI 语音康复指导 · 实时播报
+            </span>
+<p class="font-headline-sm text-headline-sm text-surface-bright font-bold tracking-tight">
+              “保持挺胸直视前方，大腿抬高至水平，落地轻柔跟随 64 BPM 节奏”
+            </p>
+</div>
+</div>
+<!-- Audio Speed & Quick Replay Controls -->
+<div class="flex items-center gap-3 pl-4 border-l border-outline-variant/30 shrink-0">
+<button class="px-4 py-2 rounded-full bg-surface-container-high/20 hover:bg-surface-container-high/40 text-surface-bright font-label-md text-label-md flex items-center gap-1 active:scale-95 transition-all border border-outline/40">
+<span class="material-symbols-outlined text-[20px]">speed</span>
+<span>语速 1.0x</span>
+</button>
+<button class="w-11 h-11 rounded-full bg-surface-container-high/20 hover:bg-surface-container-high/40 text-surface-bright flex items-center justify-center active:scale-95 transition-all border border-outline/40" title="重播上一句语音">
+<span class="material-symbols-outlined text-[22px]">replay</span>
+</button>
+</div>
+</div>
+</div>
+<!-- ==================== LEFT-TOP OVERLAY: REPETITION COUNTER & POSTURE METRICS ==================== -->
+<div class="absolute top-24 left-8 z-20 flex flex-col space-y-4 max-w-sm">
+<!-- Big Bold Counter Panel -->
+<div class="bg-surface-container-lowest/95 backdrop-blur-md p-6 rounded-3xl border-2 border-outline-variant shadow-xl">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-lg text-label-lg text-outline font-bold tracking-wider">COMPLETED REPS</span>
+<span class="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-md text-label-md font-bold">
+            当前动作: 高抬腿
+          </span>
+</div>
+<!-- Big Number Display -->
+<div class="flex items-baseline space-x-2">
+<span class="font-display-counter-lg text-display-counter-lg text-primary font-extrabold tracking-tight">05</span>
+<span class="font-headline-lg text-headline-lg text-outline-variant font-bold">/ 12 次</span>
+</div>
+<!-- Progress Bar Indicator -->
+<div class="w-full bg-surface-container-high rounded-full h-3 mt-3 overflow-hidden">
+<div class="bg-primary h-3 rounded-full transition-all duration-300" style="width: 41.6%;"></div>
+</div>
+<!-- Real-time Clinical Biomechanics Accuracy -->
+<div class="mt-4 pt-4 border-t border-outline-variant flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="text-on-surface-variant font-label-md text-label-md">动作规范达标率</span>
+<span class="font-headline-sm text-headline-sm text-secondary font-bold">98% (优秀)</span>
+</div>
+<div class="flex items-center justify-between text-body-md font-body-md text-on-surface">
+<span>髋膝对称夹角 (ROM)</span>
+<span class="font-bold text-primary">85° (目标 &gt;80°)</span>
+</div>
+</div>
+</div>
+<!-- Gait Quality Live Status Strip -->
+<div class="bg-surface-container-lowest/95 backdrop-blur-md px-5 py-3 rounded-2xl border-2 border-outline-variant shadow-lg flex items-center gap-3">
+<div class="w-4 h-4 rounded-full bg-secondary animate-ping"></div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-bold">步态冻结监测：动态流畅 (无停顿)</span>
+<span class="text-xs text-outline">FOG Risk Index: 0.04 (低风险安全范畴)</span>
+</div>
+</div>
+</div>
+<!-- ==================== RIGHT-TOP OVERLAY: 64 BPM RAS METRONOME CARD ==================== -->
+<div class="absolute top-24 right-8 z-20 flex flex-col space-y-4 w-80">
+<div class="bg-surface-container-lowest/95 backdrop-blur-md p-5 rounded-3xl border-2 border-outline-variant shadow-xl">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[26px]">graphic_eq</span>
+<span class="font-label-lg text-label-lg text-on-surface font-bold">听觉节律 (RAS)</span>
+</div>
+<!-- Metronome Switch Pill -->
+<div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container text-on-secondary-fixed-variant font-label-md text-label-md font-bold">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary pulse-rhythm"></span>
+<span>已开启</span>
+</div>
+</div>
+<!-- 64 BPM Cadence Waveform & Beats -->
+<div class="flex items-center justify-between py-2 px-3 bg-surface-container-low rounded-2xl border border-outline-variant">
+<div class="flex flex-col">
+<span class="font-display-counter text-display-counter text-secondary font-bold leading-none">64</span>
+<span class="text-xs text-outline font-bold tracking-widest mt-1">BPM 稳定节拍</span>
+</div>
+<!-- Pulsing Metronome Wave & Audio Cue Representation -->
+<div class="flex items-center gap-1.5 h-12">
+<span class="w-2 bg-secondary rounded-full h-8 pulse-rhythm"></span>
+<span class="w-2 bg-secondary rounded-full h-12 pulse-rhythm" style="animation-delay: 0.15s"></span>
+<span class="w-2 bg-secondary rounded-full h-6 pulse-rhythm" style="animation-delay: 0.3s"></span>
+<span class="w-2 bg-secondary rounded-full h-10 pulse-rhythm" style="animation-delay: 0.45s"></span>
+<span class="w-2 bg-secondary rounded-full h-5 pulse-rhythm" style="animation-delay: 0.6s"></span>
+</div>
+</div>
+<!-- Auditory Cue Verbal Pacer Strip -->
+<div class="mt-3 flex items-center justify-around py-2 rounded-xl bg-surface-container-high/60 border border-outline-variant font-label-lg text-label-lg">
+<span class="text-secondary font-bold">左脚「嗒」</span>
+<span class="text-outline font-bold">—</span>
+<span class="text-on-surface-variant font-bold">右脚「嗒」</span>
+</div>
+<div class="mt-2 text-center text-xs text-outline">
+          沉稳柔和木鱼音色 · 骨传导耳机双耳同频
+        </div>
+</div>
+<!-- Plantar Pressure & Dynamic Balance Micro-window -->
+<div class="bg-surface-container-lowest/95 backdrop-blur-md p-4 rounded-3xl border-2 border-outline-variant shadow-xl">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-md text-label-md text-on-surface font-bold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[20px] text-primary">balance</span>
+            重心与足底压力
+          </span>
+<span class="text-xs px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary font-bold">对称良好</span>
+</div>
+<!-- Foot Pressure Visualization -->
+<div class="grid grid-cols-2 gap-3 pt-1">
+<div class="p-2.5 rounded-2xl bg-surface-container-low border border-outline-variant flex flex-col items-center">
+<span class="text-xs text-outline mb-1 font-bold">左足着地</span>
+<div class="w-8 h-14 rounded-full border-2 border-secondary bg-secondary-container/40 flex items-center justify-center">
+<span class="text-xs font-bold text-secondary">51%</span>
+</div>
+<span class="text-xs text-secondary mt-1 font-semibold">足跟先着地</span>
+</div>
+<div class="p-2.5 rounded-2xl bg-surface-container-low border border-outline-variant flex flex-col items-center">
+<span class="text-xs text-outline mb-1 font-bold">右足重心</span>
+<div class="w-8 h-14 rounded-full border-2 border-secondary bg-secondary-container/40 flex items-center justify-center">
+<span class="text-xs font-bold text-secondary">49%</span>
+</div>
+<span class="text-xs text-secondary mt-1 font-semibold">平稳支撑</span>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== BOTTOM FLOATING SAFETY CUE BANNER ==================== -->
+<div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+<div class="flex items-center gap-3 px-8 py-3 rounded-full bg-surface-container-lowest/95 backdrop-blur-md border-2 border-secondary text-on-surface shadow-xl">
+<div class="w-3.5 h-3.5 rounded-full bg-secondary animate-pulse"></div>
+<span class="font-label-lg text-label-lg font-bold">
+          足部已完整入镜 · 双脚抬高适中，安全站位良好 (测距: 2.1 米)
+        </span>
+<span class="material-symbols-outlined text-secondary text-[24px]">verified</span>
+</div>
+</div>
+</main>
+<!-- ==================== FIXED SAFETY UTILITY FOOTER (BottomNavBar Anchor) ==================== -->
+<footer class="fixed bottom-0 left-0 w-full h-24 z-50 flex items-center justify-between px-margin bg-surface-container-lowest dark:bg-inverse-surface border-t-2 border-outline-variant dark:border-outline shadow-lg">
+<!-- Action 1: Pause / Rest (Oversized Ergonomic Pill, JSON Inactive/Support Style) -->
+<button aria-label="暂停训练或稍事休息" class="flex items-center justify-center min-h-[64px] px-8 rounded-full bg-surface-container-high dark:bg-surface-variant text-on-surface dark:text-inverse-on-surface font-semibold hover:opacity-90 active:scale-95 transition-all duration-100 ring-4 ring-primary-fixed border-2 border-outline-variant text-label-lg font-label-lg">
+<span class="material-symbols-outlined text-[32px] text-primary mr-3">pause_circle</span>
+<span>Pause / Rest (稍事休息)</span>
+</button>
+<!-- Action 2: Complete Set (Primary Safe Action Pill, JSON Active Navigation Style) -->
+<button aria-label="完成本组训练" class="flex items-center justify-center min-h-[64px] px-10 rounded-full bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary font-bold hover:opacity-90 active:scale-95 transition-all duration-100 ring-4 ring-primary-fixed border-2 border-secondary text-headline-sm font-headline-sm shadow-md">
+<span class="material-symbols-outlined text-[36px] text-secondary mr-3 material-symbols-fill">check_circle</span>
+<span>Complete Set (完成本组 5/12)</span>
+</button>
+<!-- Action 3: Emergency Nurse Stop (Full-height Oversized Crimson Button) -->
+<button aria-label="紧急停止训练或呼叫护士" class="flex items-center justify-center min-h-[72px] px-9 rounded-full bg-error text-on-error font-bold hover:opacity-95 active:scale-95 transition-all duration-100 shadow-xl border-2 border-error ring-4 ring-error-container text-headline-sm font-headline-sm">
+<span class="material-symbols-outlined text-[36px] text-on-error mr-3 material-symbols-fill">emergency_home</span>
+<span>Emergency Nurse Stop (紧急停止)</span>
+</button>
+</footer>
+</body></html>

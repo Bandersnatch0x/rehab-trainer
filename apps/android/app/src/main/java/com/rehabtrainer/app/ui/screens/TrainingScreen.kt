@@ -12,9 +12,11 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -37,8 +39,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -57,6 +57,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -64,23 +65,37 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.rehabtrainer.app.core.pose.PoseAnalyzer
 import com.rehabtrainer.app.core.pose.PoseFrame
+import com.rehabtrainer.app.ui.DEFAULT_EXERCISES
+import com.rehabtrainer.app.ui.ExerciseMeta
 import com.rehabtrainer.app.ui.components.ElderlyButton
 import com.rehabtrainer.app.ui.components.ElderlyButtonVariant
 import com.rehabtrainer.app.ui.theme.LocalElderlyDimens
 import java.util.concurrent.Executors
 
 /**
- * 训练执行页：双播放架构 (D22) + 演示版本 Mock 规范 (D21)。
+ * 训练执行显示模式：
+ * 1. DUAL: 示范视频 + 实景拍摄同屏 (标准双播放架构)
+ * 2. CAMERA_ONLY: 纯实景拍摄 + 动作语音提示 (针对手机屏幕适老化优化，避免双播放挤压操作区)
+ */
+enum class TrainingDisplayMode(val label: String, val icon: String) {
+    DUAL("同屏示范", "🎬"),
+    CAMERA_ONLY("纯拍摄+语音", "📷")
+}
+
+/**
+ * 训练执行页：双播放架构 (D22) + 适老化自适应 (D19) + 演示版本 Mock 规范 (D21)。
  *
- * 核心要求：
- * 1. 双播放同屏：教学视频示范区与患者实时摄像头捕获区并存；
- * 2. 布局自适应：手机竖屏上下各半，平板横屏左右分栏；
- * 3. 画面叠加元素：实时动作计数、RAS 节拍开关、脚部完整入镜提示（D17）浮动叠加于实时画面；
- * 4. 适老化安全底线：紧急停止按钮始终常驻可见且高度 >= 80dp；
- * 5. 演示版本标注：所有临床数值打上「演示数据」标识。
+ * 核心缺陷全面修复：
+ * - P0-1: 手机横屏 (sw < 600dp) 视口比例与紧凑底栏重构，画面占比 > 60%，绝不压缩至 2px，紧急停止常驻可见；
+ * - P1-5: 摄像头画面遮挡率从 79% 降低至 25% 以下（中心主体 > 75% 完全通透可视）；
+ * - P1-6: 教学视频区紧凑防溢出重构，标题 ellipsis，进度条始终清晰可见；
+ * - P1-7: 支持动作联动，非节律步态动作自动隐藏 RAS 节拍器；
+ * - P1-13: 页面全量字号升级至 >= 18sp (大字报计数 28sp，辅助信息与提示均为 18sp)；
+ * - P1-14: 按钮文字精炼平整，杜绝孤字换行。
  */
 @Composable
 fun TrainingScreen(
+    exerciseCode: String = "EX-RAS-01",
     widthSizeClass: WindowWidthSizeClass = WindowWidthSizeClass.Compact,
     modifier: Modifier = Modifier
 ) {
@@ -89,9 +104,16 @@ fun TrainingScreen(
     val configuration = LocalConfiguration.current
     val dimens = LocalElderlyDimens.current
 
-    // 判断是否为横屏平板布局 (D22)
-    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE ||
-        widthSizeClass == WindowWidthSizeClass.Expanded
+    // 旋转检测与屏幕形态判定 (模式 3: 自适应布局，P0-1 核心：sw < 600dp 视为手机)
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val isTablet = configuration.smallestScreenWidthDp >= 600
+    val isPhoneLandscape = isLandscape && !isTablet
+
+    val currentExercise = DEFAULT_EXERCISES.firstOrNull { it.code == exerciseCode }
+        ?: DEFAULT_EXERCISES.first()
+
+    // 显示模式切换状态 (模式 1 vs 模式 2)
+    var displayMode by remember { mutableStateOf(TrainingDisplayMode.DUAL) }
 
     var hasCameraPermission by remember {
         mutableStateOf(
@@ -115,7 +137,7 @@ fun TrainingScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("需要摄像头权限以进行实时姿态与防颤动作识别", style = MaterialTheme.typography.headlineSmall)
+            Text("需要摄像头权限以进行实时姿态与动作识别", style = MaterialTheme.typography.headlineSmall)
             Spacer(Modifier.height(16.dp))
             Button(onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) }) {
                 Text("授予摄像头权限")
@@ -175,77 +197,153 @@ fun TrainingScreen(
         }
     }
 
-    // 整体布局容器
+    // 整体布局容器：顶部模式栏 + 中间自适应视口 + 底部常驻安全底栏
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // 双播放视口主体：根据屏幕形态选择上下布局还是左右分栏
-        if (!isLandscape) {
-            // 手机竖屏：上下布局，各占约一半高度 (D22)
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                // 上半部：示范教学视频区 (Weight: 1f)
-                InstructionalVideoPane(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    isPaused = isPaused
-                )
+        // 顶部模式切换条与标题 (P1-7 动态联动，P1-13 字号 >= 18sp)
+        TrainingHeaderBar(
+            exercise = currentExercise,
+            currentMode = displayMode,
+            onModeSelect = { displayMode = it },
+            isPhoneLandscape = isPhoneLandscape
+        )
 
-                // 下半部：患者实时摄像头区 + 叠加层 (Weight: 1f)
-                PatientRealtimeCameraPane(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    previewView = previewView,
-                    armRaiseCount = armRaiseCount,
-                    statusText = statusText,
-                    footVisible = footVisible,
-                    metronomeEnabled = metronomeEnabled,
-                    onToggleMetronome = { metronomeEnabled = it }
-                )
-            }
-        } else {
-            // 平板横屏：左右分栏，各占一半宽度 (D22)
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // 左侧栏：示范教学视频区 (Weight: 1f)
-                InstructionalVideoPane(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    isPaused = isPaused
-                )
+        // 视口主体根据屏幕方向与显示模式自适应
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+        ) {
+            when {
+                // 模式 2: 纯实景拍摄 + 动作语音提示模式 (视口全开给摄像头)
+                displayMode == TrainingDisplayMode.CAMERA_ONLY -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = if (isPhoneLandscape) 10.dp else 12.dp, vertical = 4.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        VoiceGuidanceBanner(
+                            prompt = currentExercise.prompt,
+                            isPaused = isPaused
+                        )
 
-                // 右侧栏：患者实时摄像头区 + 叠加层 (Weight: 1f)
-                PatientRealtimeCameraPane(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    previewView = previewView,
-                    armRaiseCount = armRaiseCount,
-                    statusText = statusText,
-                    footVisible = footVisible,
-                    metronomeEnabled = metronomeEnabled,
-                    onToggleMetronome = { metronomeEnabled = it }
-                )
+                        PatientRealtimeCameraPane(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                            previewView = previewView,
+                            armRaiseCount = armRaiseCount,
+                            statusText = statusText,
+                            footVisible = footVisible,
+                            hasRas = currentExercise.hasRas,
+                            metronomeEnabled = metronomeEnabled,
+                            onToggleMetronome = { metronomeEnabled = it }
+                        )
+                    }
+                }
+
+                // 模式 1 + 模式 3: 竖屏同屏双播放 (上 38% 视频，下 62% 实景)
+                !isLandscape -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        InstructionalVideoPane(
+                            videoTitle = currentExercise.videoTitle,
+                            modifier = Modifier
+                                .weight(0.38f)
+                                .fillMaxWidth(),
+                            isPaused = isPaused
+                        )
+
+                        PatientRealtimeCameraPane(
+                            modifier = Modifier
+                                .weight(0.62f)
+                                .fillMaxWidth(),
+                            previewView = previewView,
+                            armRaiseCount = armRaiseCount,
+                            statusText = statusText,
+                            footVisible = footVisible,
+                            hasRas = currentExercise.hasRas,
+                            metronomeEnabled = metronomeEnabled,
+                            onToggleMetronome = { metronomeEnabled = it }
+                        )
+                    }
+                }
+
+                // 模式 1 + 模式 3: 横屏平板 (sw >= 600dp，50/50 对称双分栏)
+                isTablet -> {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        InstructionalVideoPane(
+                            videoTitle = currentExercise.videoTitle,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight(),
+                            isPaused = isPaused
+                        )
+
+                        PatientRealtimeCameraPane(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight(),
+                            previewView = previewView,
+                            armRaiseCount = armRaiseCount,
+                            statusText = statusText,
+                            footVisible = footVisible,
+                            hasRas = currentExercise.hasRas,
+                            metronomeEnabled = metronomeEnabled,
+                            onToggleMetronome = { metronomeEnabled = it }
+                        )
+                    }
+                }
+
+                // 模式 1 + 模式 3: 手机横屏 (sw < 600dp，40/60 比例，高度保底 >60%，解决 P0-1)
+                else -> {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 10.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        InstructionalVideoPane(
+                            videoTitle = currentExercise.videoTitle,
+                            modifier = Modifier
+                                .weight(0.40f)
+                                .fillMaxHeight(),
+                            isPaused = isPaused
+                        )
+
+                        PatientRealtimeCameraPane(
+                            modifier = Modifier
+                                .weight(0.60f)
+                                .fillMaxHeight(),
+                            previewView = previewView,
+                            armRaiseCount = armRaiseCount,
+                            statusText = statusText,
+                            footVisible = footVisible,
+                            hasRas = currentExercise.hasRas,
+                            metronomeEnabled = metronomeEnabled,
+                            onToggleMetronome = { metronomeEnabled = it }
+                        )
+                    }
+                }
             }
         }
 
-        // 常驻操作底部安全控制栏：紧急停止始终常驻可见且高度 >= 80dp (D22 + 适老化底线)
+        // 常驻操作底部安全控制栏：紧急停止始终常驻可见且高亮，手机横屏紧凑适配避免压碎主画面 (P0-1)
         PersistentControlFooter(
+            isPhoneLandscape = isPhoneLandscape,
             isPaused = isPaused,
             onTogglePause = { isPaused = !isPaused },
             onFinishSet = { /* 提交本组 */ },
@@ -255,10 +353,170 @@ fun TrainingScreen(
 }
 
 /**
- * 教学视频播放区（带示范进度条、节拍提示与 D21 演示数据标注）。
+ * 训练顶部信息与模式切换条：动态动作名 (P1-7) + 适老字号 >= 18sp (P1-13)。
+ */
+@Composable
+private fun TrainingHeaderBar(
+    exercise: ExerciseMeta,
+    currentMode: TrainingDisplayMode,
+    onModeSelect: (TrainingDisplayMode) -> Unit,
+    isPhoneLandscape: Boolean
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 2.dp,
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = if (isPhoneLandscape) 4.dp else 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f, fill = false)) {
+                Text(
+                    text = exercise.name,
+                    style = if (isPhoneLandscape) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = "${exercise.target} 【演示数据】",
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Spacer(Modifier.width(8.dp))
+
+            // 模式切换胶囊选择器 (字号 >= 18sp，无障碍触控规范)
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(24.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+            ) {
+                Row(
+                    modifier = Modifier.padding(3.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    TrainingDisplayMode.entries.forEach { mode ->
+                        val selected = currentMode == mode
+                        Surface(
+                            color = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                            contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            shape = RoundedCornerShape(20.dp),
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(20.dp))
+                                .clickable { onModeSelect(mode) }
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(
+                                    horizontal = if (isPhoneLandscape) 8.dp else 12.dp,
+                                    vertical = if (isPhoneLandscape) 4.dp else 6.dp
+                                ),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = mode.icon,
+                                    fontSize = 18.sp
+                                )
+                                Text(
+                                    text = mode.label,
+                                    fontSize = 18.sp,
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * 模式 2 专用的动作语音引导胶囊条：字号 >= 18sp (P1-13)。
+ */
+@Composable
+private fun VoiceGuidanceBanner(
+    prompt: String,
+    isPaused: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF0F172A),
+            contentColor = Color.White
+        ),
+        border = androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF0284C7))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .background(Color(0xFF0284C7), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("🔊", fontSize = 20.sp)
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "动作语音播报中",
+                        color = Color(0xFF38BDF8),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Surface(
+                        color = Color(0xFF1E293B),
+                        shape = RoundedCornerShape(4.dp)
+                    ) {
+                        Text(
+                            text = if (isPaused) "已暂停播报" else "AI 语音教练 【演示数据】",
+                            color = if (isPaused) Color(0xFFFFB4AB) else Color(0xFF80D5CB),
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = prompt,
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+/**
+ * 教学视频播放区（防溢出重构，maxLines=1 + Ellipsis，进度条常驻清晰，解决 P1-6）。
  */
 @Composable
 private fun InstructionalVideoPane(
+    videoTitle: String,
     modifier: Modifier = Modifier,
     isPaused: Boolean
 ) {
@@ -271,113 +529,109 @@ private fun InstructionalVideoPane(
         ),
         border = androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF334155))
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            // 教学示范模拟画面（深邃医疗蓝黑渐变背景）
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.SpaceBetween
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            // 顶部标签条
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // 顶部标签条
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = RoundedCornerShape(6.dp)
                 ) {
-                    Surface(
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(
-                            text = "🎬 教学示范视频 【演示数据】",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                        )
-                    }
-
-                    Surface(
-                        color = Color(0xFF1E293B),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(
-                            text = if (isPaused) "已暂停" else "循环播放中",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = if (isPaused) Color(0xFFFFB4AB) else Color(0xFF80D5CB),
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                        )
-                    }
+                    Text(
+                        text = "🎬 教学示范",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                    )
                 }
 
-                // 中央动作图示与节奏指引
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Text(
+                    text = if (isPaused) "已暂停" else "循环示范中",
+                    fontSize = 18.sp,
+                    color = if (isPaused) Color(0xFFFFB4AB) else Color(0xFF80D5CB),
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
+            // 中央动作图示与标题 (防溢出紧凑设计，避免挤压裁字 - P1-6)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .background(Color(0xFF1E293B), CircleShape)
+                        .border(1.5.dp, Color(0xFF38BDF8), CircleShape),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(64.dp)
-                            .background(Color(0xFF1E293B), CircleShape)
-                            .border(2.dp, Color(0xFF38BDF8), CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.PlayArrow,
-                            contentDescription = "示范播放",
-                            tint = Color(0xFF38BDF8),
-                            modifier = Modifier.size(36.dp)
-                        )
-                    }
-                    Spacer(Modifier.height(8.dp))
+                    Icon(
+                        imageVector = Icons.Filled.PlayArrow,
+                        contentDescription = "示范播放",
+                        tint = Color(0xFF38BDF8),
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "下肢原地节律踏步 · 标准示范",
-                        style = MaterialTheme.typography.titleMedium,
+                        text = videoTitle,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = Color.White,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "建议幅度：屈髋 45° · 舒适节拍：64 BPM 【演示数据】",
-                        style = MaterialTheme.typography.bodySmall,
+                        text = "动作幅度与节拍指引 【演示数据】",
+                        fontSize = 18.sp,
+                        color = Color(0xFF94A3B8),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+
+            // 底部进度条 (常驻可见，避免被压出屏幕)
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "示范进度 01:24 / 03:00",
+                        fontSize = 18.sp,
                         color = Color(0xFF94A3B8)
                     )
                 }
-
-                // 底部进度条
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "示范进度 01:24 / 03:00",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFF94A3B8)
-                        )
-                        Text(
-                            text = "李主任临床动作录制 【演示数据】",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFF64748B)
-                        )
-                    }
-                    Spacer(Modifier.height(4.dp))
-                    LinearProgressIndicator(
-                        progress = { 0.46f },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(6.dp)
-                            .clip(RoundedCornerShape(3.dp)),
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = Color(0xFF334155),
-                    )
-                }
+                Spacer(Modifier.height(4.dp))
+                LinearProgressIndicator(
+                    progress = { 0.46f },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(3.dp)),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = Color(0xFF334155),
+                )
             }
         }
     }
 }
 
 /**
- * 患者实时摄像头画面区：内嵌 CameraX 画面，叠加动作计数、节拍开关与脚部入镜提示 (D17 / D22)。
+ * 患者实时摄像头画面区：
+ * 叠加层极度轻量化 (P1-5)，画面可视通透面积保持 > 75%；
+ * 非步态动作动态隐藏 RAS (P1-7)；全量字号 >= 18sp (P1-13)。
  */
 @Composable
 private fun PatientRealtimeCameraPane(
@@ -386,6 +640,7 @@ private fun PatientRealtimeCameraPane(
     armRaiseCount: Int,
     statusText: String,
     footVisible: Boolean,
+    hasRas: Boolean,
     metronomeEnabled: Boolean,
     onToggleMetronome: (Boolean) -> Unit
 ) {
@@ -393,103 +648,100 @@ private fun PatientRealtimeCameraPane(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Black),
-        border = androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF0284C7))
+        border = androidx.compose.foundation.BorderStroke(
+            if (!footVisible) 2.5.dp else 1.5.dp,
+            if (!footVisible) Color(0xFFBA1A1A) else Color(0xFF0284C7)
+        )
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // 底层：CameraX 真实摄像头画面
+            // 底层：CameraX 真实摄像头画面 (占满 100% 视口)
             AndroidView(
                 factory = { previewView },
                 modifier = Modifier.fillMaxSize()
             )
 
-            // 叠加层 1：左上角 实时动作计数大字报 (等宽数字 + 演示数据标注)
+            // 叠加层 1：左上角 扁平微型动作计数胶囊 (单行排布，绝不侵占中央肢体区域 - P1-5)
             Surface(
-                color = Color(0xDD0F172A),
-                shape = RoundedCornerShape(12.dp),
+                color = Color(0x990F172A),
+                shape = RoundedCornerShape(16.dp),
                 border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF38BDF8)),
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(12.dp)
+                    .padding(8.dp)
             ) {
-                Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
                     Text(
-                        text = "实时计数 【演示数据】",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF94A3B8)
+                        text = "$armRaiseCount",
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.Monospace,
+                        color = Color(0xFF38BDF8)
                     )
-                    Row(verticalAlignment = Alignment.Bottom) {
-                        Text(
-                            text = "$armRaiseCount",
-                            fontSize = 38.sp,
-                            fontWeight = FontWeight.Black,
-                            fontFamily = FontFamily.Monospace,
-                            color = Color(0xFF38BDF8),
-                            lineHeight = 40.sp
-                        )
-                        Text(
-                            text = " / 12 次",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            modifier = Modifier.padding(bottom = 4.dp, start = 4.dp)
-                        )
-                    }
+                    Text(
+                        text = "/ 12 次",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
                 }
             }
 
-            // 叠加层 2：右上角 听觉节律 RAS 开关与闪烁状态
-            Surface(
-                color = Color(0xDD0F172A),
-                shape = RoundedCornerShape(12.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155)),
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(12.dp)
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+            // 叠加层 2：右上角 听觉节律 RAS 微型开关 (非步态动作自动隐藏 - P1-7)
+            if (hasRas) {
+                Surface(
+                    color = Color(0x990F172A),
+                    shape = RoundedCornerShape(16.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF80D5CB)),
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
                 ) {
-                    Column {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
                         Text(
-                            text = "RAS 节拍",
-                            fontSize = 11.sp,
+                            text = "🎵 64 BPM",
+                            fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF80D5CB)
                         )
-                        Text(
-                            text = "64 BPM",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Black,
-                            color = Color.White
-                        )
+                        Surface(
+                            color = if (metronomeEnabled) Color(0xFF006A63) else Color(0xFF334155),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable { onToggleMetronome(!metronomeEnabled) }
+                        ) {
+                            Text(
+                                text = if (metronomeEnabled) "节拍 开" else "节拍 关",
+                                fontSize = 18.sp,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                            )
+                        }
                     }
-                    Switch(
-                        checked = metronomeEnabled,
-                        onCheckedChange = onToggleMetronome,
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color(0xFF006A63),
-                            checkedTrackColor = Color(0xFF99EFE5)
-                        )
-                    )
                 }
             }
 
-            // 叠加层 3：底部 足部入镜提示与姿态状态条 (D17 硬性检查)
+            // 叠加层 3：底部 足部入镜提示与姿态状态胶囊 (置于最下沿居中，字号 >= 18sp - P1-13)
             Surface(
-                color = if (!footVisible) Color(0xEEBA1A1A) else Color(0xDD0F172A),
-                shape = RoundedCornerShape(10.dp),
+                color = if (!footVisible) Color(0xDDBA1A1A) else Color(0x990F172A),
+                shape = RoundedCornerShape(14.dp),
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(10.dp)
+                    .padding(bottom = 6.dp)
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     if (!footVisible) {
                         Icon(
@@ -499,22 +751,24 @@ private fun PatientRealtimeCameraPane(
                             modifier = Modifier.size(20.dp)
                         )
                         Text(
-                            text = "⚠️ 脚部未入镜，请后退站入全身框（步态指标无法计算）",
+                            text = "⚠️ 脚部未入镜，请后退入框",
                             color = Color.White,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1
                         )
                     } else {
                         Box(
                             modifier = Modifier
-                                .size(10.dp)
+                                .size(8.dp)
                                 .background(Color(0xFF80D5CB), CircleShape)
                         )
                         Text(
-                            text = "$statusText · 患者实时端上画面",
+                            text = "$statusText · 实时端上画面",
                             color = Color(0xFFE2E8F0),
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1
                         )
                     }
                 }
@@ -524,53 +778,60 @@ private fun PatientRealtimeCameraPane(
 }
 
 /**
- * 常驻操作与安全控制底栏：紧急停止按钮始终常驻可见且高度 >= 80dp。
+ * 常驻操作与安全控制底栏：
+ * 手机横屏采用紧凑高度 (52dp) 保护视频视口 (P0-1)；
+ * 紧急停止按钮任何模式下常驻可见、醒目高亮且绝对不被裁切。
+ * 按钮文字精炼短小，杜绝单字孤立换行 (P1-14)。
  */
 @Composable
 private fun PersistentControlFooter(
+    isPhoneLandscape: Boolean,
     isPaused: Boolean,
     onTogglePause: () -> Unit,
     onFinishSet: () -> Unit,
     onEmergencyStop: () -> Unit
 ) {
+    val buttonMinHeight = if (isPhoneLandscape) 52.dp else 80.dp
+    val buttonPadding = if (isPhoneLandscape) PaddingValues(horizontal = 8.dp, vertical = 6.dp) else null
+
     Surface(
         color = MaterialTheme.colorScheme.surface,
         shadowElevation = 8.dp,
         border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(
+                    horizontal = if (isPhoneLandscape) 8.dp else 12.dp,
+                    vertical = if (isPhoneLandscape) 4.dp else 8.dp
+                ),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // 次级控制栏：暂停与完成本组
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                ElderlyButton(
-                    text = if (isPaused) "继续跟练" else "暂停",
-                    onClick = onTogglePause,
-                    variant = ElderlyButtonVariant.Secondary,
-                    modifier = Modifier.weight(1f)
-                )
-                ElderlyButton(
-                    text = "完成本组 (第 1/3 组)",
-                    onClick = onFinishSet,
-                    variant = ElderlyButtonVariant.Primary,
-                    modifier = Modifier.weight(1.5f)
-                )
-            }
-
-            // 核心安全红线：紧急停止按钮始终可见且高度 >= 80dp (适老化硬约束)
             ElderlyButton(
-                text = "🛑 紧急停止训练",
+                text = if (isPaused) "继续" else "暂停",
+                onClick = onTogglePause,
+                variant = ElderlyButtonVariant.Secondary,
+                minHeight = buttonMinHeight,
+                contentPadding = buttonPadding,
+                modifier = Modifier.weight(1f)
+            )
+            ElderlyButton(
+                text = "完成本组",
+                onClick = onFinishSet,
+                variant = ElderlyButtonVariant.Primary,
+                minHeight = buttonMinHeight,
+                contentPadding = buttonPadding,
+                modifier = Modifier.weight(1.2f)
+            )
+            ElderlyButton(
+                text = "🛑 紧急停止",
                 onClick = onEmergencyStop,
                 variant = ElderlyButtonVariant.Danger,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 80.dp)
+                minHeight = buttonMinHeight,
+                contentPadding = buttonPadding,
+                modifier = Modifier.weight(1.2f)
             )
         }
     }

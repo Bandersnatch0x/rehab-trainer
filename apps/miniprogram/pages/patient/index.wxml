@@ -24,16 +24,16 @@
     <view class="card">
       <view class="stat-grid">
         <view class="stat-item">
-          <view class="stat-value">{{overview.trainingCount}}</view>
-          <view class="stat-label">近 30 天打卡 (次)</view>
+          <view class="stat-label">近 30 天打卡</view>
+          <view class="stat-value">{{overview.trainingCount}} <text style="font-size:32rpx; font-weight:normal; color:#475569;">次</text></view>
         </view>
         <view class="stat-item">
-          <view class="stat-value">{{overview.streakDays}}</view>
-          <view class="stat-label">连续打卡 (天)</view>
+          <view class="stat-label">连续打卡</view>
+          <view class="stat-value">{{overview.streakDays}} <text style="font-size:32rpx; font-weight:normal; color:#475569;">天</text></view>
         </view>
         <view class="stat-item">
-          <view class="stat-value">{{overview.todayCount}}</view>
-          <view class="stat-label">今日打卡 (次)</view>
+          <view class="stat-label">今日打卡</view>
+          <view class="stat-value">{{overview.todayCount}} <text style="font-size:32rpx; font-weight:normal; color:#475569;">次</text></view>
         </view>
       </view>
       <view class="hint">按近 30 个自然日统计；今天尚未打卡时，连续天数从昨天计起。</view>
