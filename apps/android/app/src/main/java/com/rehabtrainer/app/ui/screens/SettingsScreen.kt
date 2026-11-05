@@ -1,5 +1,6 @@
 package com.rehabtrainer.app.ui.screens
 
+import com.rehabtrainer.app.BuildConfig
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -152,7 +153,8 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = "系统版本：v1.0.0 (MediaPipe Lite + RAS Engine)",
+                    // 版本号取自构建配置，不要再硬编码，避免与 versionName 漂移。
+                    text = "系统版本：v${BuildConfig.VERSION_NAME} (MediaPipe Lite + RAS Engine)",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
