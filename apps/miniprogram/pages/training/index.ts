@@ -1,6 +1,9 @@
 import { isDemoMode, isLoggedIn } from '../../utils/auth';
+import { STORAGE_KEYS } from '../../utils/config';
 import { errorState, exerciseView, loadExercises, type ExerciseView } from '../../utils/patient-data';
 import type { components } from '../../types/api';
+
+const SELECTED_EXERCISE_KEY = STORAGE_KEYS.selectedExercise;
 
 type Exercise = components['schemas']['Exercise'];
 
@@ -83,6 +86,14 @@ Page({
       return;
     }
     this.loadData();
+  },
+  /** 记录选中条目再跳转；执行页不重复请求，只渲染这一条。 */
+  onStartExercise(event: WechatMiniprogram.BaseEvent<Record<string, never>, { index: number }>) {
+    const index = Number(event.currentTarget.dataset.index);
+    const selected = this.data.exercises[index];
+    if (!selected) return;
+    wx.setStorageSync(SELECTED_EXERCISE_KEY, selected);
+    wx.navigateTo({ url: '/pages/training/session/index' });
   },
   goBind() {
     wx.navigateTo({ url: '/pages/bind/index' });

@@ -41,4 +41,5 @@ export const STORAGE_KEYS = {
   session: 'rehab.auth.session.v1',
   actingForPatient: 'rehab.auth.actingFor.v1',
   demoMode: 'rehab.auth.demo.v1',
+  selectedExercise: 'rehab.training.selected.v1',
 } as const;

@@ -33,15 +33,15 @@
     </view>
     <view class="muted">训练大类：{{item.categoryLabel}}</view>
     <view class="muted">训练安排：{{item.dosageLine}}</view>
-    <navigator
+    <button
       wx:if="{{item.available}}"
       class="btn btn--primary btn--block exercise__action"
-      url="/pages/training/session/index"
-      aria-role="button"
+      data-index="{{index}}"
+      bindtap="onStartExercise"
       aria-label="开始{{item.label}}"
     >
       开始训练
-    </navigator>
+    </button>
     <view
       wx:else
       class="btn btn--block exercise__action exercise__action--disabled"

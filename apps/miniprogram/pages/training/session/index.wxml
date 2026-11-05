@@ -1,7 +1,15 @@
 <view class="page">
   <view class="page-title">训练执行</view>
   <view class="notice notice--warning">演示数据：本页不会录制、上传视频或生成训练记录。</view>
-  <view class="page-subtitle">条目名称（占位）</view>
+
+  <view wx:if="{{loading}}" class="card">正在读取训练安排…</view>
+  <view wx:elif="{{missing}}" class="card">
+    没有找到要训练的条目，请返回训练列表重新选择。
+  </view>
+
+  <block wx:else>
+  <view class="page-title">{{exercise.label}}</view>
+  <view class="page-subtitle">{{exercise.categoryLabel}}</view>
 
   <view class="notice notice--warning">
     小程序端采用云端异步 CV：训练视频上传后由服务端分析，训练过程中没有实时动作反馈。
@@ -16,20 +24,12 @@
     <view class="section-title">本次训练</view>
     <view class="card">
       <view class="info-row">
-        <text class="info-row__label">组数</text>
-        <text class="info-row__value">— 组</text>
+        <text class="info-row__label">训练安排</text>
+        <text class="info-row__value">{{exercise.dosageLine}}</text>
       </view>
       <view class="info-row">
-        <text class="info-row__label">每组次数</text>
-        <text class="info-row__value">— 次</text>
-      </view>
-      <view class="info-row">
-        <text class="info-row__label">节拍</text>
-        <text class="info-row__value">— BPM</text>
-      </view>
-      <view class="info-row">
-        <text class="info-row__label">预计时长</text>
-        <text class="info-row__value">— 分钟</text>
+        <text class="info-row__label">当前状态</text>
+        <text class="info-row__value">{{exercise.badgeLabel}}</text>
       </view>
     </view>
   </view>
@@ -44,20 +44,20 @@
     </view>
   </view>
 
-  <view class="btn-row">
-    <view class="btn btn--primary btn--tall" hover-class="btn--pressed" aria-role="button">
-      开始训练
-    </view>
-    <view class="btn btn--secondary btn--tall" hover-class="btn--pressed" aria-role="button">
-      结束并上传
-    </view>
+  <view class="card">
+    <view class="muted">本版本不录制、不上传视频，也不生成训练记录；录制与云端分析接入后才能在此开始。</view>
   </view>
 
   <view class="notice notice--danger session-danger">
     出现头晕、胸痛、心慌、呼吸困难或跌倒时，请立即停止训练，并联系治疗师或拨打急救电话。
   </view>
 
-  <view class="hint">
-    训练有效性校验未通过时，记录会标记「存疑」，但不阻断打卡。本页为结构占位，录制与上传待接入。
+  <view class="btn-row">
+    <button class="btn btn--secondary btn--tall" bindtap="goBack">返回训练列表</button>
   </view>
+
+  <view class="hint">
+    训练有效性校验未通过时，记录会标记「存疑」，但不阻断打卡。
+  </view>
+  </block>
 </view>
