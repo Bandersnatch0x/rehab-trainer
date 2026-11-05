@@ -102,6 +102,36 @@ test('预警处理结果保存后刷新仍然有效', async ({ page, data, reque
   expect(items).toEqual(expect.arrayContaining([expect.objectContaining({ id: data.alertId, status: 'followed_up' })]));
 });
 
+test('预警可先确认再关闭，状态保存后刷新仍然有效', async ({ page, data, request }) => {
+  const signedIn = await login(page, data, 'care_admin');
+  const { accessToken } = await signedIn.json();
+  await page.getByRole('link', { name: /预警/ }).click();
+  const row = page.getByRole('row').filter({ hasText: 'PAIN_PERSISTENT' });
+  await expect(row).toHaveCount(1);
+
+  await row.getByRole('button', { name: '确认', exact: true }).click();
+  await expect(row).toContainText('已确认');
+  // 确认后仍可登记随访或关闭，但不再显示「确认」。
+  await expect(row.getByRole('button', { name: '确认', exact: true })).toHaveCount(0);
+  await expect(row.getByRole('button', { name: '登记随访' })).toHaveCount(1);
+
+  await page.reload();
+  await expect(row).toContainText('已确认');
+
+  await row.getByRole('button', { name: '关闭', exact: true }).click();
+  await expect(row).toContainText('已关闭');
+  await page.reload();
+  await expect(row).toContainText('已关闭');
+  await expect(row.getByRole('button', { name: '关闭', exact: true })).toHaveCount(0);
+
+  const persisted = await request.get(`/v1/alerts?patientId=${data.patientId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  expect(persisted.status()).toBe(200);
+  const { items } = await persisted.json();
+  expect(items).toEqual(expect.arrayContaining([expect.objectContaining({ id: data.alertId, status: 'closed' })]));
+});
+
 test('调整处方不会删除同一处方里的其他训练条目', async ({ page, data, request }) => {
   const signedIn = await login(page, data);
   const { accessToken } = await signedIn.json();

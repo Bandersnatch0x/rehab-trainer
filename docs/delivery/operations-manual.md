@@ -189,7 +189,6 @@ python -m alembic -c deploy/alembic.ini check
 | `npx tsc` 报找不到命令 | 未安装依赖 | 在仓库根目录执行 `pnpm install --frozen-lockfile` |
 | Playwright 报缺少浏览器 | 未安装 Chromium | 在 `apps/admin-web` 执行 `npx playwright install chromium` |
 | Android 构建报 SDK location not found | 未设置 `ANDROID_HOME` 或 `ANDROID_SDK_ROOT` | 设置 SDK 路径，或在 `apps/android/local.properties` 写入 `sdk.dir` |
-| `python scripts/verify_all.py` 在 Android 步骤报 `FileNotFoundError` | Windows 下脚本以 `gradlew.bat` 直接创建进程，未通过 shell 解析 | 先跑 `python scripts/verify_all.py --skip-android`，再按第 9 节单独执行 Android 构建 |
 | 迁移后 API 在新表上返回权限错误 | 运行账号没有新表权限 | 配置 `ALTER DEFAULT PRIVILEGES`，或在每次迁移后重新授权 |
 | 多副本登录限流不准确 | 失败计数保存在进程内 | 扩容前改用共享存储；当前版本按单实例部署 |
 
@@ -215,8 +214,8 @@ python -m unittest discover -s scripts -p "test_*.py"
 
 预期：
 
-- 后端测试 73 项全部通过。
-- 部署自检输出 `PASS: 16 tables; SQLite upgrade/repeat/downgrade/upgrade; model diff empty; PostgreSQL SQL; YAML`。
+- 后端测试 97 项全部通过。
+- 部署自检输出 `PASS: 17 tables; SQLite upgrade/repeat/downgrade/upgrade; model diff empty; PostgreSQL SQL; YAML`。
 - 联调脚本回归测试 2 项通过。
 
 ### 9.3 管理端
@@ -227,7 +226,7 @@ npx tsc --noEmit
 npx playwright test
 ```
 
-预期：类型检查退出 0；E2E 15 项全部通过。
+预期：类型检查退出 0；E2E 18 项全部通过。
 
 ### 9.4 小程序
 
@@ -250,7 +249,7 @@ $env:JAVA_HOME = 'E:\jdk\microsoft-jdk-21.0.10-windows-x64\jdk-21.0.10+7'
 ./gradlew.bat :app:testDebugUnitTest :app:assembleDebug --no-daemon
 ```
 
-预期：36 项单元测试全部通过，`assembleDebug` 成功。以上路径是本次验证环境；现场按实际 JDK 与 SDK 安装位置替换。此外，`scripts/verify_all.py` 的默认 JDK 路径在本次环境不存在，且 Windows 下该脚本无法直接解析 `gradlew.bat`，因此建议按本节单独执行 Android 验证。
+预期：80 项单元测试全部通过，`assembleDebug` 成功。以上路径是本次验证环境；现场按实际 JDK 与 SDK 安装位置替换。`scripts/verify_all.py` 在 Windows 上会用绝对路径直接调用 `gradlew.bat`，无需先跑 `--skip-android`。
 
 ### 9.6 API 联调
 
@@ -260,7 +259,7 @@ $env:JAVA_HOME = 'E:\jdk\microsoft-jdk-21.0.10-windows-x64\jdk-21.0.10+7'
 python scripts/smoke-api.py --config .agent/tmp/smoke-config.json
 ```
 
-预期：脚本自建临时数据库、启动本地服务并逐项打印 `PASS`。当前脚本覆盖 18 个契约操作；契约共 20 个操作，缺少的两个科研聚合端点不在脚本覆盖内，因此脚本末尾的覆盖断言会失败并以退出码 1 结束。18 个已执行操作本身全部通过；科研端点由后端测试与管理端 E2E 覆盖。
+预期：脚本自建临时数据库、启动本地服务并逐项打印 `PASS`，覆盖全部 23 个契约操作（含两个科研聚合端点与媒体上传/上架），退出码 0。
 
 ### 9.7 全量脚本
 
@@ -268,7 +267,7 @@ python scripts/smoke-api.py --config .agent/tmp/smoke-config.json
 python scripts/verify_all.py
 ```
 
-在 Windows 上，该脚本会在 Android 步骤因 `gradlew.bat` 解析失败而中断；后端、部署自检、管理端构建、管理端 E2E、小程序各步均通过。需要完整验证时，先执行 `--skip-android`，再按 9.5 单独执行 Android。
+在 Windows 上，该脚本会依次跑完后端、部署自检、管理端构建、管理端 E2E、小程序与 Android 各步；任一步失败立即停止并打印失败步骤。
 
 ### 9.8 提交门禁
 
@@ -286,5 +285,5 @@ git diff --check
 - 没有通知投递与兜底通道；预警只持久化到数据库，不会自动发送短信、电话或推送。
 - 没有管理端静态站点托管、账号初始化与生产 seed 流程。
 - 没有对象存储上传集成；相关环境变量是预留项。
-- 当前 Docker/PostgreSQL 容器验证记录对应迁移 `0001` 且当时契约为 18 个操作；`0002` 的 SQLite 往返与模型差异由部署自检覆盖，但未在容器内复跑。
+- 当前 Docker/PostgreSQL 容器验证记录对应迁移 `0001` 且当时契约为 18 个操作；`0002`/`0003` 的 SQLite 往返与模型差异由部署自检覆盖，但未在容器内复跑。
 - CI 配置文件存在，但仓库没有远端流水线，未在真实 CI 上运行。

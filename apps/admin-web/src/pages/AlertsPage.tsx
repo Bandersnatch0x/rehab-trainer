@@ -88,16 +88,17 @@ export default function AlertsPage() {
 
   const visible = filter === "" ? alerts : alerts.filter((a) => a.level === filter);
 
-  async function handleResolve(alert: Alert) {
+  async function handleStatus(
+    alert: Alert,
+    status: "acknowledged" | "followed_up" | "closed",
+    note: string,
+  ) {
     setPendingId(alert.id);
     setError(null);
-    const result = await updateAlert(alert.id, {
-      status: "followed_up",
-      note: "管理端登记随访",
-    });
+    const result = await updateAlert(alert.id, { status, note });
     setPendingId(null);
     if (!result.ok) {
-      setError(`预警 ${alert.id} 登记失败：${result.error.message}`);
+      setError(`预警 ${alert.id} 状态更新失败：${result.error.message}`);
       return;
     }
     // 以服务端返回为准，避免本地状态与台账不一致。
@@ -221,18 +222,40 @@ export default function AlertsPage() {
                     </span>
                   </td>
                   <td>
-                    {a.status === "open" ? (
-                      <button
-                        className="btn-primary"
-                        style={{ padding: "4px 12px", minHeight: 32, fontSize: 13 }}
-                        disabled={pendingId === a.id}
-                        onClick={() => void handleResolve(a)}
-                      >
-                        {pendingId === a.id ? "登记中…" : "登记随访"}
-                      </button>
-                    ) : (
-                      <span className="hint">已归档</span>
-                    )}
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      {a.status === "open" ? (
+                        <button
+                          className="btn-secondary"
+                          style={{ padding: "4px 12px", minHeight: 32, fontSize: 13 }}
+                          disabled={pendingId === a.id}
+                          onClick={() => void handleStatus(a, "acknowledged", "管理端确认收到")}
+                        >
+                          确认
+                        </button>
+                      ) : null}
+                      {a.status === "open" || a.status === "acknowledged" ? (
+                        <button
+                          className="btn-primary"
+                          style={{ padding: "4px 12px", minHeight: 32, fontSize: 13 }}
+                          disabled={pendingId === a.id}
+                          onClick={() => void handleStatus(a, "followed_up", "管理端登记随访")}
+                        >
+                          {pendingId === a.id ? "登记中…" : "登记随访"}
+                        </button>
+                      ) : null}
+                      {a.status !== "closed" ? (
+                        <button
+                          className="btn-secondary"
+                          style={{ padding: "4px 12px", minHeight: 32, fontSize: 13 }}
+                          disabled={pendingId === a.id}
+                          onClick={() => void handleStatus(a, "closed", "管理端关闭预警")}
+                        >
+                          关闭
+                        </button>
+                      ) : (
+                        <span className="hint">已归档</span>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))

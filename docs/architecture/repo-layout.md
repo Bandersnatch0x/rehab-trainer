@@ -7,11 +7,11 @@
 | 路径 | 内容 | 当前状态 |
 | --- | --- | --- |
 | `apps/android/` | Kotlin + Jetpack Compose,手机与平板同一 App | CameraX + MediaPipe 实时上肢计数与训练页已落地;`assembleDebug` 通过(SDK 在 D:\Android\Sdk) |
-| `apps/miniprogram/` | 微信原生小程序 + TypeScript | 5 个页面接真实接口(index/patient/records/alerts/assessment),训练页保持演示并标注;行为测试 15 项、类型检查通过 |
-| `apps/admin-web/` | React + Vite + TypeScript | 路由、鉴权、7 个业务页接真实 API(含随访台账);E2E 14 条全部通过 |
-| `services/api/` | FastAPI + SQLAlchemy 后端 | 15 路径 / 18 操作,16 张表,Alembic 初始迁移,41 项测试通过 |
+| `apps/miniprogram/` | 微信原生小程序 + TypeScript | 5 个页面接真实接口(index/patient/records/alerts/assessment),训练执行页仅渲染选中条目、不录制不上传;行为测试 17 项、类型检查通过 |
+| `apps/admin-web/` | React + Vite + TypeScript | 路由、鉴权、8 个业务页接真实 API(含随访台账、科研、视频管理);E2E 18 条全部通过 |
+| `services/api/` | FastAPI + SQLAlchemy 后端 | 20 路径 / 23 操作,17 张表,迁移 head `0003`,97 项测试通过 |
 | `services/cv-worker/` | 云端 CV 异步推理 | 占位,仅 README |
-| `packages/api-contract/` | OpenAPI 契约(唯一真源) | 15 路径 / 18 操作,含 `GET /prescriptions` |
+| `packages/api-contract/` | OpenAPI 契约(唯一真源) | 20 路径 / 23 操作,含 `GET /prescriptions` 与媒体上传/上架 |
 | `packages/api-client-ts/` | TypeScript 生成客户端目录 | 空,仅 .gitkeep 与说明;实际生成物在各自 app 内 |
 | `packages/api-client-kt/` | Kotlin 生成客户端目录 | 空,仅 .gitkeep 与说明;实际接口在 `apps/android/.../data/remote/` |
 | `docs/architecture/` | 架构与仓库说明 | 本文件 |
@@ -39,7 +39,7 @@
 - 页面:`index`、`patient`、`records`、`alerts`、`assessment`、`training`,含 `sitemap.json`(disallow 全部页面)。
 - 请求层已具备 Bearer 注入与 401 刷新重放;`API_BASE_URL` 指向 `http://127.0.0.1:8000/v1`。
 - 取数与字段投影集中在 `utils/patient-data.ts`,页面只做绑定;临床字段(分级/症状)不进入患者端页面数据(D20)。
-- 行为测试 `node --test apps/miniprogram/tests/patient-data.cjs`(15 项)用 `global.wx` 桩驱动真实请求层与五个 Page。
+- 行为测试 `node --test apps/miniprogram/tests/patient-data.cjs`(17 项)用 `global.wx` 桩驱动真实请求层与五个 Page。
 - 静态一致性检查 `python tests/static_check.py .`:页面文件齐全、tabBar 指向有效、WXML 绑定键与 `data` 对齐、事件处理函数存在、D20 禁用词扫描。
 - 微信开发者工具实跑:`cli islogin` 为 true,`cli open --project` 成功,`cli preview` 编译通过并生成预览码(包体 62.4 KB)。**真机渲染与交互仍未验证**;自动化端口(9420)未开启。
 
@@ -47,8 +47,8 @@
 
 - Vite + React + TypeScript,react-router 路由 + 自建鉴权上下文,无第三方 UI 库。
 - `src/api/` 由 `openapi-typescript` 生成 `schema.d.ts`,业务调用集中在 `operations.ts`。
-- 7 个业务页已接真实 API(患者列表/详情/分期/处方/预警/随访台账);患者端 D20 文案约束只管患者端,管理端保留临床信息。
-- `npx tsc --noEmit` 与 `vite build` 通过;Playwright E2E 14 条全部通过。
+- 8 个业务页已接真实 API(患者列表/详情/分期/处方/预警/随访台账/科研/视频管理);患者端 D20 文案约束只管患者端,管理端保留临床信息。
+- `npx tsc --noEmit` 与 `vite build` 通过;Playwright E2E 18 条全部通过。
 
 ## 契约工作流
 
@@ -56,7 +56,7 @@
 2. 再生成 `packages/api-client-ts/` 与 `packages/api-client-kt/` 的客户端。
 3. 三端调用点与契约在同一提交内更新,由 CI 按路径触发检查。
 
-当前契约含 15 个路径、18 个操作,覆盖登录/绑定、患者与分期、评估、训练条目、处方(含按患者读取)、训练记录批量幂等上传、预警处置。生成命令:`apps/admin-web` 与 `apps/miniprogram` 各自的 `pnpm generate:api`。
+当前契约含 20 个路径、23 个操作,覆盖登录/绑定、患者与分期、评估、训练条目、处方(含按患者读取)、训练记录批量幂等上传、预警处置、科研聚合与媒体上传/上架。生成命令:`apps/admin-web` 与 `apps/miniprogram` 各自的 `pnpm generate:api`。
 
 ## 验证状态(2026-11-04)
 
@@ -74,11 +74,11 @@
 
 | 项 | 结果 |
 | --- | --- |
-| 后端测试 | `pytest` 40 项通过(含处方读取、机构隔离与契约一致性) |
-| 管理端 E2E | `npx playwright test` **14 passed / 0 failed**(真实后端 + 每例独立机构数据) |
+| 后端测试 | `pytest` 97 项通过(含处方读取、机构隔离与契约一致性) |
+| 管理端 E2E | `npx playwright test` **18 passed / 0 failed**(真实后端 + 每例独立机构数据) |
 | 管理端构建 | `tsc --noEmit` 退出 0;`vite build` 通过 |
-| 小程序 | 行为测试 15 项、静态一致性检查 0 问题、`tsc --noEmit` 退出 0;微信开发者工具 `open` 与 `preview` 编译通过(62.4 KB);**真机渲染与交互未验证** |
-| 联调脚本 | `scripts/smoke-api.py` 自管理模式 **18/18 契约操作**,含批量幂等与重放 |
+| 小程序 | 行为测试 17 项、静态一致性检查 0 问题、`tsc --noEmit` 退出 0;微信开发者工具 `open` 与 `preview` 编译通过(62.4 KB);**真机渲染与交互未验证** |
+| 联调脚本 | `scripts/smoke-api.py` 自管理模式 **23/23 契约操作**,含批量幂等、重放、科研聚合与媒体上传/上架 |
 | 部署自检 | `deploy/verify.py` 通过:16 表迁移往返、模型差异为空、PostgreSQL 离线 SQL、YAML |
 | 容器 | 已在 WSL2(kali-linux2,Docker 27.5.1/Compose 2.32.4)实跑:构建、compose up(双 healthy)、`alembic 0001`、healthcheck、pg_dump/restore、18/18 联调通过;hadolint 2.12.0 通过 |
 | Android | `assembleDebug` **通过**(SDK 装 D:\Android\Sdk、JDK 17);修复 3 处此前被「未验证」掩盖的编译错误 |
