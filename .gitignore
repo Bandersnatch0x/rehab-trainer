@@ -41,5 +41,8 @@ apps/miniprogram/miniprogram_npm/
 # Web
 apps/admin-web/dist/
 
+# 运行期媒体落盘目录：上传的视频与会话数据不入版本控制
+services/api/media/
+
 # 阶段技能名 build 与上方构建缓存规则同名，后匹配优先，须在文件末尾再次放行
 !.agents/skills/build/

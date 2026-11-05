@@ -373,7 +373,40 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * 列出患者的评估与身体感受记录
+         * @description 按评估时间倒序返回。管理端治疗师据此查看患者提交的每日身体感受（DAILY_FEELING）。
+         *     量表分界值待临床签核，服务端不据此输出诊断结论。
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /**
+                     * @description 不透明游标，取自上一页的 `nextCursor`。服务端按排序键定位，
+                     *     翻页期间有新增或删除也不会重复或漏行。客户端不应解析其内容。
+                     */
+                    cursor?: components["parameters"]["Cursor"];
+                    limit?: components["parameters"]["Limit"];
+                };
+                header?: never;
+                path: {
+                    patientId: components["parameters"]["PatientId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description 评估记录列表 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AssessmentPage"];
+                    };
+                };
+            };
+        };
         put?: never;
         /**
          * 提交一次评估
@@ -1156,10 +1189,17 @@ export interface components {
             patientId: string;
             instrument: string;
             score?: number;
+            answers?: {
+                [key: string]: unknown;
+            };
             riskLevel?: components["schemas"]["RiskLevel"];
             /** Format: date-time */
             assessedAt: string;
             assessedBy: string;
+        };
+        AssessmentPage: {
+            items: components["schemas"]["Assessment"][];
+            nextCursor?: string | null;
         };
         Dosage: {
             sets?: number;

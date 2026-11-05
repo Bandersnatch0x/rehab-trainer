@@ -13,6 +13,7 @@ import type {
   AlertUpdate,
   Assessment,
   AssessmentCreate,
+  AssessmentPage,
   BindRequestBody,
   Exercise,
   ExerciseListQuery,
@@ -125,6 +126,18 @@ export function createAssessment(
     api.POST("/patients/{patientId}/assessments", {
       params: { path: { patientId } },
       body,
+    }),
+  );
+}
+
+/** 8. GET /patients/{patientId}/assessments — 列出评估与身体感受记录 */
+export function listAssessments(
+  patientId: string,
+  query: { cursor?: string; limit?: number } = {},
+): Promise<ApiResult<AssessmentPage>> {
+  return toResult<AssessmentPage>(
+    api.GET("/patients/{patientId}/assessments", {
+      params: { path: { patientId }, query },
     }),
   );
 }

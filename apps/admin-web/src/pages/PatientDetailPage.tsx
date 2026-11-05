@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
-import { getPatient, listSessions } from "../api/operations";
+import { getPatient, listAssessments, listSessions } from "../api/operations";
 import { findCurrentPrescription } from "../api/prescription-query";
 import { formatServerTime } from "../api/time";
-import type { Patient, Prescription, SessionRecord } from "../api/types";
+import type { Assessment, Patient, Prescription, SessionRecord } from "../api/types";
 import { useAuth } from "../auth/AuthProvider";
 
 const RISK_LABEL: Record<string, string> = {
@@ -27,10 +27,12 @@ export default function PatientDetailPage() {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [prescription, setPrescription] = useState<Prescription | null>(null);
   const [sessions, setSessions] = useState<SessionRecord[]>([]);
+  const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [prescriptionError, setPrescriptionError] = useState<string | null>(null);
   const [sessionsError, setSessionsError] = useState<string | null>(null);
+  const [assessmentsError, setAssessmentsError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!patientId) {
@@ -45,14 +47,17 @@ export default function PatientDetailPage() {
     setPatient(null);
     setPrescription(null);
     setSessions([]);
+    setAssessments([]);
     setPrescriptionError(null);
     setSessionsError(null);
+    setAssessmentsError(null);
 
     Promise.all([
       getPatient(patientId),
       findCurrentPrescription(patientId),
       listSessions({ patientId, limit: 100 }),
-    ]).then(([patientResult, prescriptionResult, sessionResult]) => {
+      listAssessments(patientId, { limit: 100 }),
+    ]).then(([patientResult, prescriptionResult, sessionResult, assessmentResult]) => {
       if (cancelled) {
         return;
       }
@@ -74,6 +79,12 @@ export default function PatientDetailPage() {
         setSessions(sessionResult.data.items);
       } else {
         setSessionsError(sessionResult.error.message);
+      }
+
+      if (assessmentResult.ok) {
+        setAssessments(assessmentResult.data.items);
+      } else {
+        setAssessmentsError(assessmentResult.error.message);
       }
     });
 
@@ -272,6 +283,62 @@ export default function PatientDetailPage() {
                     <td>{record.metricAlgorithmVersion ?? "—"}</td>
                   </tr>
                 ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-title">身体感受与评估记录</div>
+        <p className="hint" style={{ margin: "0 0 12px" }}>
+          量表分界值待临床签核，本页只展示患者提交的记录，不输出风险分级。
+        </p>
+        <div className="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>记录时间</th>
+                <th>量表</th>
+                <th>分值</th>
+                <th>记录人</th>
+                <th>内容</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={5}>正在读取评估记录…</td>
+                </tr>
+              ) : assessmentsError ? (
+                <tr>
+                  <td colSpan={5}>评估记录读取失败：{assessmentsError}</td>
+                </tr>
+              ) : assessments.length === 0 ? (
+                <tr>
+                  <td colSpan={5}>该患者暂无评估或身体感受记录。</td>
+                </tr>
+              ) : (
+                assessments.map((item) => {
+                  const feeling =
+                    typeof item.answers?.feeling === "string" ? item.answers.feeling : null;
+                  const answerText =
+                    feeling ??
+                    (item.answers && Object.keys(item.answers).length > 0
+                      ? JSON.stringify(item.answers)
+                      : "—");
+                  return (
+                    <tr key={item.id}>
+                      <td>{formatServerTime(item.assessedAt)}</td>
+                      <td>
+                        <code>{item.instrument}</code>
+                      </td>
+                      <td>{typeof item.score === "number" ? item.score : "—"}</td>
+                      <td>{item.assessedBy}</td>
+                      <td>{answerText}</td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

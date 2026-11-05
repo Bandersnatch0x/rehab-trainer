@@ -1,23 +1,67 @@
+from datetime import datetime
 from typing import Annotated
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, Path
+from fastapi import APIRouter, Depends, Path, Query
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.access import get_patient_scoped
 from app.core.audit import record_audit
-from app.core.auth import Principal, require_roles
+from app.core.auth import Principal, get_principal, require_roles
 from app.core.database import get_db
+from app.core.pagination import apply_keyset, cursor_from, datetime_key, decode_cursor
 from app.core.timeutils import to_utc_naive, utcnow
 from app.models.clinical import Assessment, StageConfirmation
 from app.schemas.assessment import (
     AssessmentCreate,
     AssessmentOut,
+    AssessmentPage,
     StageConfirmationCreate,
     StageConfirmationOut,
 )
 
 router = APIRouter(tags=["assessments"])
+
+
+@router.get(
+    "/patients/{patientId}/assessments", response_model=AssessmentPage
+)
+def list_assessments(
+    patient_id: Annotated[str, Path(alias="patientId")],
+    principal: Principal = Depends(get_principal),
+    db: Session = Depends(get_db),
+    cursor: str | None = Query(default=None),
+    limit: int = Query(default=20, ge=1, le=100),
+):
+    patient = get_patient_scoped(db, principal, patient_id)
+    keyset = decode_cursor(cursor, keys=("k", "i"))
+    stmt = select(Assessment).where(
+        Assessment.org_id == patient.org_id,
+        Assessment.patient_id == patient.patient_id,
+    )
+    stmt = apply_keyset(
+        stmt,
+        Assessment.assessed_at,
+        Assessment.id,
+        keyset,
+        descending=True,
+        key_type=datetime.fromisoformat,
+    )
+    stmt = stmt.order_by(Assessment.assessed_at.desc(), Assessment.id.desc())
+    rows = db.scalars(stmt.limit(limit + 1)).all()
+    has_more = len(rows) > limit
+    page = rows[:limit]
+
+    next_cursor = None
+    if has_more and page:
+        last = page[-1]
+        next_cursor = cursor_from(key=datetime_key(last.assessed_at), ident=last.id)
+
+    return AssessmentPage(
+        items=[AssessmentOut.model_validate(row) for row in page],
+        next_cursor=next_cursor,
+    )
 
 
 @router.post(

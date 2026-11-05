@@ -36,6 +36,12 @@ class AssessmentOut(APIModel):
     patient_id: str
     instrument: str
     score: float | None = None
+    answers: dict[str, Any] = {}
     risk_level: RiskLevel | None = None
     assessed_at: datetime
     assessed_by: str
+
+
+class AssessmentPage(APIModel):
+    items: list[AssessmentOut]
+    next_cursor: str | None = None

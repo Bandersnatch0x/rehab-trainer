@@ -138,8 +138,11 @@ def run_smoke(base_url, username, password, binding_token):
     request("GET", f"/patients/{patient_id}",
             check=lambda b: b["id"] == patient_id and b["hyStage"] == 3 and b["stageConfirmationStatus"] == "confirmed")
     request("POST", f"/patients/{patient_id}/assessments",
-            {"instrument": "STEADI", "score": 1, "assessedAt": timestamp}, status=201,
+            {"instrument": "STEADI", "score": 1, "answers": {"item1": 1}, "assessedAt": timestamp}, status=201,
             check=lambda b: bool(b["id"]) and b["patientId"] == patient_id and b["score"] == 1)
+    request("GET", f"/patients/{patient_id}/assessments",
+            check=lambda b: len(b["items"]) == 1 and b["items"][0]["instrument"] == "STEADI"
+            and b["items"][0]["answers"]["item1"] == 1)
     request("GET", "/exercises", check=lambda b: any(e["code"] == "ex-stretch-01" for e in b["items"]))
     request("GET", "/exercises/ex-stretch-01", check=lambda b: b["code"] == "ex-stretch-01" and bool(b["label"]))
     prescription = request("POST", "/prescriptions", {

@@ -20,7 +20,7 @@ from app.core.database import SessionLocal, init_db
 from app.core.security import hash_password
 from app.core.timeutils import utcnow
 from app.models.alert import AlertEvent
-from app.models.clinical import Patient
+from app.models.clinical import Assessment, Patient
 from app.models.identity import Account, Org, RoleBinding
 from app.models.prescription import Prescription, PrescriptionItem
 from app.models.record import SessionRecord
@@ -75,6 +75,12 @@ def seed_case(extra_patients: int = 0):
         db.add(prescription)
         db.add(AlertEvent(id=alert_id, org_id=case_id, patient_id=patient_id,
                           rule_code="PAIN_PERSISTENT", level="warning", triggered_at=now, status="open"))
+        # 患者端每日身体感受；管理端详情页应能读回原文。
+        db.add(Assessment(id=uuid4().hex, org_id=case_id, patient_id=patient_id,
+                          instrument="DAILY_FEELING",
+                          answers={"feeling": "今天散步很轻松，练习后休息了一会儿。"},
+                          assessed_at=now - timedelta(hours=2),
+                          assessed_by=accounts["patient"]))
         # 科研看板冒烟用：5 条训练记录刚好越过 n<5 阈值，患者数保持不变，
         # 以免影响既有的患者列表计数用例。
         for index in range(5):

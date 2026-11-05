@@ -78,6 +78,41 @@ def test_assessment_cross_org_rejected(client, seed):
     assert response.status_code == 403
 
 
+def test_patient_can_read_back_daily_feeling_text(client, seed):
+    token = login(client, "patient-unconfirmed")
+    headers = auth_headers(token)
+    created = client.post(
+        f"{API}/patients/{seed['patient_unconfirmed']}/assessments",
+        json={
+            "instrument": "DAILY_FEELING",
+            "answers": {"feeling": "散步很轻松，练习后休息了一会儿。"},
+            "assessedAt": "2026-11-04T10:00:00Z",
+        },
+        headers=headers,
+    )
+    assert created.status_code == 201, created.text
+    assert created.json()["answers"]["feeling"] == "散步很轻松，练习后休息了一会儿。"
+
+    listed = client.get(
+        f"{API}/patients/{seed['patient_unconfirmed']}/assessments",
+        headers=headers,
+    )
+    assert listed.status_code == 200, listed.text
+    body = listed.json()
+    assert [item["instrument"] for item in body["items"]] == ["DAILY_FEELING"]
+    assert body["items"][0]["answers"]["feeling"] == "散步很轻松，练习后休息了一会儿。"
+    assert body["items"][0]["assessedBy"] == "patient-unconfirmed-account"
+
+
+def test_assessment_list_is_org_scoped(client, seed):
+    token = login(client, "therapist-a")
+    response = client.get(
+        f"{API}/patients/{seed['patient_b']}/assessments",
+        headers=auth_headers(token),
+    )
+    assert response.status_code == 403
+
+
 def test_patient_creation_roles_and_defaults(client, seed):
     patient_token = login(client, "patient-a")
     denied = client.post(

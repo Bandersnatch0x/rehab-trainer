@@ -238,6 +238,23 @@ paths:
           $ref: "#/components/responses/Forbidden"
 
   /patients/{patientId}/assessments:
+    get:
+      tags: [assessments]
+      summary: 列出患者的评估与身体感受记录
+      description: |
+        按评估时间倒序返回。管理端治疗师据此查看患者提交的每日身体感受（DAILY_FEELING）。
+        量表分界值待临床签核，服务端不据此输出诊断结论。
+      parameters:
+        - $ref: "#/components/parameters/PatientId"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: 评估记录列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssessmentPage"
     post:
       tags: [assessments]
       summary: 提交一次评估
@@ -913,6 +930,9 @@ components:
           type: string
         score:
           type: number
+        answers:
+          type: object
+          additionalProperties: true
         riskLevel:
           $ref: "#/components/schemas/RiskLevel"
         assessedAt:
@@ -920,6 +940,18 @@ components:
           format: date-time
         assessedBy:
           type: string
+
+    AssessmentPage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Assessment"
+        nextCursor:
+          type: string
+          nullable: true
 
     Dosage:
       type: object

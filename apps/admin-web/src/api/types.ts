@@ -22,6 +22,7 @@ export type Patient = components["schemas"]["Patient"];
 export type PatientPage = components["schemas"]["PatientPage"];
 export type StageConfirmation = components["schemas"]["StageConfirmation"];
 export type Assessment = components["schemas"]["Assessment"];
+export type AssessmentPage = components["schemas"]["AssessmentPage"];
 export type Exercise = components["schemas"]["Exercise"];
 export type ExerciseVariant = components["schemas"]["ExerciseVariant"];
 export type ExercisePage = components["schemas"]["ExercisePage"];

@@ -44,6 +44,14 @@ test('患者详情展示真实分期和当前处方', async ({ page, data }) => 
   await expect(page.getByText(/肩颈牵伸|ex-stretch-01/)).toBeVisible();
 });
 
+test('患者详情展示每日身体感受记录', async ({ page, data }) => {
+  await login(page, data);
+  await page.goto(`/patients/${data.patientId}`);
+  await expect(page.getByText('身体感受与评估记录')).toBeVisible();
+  await expect(page.getByText('DAILY_FEELING')).toBeVisible();
+  await expect(page.getByText('今天散步很轻松，练习后休息了一会儿。')).toBeVisible();
+});
+
 test('康复治疗师可见并进入分期确认', async ({ page, data }) => {
   await login(page, data);
   await page.goto(`/patients/${data.patientId}`);
