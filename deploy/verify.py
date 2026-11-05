@@ -10,7 +10,7 @@ from alembic import command
 from alembic.autogenerate import compare_metadata
 from alembic.config import Config
 from alembic.migration import MigrationContext
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import CheckConstraint, create_engine, inspect
 
 root = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(root / "services/api"))
@@ -27,14 +27,30 @@ with tempfile.TemporaryDirectory(dir=scratch) as temporary:
     command.upgrade(config, "head")
     command.upgrade(config, "head")
     engine = create_engine(os.environ["REHAB_DATABASE_URL"])
-    with engine.connect() as connection:
-        assert set(inspect(connection).get_table_names()) == set(Base.metadata.tables) | {"alembic_version"}
-        assert compare_metadata(MigrationContext.configure(connection), Base.metadata) == []
-        assert sum(len(inspect(connection).get_check_constraints(name)) for name in Base.metadata.tables) == 4
-    command.downgrade(config, "base")
-    assert inspect(engine).get_table_names() == ["alembic_version"]
-    command.upgrade(config, "head")
-    engine.dispose()
+    try:
+        with engine.connect() as connection:
+            assert set(inspect(connection).get_table_names()) == set(Base.metadata.tables) | {"alembic_version"}
+            assert compare_metadata(MigrationContext.configure(connection), Base.metadata) == []
+            # 从模型推导期望的检查约束数，避免新增约束后自检静默失效。
+            expected_checks = sum(
+                1
+                for table in Base.metadata.tables.values()
+                for constraint in table.constraints
+                if isinstance(constraint, CheckConstraint)
+            )
+            actual_checks = sum(
+                len(inspect(connection).get_check_constraints(name))
+                for name in Base.metadata.tables
+            )
+            assert actual_checks == expected_checks, (
+                f"检查约束数量不符：数据库 {actual_checks}，模型 {expected_checks}"
+            )
+        command.downgrade(config, "base")
+        assert inspect(engine).get_table_names() == ["alembic_version"]
+        command.upgrade(config, "head")
+    finally:
+        # Windows 下未释放连接会让临时目录删除报 WinError 32，掩盖真实断言失败。
+        engine.dispose()
 
 from app.core.config import get_settings
 
