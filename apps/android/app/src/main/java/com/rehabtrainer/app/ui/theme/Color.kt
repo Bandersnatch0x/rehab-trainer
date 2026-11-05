@@ -30,7 +30,14 @@ internal val DangerContainer = Color(0xFFFEE2E2)
 internal val OnDangerContainer = Color(0xFF7F1D1D)
 internal val SurfaceVariantLight = Color(0xFFF1F5F9)
 internal val OnSurfaceVariantLight = Color(0xFF334155)
-internal val OutlineLight = Color(0xFFCBD5E1)
+/** 白底上约 4.8:1，满足 AA 正文要求；旧值 0xFFCBD5E1 仅约 1.5:1。 */
+internal val OutlineLight = Color(0xFF64748B)
+
+// 高对比度模式：把次级文字与边框压到近黑，白底上 ≥ 9:1。
+internal val HighContrastOutlineLight = Color(0xFF334155)
+internal val HighContrastOnSurfaceVariantLight = Color(0xFF1E293B)
+internal val HighContrastSurfaceVariantLight = Color(0xFFE8EDF3)
+internal val HighContrastOutlineVariantLight = Color(0xFF64748B)
 
 internal val DarkPaper = Color(0xFF121212)
 internal val DarkInk = Color(0xFFF5F5F5)
@@ -53,6 +60,11 @@ internal val OnDangerContainerDark = Color(0xFFFFDAD6)
 internal val SurfaceVariantDark = Color(0xFF2B2B2B)
 internal val OnSurfaceVariantDark = Color(0xFFE2E2E2)
 internal val OutlineDark = Color(0xFFA8A8A8)
+
+internal val HighContrastOutlineDark = Color(0xFFE2E2E2)
+internal val HighContrastOnSurfaceVariantDark = Color(0xFFF5F5F5)
+internal val HighContrastSurfaceVariantDark = Color(0xFF333333)
+internal val HighContrastOutlineVariantDark = Color(0xFFCFCFCF)
 
 // Q 版柔和辅助色 (D19 决策)
 internal val MascotWarmYellow = Color(0xFFFFF3C4)
