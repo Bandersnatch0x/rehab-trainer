@@ -4,7 +4,7 @@ import okhttp3.Interceptor
 import okhttp3.Response
 
 /**
- * 给除 `/auth/*` 外的请求注入 `Authorization: Bearer <accessToken>`。
+ * 给 `auth` 下的端点之外的请求注入 `Authorization: Bearer <accessToken>`。
  *
  * 刷新令牌由 [TokenAuthenticator] 在收到 401 时完成，本拦截器只负责常规注入。
  */

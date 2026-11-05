@@ -9,7 +9,7 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 /**
- * `/auth/*` 两个端点（契约安全要求为 `security: []`，不带 Bearer）。
+ * `auth` 下的两个端点（契约安全要求为 `security: []`，不带 Bearer）。
  *
  * 这两个方法由 `ApiContainer` 中不带鉴权拦截器的 Retrofit 实例创建，
  * 以免刷新令牌时再次触发 401 刷新循环。

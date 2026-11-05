@@ -86,8 +86,9 @@ class PoseAnalyzer(
         val shoulderY = (landmarks[11].y() + landmarks[12].y()) / 2f
         val hipY = (landmarks[23].y() + landmarks[24].y()) / 2f
         val torso = abs(hipY - shoulderY)
+        // visibility() 是 Optional<Float>：模型未给出可见度时按不可见处理（D17 门槛 fail-closed）。
         val footVisibility = listOf(27, 28, 29, 30, 31, 32)
-            .minOf { landmarks[it].visibility() }
+            .minOf { index -> landmarks[index].visibility().orElse(0f) }
 
         if (torso <= 1e-4f) {
             onFrame(PoseFrame.NoPose)
