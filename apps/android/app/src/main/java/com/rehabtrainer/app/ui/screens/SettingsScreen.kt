@@ -136,6 +136,13 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                     text = "所属机构与设备标识",
                     style = MaterialTheme.typography.titleLarge
                 )
+                // D21：机构与治疗师为 mock 信息（上方三个开关是真实偏好，不属演示数据）；
+                // 接入真实机构 API 后本声明随这两行 mock 一并移除。
+                Text(
+                    text = "演示数据：以下机构与治疗师信息为示例数据，不是真实机构信息。",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 Text(
                     text = "签约机构：市康复中心第三病区（机构隔离 D10）",
                     style = MaterialTheme.typography.bodyLarge

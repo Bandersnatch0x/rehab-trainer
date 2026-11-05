@@ -54,6 +54,13 @@ fun AlertsScreen(modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.headlineLarge
         )
 
+        // D21：预警规则、时间与随访文案均为 mock；接入真实预警数据时本声明与 mock 一并移除。
+        Text(
+            text = "演示数据：当前为演示模式，本页预警与随访内容均为示例数据，不是真实患者信息。",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
         // Safety Stop Principle Banner
         Card(
             modifier = Modifier.fillMaxWidth(),

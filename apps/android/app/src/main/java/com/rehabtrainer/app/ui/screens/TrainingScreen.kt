@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Handler
 import android.os.Looper
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
@@ -119,7 +120,8 @@ fun TrainingScreen(
     var metronomeEnabled by rememberSaveable {
         mutableStateOf(AppPreferences.isAudioGuidanceEnabled(context))
     }
-    var isPaused by remember { mutableStateOf(false) }
+    // 暂停状态须跨 Activity 重建保存：旋转后仍保持暂停，视频不得自动续播。
+    var isPaused by rememberSaveable { mutableStateOf(false) }
     var ttsReady by remember { mutableStateOf(false) }
     var ttsFailed by remember { mutableStateOf(false) }
 
@@ -256,6 +258,12 @@ fun TrainingScreen(
             }
         }
         previousGateBlocked = gateBlocked
+    }
+
+    // P2-3：安全优先不做二次确认，但停止后先给可见反馈再退出训练页。
+    val stopTrainingWithFeedback: () -> Unit = {
+        Toast.makeText(context, "训练已停止，本次未保存记录", Toast.LENGTH_LONG).show()
+        onEmergencyStop()
     }
 
     val finishCurrentSet: () -> Unit = {
@@ -452,7 +460,7 @@ fun TrainingScreen(
             setProgress = setProgress,
             onTogglePause = { isPaused = !isPaused },
             onFinishSet = finishCurrentSet,
-            onEmergencyStop = onEmergencyStop
+            onEmergencyStop = stopTrainingWithFeedback
         )
     }
 }
