@@ -97,7 +97,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
 
                 SettingSwitchRow(
                     title = "按键防颤振动确认",
-                    description = "点击 80dp 主按钮时触发物理马达震动回馈",
+                    description = "按下按钮时轻微震动，确认操作已被接受",
                     checked = hapticFeedbackEnabled,
                     onCheckedChange = { enabled ->
                         hapticFeedbackEnabled = enabled
