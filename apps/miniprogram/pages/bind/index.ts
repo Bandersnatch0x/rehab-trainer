@@ -1,5 +1,5 @@
 import { bindWithCode, loginWithPassword, setDemoMode } from '../../utils/auth';
-import { DEMO_ACCOUNT } from '../../utils/config';
+import { DEMO_ACCOUNT, DEMO_LOGIN_ENABLED } from '../../utils/config';
 import { errorMessage } from '../../utils/patient-data';
 
 Page({
@@ -9,6 +9,8 @@ Page({
     error: '',
     demoLoading: false,
     demoError: '',
+    // 生产构建把 DEMO_LOGIN_ENABLED 置 false 后，演示入口整块不渲染。
+    demoEnabled: DEMO_LOGIN_ENABLED,
   },
   onCodeInput(event: WechatMiniprogram.Input) {
     this.setData({ code: event.detail.value, error: '' });
@@ -28,6 +30,7 @@ Page({
     }
   },
   async enterDemo() {
+    if (!DEMO_LOGIN_ENABLED) return;
     if (this.data.demoLoading || this.data.submitting) return;
     this.setData({ demoLoading: true, demoError: '' });
     try {

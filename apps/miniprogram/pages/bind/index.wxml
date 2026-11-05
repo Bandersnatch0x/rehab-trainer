@@ -30,7 +30,7 @@
     </button>
   </view>
 
-  <view class="card">
+  <view wx:if="{{demoEnabled}}" class="card">
     <view class="card-title">没有绑定码？</view>
     <view class="muted">
       演示数据：演示模式使用预置演示账号登录，进入后展示示例患者与示例训练数据，仅用于产品演示，不是真实患者信息。

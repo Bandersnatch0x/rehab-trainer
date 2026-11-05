@@ -17,8 +17,19 @@ export const AUTH_ENDPOINTS = {
 } as const;
 
 /**
+ * 演示模式总开关。
+ *
+ * **生产构建必须置为 false。** 为 true 时客户端携带演示账号凭据，
+ * 小程序包可被反编译取出，等同于公开该账号。演示账号只连演示数据。
+ */
+export const DEMO_LOGIN_ENABLED = true;
+
+/**
  * 本地演示账号，由 `services/api` 的 seed 脚本生成，仅用于演示模式。
  * 生产环境不应存在该账号；绑定页也明确标注演示数据。
+ *
+ * 安全边界：这是演示凭据，不是秘密。任何拿到小程序包的人都能读到。
+ * 因此生产构建必须同时满足：`DEMO_LOGIN_ENABLED = false` 且后端未创建该账号。
  */
 export const DEMO_ACCOUNT = {
   username: 'patient',
