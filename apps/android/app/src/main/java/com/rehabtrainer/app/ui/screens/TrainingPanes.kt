@@ -30,7 +30,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -371,6 +373,10 @@ internal fun InstructionalVideoPane(
     isPaused: Boolean,
     videoSource: InstructionalVideoSource = InstructionalVideoSource()
 ) {
+    // factory 的闭包只捕获创建时的值；用 rememberUpdatedState 让 onPrepared 读到最新暂停状态，
+    // 否则「准备完成」瞬间会用旧值覆盖用户的暂停/继续操作。
+    val pausedNow by rememberUpdatedState(isPaused)
+
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
@@ -394,7 +400,7 @@ internal fun InstructionalVideoPane(
                                 player.isLooping = true
                                 // 教学视频静音，音频通道留给动作语音与节拍音。
                                 player.setVolume(0f, 0f)
-                                if (!isPaused) start()
+                                if (!pausedNow) start()
                             }
                             setOnErrorListener { _, _, _ ->
                                 // 远端不可用时回退内置演示视频；内置视频再失败就停止重试。
@@ -525,6 +531,8 @@ internal fun PatientRealtimeCameraPane(
     previewView: PreviewView,
     armRaiseCount: Int,
     repsPerSet: Int,
+    // 计数在数什么：当前只有右臂抬举计数器，必须如实标注（P1-16）。
+    counterLabel: String = "右臂抬举",
     largeCount: Boolean = false,
     statusText: String,
     footVisible: Boolean,
@@ -571,12 +579,19 @@ internal fun PatientRealtimeCameraPane(
                         fontFamily = FontFamily.Monospace,
                         color = Color(0xFF38BDF8)
                     )
-                    Text(
-                        text = "/ $repsPerSet 次",
-                        fontSize = if (largeCount) 20.sp else 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
+                    Column {
+                        Text(
+                            text = "/ $repsPerSet 次",
+                            fontSize = if (largeCount) 20.sp else 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Text(
+                            text = counterLabel,
+                            fontSize = 14.sp,
+                            color = Color(0xFFCBD5E1)
+                        )
+                    }
                 }
             }
 

@@ -49,6 +49,9 @@ data class ExerciseMeta(
     val repsPerSet: Int,
     val requiresFullBody: Boolean,
     val restSeconds: Int = 30,
+    // 计数语义：当前只有「右臂抬举」一个计数器，标签必须如实说明在数什么（P1-16）。
+    // 接入按动作类型分派的计数后，改由条目指标类型决定。
+    val counterLabel: String = "右臂抬举",
     // 服务端下发的示范视频；为空时回退 APK 内置演示视频。
     val videoUri: String? = null,
     val watermarkText: String? = null,
@@ -70,7 +73,8 @@ val DEFAULT_EXERCISES = listOf(
         prompt = "“保持挺胸直视前方，大腿抬高至水平，落地轻柔跟随 64 BPM 节奏”",
         sets = 3,
         repsPerSet = 12,
-        requiresFullBody = true
+        requiresFullBody = true,
+        counterLabel = "右臂抬举（踏步计数待接入）",
     ),
     ExerciseMeta(
         code = "EX-STRETCH-01",
@@ -82,7 +86,8 @@ val DEFAULT_EXERCISES = listOf(
         prompt = "“双臂自然上举过头顶，躯干轻柔向两侧延伸，深呼吸保持均匀”",
         sets = 2,
         repsPerSet = 10,
-        requiresFullBody = false
+        requiresFullBody = false,
+        counterLabel = "右臂抬举（上肢伸展计数待接入）",
     ),
     ExerciseMeta(
         code = "EX-STRENGTH-01",
@@ -94,7 +99,8 @@ val DEFAULT_EXERCISES = listOf(
         prompt = "“背部贴墙缓缓下蹲至膝屈 30°，双手扶稳把手，起身平稳”",
         sets = 2,
         repsPerSet = 8,
-        requiresFullBody = true
+        requiresFullBody = true,
+        counterLabel = "右臂抬举（蹲起计数待接入）",
     ),
     ExerciseMeta(
         code = "EX-POSTURE-01",
@@ -106,7 +112,8 @@ val DEFAULT_EXERCISES = listOf(
         prompt = "“双肩下沉放松，收腹挺胸，感受头顶向上延伸对齐重力垂线”",
         sets = 3,
         repsPerSet = 10,
-        requiresFullBody = true
+        requiresFullBody = true,
+        counterLabel = "右臂抬举（姿势矫正计数待接入）",
     )
 )
 
