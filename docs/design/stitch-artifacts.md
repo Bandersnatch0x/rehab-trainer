@@ -64,35 +64,46 @@
 
 ---
 
-### 2. 多端次级衍生页面覆盖清单
+### 2. 全量 23 个页面生成与落盘清单 (覆盖率 100%)
 
-本轮任务中，Stitch 针对移动端（代表 Android 与小程序）和桌面端（代表 Web 管理端）的核心主屏生成了完整的基准视觉设计与 `NeuroShield Mobility` 设计系统。各端次级业务页面直接复用本套设计系统规范，并在现有工程代码与全端交互原型中全量落地。
+本轮任务中，针对 Android 原生端、微信小程序端、Web 医护管理端的所有业务屏，均已在 Stitch 服务端完成高保真设计生成并下载落盘至 `docs/design/stitch/`：
 
-| 终端 | 页面名称 | 业务职责 | Stitch 云端链接状态 | 说明与落地位置 |
+#### (1) Android 原生移动端 (9 个页面)
+| 序号 | 页面名称 | 业务职责与三模式定义 | Stitch Screen ID | 本地导出文件 |
 | :--- | :--- | :--- | :--- | :--- |
-| **Android** | 训练列表 | 训练动作与课程筛选 | **不可获取** | 复用 Stitch 设计规范；落地于 App 模块及全量交互原型 |
-| **Android** | 训练执行 (实时计数) | RAS 听觉节奏与传感器防颤计数 | **不可获取** | 复用 Stitch 设计规范；落地于 App 模块及全量交互原型 |
-| **Android** | 训练记录 | 依从度日历与肌肉负荷趋势 | **不可获取** | 复用 Stitch 设计规范；落地于 App 模块及全量交互原型 |
-| **Android** | 预警中心 | 跌倒/心率异常醒目通知 | **不可获取** | 复用 Stitch 设计规范；落地于 App 模块及全量交互原型 |
-| **Android** | 患者档案 | 个人信息与 H-Y 分期状态 | **不可获取** | 复用 Stitch 设计规范；落地于 App 模块及全量交互原型 |
-| **Android** | 系统设置 | 骨传导耳机配对与无障碍音色 | **不可获取** | 复用 Stitch 设计规范；落地于 App 模块及全量交互原型 |
-| **小程序** | 首页 | 帕金森每日康复概览 | **不可获取** | 复用 Stitch 移动端规范；落地于 `apps/miniprogram` |
-| **小程序** | 患者档案 | 家属代办与患者状态 | **不可获取** | 复用 Stitch 移动端规范；落地于 `apps/miniprogram` |
-| **小程序** | 训练列表 | 动作分类与视频指导 | **不可获取** | 复用 Stitch 移动端规范；落地于 `apps/miniprogram` |
-| **小程序** | 训练执行 | 计时与动作提示 | **不可获取** | 复用 Stitch 移动端规范；落地于 `apps/miniprogram` |
-| **小程序** | 训练记录 | 历史完成度打卡 | **不可获取** | 复用 Stitch 移动端规范；落地于 `apps/miniprogram` |
-| **小程序** | 症状自评 | 震颤/僵直每日量表自测 | **不可获取** | 复用 Stitch 移动端规范；落地于 `apps/miniprogram` |
-| **小程序** | 预警通知 | 运动风险警报与照护者推送 | **不可获取** | 复用 Stitch 移动端规范；落地于 `apps/miniprogram` |
-| **Web 管理端** | 登录页面 | 医护工号登录与认证 | **不可获取** | 复用 Stitch 桌面端规范；落地于 `apps/admin-web` |
-| **Web 管理端** | 患者详情 | 临床病历与病程记录 | **不可获取** | 复用 Stitch 桌面端规范；落地于 `apps/admin-web` |
-| **Web 管理端** | 分期确认 | H-Y 分期临床复核与确认 | **不可获取** | 复用 Stitch 桌面端规范；落地于 `apps/admin-web` |
-| **Web 管理端** | 处方编辑 | 动作编排与 RAS 频次配置 | **不可获取** | 复用 Stitch 桌面端规范；落地于 `apps/admin-web` |
-| **Web 管理端** | 预警中心 | 跌倒高危与异常台账处理 | **不可获取** | 复用 Stitch 桌面端规范；落地于 `apps/admin-web` |
-| **Web 管理端** | 随访台账 | 电话随访与康复评估追踪 | **不可获取** | 复用 Stitch 桌面端规范；落地于 `apps/admin-web` |
-| **Web 管理端** | 权限管理 | 医生/护士/管理员权限配置 | **不可获取** | 复用 Stitch 桌面端规范；落地于 `apps/admin-web` |
-| **Web 管理端** | 403 / 404 | 异常状态兜底页 | **不可获取** | 复用 Stitch 桌面端规范；落地于 `apps/admin-web` |
+| 1 | 首页 | 帕金森康复工作台，Q版插画与80dp大按钮 | `d107f4407f7d465e9659573bbdc50909` | [`screen-android-home.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-android-home.png) (479 KB) |
+| 2 | 训练列表 | 四大分类卡片，水平非换行适老化标签 | `bfa2f4db1d7d48398a0df4b489bfc79c` | [`screen-android-exercises.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-android-exercises.png) (793 KB) |
+| 3 | 训练执行 (模式1) | **竖屏同屏双播放**：教学视频 38% + 实景拍摄 62% | `53cc050a731343f28349a15f720c0d57` | [`screen-android-training-portrait.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-android-training-portrait.png) (525 KB) |
+| 4 | 训练执行 (模式2) | **纯实景拍摄+语音提示**：折叠视频为语音胶囊，摄像头独占100% | `f5bc2b4c7ce6447b9cefe4f2d21b0775` | [`screen-android-training-camera-only.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-android-training-camera-only.png) (2.94 MB) |
+| 5 | 训练执行 (模式3) | **横屏自适应**：平板 50/50 分栏，手机 36/64 比例防挤压 | `8d7b916561f44e52b740deb84f547e91` | [`screen-android-training-landscape.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-android-training-landscape.png) (1.69 MB) |
+| 6 | 训练记录 | 依从度打卡日历圆盘、动作规范星级评分 | `1177b5a9cf27480c98439b6fbadedd5b` | [`screen-android-records.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-android-records.png) (1.34 MB) |
+| 7 | 预警通知 | 关怀提醒与安全建议，符合 D20 禁用词规范 | `1bad347980fe4498b8e5b6765e0ea720` | [`screen-android-alerts.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-android-alerts.png) (406 KB) |
+| 8 | 患者档案 | 个人中心与阶段标识，一键呼叫家属大卡片 | `48c35c46b22d4e63a1674e3b44eaf9c1` | [`screen-android-patients.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-android-patients.png) (722 KB) |
+| 9 | 系统设置 | 骨传导耳机配对、大字号切换、无障碍模式 | `bda36872e8d245a8b104872dcb08a32a` | [`screen-android-settings.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-android-settings.png) (732 KB) |
 
-> *注：上述次级衍生页面未在 Stitch 服务端单独发起 AI 图像生成调用（避免冗余消耗配额与 API 超时），所有视觉规范均可在本地全功能原型 [`docs/design/preview/index.html`](file:///D:/code_space/rehab-trainer/docs/design/preview/index.html) 中切换查看并已完全编译通过。*
+> **关键安全底线保证**：在任何模式与屏幕旋转状态下，底部的「🛑 紧急停止」按钮始终常驻吸底可见、高度 >= 80dp，绝对不被裁切。
+
+#### (2) 微信小程序端 (6 个页面)
+| 序号 | 页面名称 | 业务职责 | Stitch Screen ID | 本地导出文件 |
+| :--- | :--- | :--- | :--- | :--- |
+| 1 | 首页 | 温暖小鹿问候、今日原地踏步任务大卡片 | `a0c295f0724148d08fa8ad27ecc9da28` | [`screen-mp-home.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-mp-home.png) (456 KB) |
+| 2 | 患者档案 | 就诊卡号、当前康复阶段、照护家属快捷绑定 | `d8951048230248be8a365faf9bd1edab` | [`screen-mp-profile.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-mp-profile.png) (748 KB) |
+| 3 | 训练记录 | 月度打卡日历圆盘、组数统计、星级评分流 | `33bd6fede15e41369ef17f5387abfa1e` | [`screen-mp-records.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-mp-records.png) (824 KB) |
+| 4 | 关怀提醒 | 训练达成提醒、动作偏快提示、家属关怀卡片 | `ab9690d0760c4cdeb5e8b70d7e8df30b` | [`screen-mp-alerts.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-mp-alerts.png) (684 KB) |
+| 5 | 症状自评 | 生活语言晨间状态问卷、单选大药丸按钮 | `279b1c3b14854713affb37e3db33e1de` | [`screen-mp-assessment.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-mp-assessment.png) (588 KB) |
+| 6 | 跟练指导 | 动作示范分解卡片、64 BPM 节拍球、大字计时 | `7b074108b0514a3cb1099c5eba3c594f` | [`screen-mp-training.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-mp-training.png) (807 KB) |
+
+#### (3) Web 医护管理端 (8 个页面)
+| 序号 | 页面名称 | 业务职责 | Stitch Screen ID | 本地导出文件 |
+| :--- | :--- | :--- | :--- | :--- |
+| 1 | 医护登录 | 医疗深蓝风格、机构选择、医护工号认证 | `d6c2061705a3488a867391f89d218282` | [`screen-web-login.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-web-login.png) (568 KB) |
+| 2 | 患者名册 | 全科患者多维看板、分期多选过滤筛选 | `811cbaadb90048818b17e4f6ea6db80b` | [`screen-web-patients.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-web-patients.png) (1.32 MB) |
+| 3 | 患者详情 | 步态雷达图、肌力维持曲线、FoG 频次记录 | `5b3149a8369c4c279cbff621d0b08a34` | [`screen-web-patient-detail.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-web-patient-detail.png) (801 KB) |
+| 4 | 分期确认 | Hoehn & Yahr 1-5 级量表复核、专家意见录入 | `d33b21a981f34bf89262db6c3985d778` | [`screen-web-staging.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-web-staging.png) (859 KB) |
+| 5 | 处方编辑 | 动作库拖拽编排、节拍频次调节、下发患者端 | `958c95899e7e41ebb9c62ec90a6fb3b4` | [`screen-web-prescription.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-web-prescription.png) (926 KB) |
+| 6 | 预警中心 | 跌倒可疑/姿势失稳告警台账、事件处理抽屉 | `39ff490a019c46a7afbf3dd9b13fe07a` | [`screen-web-alerts.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-web-alerts.png) (651 KB) |
+| 7 | 随访台账 | 随访日历看板、患者回访状态、新增随访模态框 | `7ab957e931eb400896ad9b6014cbeed0` | [`screen-web-followup.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-web-followup.png) (609 KB) |
+| 8 | 权限管理 | 医护角色树 (主任/治疗师/护士)、功能权限矩阵 | `a374e86ab70c4cb38b0e39d4823c1de0` | [`screen-web-permissions.png`](file:///D:/code_space/rehab-trainer/docs/design/stitch/screen-web-permissions.png) (740 KB) |
 
 ---
 

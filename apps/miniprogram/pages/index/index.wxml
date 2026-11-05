@@ -65,8 +65,11 @@
         aria-role="button"
         aria-label="查看活力健康档案"
       >
-        <view class="entry-tile__title">健康档案</view>
-        <view class="entry-tile__desc">查看打卡与坚持记录</view>
+        <view class="entry-tile__body">
+          <view class="entry-tile__title">健康档案</view>
+          <view class="entry-tile__desc">查看打卡与坚持记录</view>
+        </view>
+        <view class="entry-tile__arrow">›</view>
       </navigator>
 
       <navigator
@@ -75,8 +78,11 @@
         aria-role="button"
         aria-label="进入身体感受记录"
       >
-        <view class="entry-tile__title">身体感受记录</view>
-        <view class="entry-tile__desc">活动自如度、平衡感知</view>
+        <view class="entry-tile__body">
+          <view class="entry-tile__title">身体感受记录</view>
+          <view class="entry-tile__desc">活动自如度、平衡感知</view>
+        </view>
+        <view class="entry-tile__arrow">›</view>
       </navigator>
 
       <navigator
@@ -86,8 +92,11 @@
         aria-role="button"
         aria-label="查看训练记录"
       >
-        <view class="entry-tile__title">训练记录</view>
-        <view class="entry-tile__desc">完成次数与存疑标记</view>
+        <view class="entry-tile__body">
+          <view class="entry-tile__title">训练记录</view>
+          <view class="entry-tile__desc">完成次数与存疑标记</view>
+        </view>
+        <view class="entry-tile__arrow">›</view>
       </navigator>
 
       <navigator
@@ -97,8 +106,11 @@
         aria-role="button"
         aria-label="查看风险预警"
       >
-        <view class="entry-tile__title">风险预警</view>
-        <view class="entry-tile__desc">预警级别与处理状态</view>
+        <view class="entry-tile__body">
+          <view class="entry-tile__title">风险预警</view>
+          <view class="entry-tile__desc">预警级别与处理状态</view>
+        </view>
+        <view class="entry-tile__arrow">›</view>
       </navigator>
     </view>
   </view>

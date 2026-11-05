@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-background" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>患者康复全景详情 - 华东神经康复中心 (D10隔离租户)</title>
+<!-- Atkinson Hyperlegible Next Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-dim": "#d2d9f4",
+            "secondary-container": "#8ef4e4",
+            "inverse-surface": "#283044",
+            "on-secondary-fixed": "#00201c",
+            "inverse-primary": "#aec6ff",
+            "tertiary-fixed-dim": "#ffb77d",
+            "primary": "#00387e",
+            "tertiary": "#5c2f00",
+            "error-container": "#ffdad6",
+            "tertiary-fixed": "#ffdcc3",
+            "primary-fixed-dim": "#aec6ff",
+            "on-surface-variant": "#434751",
+            "surface-variant": "#dae2fd",
+            "on-error-container": "#93000a",
+            "error": "#ba1a1a",
+            "secondary-fixed-dim": "#72d8c8",
+            "secondary-fixed": "#8ef4e4",
+            "secondary": "#006a60",
+            "on-background": "#131b2e",
+            "on-tertiary-fixed": "#2f1500",
+            "on-secondary-container": "#007166",
+            "outline-variant": "#c3c6d3",
+            "on-tertiary-container": "#ffb579",
+            "on-secondary": "#ffffff",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-highest": "#dae2fd",
+            "on-primary-container": "#abc5ff",
+            "on-error": "#ffffff",
+            "on-surface": "#131b2e",
+            "on-primary-fixed-variant": "#024394",
+            "surface-container-low": "#f2f3ff",
+            "primary-container": "#1a4fa0",
+            "on-primary-fixed": "#001a42",
+            "background": "#faf8ff",
+            "surface-container-high": "#e2e7ff",
+            "tertiary-container": "#7e4200",
+            "on-tertiary-fixed-variant": "#6e3900",
+            "surface-container": "#eaedff",
+            "outline": "#737783",
+            "on-primary": "#ffffff",
+            "on-tertiary": "#ffffff",
+            "surface": "#faf8ff",
+            "surface-tint": "#2c5cae",
+            "on-secondary-fixed-variant": "#005048",
+            "primary-fixed": "#d8e2ff",
+            "surface-bright": "#faf8ff",
+            "inverse-on-surface": "#eef0ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "3xl": "1.5rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-2xl": "3rem",
+            "space-md": "1rem",
+            "margin": "1.5rem",
+            "space-xl": "2.25rem",
+            "space-lg": "1.5rem",
+            "gutter": "1.5rem",
+            "space-xs": "0.5rem",
+            "space-sm": "0.75rem"
+          },
+          "fontFamily": {
+            "body-xl": ["Atkinson Hyperlegible Next"],
+            "headline-lg": ["Atkinson Hyperlegible Next"],
+            "body-md": ["Atkinson Hyperlegible Next"],
+            "display-counter-lg": ["Atkinson Hyperlegible Next"],
+            "label-lg": ["Atkinson Hyperlegible Next"],
+            "headline-md": ["Atkinson Hyperlegible Next"],
+            "label-md": ["Atkinson Hyperlegible Next"],
+            "headline-sm": ["Atkinson Hyperlegible Next"],
+            "body-lg": ["Atkinson Hyperlegible Next"],
+            "display-counter": ["Atkinson Hyperlegible Next"]
+          },
+          "fontSize": {
+            "body-xl": ["22px", { "lineHeight": "32px", "fontWeight": "500" }],
+            "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+            "body-md": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "display-counter-lg": ["72px", { "lineHeight": "80px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+            "label-lg": ["18px", { "lineHeight": "24px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+            "headline-md": ["26px", { "lineHeight": "34px", "fontWeight": "700" }],
+            "label-md": ["16px", { "lineHeight": "22px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+            "headline-sm": ["22px", { "lineHeight": "30px", "fontWeight": "600" }],
+            "body-lg": ["20px", { "lineHeight": "30px", "fontWeight": "400" }],
+            "display-counter": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #f2f3ff;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #c3c6d3;
+      border-radius: 9999px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: #737783;
+    }
+  </style>
+</head>
+<body class="h-full font-body-md text-on-surface antialiased flex flex-col overflow-hidden bg-background">
+<!-- ==================== TOP NAVIGATION BAR ==================== -->
+<header class="flex justify-between items-center h-16 px-6 w-full z-40 bg-surface-container-lowest dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none flex-shrink-0">
+<!-- Brand / Tenant & Search on Left -->
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary shadow-sm">
+<span class="material-symbols-outlined text-2xl" data-icon="local_hospital">local_hospital</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-primary dark:text-inverse-primary font-bold tracking-tight">华东神经康复中心 (D10隔离租户)</span>
+<span class="text-xs text-on-surface-variant font-medium tracking-wide">临床医生站 · UPDRS 智能化管理平台</span>
+</div>
+</div>
+<!-- Search Bar on left as specified -->
+<div class="relative w-80">
+<span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-outline">
+<span class="material-symbols-outlined text-lg" data-icon="search">search</span>
+</span>
+<input class="w-full pl-9 pr-4 py-1.5 text-sm bg-surface-container-low border border-outline-variant rounded-lg text-on-surface placeholder-outline focus:outline-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all" placeholder="输入患者姓名 / 识别号 (PID) / 腕带编号检索..." type="text"/>
+</div>
+</div>
+<!-- Center Navigation Links / Status Indicator -->
+<div class="hidden xl:flex items-center gap-6">
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container-low rounded-full border border-outline-variant">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary animate-pulse"></span>
+<span class="text-xs font-label-md text-on-surface">专科智算节点状态: 正常在线 (延迟 12ms)</span>
+</div>
+</div>
+<!-- Trailing Actions: Doctor info, notifications, help, exit -->
+<div class="flex items-center gap-4">
+<button class="relative p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-colors duration-150" title="通知中心">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-colors duration-150" title="使用帮助">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<div class="h-6 w-px bg-outline-variant"></div>
+<!-- Doctor Profile -->
+<div class="flex items-center gap-3 pl-1">
+<img alt="李副主任医师工作头像" class="w-9 h-9 rounded-full ring-2 ring-primary/20 object-cover" data-alt="A professional close-up clinical portrait of a distinguished Chinese medical doctor in a crisp white lab coat with stethoscope, soft high-key medical lighting in a modern clean hospital office, cool blue accents, high resolution photograph." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDThp7GW4lpLRxY_2VgNdHGt8vJEiwqxrM95Bdeu5AEE2fJJtYRcXK1G8yZjqwov5HOv1zC2j7Qaq5szE5VMei_LM4wrdevfyC31KTqeWvB9Z2ryaeBCJQKO059ud9vzb0ZoPrJF-Nfr_fpufVyu-x3nq5DFSKjBzTUwD4yetPVpjnOMP1vU_nFzfSSVUTRe1Lvx4Hffaw7bqQN8Lm5yZfyxHFHY7s_-hHiytflZjeJibstVMLtlgZRkNNEKwuFwflEjNv3sAN6atVi"/>
+<div class="flex flex-col text-left">
+<span class="font-label-md text-label-md text-on-surface leading-tight">李副主任医师</span>
+<span class="text-xs text-on-surface-variant">神经内科三病区</span>
+</div>
+</div>
+<!-- Exit CTA -->
+<button class="flex items-center gap-1.5 px-3 py-1.5 ml-2 text-sm font-label-md text-error hover:bg-error-container hover:text-on-error-container rounded-lg transition-colors duration-150" title="退出系统">
+<span class="material-symbols-outlined text-lg" data-icon="logout">logout</span>
+<span>退出</span>
+</button>
+</div>
+</header>
+<!-- ==================== MAIN WORKSPACE WITH SIDE NAV ==================== -->
+<div class="flex flex-1 overflow-hidden relative">
+<!-- SIDE NAVIGATION BAR (matching {{DATA:COMPONENTS:COMPONENTS_4}}) -->
+<aside class="w-64 flex-shrink-0 z-30 flex flex-col justify-between py-4 px-3 border-r border-outline-variant dark:border-outline bg-surface-container-low dark:bg-inverse-surface h-full">
+<!-- Top header in SideNav -->
+<div class="flex flex-col gap-5">
+<div class="flex items-center gap-3 px-2 pt-1 pb-3 border-b border-outline-variant/60">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-2xl" data-icon="neurology">neurology</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-primary dark:text-inverse-primary font-bold leading-tight">帕金森临床康复系统</h2>
+<p class="text-xs text-on-surface-variant">UPDRS &amp; H-Y 分期平台</p>
+</div>
+</div>
+<!-- Emergency Intervention CTA -->
+<button class="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-error text-on-error rounded-lg font-label-md text-label-md hover:bg-on-error-container transition-colors shadow-sm">
+<span class="material-symbols-outlined text-xl" data-icon="crisis_alert">crisis_alert</span>
+<span>发起紧急干预</span>
+</button>
+<!-- Main Navigation Tabs (6 Tabs) -->
+<nav class="flex flex-col gap-1.5">
+<!-- 1. 患者工作台 (ACTIVE) -->
+<a class="flex items-center gap-3 px-3 py-2.5 bg-primary-container text-on-primary font-label-lg text-label-lg rounded-lg border-l-4 border-primary transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="clinical_notes">clinical_notes</span>
+<span>患者工作台</span>
+</a>
+<!-- 2. 分期确认 -->
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-container-high hover:text-primary rounded-lg font-body-md text-body-md transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="fact_check">fact_check</span>
+<span>分期确认</span>
+</a>
+<!-- 3. 处方编辑 -->
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-container-high hover:text-primary rounded-lg font-body-md text-body-md transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="edit_calendar">edit_calendar</span>
+<span>处方编辑</span>
+</a>
+<!-- 4. 预警处置中心 -->
+<a class="flex items-center justify-between px-3 py-2.5 text-on-surface-variant hover:bg-surface-container-high hover:text-primary rounded-lg font-body-md text-body-md transition-all duration-150" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-xl" data-icon="warning">warning</span>
+<span>预警处置中心</span>
+</div>
+<span class="px-2 py-0.5 text-xs bg-error-container text-on-error-container font-bold rounded-full">2</span>
+</a>
+<!-- 5. 随访台账 -->
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-container-high hover:text-primary rounded-lg font-body-md text-body-md transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="inventory_2">inventory_2</span>
+<span>随访台账</span>
+</a>
+<!-- 6. 权限管理 -->
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-container-high hover:text-primary rounded-lg font-body-md text-body-md transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="admin_panel_settings">admin_panel_settings</span>
+<span>权限管理</span>
+</a>
+</nav>
+</div>
+<!-- Footer Navigation Items -->
+<div class="pt-4 border-t border-outline-variant flex flex-col gap-1.5">
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high hover:text-primary rounded-lg font-body-md text-body-md transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="settings">settings</span>
+<span class="text-sm">系统配置</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high hover:text-primary rounded-lg font-body-md text-body-md transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="support_agent">support_agent</span>
+<span class="text-sm">临床帮助指南</span>
+</a>
+</div>
+</aside>
+<!-- ==================== MAIN CONTENT CANVAS ==================== -->
+<main class="flex-1 overflow-y-auto custom-scroll bg-background p-6 flex flex-col gap-6">
+<!-- Breadcrumbs & Patient Top Panorama Header Card -->
+<section class="flex flex-col gap-4">
+<!-- Breadcrumbs -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 text-sm">
+<a class="flex items-center gap-1.5 font-label-md text-primary hover:underline" href="#">
+<span class="material-symbols-outlined text-base" data-icon="arrow_back">arrow_back</span>
+<span>返回患者名册</span>
+</a>
+<span class="text-outline-variant">/</span>
+<span class="text-on-surface-variant">患者工作台</span>
+<span class="text-outline-variant">/</span>
+<span class="font-medium text-on-surface">患者康复全景详情 (PID-20240012)</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-xs text-on-surface-variant">病历同步时间: 2024-10-24 16:45:10</span>
+<button class="inline-flex items-center gap-1 text-xs text-primary font-semibold hover:bg-surface-container-high px-2 py-1 rounded">
+<span class="material-symbols-outlined text-sm" data-icon="refresh">refresh</span>
+              实时刷新
+            </button>
+</div>
+</div>
+<!-- Comprehensive Patient Identity Panorama Card -->
+<div class="bg-surface-container-lowest border-2 border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col lg:flex-row gap-6 justify-between items-start lg:items-center">
+<!-- Patient Identity Details -->
+<div class="flex items-start gap-5">
+<div class="relative">
+<div class="w-20 h-20 rounded-2xl bg-surface-container-high border-2 border-primary/30 flex items-center justify-center text-primary font-headline-lg text-headline-lg overflow-hidden">
+<span class="material-symbols-outlined text-5xl" data-icon="elderly">elderly</span>
+</div>
+<span class="absolute -bottom-1 -right-1 px-2 py-0.5 bg-secondary text-on-secondary text-xs font-bold rounded-full border-2 border-white">
+                随访中
+              </span>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex flex-wrap items-center gap-3">
+<h1 class="font-headline-lg text-headline-lg text-on-surface font-extrabold tracking-tight">张建国</h1>
+<span class="px-2.5 py-0.5 bg-surface-container rounded-md text-xs font-label-md text-on-surface-variant">PID-20240012</span>
+<span class="text-sm text-on-surface-variant font-medium">男 · 68 岁 · 医保统筹号: SH-88392019</span>
+<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="check_circle">check_circle</span>
+                  H-Y 2期 · 已临床确认
+                </span>
+</div>
+<div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-on-surface-variant">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base text-primary" data-icon="diagnosis">diagnosis</span>
+<span class="font-semibold text-on-surface">临床诊断:</span>
+<span>原发性帕金森病 (PD) · 确诊 4.5 年 · 震颤与步态僵直型</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base text-secondary" data-icon="speed">speed</span>
+<span class="font-semibold text-on-surface">Berg 平衡评分:</span>
+<span class="text-on-surface font-bold">82 / 100</span>
+<span class="text-xs px-2 py-0.5 bg-secondary-fixed text-on-secondary-fixed rounded font-medium">低跌倒风险 · 步态稳健</span>
+</div>
+</div>
+<!-- Extra clinical meta strip -->
+<div class="flex flex-wrap items-center gap-4 pt-1 text-xs text-on-surface-variant">
+<div class="flex items-center gap-1 px-2.5 py-1 bg-surface-container-low rounded-md border border-outline-variant">
+<span class="material-symbols-outlined text-sm text-tertiary-container" data-icon="medication">medication</span>
+<span>用药时相: <strong class="text-on-surface">多巴胺有效窗口 (开期稳态 - 维持中)</strong></span>
+</div>
+<div class="flex items-center gap-1 px-2.5 py-1 bg-surface-container-low rounded-md border border-outline-variant">
+<span class="material-symbols-outlined text-sm text-secondary" data-icon="sensors">sensors</span>
+<span>物联网体征: <strong class="text-on-surface">双耳骨传导在线 · 步态传感器 60 FPS</strong></span>
+</div>
+<div class="flex items-center gap-1 text-outline">
+<span class="material-symbols-outlined text-sm" data-icon="calendar_month">calendar_month</span>
+<span>最近随访评估: 2024-10-24</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Top Right Action Cluster -->
+<div class="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-2.5 flex-shrink-0 w-full lg:w-auto">
+<button class="flex items-center justify-center gap-2 px-5 py-3 bg-primary text-on-primary rounded-xl font-label-md hover:bg-primary-container shadow transition-all duration-150">
+<span class="material-symbols-outlined text-lg" data-icon="tune">tune</span>
+<span>调整处方</span>
+</button>
+<button class="flex items-center justify-center gap-2 px-5 py-3 bg-surface-container-low text-primary border-2 border-primary/30 hover:border-primary rounded-xl font-label-md transition-all duration-150">
+<span class="material-symbols-outlined text-lg" data-icon="fact_check">fact_check</span>
+<span>分期复核</span>
+</button>
+<div class="flex items-center gap-2">
+<button class="p-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high border border-outline-variant rounded-xl transition-all" title="导出全景病历">
+<span class="material-symbols-outlined text-xl" data-icon="download">download</span>
+</button>
+<button class="p-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high border border-outline-variant rounded-xl transition-all" title="发起远程会诊">
+<span class="material-symbols-outlined text-xl" data-icon="video_call">video_call</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- ==================== MAIN 2-COLUMN GRID ==================== -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+<!-- ================= LEFT COLUMN: Clinical Assessment & Trend Analytics (58% approx 7 cols) ================= -->
+<div class="lg:col-span-7 flex flex-col gap-6">
+<!-- Card 1: 步态运动学六维雷达多维评估 -->
+<div class="bg-surface-container-lowest border-2 border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col gap-5">
+<div class="flex items-center justify-between border-b border-outline-variant/60 pb-3">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-xl" data-icon="radar">radar</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">步态运动学六维雷达多维评估</h3>
+<p class="text-xs text-on-surface-variant">Gait Biomechanics 6-Axis Radar Analysis · 基于 60FPS 计算机视觉与惯性传感捕捉</p>
+</div>
+</div>
+<span class="px-2.5 py-1 text-xs font-label-md bg-primary-fixed text-on-primary-fixed rounded-md">UPDRS-III 运动功能评分映射: 14分 (轻度)</span>
+</div>
+<!-- Radar Chart & Metrics Grid -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+<!-- SVG Radar Chart Container (Left 7 cols) -->
+<div class="md:col-span-7 relative flex items-center justify-center py-2">
+<svg class="w-full max-w-[340px] h-auto drop-shadow-sm" viewbox="0 0 360 340">
+<!-- Background Concentric Polygons -->
+<!-- 100% -->
+<polygon fill="none" points="180,30 310,95 310,245 180,310 50,245 50,95" stroke="#e2e8f0" stroke-dasharray="3,3" stroke-width="1.5"></polygon>
+<!-- 80% -->
+<polygon fill="none" points="180,56 284,108 284,228 180,280 76,228 76,108" stroke="#e2e8f0" stroke-width="1.5"></polygon>
+<!-- 60% -->
+<polygon fill="none" points="180,82 258,121 258,211 180,250 102,211 102,121" stroke="#eaedff" stroke-width="1.2"></polygon>
+<!-- 40% -->
+<polygon fill="none" points="180,108 232,134 232,194 180,220 128,194 128,134" stroke="#eaedff" stroke-width="1"></polygon>
+<!-- 20% -->
+<polygon fill="none" points="180,134 206,147 206,177 180,190 154,177 154,147" stroke="#eaedff" stroke-width="1"></polygon>
+<!-- Axis lines -->
+<line stroke="#cbd5e1" stroke-width="1.2" x1="180" x2="180" y1="170" y2="30"></line>
+<line stroke="#cbd5e1" stroke-width="1.2" x1="180" x2="310" y1="170" y2="95"></line>
+<line stroke="#cbd5e1" stroke-width="1.2" x1="180" x2="310" y1="170" y2="245"></line>
+<line stroke="#cbd5e1" stroke-width="1.2" x1="180" x2="180" y1="170" y2="310"></line>
+<line stroke="#cbd5e1" stroke-width="1.2" x1="180" x2="50" y1="170" y2="245"></line>
+<line stroke="#cbd5e1" stroke-width="1.2" x1="180" x2="50" y1="170" y2="95"></line>
+<!-- Benchmark Polygon (Normative 85-90%) -->
+<polygon fill="rgba(142, 244, 228, 0.18)" points="180,45 295,103 295,235 180,295 65,235 65,103" stroke="#00a896" stroke-dasharray="4,4" stroke-width="2"></polygon>
+<!-- Patient Measured Average Polygon -->
+<!-- 
+                    1: 步幅对称性 (88%) -> y = 170 - (140 * 0.88) = 46.8 (180, 47)
+                    2: 抬脚离地高度 (84%) -> 180 + 130*0.84*cos(-30°)= 180 + 94.5 = 274, 170 - 109.2*sin(30)= 170-58= 112 -> (274, 112)
+                    3: 步频规律性 (92%) -> (285, 239)
+                    4: 躯干旋转度 (76%) -> (180, 276)
+                    5: 摆臂协同率 (80%) -> (76, 230)
+                    6: 起步流畅度 (86%) -> (68, 110)
+                  -->
+<polygon fill="rgba(26, 79, 160, 0.28)" points="180,47 278,114 288,238 180,276 76,230 68,110" stroke="#1a4fa0" stroke-width="2.5"></polygon>
+<!-- Data node circles (Patient) -->
+<circle cx="180" cy="47" fill="#1a4fa0" r="4.5" stroke="#ffffff" stroke-width="2"></circle>
+<circle cx="278" cy="114" fill="#1a4fa0" r="4.5" stroke="#ffffff" stroke-width="2"></circle>
+<circle cx="288" cy="238" fill="#1a4fa0" r="4.5" stroke="#ffffff" stroke-width="2"></circle>
+<circle cx="180" cy="276" fill="#1a4fa0" r="4.5" stroke="#ffffff" stroke-width="2"></circle>
+<circle cx="76" cy="230" fill="#1a4fa0" r="4.5" stroke="#ffffff" stroke-width="2"></circle>
+<circle cx="68" cy="110" fill="#1a4fa0" r="4.5" stroke="#ffffff" stroke-width="2"></circle>
+<!-- Axis Label Texts -->
+<text fill="#131b2e" font-size="12" font-weight="700" text-anchor="middle" x="180" y="20">步幅对称性 (88%)</text>
+<text fill="#131b2e" font-size="12" font-weight="700" text-anchor="start" x="325" y="95">抬脚高度 (84%)</text>
+<text fill="#131b2e" font-size="12" font-weight="700" text-anchor="start" x="325" y="255">步频规律性 (92%)</text>
+<text fill="#d97706" font-size="12" font-weight="700" text-anchor="middle" x="180" y="330">躯干旋转 (76% ⚠️)</text>
+<text fill="#131b2e" font-size="12" font-weight="700" text-anchor="end" x="35" y="255">摆臂协同 (80%)</text>
+<text fill="#131b2e" font-size="12" font-weight="700" text-anchor="end" x="35" y="95">起步流畅度 (86%)</text>
+</svg>
+</div>
+<!-- Dimension Score Breakdown (Right 5 cols) -->
+<div class="md:col-span-5 flex flex-col gap-2.5 bg-surface-container-low p-4 rounded-xl border border-outline-variant">
+<div class="flex items-center justify-between text-xs pb-2 border-b border-outline-variant/60 font-semibold text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-sm bg-primary-container inline-block"></span>
+<span>患者当前实测</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-1 bg-secondary inline-block border-t border-dashed"></span>
+<span>同龄健康基准线</span>
+</div>
+</div>
+<div class="space-y-2 text-xs">
+<div>
+<div class="flex justify-between font-medium py-0.5">
+<span>步频规律性 (CAD)</span>
+<span class="text-primary font-bold">92% <span class="text-outline font-normal">/ 90%</span></span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 92%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-medium py-0.5">
+<span>步幅对称性 (SYM)</span>
+<span class="text-primary font-bold">88% <span class="text-outline font-normal">/ 92%</span></span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 88%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-medium py-0.5">
+<span>起步流畅度 (HIS)</span>
+<span class="text-primary font-bold">86% <span class="text-outline font-normal">/ 88%</span></span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 86%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-medium py-0.5">
+<span>抬脚离地高度 (CLE)</span>
+<span class="text-primary font-bold">84% <span class="text-outline font-normal">/ 85%</span></span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 84%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-medium py-0.5">
+<span>摆臂协同率 (ARM)</span>
+<span class="text-primary font-bold">80% <span class="text-outline font-normal">/ 86%</span></span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 80%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-medium py-0.5">
+<span class="text-tertiary-container font-semibold">躯干旋转度 (TRK)</span>
+<span class="text-tertiary-container font-bold">76% <span class="text-outline font-normal">/ 88%</span></span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-amber-600 h-full rounded-full" style="width: 76%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Clinical Interpretation Summary Notes -->
+<div class="bg-surface-container-low border-l-4 border-primary p-3.5 rounded-r-xl flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-xl flex-shrink-0" data-icon="clinical_notes">clinical_notes</span>
+<div class="text-xs text-on-surface leading-relaxed">
+<strong class="font-semibold text-primary">AI辅助诊断与质控提示:</strong>
+                患者左侧下肢在跨步末端存在轻度足下垂代偿，双侧摆臂已通过节律声刺激 (RAS) 恢复至 80% 基线。当前主要受限维度为<strong>“躯干轴向旋转僵硬” (76%)</strong>，建议持续在康复处方中保持“坐位躯干大交替抗旋”与“核心肌群PNF伸展”。
+              </div>
+</div>
+</div>
+<!-- Card 2: 神经肌力与关节活动度维持曲线 (30-Day Trend Chart) -->
+<div class="bg-surface-container-lowest border-2 border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col gap-5">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-outline-variant/60 gap-2">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-xl" data-icon="trending_up">trending_up</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">神经肌力与关节活动度维持曲线 (30日趋势)</h3>
+<p class="text-xs text-on-surface-variant">股四头肌肌力指数 · 踝关节背屈 ROM · 弹性阻力带 + 听觉节律持续性康复效应</p>
+</div>
+</div>
+<div class="flex items-center gap-2 text-xs">
+<span class="px-2.5 py-1 bg-surface-container rounded-md font-medium text-on-surface">采样周数: 第 4 周</span>
+<span class="px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-md font-semibold">阻力带2级执行中</span>
+</div>
+</div>
+<!-- Key metrics pills -->
+<div class="grid grid-cols-3 gap-3">
+<div class="p-3 bg-surface-container-low rounded-xl border border-outline-variant">
+<div class="text-xs text-on-surface-variant font-medium">股四头肌肌力 (峰值)</div>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-headline-md text-headline-md text-primary font-bold">4+ 级</span>
+<span class="text-xs font-semibold text-secondary flex items-center">
+<span class="material-symbols-outlined text-xs" data-icon="north">north</span> +0.5级
+                  </span>
+</div>
+<div class="text-xs text-outline mt-0.5">基线: 3+ 级 (抗轻阻力)</div>
+</div>
+<div class="p-3 bg-surface-container-low rounded-xl border border-outline-variant">
+<div class="text-xs text-on-surface-variant font-medium">踝关节背屈 ROM</div>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-headline-md text-headline-md text-primary font-bold">18°</span>
+<span class="text-xs font-semibold text-secondary flex items-center">
+<span class="material-symbols-outlined text-xs" data-icon="north">north</span> +4°
+                  </span>
+</div>
+<div class="text-xs text-outline mt-0.5">有效预防拖拽步伐阈值: 15°</div>
+</div>
+<div class="p-3 bg-surface-container-low rounded-xl border border-outline-variant">
+<div class="text-xs text-on-surface-variant font-medium">30分钟疲劳耐受度</div>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-headline-md text-headline-md text-secondary font-bold">88%</span>
+<span class="text-xs font-semibold text-secondary flex items-center">
+<span class="material-symbols-outlined text-xs" data-icon="north">north</span> 稳定
+                  </span>
+</div>
+<div class="text-xs text-outline mt-0.5">心率波动区间: 82-108 BPM</div>
+</div>
+</div>
+<!-- High Fidelity Interactive Area & Trend SVG Chart -->
+<div class="relative w-full h-56 bg-surface-container-low/50 rounded-xl border border-outline-variant p-2 flex flex-col justify-end">
+<!-- Pharmacokinetics overlay label -->
+<div class="absolute top-3 left-4 flex items-center gap-1.5 px-3 py-1 bg-surface-container-lowest/90 backdrop-blur rounded-full border border-primary/20 text-xs shadow-sm">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="text-on-surface font-semibold">药动学重叠标记:</span>
+<span class="text-primary font-bold">晨间开期窗口运动效果最佳 (+24% 动作爆发度)</span>
+</div>
+<!-- SVG Curve -->
+<svg class="w-full h-44 overflow-visible" viewbox="0 0 600 180">
+<defs>
+<lineargradient id="primaryGradient" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#1a4fa0" stop-opacity="0.35"></stop>
+<stop offset="100%" stop-color="#1a4fa0" stop-opacity="0.0"></stop>
+</lineargradient>
+<lineargradient id="romGradient" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#006a60" stop-opacity="0.25"></stop>
+<stop offset="100%" stop-color="#006a60" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<!-- Grid horizontal lines -->
+<line stroke="#e2e8f0" stroke-dasharray="4,4" stroke-width="1" x1="40" x2="580" y1="20" y2="20"></line>
+<line stroke="#e2e8f0" stroke-dasharray="4,4" stroke-width="1" x1="40" x2="580" y1="60" y2="60"></line>
+<line stroke="#e2e8f0" stroke-dasharray="4,4" stroke-width="1" x1="40" x2="580" y1="100" y2="100"></line>
+<line stroke="#e2e8f0" stroke-width="1" x1="40" x2="580" y1="140" y2="140"></line>
+<!-- Y-axis labels -->
+<text fill="#737783" font-size="10" text-anchor="end" x="30" y="24">20° / 5级</text>
+<text fill="#737783" font-size="10" text-anchor="end" x="30" y="64">16° / 4级</text>
+<text fill="#737783" font-size="10" text-anchor="end" x="30" y="104">12° / 3级</text>
+<text fill="#737783" font-size="10" text-anchor="end" x="30" y="144">8° / 2级</text>
+<!-- Area Fill ROM -->
+<path d="M 60,120 Q 150,110 240,90 T 420,60 T 560,40 L 560,140 L 60,140 Z" fill="url(#romGradient)"></path>
+<!-- Stroke ROM (Green/Secondary) -->
+<path d="M 60,120 Q 150,110 240,90 T 420,60 T 560,40" fill="none" stroke="#006a60" stroke-width="3"></path>
+<!-- Area Fill Muscle Index -->
+<path d="M 60,105 Q 160,95 240,80 T 420,50 T 560,30 L 560,140 L 60,140 Z" fill="url(#primaryGradient)"></path>
+<!-- Stroke Muscle Index (Blue/Primary) -->
+<path d="M 60,105 Q 160,95 240,80 T 420,50 T 560,30" fill="none" stroke="#1a4fa0" stroke-width="3"></path>
+<!-- Data point dots & Highlights -->
+<circle cx="60" cy="105" fill="#1a4fa0" r="4" stroke="#ffffff" stroke-width="2"></circle>
+<circle cx="240" cy="80" fill="#1a4fa0" r="4" stroke="#ffffff" stroke-width="2"></circle>
+<circle cx="420" cy="50" fill="#1a4fa0" r="4" stroke="#ffffff" stroke-width="2"></circle>
+<circle cx="560" cy="30" fill="#1a4fa0" r="5" stroke="#ffffff" stroke-width="2.5"></circle>
+<circle cx="560" cy="40" fill="#006a60" r="5" stroke="#ffffff" stroke-width="2.5"></circle>
+<!-- X Axis Day Markers -->
+<text fill="#737783" font-size="11" text-anchor="middle" x="60" y="160">D-30 (基线)</text>
+<text fill="#737783" font-size="11" text-anchor="middle" x="180" y="160">D-21</text>
+<text fill="#737783" font-size="11" text-anchor="middle" x="310" y="160">D-14</text>
+<text fill="#737783" font-size="11" text-anchor="middle" x="430" y="160">D-7</text>
+<text fill="#1a4fa0" font-size="11" font-weight="700" text-anchor="middle" x="560" y="160">今日 (D-1)</text>
+</svg>
+<!-- Legend footer -->
+<div class="flex items-center justify-center gap-6 pt-1 text-xs text-on-surface-variant">
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-1 bg-primary rounded-full"></span>
+<span>股四头肌肌力指数 (趋势上升)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-1 bg-secondary rounded-full"></span>
+<span>踝背屈活动度 ROM (14° → 18°)</span>
+</div>
+<div class="flex items-center gap-1 text-outline">
+<span class="material-symbols-outlined text-xs" data-icon="info">info</span>
+<span>双周评估复测通过</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ================= RIGHT COLUMN: Prescription Adherence & FoG Log (42% approx 5 cols) ================= -->
+<div class="lg:col-span-5 flex flex-col gap-6">
+<!-- Card 3: 步态冻结 (FoG) 智能监测与发作频次 -->
+<div class="bg-surface-container-lowest border-2 border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col gap-5">
+<div class="flex items-center justify-between pb-3 border-b border-outline-variant/60">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-xl" data-icon="freezing_gait">snowshoeing</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">步态冻结 (FoG) 智能监测与发作台账</h3>
+<p class="text-xs text-on-surface-variant">Freezing of Gait Event Logs · 智能穿戴与下肢惯导实时流</p>
+</div>
+</div>
+<span class="px-2 py-0.5 text-xs bg-emerald-100 text-emerald-800 font-bold rounded">AI守护在线</span>
+</div>
+<!-- Summary Metric Pills -->
+<div class="grid grid-cols-3 gap-2">
+<div class="bg-surface-container-low p-3 rounded-xl border border-outline-variant flex flex-col items-center text-center">
+<span class="text-xs text-on-surface-variant">本周发作次数</span>
+<span class="font-headline-md text-headline-md text-primary font-black mt-0.5">2 <span class="text-xs font-normal">次</span></span>
+<span class="text-xs text-secondary font-bold flex items-center">
+<span class="material-symbols-outlined text-xs" data-icon="south">south</span> 环比降 66%
+                </span>
+</div>
+<div class="bg-surface-container-low p-3 rounded-xl border border-outline-variant flex flex-col items-center text-center">
+<span class="text-xs text-on-surface-variant">平均冻结持续</span>
+<span class="font-headline-md text-headline-md text-on-surface font-black mt-0.5">3.2 <span class="text-xs font-normal">秒</span></span>
+<span class="text-xs text-outline">安全缓冲范围内</span>
+</div>
+<div class="bg-surface-container-low p-3 rounded-xl border border-outline-variant flex flex-col items-center text-center">
+<span class="text-xs text-on-surface-variant">RAS 节律自主突破率</span>
+<span class="font-headline-md text-headline-md text-secondary font-black mt-0.5">100%</span>
+<span class="text-xs text-secondary font-bold">无需外部跌倒救助</span>
+</div>
+</div>
+<!-- Time of Day Bar Distribution -->
+<div class="bg-surface-container-low p-3 rounded-xl border border-outline-variant flex flex-col gap-2">
+<div class="flex items-center justify-between text-xs text-on-surface-variant">
+<span class="font-semibold text-on-surface">发作全天分布时段 (早/中/晚/关期末期)</span>
+<span>主要风险点: <strong>傍晚关期转换期</strong></span>
+</div>
+<div class="grid grid-cols-4 gap-2 pt-1 text-center">
+<div class="flex flex-col items-center">
+<div class="w-full bg-surface-container-high h-10 rounded-lg flex items-end justify-center p-1">
+<div class="w-full bg-primary/40 h-2 rounded"></div>
+</div>
+<span class="text-xs text-on-surface-variant mt-1">晨间 (0次)</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-full bg-surface-container-high h-10 rounded-lg flex items-end justify-center p-1">
+<div class="w-full bg-primary/40 h-2 rounded"></div>
+</div>
+<span class="text-xs text-on-surface-variant mt-1">午间 (0次)</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-full bg-surface-container-high h-10 rounded-lg flex items-end justify-center p-1">
+<div class="w-full bg-amber-500 h-6 rounded"></div>
+</div>
+<span class="text-xs font-bold text-amber-700 mt-1">傍晚 (1次)</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-full bg-surface-container-high h-10 rounded-lg flex items-end justify-center p-1">
+<div class="w-full bg-amber-500 h-6 rounded"></div>
+</div>
+<span class="text-xs font-bold text-amber-700 mt-1">药末期 (1次)</span>
+</div>
+</div>
+</div>
+<!-- Freezing Occurrence Detailed Log -->
+<div class="flex flex-col gap-2.5">
+<span class="text-xs font-semibold text-on-surface-variant">近期冻结事件审计追踪:</span>
+<!-- Event Item 1 -->
+<div class="p-3 bg-surface-container-low rounded-xl border-l-4 border-amber-500 flex flex-col gap-1 text-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5 font-bold text-on-surface">
+<span class="material-symbols-outlined text-sm text-amber-600" data-icon="rotate_right">rotate_right</span>
+<span>10-24 09:34 转身诱发轻微停滞 (持续 2.8s)</span>
+</div>
+<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-semibold text-xs">自主突破</span>
+</div>
+<p class="text-on-surface-variant pl-5">
+                  诱因: 室内客厅快速 180° 急转弯 · 状态处置: 骨传导耳机即时触发 64 BPM RAS 声光节律提示，患者以“足跟先落地”大步态成功突破。
+                </p>
+</div>
+<!-- Event Item 2 -->
+<div class="p-3 bg-surface-container-low rounded-xl border-l-4 border-outline flex flex-col gap-1 text-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5 font-bold text-on-surface">
+<span class="material-symbols-outlined text-sm text-outline" data-icon="door_front">door_front</span>
+<span>10-22 16:15 进出窄门轻微小碎步 (持续 3.5s)</span>
+</div>
+<span class="px-2 py-0.5 bg-surface-container-high text-on-surface-variant rounded font-semibold text-xs">语音化解</span>
+</div>
+<p class="text-on-surface-variant pl-5">
+                  诱因: 卫生间窄门视觉围闭诱导 · 状态处置: 照护者口头“数一二一”节律引导，配合激光投影横条引导线顺利跨步。
+                </p>
+</div>
+</div>
+</div>
+<!-- Card 4: 近期康复处方执行列表与医嘱速记 -->
+<div class="bg-surface-container-lowest border-2 border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col gap-5">
+<div class="flex items-center justify-between pb-3 border-b border-outline-variant/60">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-xl" data-icon="task_alt">task_alt</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">近期康复处方执行列表</h3>
+<p class="text-xs text-on-surface-variant">Prescription Adherence &amp; Compliance · 本周依从度: <strong>14/15 组 (93.3%)</strong></p>
+</div>
+</div>
+<span class="px-2 py-1 bg-secondary-fixed text-on-secondary-fixed text-xs font-bold rounded">依从性优等</span>
+</div>
+<!-- Exercise Items List -->
+<div class="flex flex-col gap-3 text-xs">
+<!-- Session 1: 今日已完成 -->
+<div class="p-3 bg-surface-container-low rounded-xl border border-outline-variant flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">1</span>
+<strong class="font-semibold text-sm text-on-surface">下肢防拖拽踏步与重心转移 (RAS 64 BPM)</strong>
+</div>
+<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-semibold">今日已完成</span>
+</div>
+<div class="flex flex-wrap items-center justify-between text-on-surface-variant pl-8">
+<span>目标容量: <strong>3组 × 12次</strong> (完成率 100%)</span>
+<span class="text-primary font-semibold">动作质检 5.0分 · 离地高度 &gt;15cm (优秀)</span>
+</div>
+</div>
+<!-- Session 2: 昨日已完成 -->
+<div class="p-3 bg-surface-container-low rounded-xl border border-outline-variant flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-surface-container-high text-primary flex items-center justify-center font-bold">2</span>
+<strong class="font-semibold text-sm text-on-surface">坐位交替大摆臂与躯干抗旋</strong>
+</div>
+<span class="px-2 py-0.5 bg-surface-container-high text-on-surface-variant rounded font-semibold">昨日已完成</span>
+</div>
+<div class="flex flex-wrap items-center justify-between text-on-surface-variant pl-8">
+<span>目标容量: <strong>2组 × 10次</strong> (完成率 100%)</span>
+<span class="text-secondary font-semibold">动作质检 4.5分 · 旋转度对称</span>
+</div>
+</div>
+<!-- Session 3: 前天已完成 -->
+<div class="p-3 bg-surface-container-low rounded-xl border border-outline-variant flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-surface-container-high text-primary flex items-center justify-center font-bold">3</span>
+<strong class="font-semibold text-sm text-on-surface">坐位弹力带胸前推举抗阻 (阻力带2级)</strong>
+</div>
+<span class="px-2 py-0.5 bg-surface-container-high text-on-surface-variant rounded font-semibold">前天已完成</span>
+</div>
+<div class="flex flex-wrap items-center justify-between text-on-surface-variant pl-8">
+<span>目标容量: <strong>3组 × 10次</strong> (完成率 100%)</span>
+<span class="text-on-surface-variant">动作耐受性良好 · 无肌腱痛点</span>
+</div>
+</div>
+</div>
+<!-- Doctor Quick Remark Input -->
+<div class="pt-2 flex flex-col gap-2">
+<label class="text-xs font-semibold text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="edit_note">edit_note</span>
+<span>医生随访医嘱与处方备注速记:</span>
+</label>
+<div class="flex gap-2">
+<input class="flex-1 text-xs px-3 py-2 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary" type="text" value="步态平稳，维持现有RAS 64BPM与下肢阻力处方；嘱晨间服药后45分钟进行训练。"/>
+<button class="px-4 py-2 bg-primary text-on-primary text-xs font-label-md rounded-lg hover:bg-primary-container transition-all flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-sm" data-icon="save">save</span>
+<span>保存医嘱</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

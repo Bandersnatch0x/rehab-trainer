@@ -82,7 +82,8 @@ fun RehabNavigationRail(
     NavigationRail(
         modifier = Modifier
             .fillMaxHeight()
-            .width(dimens.railWidth),
+            .width(dimens.railWidth)
+            .verticalScroll(rememberScrollState()),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         // 外层 Scaffold 已经消费系统栏 inset，这里置零避免重复留白。
         windowInsets = WindowInsets(0, 0, 0, 0)

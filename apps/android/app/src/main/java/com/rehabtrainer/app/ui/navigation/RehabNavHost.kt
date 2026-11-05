@@ -2,10 +2,6 @@ package com.rehabtrainer.app.ui.navigation
 
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -18,16 +14,15 @@ import com.rehabtrainer.app.ui.screens.RecordsScreen
 import com.rehabtrainer.app.ui.screens.SettingsScreen
 import com.rehabtrainer.app.ui.screens.TrainingScreen
 
-/** 顶层路由表；页面均为骨架，业务内容在后续迭代填入。 */
+/** 顶层路由表；连接各业务页面。 */
 @Composable
 fun RehabNavHost(
     navController: NavHostController,
     widthSizeClass: WindowWidthSizeClass,
+    selectedExerciseCode: String = "EX-RAS-01",
+    onSelectExercise: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    // 当前选中的训练条目：决定训练页是否强制全身构图（D17：上肢类可用半身）。
-    var selectedExercise by rememberSaveable { mutableStateOf("") }
-
     NavHost(
         navController = navController,
         startDestination = RehabDestination.HOME.route,
@@ -37,9 +32,8 @@ fun RehabNavHost(
             HomeScreen(
                 widthSizeClass = widthSizeClass,
                 onStartTraining = {
-                    navController.navigate(RehabDestination.TRAINING.route) {
-                        launchSingleTop = true
-                    }
+                    onSelectExercise("EX-RAS-01")
+                    navController.navigate(RehabDestination.TRAINING.route)
                 },
                 onOpenPrescription = {
                     navController.navigate(RehabDestination.EXERCISES.route) {
@@ -51,7 +45,7 @@ fun RehabNavHost(
         composable(RehabDestination.EXERCISES.route) {
             ExercisesScreen(
                 onSelectExercise = { code ->
-                    selectedExercise = code
+                    onSelectExercise(code)
                     navController.navigate(RehabDestination.TRAINING.route)
                 }
             )
@@ -61,8 +55,8 @@ fun RehabNavHost(
         }
         composable(RehabDestination.TRAINING.route) {
             TrainingScreen(
+                exerciseCode = selectedExerciseCode,
                 widthSizeClass = widthSizeClass,
-                exerciseCode = selectedExercise,
                 // 紧急停止：退出训练页，回到上一个页面。
                 onEmergencyStop = { navController.popBackStack() }
             )

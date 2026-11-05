@@ -1,5 +1,6 @@
 package com.rehabtrainer.app.ui
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,8 +13,12 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -25,11 +30,66 @@ import com.rehabtrainer.app.ui.navigation.RehabNavigationRail
 import kotlinx.coroutines.launch
 
 /**
+ * 训练动作元数据定义，用于顶栏与训练页联动 (P1-7)。
+ */
+data class ExerciseMeta(
+    val code: String,
+    val name: String,
+    val shortName: String,
+    val target: String,
+    val hasRas: Boolean,
+    val bpm: Int = 64,
+    val videoTitle: String,
+    val prompt: String
+)
+
+val DEFAULT_EXERCISES = listOf(
+    ExerciseMeta(
+        code = "EX-RAS-01",
+        name = "下肢原地节律踏步",
+        shortName = "原地踏步",
+        target = "目标 12 次 · 64 BPM · 第 1/3 组",
+        hasRas = true,
+        bpm = 64,
+        videoTitle = "原地节律踏步 · 标准示范",
+        prompt = "“保持挺胸直视前方，大腿抬高至水平，落地轻柔跟随 64 BPM 节奏”"
+    ),
+    ExerciseMeta(
+        code = "EX-STRETCH-01",
+        name = "坐位双上肢躯干伸展",
+        shortName = "躯干伸展",
+        target = "目标 10 次 · 自主节律 · 第 1/2 组",
+        hasRas = false,
+        videoTitle = "躯干牵伸放松 · 标准示范",
+        prompt = "“双臂自然上举过头顶，躯干轻柔向两侧延伸，深呼吸保持均匀”"
+    ),
+    ExerciseMeta(
+        code = "EX-STRENGTH-01",
+        name = "下肢靠墙微蹲训练",
+        shortName = "靠墙微蹲",
+        target = "目标 8 次 · 稳固扶手 · 第 1/2 组",
+        hasRas = false,
+        videoTitle = "下肢靠墙微蹲 · 标准示范",
+        prompt = "“背部贴墙缓缓下蹲至膝屈 30°，双手扶稳把手，起身平稳”"
+    ),
+    ExerciseMeta(
+        code = "EX-POSTURE-01",
+        name = "站立位脊柱对齐矫正",
+        shortName = "姿势矫正",
+        target = "目标 10 次 · 实时矫正 · 第 1/3 组",
+        hasRas = false,
+        videoTitle = "站立脊柱矫正 · 标准示范",
+        prompt = "“双肩下沉放松，收腹挺胸，感受头顶向上延伸对齐重力垂线”"
+    )
+)
+
+/**
  * 应用外壳。
  *
- * - Compact（手机）：抽屉导航 + 单列内容；抽屉条目整行且最小 80dp，避免细小的底部标签。
- * - Medium / Expanded（平板）：常驻侧栏；Expanded 时首页内容再分为双列，
- *   符合 D8「手机为主、平板兼容」。
+ * - P0-1 修复：平板判定使用 [smallestScreenWidthDp] >= 600 (即 sw600dp)。
+ *   手机（sw < 600dp）无论横屏还是竖屏一律使用 CompactShell（带 Drawer 抽屉导航），
+ *   杜绝横屏手机被误判为平板而强行加载常驻 NavigationRail 导致溢出与内容压缩。
+ * - Medium / Expanded（真正平板 sw >= 600dp）：使用 ExpandedShell 常驻侧栏。
  */
 @Composable
 fun RehabApp(
@@ -39,17 +99,26 @@ fun RehabApp(
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
-    val title = RehabDestination.entries
-        .firstOrNull { it.route == currentRoute }
-        ?.label
-        ?: "康复训练"
+    val configuration = LocalConfiguration.current
+    val isTablet = configuration.smallestScreenWidthDp >= 600
 
-    if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact) {
+    var selectedExerciseCode by remember { mutableStateOf("EX-RAS-01") }
+    val currentExercise = DEFAULT_EXERCISES.firstOrNull { it.code == selectedExerciseCode }
+        ?: DEFAULT_EXERCISES.first()
+
+    val title = when (currentRoute) {
+        RehabDestination.TRAINING.route -> "训练执行 · ${currentExercise.shortName}"
+        else -> RehabDestination.entries.firstOrNull { it.route == currentRoute }?.label ?: "康复训练"
+    }
+
+    if (!isTablet) {
         CompactShell(
             navController = navController,
             windowSizeClass = windowSizeClass,
             currentRoute = currentRoute,
             title = title,
+            selectedExerciseCode = selectedExerciseCode,
+            onSelectExercise = { selectedExerciseCode = it },
             modifier = modifier
         )
     } else {
@@ -58,6 +127,8 @@ fun RehabApp(
             windowSizeClass = windowSizeClass,
             currentRoute = currentRoute,
             title = title,
+            selectedExerciseCode = selectedExerciseCode,
+            onSelectExercise = { selectedExerciseCode = it },
             modifier = modifier
         )
     }
@@ -69,6 +140,8 @@ private fun CompactShell(
     windowSizeClass: WindowSizeClass,
     currentRoute: String?,
     title: String,
+    selectedExerciseCode: String,
+    onSelectExercise: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -98,6 +171,8 @@ private fun CompactShell(
             RehabNavHost(
                 navController = navController,
                 widthSizeClass = windowSizeClass.widthSizeClass,
+                selectedExerciseCode = selectedExerciseCode,
+                onSelectExercise = onSelectExercise,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
@@ -112,6 +187,8 @@ private fun ExpandedShell(
     windowSizeClass: WindowSizeClass,
     currentRoute: String?,
     title: String,
+    selectedExerciseCode: String,
+    onSelectExercise: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -130,6 +207,8 @@ private fun ExpandedShell(
             RehabNavHost(
                 navController = navController,
                 widthSizeClass = windowSizeClass.widthSizeClass,
+                selectedExerciseCode = selectedExerciseCode,
+                onSelectExercise = onSelectExercise,
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()

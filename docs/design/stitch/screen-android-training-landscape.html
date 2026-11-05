@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RehabTrack D22 - 帕金森康复双视口训练系统</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Atkinson Hyperlegible Next / System Accessible Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-error": "#ffffff",
+            "on-secondary-fixed-variant": "#005048",
+            "surface-container": "#eaedff",
+            "primary-fixed": "#d8e2ff",
+            "on-primary": "#ffffff",
+            "tertiary-fixed": "#ffdcc3",
+            "secondary": "#006a60",
+            "surface-container-highest": "#dae2fd",
+            "inverse-primary": "#aec6ff",
+            "on-tertiary": "#ffffff",
+            "secondary-fixed-dim": "#72d8c8",
+            "surface-variant": "#dae2fd",
+            "on-surface": "#131b2e",
+            "tertiary": "#5c2f00",
+            "on-secondary": "#ffffff",
+            "surface-container-high": "#e2e7ff",
+            "on-secondary-fixed": "#00201c",
+            "on-error-container": "#93000a",
+            "surface-dim": "#d2d9f4",
+            "on-primary-fixed-variant": "#024394",
+            "inverse-surface": "#283044",
+            "on-primary-fixed": "#001a42",
+            "primary-fixed-dim": "#aec6ff",
+            "tertiary-fixed-dim": "#ffb77d",
+            "background": "#faf8ff",
+            "primary": "#00387e",
+            "on-background": "#131b2e",
+            "error": "#ba1a1a",
+            "on-tertiary-fixed-variant": "#6e3900",
+            "inverse-on-surface": "#eef0ff",
+            "surface-container-lowest": "#ffffff",
+            "tertiary-container": "#7e4200",
+            "secondary-container": "#8ef4e4",
+            "surface-tint": "#2c5cae",
+            "primary-container": "#1a4fa0",
+            "error-container": "#ffdad6",
+            "surface": "#faf8ff",
+            "on-surface-variant": "#434751",
+            "on-tertiary-container": "#ffb579",
+            "on-tertiary-fixed": "#2f1500",
+            "outline-variant": "#c3c6d3",
+            "surface-container-low": "#f2f3ff",
+            "surface-bright": "#faf8ff",
+            "outline": "#737783",
+            "on-secondary-container": "#007166",
+            "on-primary-container": "#abc5ff",
+            "secondary-fixed": "#8ef4e4"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "3xl": "1.5rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-2xl": "3rem",
+            "space-sm": "0.75rem",
+            "space-xl": "2.25rem",
+            "margin": "1.5rem",
+            "space-lg": "1.5rem",
+            "gutter": "1.5rem",
+            "space-xs": "0.5rem",
+            "space-md": "1rem"
+          },
+          "fontFamily": {
+            "display-counter-lg": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "display-counter": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "body-md": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "label-lg": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "headline-md": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "headline-sm": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "headline-lg": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "label-md": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "body-lg": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "body-xl": ["Atkinson Hyperlegible Next", "sans-serif"]
+          },
+          "fontSize": {
+            "display-counter-lg": ["72px", { "lineHeight": "80px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+            "display-counter": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-md": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "label-lg": ["18px", { "lineHeight": "24px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+            "headline-md": ["26px", { "lineHeight": "34px", "fontWeight": "700" }],
+            "headline-sm": ["22px", { "lineHeight": "30px", "fontWeight": "600" }],
+            "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+            "label-md": ["16px", { "lineHeight": "22px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+            "body-lg": ["20px", { "lineHeight": "30px", "fontWeight": "400" }],
+            "body-xl": ["22px", { "lineHeight": "32px", "fontWeight": "500" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 28;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-filled {
+      font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 28;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    /* Pulse Metronome Animation */
+    @keyframes rasPulse {
+      0%, 100% { transform: scale(1); opacity: 0.85; }
+      50% { transform: scale(1.15); opacity: 1; filter: drop-shadow(0 0 10px rgba(0, 135, 122, 0.6)); }
+    }
+    .ras-beacon {
+      animation: rasPulse 0.9375s infinite ease-in-out; /* 64 BPM */
+    }
+    @keyframes waveTravel {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .wave-anim {
+      animation: waveTravel 2.8s linear infinite;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface h-full w-full select-none overflow-x-hidden font-body-lg text-body-lg antialiased">
+<div class="min-h-screen flex flex-col justify-between pb-28 pt-20">
+<!-- TOP HEADER / APP BAR (Shared Component Anchor Compliant) -->
+<header class="fixed top-0 left-0 w-full h-20 z-50 flex items-center justify-between px-gutter bg-surface-container-lowest dark:bg-inverse-surface shadow-sm dark:shadow-none">
+<!-- Leading: Exit section -->
+<div class="flex items-center gap-space-md">
+<button aria-label="退出本节" class="flex items-center gap-2 min-h-[56px] px-5 py-2.5 rounded-2xl bg-surface-container-high dark:bg-surface-variant text-primary dark:text-inverse-primary font-label-lg text-label-lg border-2 border-outline-variant hover:bg-surface-container transition-all active:scale-95 ring-4 ring-primary-fixed">
+<span class="material-symbols-outlined text-[28px]">arrow_back</span>
+<span>退出本节</span>
+</button>
+<!-- Medication Window Badge -->
+<div class="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary-container text-on-secondary-container border border-secondary font-label-md text-label-md shadow-xs">
+<span class="material-symbols-outlined material-symbols-filled text-[22px]">medical_services</span>
+<span>开期黄金窗口 (药效稳态中)</span>
+</div>
+</div>
+<!-- Center Title: RehabTrack D22 Gait & Posture Therapy -->
+<div class="flex flex-col items-center justify-center text-center">
+<span class="text-label-md font-label-md text-primary font-bold tracking-wide">RehabTrack D22 · 适老双视口</span>
+<h1 class="text-headline-md font-headline-md font-bold text-on-surface tracking-tight">
+          第 2/4 节：下肢防拖曳踏步与重心转移训练
+        </h1>
+</div>
+<!-- Trailing Controls: Audio, Bone-conduction status, Heart-rate telemetry -->
+<div class="flex items-center gap-space-sm">
+<!-- Audio Broadcast Level -->
+<button class="flex items-center justify-center w-14 h-14 rounded-2xl bg-surface-container-high text-primary hover:bg-surface-container-highest transition active:scale-95 border border-outline-variant" title="音量调节">
+<span class="material-symbols-outlined text-[28px]">volume_up</span>
+</button>
+<!-- Bone conduction synced -->
+<div class="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-surface-container-low border border-outline-variant text-on-surface-variant font-label-md text-label-md">
+<span class="material-symbols-outlined text-secondary text-[24px]">hearing</span>
+<span class="text-on-surface font-semibold">双耳骨传导已连通</span>
+</div>
+<!-- Vital Signs / Wristband HR -->
+<div class="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-surface-container-lowest border-2 border-outline-variant shadow-xs">
+<span class="material-symbols-outlined material-symbols-filled text-[#dc2626] text-[26px]">vital_signs</span>
+<div class="flex items-baseline gap-1">
+<span class="font-display-counter text-[24px] font-bold text-on-surface">78</span>
+<span class="text-label-md font-label-md text-outline">bpm 正常</span>
+</div>
+</div>
+</div>
+</header>
+<!-- CORE DUAL VIEWPORT CONTENT (16:9 Landscape Tablet layout, 50% / 50% split) -->
+<main class="flex-1 w-full px-gutter py-space-sm grid grid-cols-1 lg:grid-cols-2 gap-space-lg max-w-[1920px] mx-auto">
+<!-- LEFT VIEWPORT: CLINICAL DEMONSTRATION COACH (标准示范教学) -->
+<section class="flex flex-col bg-surface-container-lowest rounded-3xl border-2 border-outline-variant shadow-md overflow-hidden">
+<!-- Coach Header Bar -->
+<div class="flex items-center justify-between px-space-md py-space-xs bg-surface-container-low border-b-2 border-outline-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined material-symbols-filled text-primary-container text-[28px]">smart_display</span>
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">标准示范教学 (主任物理治疗师)</span>
+</div>
+<span class="px-3 py-1 bg-primary text-on-primary rounded-full font-label-md text-label-md font-bold">4K 慢速引导</span>
+</div>
+<!-- Video Simulation Container -->
+<div class="relative w-full h-[340px] xl:h-[390px] bg-inverse-surface flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A clean, brightly illuminated modern clinical physical therapy room with high-key lighting, soft white walls, and clear wooden floor markers. A professional Asian physical therapist in navy blue medical attire is demonstrating high-knee marching and weight transfer exercises with correct posture, balanced spine, and high ground clearance. The aesthetic is clean, medical, compassionate, and sharp light-mode style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuASTpDjK49tDgFZcDPA-XQvaApkcyyfxmxImUmvHY6pkib_X-1Pe4Cc1dEznudfIx78iX-ehgzZYS32HJm05AU7SQiRLwEM5ZodcsVfmKEuJ3LtasotoNgnrKtZ58AQXxPNSxB7_PCFEAQGN1DOBuxb9e67m68HULtjekDAnAQkpfOcwZ9txAUoH0yb8ld7LxJRph5FaqUKKMRLHBQFi4_Z7fpVWqIlp7uEK-VZt0W0r5nECkGwfFKrmjrTDf-NeSIjOQrX1RErqgHt"/>
+<!-- Semi-transparent Pacing Indicator Overlay -->
+<div class="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none">
+<div class="flex items-center gap-2 bg-inverse-surface/85 backdrop-blur-md px-5 py-2.5 rounded-full border border-white/20 text-inverse-on-surface">
+<span class="material-symbols-outlined text-[#8ef4e4] text-[24px]">music_note</span>
+<span class="font-headline-sm text-headline-sm font-bold text-[#8ef4e4]">3拍节律循环：</span>
+<span class="font-label-lg text-label-lg font-bold">1 慢抬  ·  2 定住  ·  3 稳踩</span>
+</div>
+<div class="bg-black/60 backdrop-blur-md px-4 py-2 rounded-xl text-white font-label-md text-label-md border border-white/20">
+              示范视点：正侧双机位联动
+            </div>
+</div>
+<!-- Bottom Control Bar inside Demo Video -->
+<div class="absolute bottom-3 left-4 right-4 flex items-center justify-between bg-inverse-surface/90 backdrop-blur-md px-5 py-2 rounded-2xl border border-white/15 text-white">
+<div class="flex items-center gap-3">
+<button aria-label="暂停重播" class="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 text-white transition active:scale-95">
+<span class="material-symbols-outlined material-symbols-filled text-[24px]">replay_10</span>
+</button>
+<span class="font-body-md text-body-md text-white/90">01:42 / 03:00</span>
+</div>
+<!-- Segmented Step Progress indicator -->
+<div class="flex items-center gap-2">
+<div class="w-20 h-3 rounded-full bg-[#00877a]"></div>
+<div class="w-20 h-3 rounded-full bg-[#00877a]"></div>
+<div class="w-20 h-3 rounded-full bg-white/30"></div>
+</div>
+<button class="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white font-label-md text-label-md font-semibold transition active:scale-95">
+<span class="material-symbols-outlined text-[20px]">slow_motion_video</span>
+<span>0.75x 慢速讲解</span>
+</button>
+</div>
+</div>
+<!-- Clinical Guidelines & Caregiver Notice Card (适老特大字号) -->
+<div class="p-space-md flex-1 flex flex-col justify-between bg-surface-container-lowest">
+<div class="space-y-space-sm">
+<!-- Guideline 1 -->
+<div class="flex items-start gap-space-sm p-space-sm bg-surface-container-low rounded-2xl border border-outline-variant">
+<div class="w-9 h-9 rounded-xl bg-primary-container text-on-primary flex items-center justify-center font-bold text-[20px] flex-shrink-0">
+                1
+              </div>
+<div>
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">抬脚离地 ≥ 15 厘米</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-0.5">
+                  足尖主动向上微勾，避免脚尖下垂刮蹭地面造成急停或拖步。
+                </p>
+</div>
+</div>
+<!-- Guideline 2 -->
+<div class="flex items-start gap-space-sm p-space-sm bg-surface-container-low rounded-2xl border border-outline-variant">
+<div class="w-9 h-9 rounded-xl bg-primary-container text-on-primary flex items-center justify-center font-bold text-[20px] flex-shrink-0">
+                2
+              </div>
+<div>
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">胸廓舒展，视线放平</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-0.5">
+                  双目平视正前方靶标，勿低头盯看双脚，维持身体中心轴稳定。
+                </p>
+</div>
+</div>
+<!-- Caregiver Safety Notice -->
+<div class="flex items-center gap-3 px-space-md py-space-sm bg-tertiary-fixed/60 rounded-2xl border border-tertiary-fixed-dim">
+<span class="material-symbols-outlined material-symbols-filled text-tertiary text-[30px] flex-shrink-0">health_and_safety</span>
+<p class="font-body-lg text-body-lg text-on-tertiary-fixed font-semibold">
+<span class="font-bold underline">家属或陪护提示：</span>若长辈身体略有晃动，可引导其双手虚扶于前方的稳固实木椅背上。
+              </p>
+</div>
+</div>
+</div>
+</section>
+<!-- RIGHT VIEWPORT: PATIENT AI REAL-TIME ANALYSIS (患者实时摄像头与AI分析) -->
+<section class="flex flex-col bg-surface-container-lowest rounded-3xl border-2 border-outline-variant shadow-md overflow-hidden relative">
+<!-- AI Camera Header Bar -->
+<div class="flex items-center justify-between px-space-md py-space-xs bg-surface-container-low border-b-2 border-outline-variant">
+<div class="flex items-center gap-2">
+<span class="w-4 h-4 rounded-full bg-[#16a34a] animate-pulse"></span>
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">AI 实时姿态捕获</span>
+<span class="text-label-md font-label-md text-outline font-semibold">广角红外景深相机</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-3 py-1 bg-secondary-fixed text-on-secondary-fixed font-label-md text-label-md font-bold rounded-full">
+              关节追踪 60 FPS
+            </span>
+</div>
+</div>
+<!-- Camera Feed with Kinematic Overlays & Metrics -->
+<div class="relative w-full h-[340px] xl:h-[390px] bg-inverse-surface flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="First-person real-time camera view of an elder practicing gait exercises in a bright, tidy home rehabilitation space. Overlaid with high-visibility bright teal and blue skeletal joint tracking lines and circular node markers connecting hips, knees, and ankles. Clean clinical graphics display motion trajectory and ground-clearance measurement arcs in vivid teal and amber." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZh3EBDcd784g2IcY4KPUFCLmR146LohTMG9T-XUQvfavYiyhNMlhb2rebTnJytbYy7D-so8pZ-0lShoIrMfA7QstzUB83YmrgwOa5EMILXeKHnD7nFd_eARTUDTjB9uCDKdGc5ZlI6ldHxjjePrgVrV1a8UAOsYJ-0EVZaggmNrVH5fsbXIblvXOG93u-Cr3feJtWRIbhErQfNXWoYLGKoFzPsEsqL0LpTUzGm64pVmqwsLymAtNz8p8r6hzR-6LVy-cno502XC8d"/>
+<!-- AI Joint HUD Elements (Simulated SVG Skeleton Overlay) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" preserveaspectratio="none" viewbox="0 0 600 400">
+<!-- Simulated Skeleton Joint Lines -->
+<line stroke="#1a4fa0" stroke-linecap="round" stroke-width="6" x1="280" x2="310" y1="110" y2="190"></line>
+<line stroke="#00877a" stroke-linecap="round" stroke-width="6" x1="310" x2="295" y1="190" y2="280"></line>
+<line stroke="#00877a" stroke-linecap="round" stroke-width="6" x1="295" x2="330" y1="280" y2="350"></line>
+<!-- Left Hip/Knee/Foot clearance line -->
+<line stroke="#16a34a" stroke-linecap="round" stroke-width="6" x1="310" x2="335" y1="190" y2="260"></line>
+<line stroke="#16a34a" stroke-linecap="round" stroke-width="6" x1="335" x2="380" y1="260" y2="310"></line>
+<!-- Joint Circles -->
+<circle cx="280" cy="110" fill="#1a4fa0" r="8" stroke="#ffffff" stroke-width="3"></circle>
+<circle cx="310" cy="190" fill="#1a4fa0" r="8" stroke="#ffffff" stroke-width="3"></circle>
+<circle cx="295" cy="280" fill="#00877a" r="9" stroke="#ffffff" stroke-width="3"></circle>
+<circle cx="330" cy="350" fill="#00877a" r="9" stroke="#ffffff" stroke-width="3"></circle>
+<circle cx="335" cy="260" fill="#16a34a" r="9" stroke="#ffffff" stroke-width="3"></circle>
+<circle cx="380" cy="310" fill="#16a34a" r="10" stroke="#ffffff" stroke-width="3"></circle>
+<!-- ROM Angle Arc & Tag -->
+<path d="M 335 240 A 25 25 0 0 1 355 265" fill="none" stroke="#d97706" stroke-dasharray="4,2" stroke-width="4"></path>
+</svg>
+<!-- Top-Left Floating Rep Counter Badge (等宽实时计数大字报) -->
+<div class="absolute top-4 left-4 bg-surface-container-lowest/95 backdrop-blur-md p-4 rounded-3xl border-2 border-primary shadow-lg flex items-center gap-5">
+<div>
+<div class="font-label-md text-label-md text-on-surface-variant font-bold uppercase tracking-wider">
+                当前组达成步数
+              </div>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="font-display-counter-lg text-display-counter-lg font-extrabold text-primary tracking-tight">08</span>
+<span class="font-headline-lg text-headline-lg text-outline font-bold">/ 12 次</span>
+</div>
+</div>
+<div class="flex flex-col gap-1.5 pl-4 border-l-2 border-outline-variant">
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#16a34a]/15 text-[#16a34a] font-label-md text-label-md font-bold">
+<span class="material-symbols-outlined text-[20px]">verified</span>
+                动作幅度 98% 优秀
+              </span>
+<span class="text-body-md text-body-md text-on-surface font-semibold">
+                髋膝对称角：<strong class="text-primary font-bold">ROM 85° 良好</strong>
+</span>
+</div>
+</div>
+<!-- Top-Right Real-time Mirror Status -->
+<div class="absolute top-4 right-4 bg-inverse-surface/80 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/20 text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]">flip</span>
+<span class="font-label-md text-label-md">镜像校准开启</span>
+</div>
+<!-- Bottom Floating ROM Angle indicator -->
+<div class="absolute bottom-4 right-4 bg-surface-container-lowest/95 backdrop-blur-md px-4 py-2.5 rounded-2xl border-2 border-[#16a34a] shadow-md flex items-center gap-2">
+<span class="material-symbols-outlined material-symbols-filled text-[#16a34a] text-[24px]">height</span>
+<div>
+<div class="text-[14px] text-outline font-semibold">左足抬升间隙</div>
+<div class="font-headline-sm text-headline-sm font-bold text-[#16a34a]">18.4 cm (达标)</div>
+</div>
+</div>
+</div>
+<!-- Lower Analytics Area: RAS 64 BPM Wave & Gait Freeze Monitor -->
+<div class="p-space-md flex-1 flex flex-col justify-between bg-surface-container-lowest space-y-space-sm">
+<!-- 64 BPM RAS (Rhythmic Auditory Stimulation) Waveform Component -->
+<div class="p-space-sm bg-surface-container-low rounded-2xl border-2 border-secondary/30 relative overflow-hidden">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2">
+<div class="w-4 h-4 rounded-full bg-[#00877a] ras-beacon"></div>
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">64 BPM 听觉节律引导 (RAS)</span>
+<span class="px-2.5 py-0.5 rounded-md bg-secondary-container text-on-secondary-container font-label-md text-label-md font-bold">等步频脉冲</span>
+</div>
+<span class="font-label-lg text-label-lg font-bold text-secondary">
+                "嗒 — 嗒 — 嗒 — 嗒"
+              </span>
+</div>
+<!-- Stylized Dynamic Wave Visualizer -->
+<div class="h-12 w-full bg-surface-container-lowest rounded-xl border border-outline-variant flex items-center px-4 overflow-hidden relative">
+<!-- Moving Soundwave simulation -->
+<div class="flex items-center gap-1.5 w-[200%] wave-anim">
+<div class="h-3 w-2 bg-[#00877a]/40 rounded-full"></div>
+<div class="h-6 w-2 bg-[#00877a]/60 rounded-full"></div>
+<div class="h-10 w-2.5 bg-[#00877a] rounded-full"></div>
+<div class="h-5 w-2 bg-[#00877a]/50 rounded-full"></div>
+<div class="h-2 w-2 bg-[#00877a]/30 rounded-full"></div>
+<div class="h-4 w-2 bg-[#00877a]/50 rounded-full"></div>
+<div class="h-9 w-2.5 bg-[#00877a] rounded-full"></div>
+<div class="h-3 w-2 bg-[#00877a]/40 rounded-full"></div>
+<div class="h-7 w-2 bg-[#00877a]/70 rounded-full"></div>
+<div class="h-10 w-2.5 bg-[#00877a] rounded-full"></div>
+<div class="h-4 w-2 bg-[#00877a]/40 rounded-full"></div>
+<div class="h-2 w-2 bg-[#00877a]/30 rounded-full"></div>
+<div class="h-6 w-2 bg-[#00877a]/60 rounded-full"></div>
+<div class="h-10 w-2.5 bg-[#00877a] rounded-full"></div>
+<div class="h-3 w-2 bg-[#00877a]/40 rounded-full"></div>
+<!-- Duplicate sequence for smooth loop -->
+<div class="h-3 w-2 bg-[#00877a]/40 rounded-full"></div>
+<div class="h-6 w-2 bg-[#00877a]/60 rounded-full"></div>
+<div class="h-10 w-2.5 bg-[#00877a] rounded-full"></div>
+<div class="h-5 w-2 bg-[#00877a]/50 rounded-full"></div>
+<div class="h-2 w-2 bg-[#00877a]/30 rounded-full"></div>
+<div class="h-4 w-2 bg-[#00877a]/50 rounded-full"></div>
+<div class="h-9 w-2.5 bg-[#00877a] rounded-full"></div>
+<div class="h-3 w-2 bg-[#00877a]/40 rounded-full"></div>
+<div class="h-7 w-2 bg-[#00877a]/70 rounded-full"></div>
+<div class="h-10 w-2.5 bg-[#00877a] rounded-full"></div>
+<div class="h-4 w-2 bg-[#00877a]/40 rounded-full"></div>
+<div class="h-2 w-2 bg-[#00877a]/30 rounded-full"></div>
+<div class="h-6 w-2 bg-[#00877a]/60 rounded-full"></div>
+<div class="h-10 w-2.5 bg-[#00877a] rounded-full"></div>
+<div class="h-3 w-2 bg-[#00877a]/40 rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Foot Freeze Status Bar (防冻结步态雷达监控条) -->
+<div class="flex items-center justify-between px-space-md py-3 rounded-2xl bg-[#00877a]/10 border-2 border-[#00877a]/40">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined material-symbols-filled text-[#00877a] text-[30px]">radar</span>
+<div>
+<div class="font-headline-sm text-headline-sm font-bold text-on-surface">足底压力与步态冻结监测</div>
+<div class="font-body-md text-body-md text-on-surface-variant font-medium">
+                  触地传感：左足悬空轻离地 · 右足抓地稳固 (重心居中)
+                </div>
+</div>
+</div>
+<!-- Freeze risk pill -->
+<div class="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-lowest border border-[#00877a] shadow-xs">
+<span class="w-3 h-3 rounded-full bg-[#16a34a]"></span>
+<span class="font-label-lg text-label-lg font-bold text-[#00877a]">极低冻结风险 · 步态平稳</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- FIXED SAFETY FOOTER DOCK (Shared Component BottomNavBar Anchor Compliant) -->
+<!-- h-24 docked full-width bottom-0 with 64dp+ touch bounds and high contrast -->
+<nav aria-label="训练执行安全操作底栏" class="fixed bottom-0 left-0 w-full h-24 z-50 flex items-center justify-between px-margin bg-surface-container-lowest dark:bg-inverse-surface shadow-lg dark:shadow-none border-t-2 border-outline-variant dark:border-outline">
+<!-- Action 1: Pause / Rest (稍事休息 / 暂停) -->
+<button aria-label="稍事休息 / 暂停训练" class="flex items-center justify-center min-h-[64px] px-8 rounded-full bg-surface-container-high dark:bg-surface-variant text-on-surface dark:text-inverse-on-surface font-semibold font-label-lg text-label-lg hover:opacity-90 transition-opacity active:scale-95 duration-100 ring-4 ring-primary-fixed border border-outline-variant">
+<span class="material-symbols-outlined text-[32px] mr-2">pause_circle</span>
+<span>Pause / Rest 稍事休息</span>
+</button>
+<!-- Action 2: Complete Set (完成本组，进入下一组 - Active Navigation Pillar) -->
+<button aria-label="完成本组并进入下一组" class="flex items-center justify-center min-h-[64px] px-12 rounded-full bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary font-bold font-headline-sm text-headline-sm hover:opacity-90 transition-opacity active:scale-95 duration-100 ring-4 ring-primary-fixed shadow-md border-2 border-secondary">
+<span class="material-symbols-outlined material-symbols-filled text-[34px] mr-2.5">check_circle</span>
+<span>Complete Set 完成本组 (8/12)</span>
+<span class="material-symbols-outlined text-[28px] ml-2">arrow_forward</span>
+</button>
+<!-- Action 3: Emergency Nurse Stop (紧急停止 / 呼叫照护 - Crimson High Contrast Button) -->
+<button aria-label="紧急停止训练并呼叫护士" class="flex items-center justify-center min-h-[64px] px-8 rounded-full bg-[#dc2626] text-white font-bold font-headline-sm text-headline-sm hover:bg-[#b91c1c] hover:opacity-95 transition-all active:scale-95 duration-100 ring-4 ring-error-container shadow-lg border-2 border-white/40">
+<span class="material-symbols-outlined material-symbols-filled text-[34px] mr-2">emergency_home</span>
+<span>Emergency Nurse Stop 急停呼叫</span>
+</button>
+</nav>
+</div>
+<script>
+    // Lightweight tactile feedback & safety keyboard shortcuts for assistive hardware
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' || e.key === 'e') {
+        const emergencyBtn = document.querySelector('button[aria-label="紧急停止训练并呼叫护士"]');
+        if (emergencyBtn) {
+          emergencyBtn.classList.add('scale-95', 'ring-8');
+          setTimeout(() => emergencyBtn.classList.remove('scale-95', 'ring-8'), 300);
+        }
+      }
+    });
+  </script>
+</body></html>

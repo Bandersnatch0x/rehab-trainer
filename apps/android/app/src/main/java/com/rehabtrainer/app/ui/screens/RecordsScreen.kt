@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rehabtrainer.app.ui.theme.LocalElderlyDimens
 
@@ -125,40 +126,58 @@ private fun RecordCard(
                 style = MaterialTheme.typography.titleLarge
             )
 
-            // Metrics Grid
+            // Metrics Grid (结构化单行指标，解决 P1-4 标签粘连与颜色串项)
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant,
                 shape = MaterialTheme.shapes.small,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(text = "完成次数: $completedCount 次", style = MaterialTheme.typography.bodyMedium)
-                        Text(text = "动作错误: $errorCount 次", style = MaterialTheme.typography.bodyMedium)
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(text = "中断次数: $interruptionCount 次", style = MaterialTheme.typography.bodyMedium)
-                        Text(
-                            text = "有效帧占比: ${effectiveFrameRate}%",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = if (effectiveFrameRate < 80f) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-                        )
-                    }
+                Column(
+                    modifier = Modifier.padding(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    RecordMetricRow(label = "完成次数", value = "$completedCount 次")
+                    RecordMetricRow(label = "动作错误", value = "$errorCount 次")
+                    RecordMetricRow(label = "中断次数", value = "$interruptionCount 次")
+                    RecordMetricRow(
+                        label = "有效帧占比",
+                        value = "${effectiveFrameRate}%",
+                        valueColor = if (effectiveFrameRate < 80f) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                    )
                 }
             }
 
-            // Version Metadata
+            // Version Metadata (使用 onSurfaceVariant 满足 P1-12 对比度 >= 4.5:1)
             Text(
-                text = "模型版本: $modelVersion · 指标版本: $algorithmVersion",
+                text = "模型: $modelVersion · 指标: $algorithmVersion",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+}
+
+@Composable
+private fun RecordMetricRow(
+    label: String,
+    value: String,
+    valueColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurface
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            color = valueColor
+        )
     }
 }

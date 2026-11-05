@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>暖心关怀 - 帕金森肌力康复</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Atkinson Hyperlegible Next Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-dim": "#ccdbf3",
+            "primary": "#00387e",
+            "on-tertiary": "#ffffff",
+            "surface-variant": "#d5e3fc",
+            "surface-container": "#e6eeff",
+            "primary-container": "#1a4fa0",
+            "on-tertiary-fixed-variant": "#832600",
+            "surface": "#f8f9ff",
+            "primary-fixed-dim": "#aec6ff",
+            "on-primary": "#ffffff",
+            "inverse-surface": "#233144",
+            "surface-container-lowest": "#ffffff",
+            "tertiary": "#6f1f00",
+            "background": "#f8f9ff",
+            "on-tertiary-fixed": "#390c00",
+            "surface-container-high": "#dce9ff",
+            "primary-fixed": "#d8e2ff",
+            "secondary-fixed": "#9cf2e8",
+            "surface-container-highest": "#d5e3fc",
+            "outline": "#737783",
+            "on-secondary-container": "#006f67",
+            "on-primary-fixed": "#001a42",
+            "on-secondary": "#ffffff",
+            "on-secondary-fixed-variant": "#00504a",
+            "on-surface": "#0d1c2e",
+            "on-error-container": "#93000a",
+            "secondary-fixed-dim": "#80d5cb",
+            "inverse-primary": "#aec6ff",
+            "on-error": "#ffffff",
+            "surface-tint": "#2c5cae",
+            "on-primary-fixed-variant": "#024394",
+            "error-container": "#ffdad6",
+            "surface-container-low": "#eff4ff",
+            "surface-bright": "#f8f9ff",
+            "on-primary-container": "#abc5ff",
+            "secondary-container": "#99efe5",
+            "on-secondary-fixed": "#00201d",
+            "on-tertiary-container": "#ffb39a",
+            "on-surface-variant": "#434751",
+            "tertiary-container": "#962d00",
+            "tertiary-fixed-dim": "#ffb59d",
+            "on-background": "#0d1c2e",
+            "inverse-on-surface": "#eaf1ff",
+            "error": "#ba1a1a",
+            "tertiary-fixed": "#ffdbd0",
+            "secondary": "#006a63",
+            "outline-variant": "#c3c6d3"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin-desktop": "3rem",
+            "gutter": "1rem",
+            "space-sm": "0.75rem",
+            "space-xs": "0.5rem",
+            "space-lg": "1.75rem",
+            "margin-tablet": "2rem",
+            "gutter-tablet": "1.5rem",
+            "space-xl": "2.5rem",
+            "space-md": "1.25rem",
+            "margin": "1.25rem"
+          },
+          "fontFamily": {
+            "label-lg": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "body-xl": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "label-md": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "headline-md": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "headline-sm": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "headline-lg": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "headline-xl-mobile": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "label-xl": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "headline-xl": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "body-lg": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "body-md": ["Atkinson Hyperlegible Next", "sans-serif"]
+          },
+          "fontSize": {
+            "label-lg": ["16px", { "lineHeight": "22px", "fontWeight": "700" }],
+            "body-xl": ["20px", { "lineHeight": "32px", "fontWeight": "400" }],
+            "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "headline-md": ["24px", { "lineHeight": "34px", "fontWeight": "700" }],
+            "headline-sm": ["20px", { "lineHeight": "30px", "fontWeight": "600" }],
+            "headline-lg": ["28px", { "lineHeight": "38px", "fontWeight": "700" }],
+            "headline-xl-mobile": ["30px", { "lineHeight": "40px", "fontWeight": "700" }],
+            "label-xl": ["18px", { "lineHeight": "24px", "fontWeight": "700" }],
+            "headline-xl": ["36px", { "lineHeight": "48px", "fontWeight": "700" }],
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "body-md": ["16px", { "lineHeight": "26px", "fontWeight": "500" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    /* Gentle accessibility tap feedback */
+    .tap-scale {
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+    .tap-scale:active {
+      transform: scale(0.97);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen pb-28 selection:bg-secondary-container selection:text-on-secondary-container">
+<!-- WECHAT MINI PROGRAM NAVIGATION HEADER (适老高对比无边框设计) -->
+<header class="fixed top-0 left-0 w-full z-50 bg-surface-container-lowest shadow-sm flex flex-col justify-end">
+<!-- 微信小程序状态栏与胶囊栏模拟 -->
+<div class="h-6 w-full flex items-center justify-between px-6 pt-2 text-xs text-on-surface-variant font-medium select-none">
+<span>09:41</span>
+<div class="flex items-center space-x-1.5">
+<span class="material-symbols-outlined text-sm">signal_cellular_4_bar</span>
+<span class="material-symbols-outlined text-sm">wifi</span>
+<span class="material-symbols-outlined text-sm">battery_full</span>
+</div>
+</div>
+<!-- 胶囊行导航 -->
+<div class="h-16 px-margin flex items-center justify-between">
+<!-- 左侧：返回键与小程序标题及朗读胶囊 -->
+<div class="flex items-center space-x-2">
+<button aria-label="返回上一页" class="w-11 h-11 flex items-center justify-center rounded-full bg-surface-container-low text-primary tap-scale border border-outline-variant">
+<span class="material-symbols-outlined text-2xl font-bold">arrow_back</span>
+</button>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-primary tracking-tight font-bold">暖心关怀</span>
+<span class="font-label-md text-label-md text-secondary flex items-center">
+<span class="w-2 h-2 rounded-full bg-secondary inline-block mr-1"></span>守护中 · 步履稳健
+          </span>
+</div>
+</div>
+<!-- 右侧：语音播报大胶囊 + 微信原生标准控制胶囊模拟 -->
+<div class="flex items-center space-x-2">
+<!-- 语音朗读大按钮 -->
+<button class="h-11 px-3 bg-secondary-container text-on-secondary-container rounded-full flex items-center space-x-1 shadow-sm border border-secondary-fixed tap-scale" id="ttsBtn" onclick="toggleAudioSpeech()">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">volume_up</span>
+<span class="font-label-md text-label-md hidden sm:inline" id="ttsText">朗读此页</span>
+</button>
+<!-- 微信经典胶囊条 -->
+<div class="h-10 px-2.5 bg-surface-container-low rounded-full border border-outline-variant flex items-center space-x-2 shadow-xs">
+<button aria-label="小程序更多选项" class="w-6 h-6 flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-lg">more_horiz</span>
+</button>
+<div class="w-px h-4 bg-outline-variant"></div>
+<button aria-label="退出小程序" class="w-6 h-6 flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-lg">radio_button_checked</span>
+</button>
+</div>
+</div>
+</div>
+</header>
+<!-- MAIN SCROLLABLE CONTENT CANVAS (Single-Axis Guardrail Flow) -->
+<main class="w-full max-w-xl mx-auto px-margin pt-24 space-y-space-lg">
+<!-- 1. 头部温馨状态卡片 (陪伴卡通小暖伴 Mascot Card) -->
+<section class="bg-surface-container-lowest rounded-2xl p-space-md border-[1.5px] border-outline-variant shadow-sm relative overflow-hidden">
+<!-- 柔和背景微晕 -->
+<div class="absolute -right-10 -bottom-10 w-44 h-44 bg-surface-container rounded-full blur-2xl pointer-events-none opacity-60"></div>
+<div class="flex items-center space-x-4">
+<!-- 卡通陪伴形象 -->
+<div class="w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 bg-surface-container-low rounded-2xl p-1 border-[1.5px] border-surface-container-high overflow-hidden shadow-xs flex items-center justify-center">
+<img alt="康复小暖伴" class="w-full h-full object-contain transform hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida/AEtjO1XLiFYwgcmRkBbggrneXQgC-pgDA2O72DAOwGrX9LNx7dJZ4a9GceS-RzZRXRzn2HVdZMcGxhgzdeaT2TY-XKr_wWnoCN_D4UQK7ZnmypFIAfF6p9P0cNXsTJHfLmZPbpLhp4vIcoVWYpW4_lGSU0yJre2OGJ16S6EVTM-RMILw43nNu8h5_YhcrLOatGDXgGvN-PWnHzmOsGTFU2kiMQjgZO6hD8HYv3O9N2LL_H9_vrhpf5etBxsWzYcw"/>
+</div>
+<!-- 温暖问候与语音播报 -->
+<div class="flex-1 space-y-1.5">
+<div class="inline-flex items-center px-3 py-1 bg-surface-container rounded-full border border-surface-dim">
+<span class="material-symbols-outlined text-base text-primary mr-1" style="font-variation-settings: 'FILL' 1;">spa</span>
+<span class="font-label-md text-label-md text-primary">晨间舒展守护</span>
+</div>
+<h1 class="font-headline-sm text-headline-sm text-on-surface font-bold leading-tight">
+            建国叔，早安！
+          </h1>
+<p class="font-body-md text-body-md text-on-surface-variant">
+            今日身心状态舒缓平稳，肌肉轻松柔和，气色非常好。
+          </p>
+</div>
+</div>
+<!-- 快捷播报标签条 -->
+<div class="mt-4 pt-3 border-t-[1.5px] border-surface-container-high flex items-center justify-between bg-surface-container-low/70 -mx-space-md -mb-space-md px-space-md py-3 rounded-b-2xl">
+<div class="flex items-center text-primary space-x-1.5">
+<span class="material-symbols-outlined text-xl">record_voice_over</span>
+<span class="font-label-md text-label-md">小暖伴语音已就绪</span>
+</div>
+<button class="h-10 px-4 rounded-xl bg-primary text-on-primary font-label-md text-label-md flex items-center space-x-1.5 shadow-sm tap-scale" onclick="playGreetingVoice()">
+<span class="material-symbols-outlined text-lg">play_arrow</span>
+<span>听小伴问候</span>
+</button>
+</div>
+</section>
+<!-- 2. 今日成就与休整提醒大卡片 (温水滋养与舒缓打卡) -->
+<section class="bg-surface-container-lowest rounded-2xl p-space-md sm:p-6 border-[1.5px] border-outline-variant shadow-sm space-y-4">
+<div class="flex items-start justify-between">
+<div class="flex items-center space-x-2.5">
+<div class="w-12 h-12 rounded-2xl bg-secondary-container text-on-secondary-container flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-2xl font-bold" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div>
+<span class="font-label-md text-label-md text-secondary font-bold">今日晨操圆满</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">训练已达成 · 滋养休整</h2>
+</div>
+</div>
+<span class="px-3 py-1 bg-surface-container-high text-primary font-label-md text-label-md rounded-full border border-surface-dim">
+          已达标 100%
+        </span>
+</div>
+<!-- 核心滋养建议框 -->
+<div class="bg-surface-container-low rounded-xl p-4 border border-surface-dim space-y-2">
+<div class="flex items-center text-primary space-x-2">
+<span class="material-symbols-outlined text-2xl text-secondary">local_drink</span>
+<span class="font-label-lg text-label-lg text-primary font-bold">推荐饮用 200ml 温开水</span>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface leading-relaxed">
+          小口慢饮温水，坐位静坐调息 10 分钟。身体保持自然挺拔，深吸慢吐，让肩颈与双臂彻底放松。
+        </p>
+</div>
+<!-- 宽大打卡确认按钮 (高 64px 适老标准) -->
+<button class="w-full h-16 bg-primary-container hover:bg-primary text-on-primary rounded-xl font-label-xl text-label-xl flex items-center justify-center space-x-2 shadow-sm border border-primary tap-scale" id="drinkWaterBtn" onclick="confirmHydration()">
+<span class="material-symbols-outlined text-2xl" id="drinkIcon">water_drop</span>
+<span id="drinkBtnText">已喝温水 · 舒展调息完成</span>
+</button>
+</section>
+<!-- 3. 节律温和微调关怀 (浅杏色暖调，动作偏快贴心提示) -->
+<section class="bg-surface-container-lowest rounded-2xl p-space-md sm:p-6 border-2 border-tertiary-fixed-dim shadow-sm space-y-4">
+<div class="flex items-center space-x-3">
+<div class="w-12 h-12 rounded-2xl bg-tertiary-fixed text-tertiary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-2xl font-bold">tune</span>
+</div>
+<div class="flex-1">
+<span class="font-label-md text-label-md text-tertiary font-bold">步幅调谐关怀</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">动作节律温和微调提示</h2>
+</div>
+</div>
+<!-- 温和生活化叮咛文案 -->
+<div class="p-4 rounded-xl bg-surface-bright border border-outline-variant/60 space-y-2">
+<p class="font-body-lg text-body-lg text-on-surface leading-relaxed">
+          检测到刚才下肢踏步节奏稍快了一点点。咱们动作慢一点、步子稳一点，让肌肉有充分的舒展时间。
+        </p>
+<p class="font-label-lg text-label-lg text-tertiary font-bold flex items-center">
+<span class="material-symbols-outlined text-xl mr-1">tips_and_updates</span>
+          大步慢行最从容，每一步踩踏实再向前迈进~
+        </p>
+</div>
+<!-- 互动双操作区 (沉稳节律声音 + 步频微调) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+<!-- 节律试听大按钮 -->
+<button class="h-14 px-4 rounded-xl bg-surface-container-lowest border-2 border-primary text-primary font-label-lg text-label-lg flex items-center justify-center space-x-2 tap-scale shadow-xs" id="metronomeBtn" onclick="toggleMetronome()">
+<span class="material-symbols-outlined text-2xl" id="metronomeIcon">spatial_audio</span>
+<span id="metronomeText">试听舒缓节律音 (60 BPM)</span>
+</button>
+<!-- 调慢节拍大按钮 -->
+<button class="h-14 px-4 rounded-xl bg-secondary text-on-secondary font-label-lg text-label-lg flex items-center justify-center space-x-2 tap-scale shadow-xs" onclick="applyGentleCadence()">
+<span class="material-symbols-outlined text-2xl">slow_motion_video</span>
+<span>应用稳健慢步节拍</span>
+</button>
+</div>
+</section>
+<!-- 4. 居家安全环境温暖自查卡片 (柔和浅青/浅蓝底色) -->
+<section class="bg-surface-container-lowest rounded-2xl p-space-md sm:p-6 border-[1.5px] border-outline-variant shadow-sm space-y-4">
+<div class="flex items-center space-x-3">
+<div class="w-12 h-12 rounded-2xl bg-secondary-container text-on-secondary-container flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-2xl">night_shelter</span>
+</div>
+<div>
+<span class="font-label-md text-label-md text-secondary font-bold">生活空间关护</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">居室明亮与平稳步履建议</h2>
+</div>
+</div>
+<!-- 3项生活化温暖检查要点 (宽大选项与图标) -->
+<div class="space-y-2.5">
+<div class="flex items-center p-3.5 rounded-xl bg-surface-container-low border border-surface-dim">
+<span class="material-symbols-outlined text-2xl text-secondary mr-3 flex-shrink-0" style="font-variation-settings: 'FILL' 1;">light_mode</span>
+<div class="flex-1">
+<p class="font-label-lg text-label-lg text-on-surface">通道光线明亮充足</p>
+<p class="font-body-md text-body-md text-on-surface-variant">走廊与洗手间常开夜灯，视野开阔不晃眼</p>
+</div>
+<span class="material-symbols-outlined text-2xl text-secondary">check_circle</span>
+</div>
+<div class="flex items-center p-3.5 rounded-xl bg-surface-container-low border border-surface-dim">
+<span class="material-symbols-outlined text-2xl text-secondary mr-3 flex-shrink-0" style="font-variation-settings: 'FILL' 1;">dry_cleaning</span>
+<div class="flex-1">
+<p class="font-label-lg text-label-lg text-on-surface">地面平整干爽无水渍</p>
+<p class="font-body-md text-body-md text-on-surface-variant">电线收纳整齐，地毯平铺固定无卷边</p>
+</div>
+<span class="material-symbols-outlined text-2xl text-secondary">check_circle</span>
+</div>
+<div class="flex items-center p-3.5 rounded-xl bg-surface-container-low border border-surface-dim">
+<span class="material-symbols-outlined text-2xl text-secondary mr-3 flex-shrink-0" style="font-variation-settings: 'FILL' 1;">do_not_step</span>
+<div class="flex-1">
+<p class="font-label-lg text-label-lg text-on-surface">起步前先深呼吸 3 秒</p>
+<p class="font-body-md text-body-md text-on-surface-variant">站稳后再抬脚，穿着包脚防滑软底鞋</p>
+</div>
+<span class="material-symbols-outlined text-2xl text-secondary">check_circle</span>
+</div>
+</div>
+</section>
+<!-- 5. 一键联系家庭医生与康复师大按钮模块 (防误触、醒目宽大、在岗绿标) -->
+<section class="bg-surface-container-lowest rounded-2xl p-space-md sm:p-6 border-2 border-primary-fixed-dim shadow-sm space-y-4">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-label-md text-label-md text-primary font-bold">随身专业医疗后盾</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">一键联系康复关照团队</h2>
+</div>
+<span class="flex items-center text-xs font-semibold px-2.5 py-1 bg-surface-container rounded-full text-secondary">
+<span class="w-2 h-2 rounded-full bg-secondary inline-block mr-1.5 animate-pulse"></span>
+          双师在线值守
+        </span>
+</div>
+<!-- 双大卡片按钮流 (最小高度 > 68px) -->
+<div class="grid grid-cols-1 gap-3.5">
+<!-- 责任康复师按键 -->
+<div class="p-3.5 bg-surface-container-low rounded-xl border border-surface-dim flex items-center justify-between hover:bg-surface-container transition-colors">
+<div class="flex items-center space-x-3">
+<div class="relative">
+<div class="w-14 h-14 rounded-full bg-primary-fixed flex items-center justify-center text-primary font-bold text-xl border-2 border-surface-container-lowest">
+                陈
+              </div>
+<span class="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-secondary border-2 border-white" title="在岗就绪"></span>
+</div>
+<div>
+<div class="flex items-center space-x-2">
+<span class="font-label-xl text-label-xl text-on-surface font-bold">陈敏 康复师</span>
+<span class="px-2 py-0.5 bg-surface-container text-primary font-label-md text-xs rounded">责任康复</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">熟悉您的步频与关节活动度</p>
+</div>
+</div>
+<div class="flex items-center space-x-2">
+<button aria-label="呼叫陈康复师" class="h-12 px-4 rounded-xl bg-primary text-on-primary font-label-lg text-label-lg flex items-center space-x-1.5 shadow-sm tap-scale" onclick="callProvider('陈康复师')">
+<span class="material-symbols-outlined text-2xl">call</span>
+<span>通话</span>
+</button>
+<button aria-label="陈康复师语音留言" class="h-12 w-12 rounded-xl bg-surface-container-lowest border border-outline-variant text-primary flex items-center justify-center tap-scale" onclick="msgProvider('陈康复师')">
+<span class="material-symbols-outlined text-2xl">mic</span>
+</button>
+</div>
+</div>
+<!-- 家庭医生按键 -->
+<div class="p-3.5 bg-surface-container-low rounded-xl border border-surface-dim flex items-center justify-between hover:bg-surface-container transition-colors">
+<div class="flex items-center space-x-3">
+<div class="relative">
+<div class="w-14 h-14 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary font-bold text-xl border-2 border-surface-container-lowest">
+                林
+              </div>
+<span class="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-secondary border-2 border-white" title="在岗就绪"></span>
+</div>
+<div>
+<div class="flex items-center space-x-2">
+<span class="font-label-xl text-label-xl text-on-surface font-bold">林华 主任医生</span>
+<span class="px-2 py-0.5 bg-surface-container text-secondary font-label-md text-xs rounded">家庭签约</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">提供用药节奏与全周期身心关怀</p>
+</div>
+</div>
+<div class="flex items-center space-x-2">
+<button aria-label="呼叫林华医生" class="h-12 px-4 rounded-xl bg-secondary text-on-secondary font-label-lg text-label-lg flex items-center space-x-1.5 shadow-sm tap-scale" onclick="callProvider('林华医生')">
+<span class="material-symbols-outlined text-2xl">video_call</span>
+<span>视频</span>
+</button>
+<button aria-label="林医生语音留言" class="h-12 w-12 rounded-xl bg-surface-container-lowest border border-outline-variant text-secondary flex items-center justify-center tap-scale" onclick="msgProvider('林华医生')">
+<span class="material-symbols-outlined text-2xl">chat</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- 页面底部暖心寄语 -->
+<div class="text-center py-2 space-y-1">
+<p class="font-label-md text-label-md text-on-surface-variant flex items-center justify-center space-x-1">
+<span class="material-symbols-outlined text-lg text-primary">volunteer_activism</span>
+<span>步步安稳 · 身心舒展 · 静好前行</span>
+</p>
+<p class="text-xs text-outline">国家重点医疗数字化康复守护体系保障中</p>
+</div>
+</main>
+<!-- SHARED COMPONENT: BottomNavBar (Strictly Executing JSON Spec) -->
+<!-- 
+    Destination count: 5
+    label_texts: ["首页", "训练", "记录", "预警", "患者"]
+    icons: ["home", "fitness_center", "assignment", "warning", "person"]
+    Active Intent: "预警" (Safety, Alert, Care Notifications Page)
+    style_shell_layout: "fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-space-xs h-[76px]"
+    style_active_navigation: "flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary-container text-on-secondary-container dark:text-on-secondary-container rounded-xl px-3 py-1.5 min-h-[56px]"
+    style_inactive_navigation: "flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-3 py-1.5 min-h-[56px]"
+  -->
+<nav aria-label="底部导航" class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-space-xs h-[76px] bg-surface-container-lowest shadow-sm">
+<!-- 0: 首页 (Inactive) -->
+<a aria-label="首页" class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1.5 min-h-[56px] hover:bg-surface-container-high transition-transform duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[26px]">home</span>
+<span class="font-label-md text-label-md mt-0.5">首页</span>
+</a>
+<!-- 1: 训练 (Inactive) -->
+<a aria-label="训练" class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1.5 min-h-[56px] hover:bg-surface-container-high transition-transform duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[26px]">fitness_center</span>
+<span class="font-label-md text-label-md mt-0.5">训练</span>
+</a>
+<!-- 2: 记录 (Inactive) -->
+<a aria-label="记录" class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1.5 min-h-[56px] hover:bg-surface-container-high transition-transform duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[26px]">assignment</span>
+<span class="font-label-md text-label-md mt-0.5">记录</span>
+</a>
+<!-- 3: 预警 (ACTIVE: Mapped to Care Notifications & Safety Monitoring) -->
+<a aria-label="预警 (当前选中)" class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-xl px-3 py-1.5 min-h-[56px] transition-transform duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[26px]" style="font-variation-settings: 'FILL' 1;">warning</span>
+<span class="font-label-md text-label-md font-bold mt-0.5">预警</span>
+</a>
+<!-- 4: 患者 (Inactive) -->
+<a aria-label="患者" class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1.5 min-h-[56px] hover:bg-surface-container-high transition-transform duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[26px]">person</span>
+<span class="font-label-md text-label-md mt-0.5">患者</span>
+</a>
+</nav>
+<!-- 轻量交互脚本：语音模拟、打卡反馈与节拍音效 -->
+<script>
+    let isPlayingSpeech = false;
+    let isMetronomePlaying = false;
+    let audioCtx = null;
+    let metronomeInterval = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      return audioCtx;
+    }
+
+    // 播放沉稳温润木鱼声节拍 (60 BPM)
+    function playWoodblockClick() {
+      const ctx = getAudioContext();
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(320, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(140, ctx.currentTime + 0.08);
+
+      gain.gain.setValueAtTime(0.7, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.12);
+    }
+
+    function toggleMetronome() {
+      const btnText = document.getElementById('metronomeText');
+      const btnIcon = document.getElementById('metronomeIcon');
+      const btn = document.getElementById('metronomeBtn');
+
+      if (!isMetronomePlaying) {
+        isMetronomePlaying = true;
+        btnText.innerText = "正在播放 60BPM 沉稳木鱼声";
+        btnIcon.innerText = "stop_circle";
+        btn.classList.add('bg-primary', 'text-on-primary');
+        btn.classList.remove('bg-surface-container-lowest', 'text-primary');
+
+        playWoodblockClick();
+        metronomeInterval = setInterval(playWoodblockClick, 1000); // 60 BPM
+      } else {
+        isMetronomePlaying = false;
+        clearInterval(metronomeInterval);
+        btnText.innerText = "试听舒缓节律音 (60 BPM)";
+        btnIcon.innerText = "spatial_audio";
+        btn.classList.remove('bg-primary', 'text-on-primary');
+        btn.classList.add('bg-surface-container-lowest', 'text-primary');
+      }
+    }
+
+    function applyGentleCadence() {
+      alert("已成功为您同步‘60BPM 沉稳舒展节拍’，请保持大步慢行，动作舒适自如。");
+    }
+
+    function toggleAudioSpeech() {
+      const ttsText = document.getElementById('ttsText');
+      isPlayingSpeech = !isPlayingSpeech;
+      if (isPlayingSpeech) {
+        ttsText.innerText = "正在播报...";
+        if ('speechSynthesis' in window) {
+          const text = "建国叔，早安！今日身心状态舒缓平稳。今日晨练已圆满达成，请小口饮用200毫升温水，静坐调息10分钟。检测到步频稍快，大步慢行最从容。";
+          const utter = new SpeechSynthesisUtterance(text);
+          utter.rate = 0.85; // 专为长者放慢语速
+          utter.onend = () => {
+            isPlayingSpeech = false;
+            ttsText.innerText = "朗读此页";
+          };
+          window.speechSynthesis.speak(utter);
+        } else {
+          setTimeout(() => {
+            isPlayingSpeech = false;
+            ttsText.innerText = "朗读此页";
+          }, 3500);
+        }
+      } else {
+        ttsText.innerText = "朗读此页";
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+        }
+      }
+    }
+
+    function playGreetingVoice() {
+      toggleAudioSpeech();
+    }
+
+    function confirmHydration() {
+      const btn = document.getElementById('drinkWaterBtn');
+      const text = document.getElementById('drinkBtnText');
+      const icon = document.getElementById('drinkIcon');
+      btn.classList.remove('bg-primary-container', 'text-on-primary');
+      btn.classList.add('bg-secondary', 'text-on-secondary');
+      text.innerText = "温水已打卡 · 感到身体轻盈舒畅 ✓";
+      icon.innerText = "task_alt";
+    }
+
+    function callProvider(name) {
+      alert("正在为您接通 " + name + " 的温情关怀专线，请保持通话平稳，稍后将有医护人员应答。");
+    }
+
+    function msgProvider(name) {
+      alert("已开启对 " + name + " 的语音留言通道，请轻按说话。");
+    }
+  </script>
+</body></html>

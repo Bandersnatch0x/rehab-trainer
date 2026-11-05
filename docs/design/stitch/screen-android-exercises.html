@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>帕金森肌力康复 - 今日康复训练库</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-primary-container": "#abc5ff",
+            "secondary": "#006a63",
+            "primary-fixed": "#d8e2ff",
+            "on-error-container": "#93000a",
+            "tertiary-container": "#962d00",
+            "on-secondary-fixed": "#00201d",
+            "surface": "#f8f9ff",
+            "error-container": "#ffdad6",
+            "secondary-fixed": "#9cf2e8",
+            "on-secondary-fixed-variant": "#00504a",
+            "tertiary-fixed": "#ffdbd0",
+            "on-tertiary-fixed": "#390c00",
+            "surface-dim": "#ccdbf3",
+            "on-tertiary-container": "#ffb39a",
+            "primary-container": "#1a4fa0",
+            "primary-fixed-dim": "#aec6ff",
+            "on-error": "#ffffff",
+            "on-background": "#0d1c2e",
+            "surface-container-lowest": "#ffffff",
+            "on-secondary": "#ffffff",
+            "on-primary-fixed-variant": "#024394",
+            "surface-container-high": "#dce9ff",
+            "secondary-container": "#99efe5",
+            "surface-tint": "#2c5cae",
+            "on-surface": "#0d1c2e",
+            "inverse-primary": "#aec6ff",
+            "primary": "#00387e",
+            "outline": "#737783",
+            "on-tertiary-fixed-variant": "#832600",
+            "surface-container": "#e6eeff",
+            "secondary-fixed-dim": "#80d5cb",
+            "on-surface-variant": "#434751",
+            "error": "#ba1a1a",
+            "on-tertiary": "#ffffff",
+            "inverse-surface": "#233144",
+            "surface-bright": "#f8f9ff",
+            "outline-variant": "#c3c6d3",
+            "background": "#f8f9ff",
+            "inverse-on-surface": "#eaf1ff",
+            "tertiary-fixed-dim": "#ffb59d",
+            "on-primary": "#ffffff",
+            "surface-container-highest": "#d5e3fc",
+            "surface-variant": "#d5e3fc",
+            "surface-container-low": "#eff4ff",
+            "on-primary-fixed": "#001a42",
+            "tertiary": "#6f1f00",
+            "on-secondary-container": "#006f67"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xl": "2.5rem",
+            "gutter": "1rem",
+            "space-md": "1.25rem",
+            "margin-desktop": "3rem",
+            "gutter-tablet": "1.5rem",
+            "space-sm": "0.75rem",
+            "space-lg": "1.75rem",
+            "margin": "1.25rem",
+            "margin-tablet": "2rem",
+            "space-xs": "0.5rem"
+          },
+          "fontFamily": {
+            "headline-xl": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "label-xl": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "label-lg": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "headline-sm": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "body-xl": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "headline-md": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "label-md": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "headline-xl-mobile": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "headline-lg": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "body-lg": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "body-md": ["Atkinson Hyperlegible Next", "sans-serif"]
+          },
+          "fontSize": {
+            "headline-xl": ["36px", { "lineHeight": "48px", "fontWeight": "700" }],
+            "label-xl": ["18px", { "lineHeight": "24px", "fontWeight": "700" }],
+            "label-lg": ["16px", { "lineHeight": "22px", "fontWeight": "700" }],
+            "headline-sm": ["20px", { "lineHeight": "30px", "fontWeight": "600" }],
+            "body-xl": ["20px", { "lineHeight": "32px", "fontWeight": "400" }],
+            "headline-md": ["24px", { "lineHeight": "34px", "fontWeight": "700" }],
+            "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "headline-xl-mobile": ["30px", { "lineHeight": "40px", "fontWeight": "700" }],
+            "headline-lg": ["28px", { "lineHeight": "38px", "fontWeight": "700" }],
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "body-md": ["16px", { "lineHeight": "26px", "fontWeight": "500" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 550, 'GRAD' 0, 'opsz' 28;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .custom-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    /* Anti-tremor boundary & safe touch */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-lg min-h-screen pb-44 selection:bg-secondary-container antialiased">
+<!-- ================= TOP APP BAR (Shared Component Anchor) ================= -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin h-16 min-h-[64px] bg-surface-container-lowest shadow-sm">
+<div class="flex items-center gap-space-sm">
+<button aria-label="返回上一页" class="w-12 h-12 rounded-full flex items-center justify-center bg-surface-container hover:bg-surface-container-high active:scale-95 transition-all text-primary" type="button">
+<span class="material-symbols-outlined text-[28px]" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="flex items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center border-2 border-secondary font-headline-sm text-sm">
+<span>H&amp;Y 2</span>
+</div>
+<div class="flex flex-col">
+<span class="text-headline-sm font-headline-sm font-bold text-primary tracking-tight">今日康复训练库</span>
+<span class="text-label-md font-label-md text-on-surface-variant flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-secondary inline-block"></span> 适老化极简模式
+          </span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-space-xs">
+<div class="hidden sm:flex items-center bg-surface-container-high px-3 py-1 rounded-full text-label-md font-label-md text-primary gap-1">
+<span class="material-symbols-outlined text-lg" data-icon="accessibility_new">accessibility_new</span>
+<span>大字高触控</span>
+</div>
+<button aria-label="医疗求助服务" class="w-12 h-12 rounded-full flex items-center justify-center bg-surface-container hover:bg-surface-container-high active:scale-95 transition-all text-primary" type="button">
+<span class="material-symbols-outlined text-[28px]" data-icon="medical_services">medical_services</span>
+</button>
+</div>
+</header>
+<!-- ================= MAIN CONTENT CONTAINER ================= -->
+<main class="max-w-3xl mx-auto px-margin pt-20">
+<!-- 临床运动时相指导条 (ON 状态提示) -->
+<section class="mt-4 mb-space-lg">
+<div class="bg-surface-container-lowest rounded-3xl p-5 border-2 border-secondary shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div class="flex items-start gap-3">
+<div class="w-12 h-12 rounded-2xl bg-secondary-container text-on-secondary-container flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[30px]" data-icon="psychology">psychology</span>
+</div>
+<div>
+<div class="flex items-center gap-2 flex-wrap">
+<span class="text-label-xl font-label-xl text-primary font-bold">当前状态：开期 (ON Phase)</span>
+<span class="bg-secondary-fixed text-on-secondary-fixed text-label-md font-label-md font-bold px-3 py-1 rounded-full">药效黄金窗</span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant mt-1">
+              肌肉僵直已缓解，动作协调度良好。推荐完成上肢力量与防跌倒重心转移训练。
+            </p>
+</div>
+</div>
+<div class="flex items-center gap-2 self-end sm:self-center flex-shrink-0">
+<span class="text-label-md font-label-md text-secondary font-bold">语音指导播报</span>
+<button aria-label="语音播报已开启" class="w-16 h-9 rounded-full bg-primary flex items-center px-1 transition-all" type="button">
+<span class="w-7 h-7 rounded-full bg-surface-container-lowest shadow flex items-center justify-center translate-x-7 transition-transform text-primary font-bold text-xs">开</span>
+</button>
+</div>
+</div>
+</section>
+<!-- 顶部横向分类药丸导航栏 (解决标签竖排，超大触控区，横向流式布局) -->
+<section class="mb-space-lg">
+<div class="flex items-center justify-between mb-3 px-1">
+<h2 class="text-headline-sm font-headline-sm text-primary font-bold">训练项目分类</h2>
+<span class="text-label-md font-label-md text-on-surface-variant">共 4 组推荐训练</span>
+</div>
+<!-- 横向滑动容器，每个胶囊保持单行，内含图标+文字+计数 -->
+<div class="flex items-center gap-3 overflow-x-auto pb-2 custom-scrollbar">
+<!-- 分类 1: 全部动作 (激活) -->
+<button class="flex-shrink-0 min-h-[58px] px-6 rounded-full bg-primary text-on-primary flex items-center gap-2 shadow-sm font-label-lg font-label-lg whitespace-nowrap active:scale-95 transition-transform border-2 border-primary" type="button">
+<span class="material-symbols-outlined text-[24px]" data-icon="grid_view">grid_view</span>
+<span class="tracking-wide">全部动作</span>
+<span class="bg-surface-container-lowest text-primary text-label-md font-label-md px-2.5 py-0.5 rounded-full ml-1 font-bold">4</span>
+</button>
+<!-- 分类 2: 上肢力量 -->
+<button class="flex-shrink-0 min-h-[58px] px-5 rounded-full bg-surface-container-lowest text-on-surface flex items-center gap-2 border-2 border-outline-variant hover:border-primary font-label-lg font-label-lg whitespace-nowrap active:scale-95 transition-transform" type="button">
+<span class="material-symbols-outlined text-[24px] text-secondary" data-icon="sports_gymnastics">sports_gymnastics</span>
+<span class="tracking-wide">上肢力量</span>
+<span class="bg-surface-container text-on-surface-variant text-label-md font-label-md px-2 py-0.5 rounded-full ml-1">1</span>
+</button>
+<!-- 分类 3: 平衡步伐 -->
+<button class="flex-shrink-0 min-h-[58px] px-5 rounded-full bg-surface-container-lowest text-on-surface flex items-center gap-2 border-2 border-outline-variant hover:border-primary font-label-lg font-label-lg whitespace-nowrap active:scale-95 transition-transform" type="button">
+<span class="material-symbols-outlined text-[24px] text-secondary" data-icon="directions_walk">directions_walk</span>
+<span class="tracking-wide">平衡步伐</span>
+<span class="bg-surface-container text-on-surface-variant text-label-md font-label-md px-2 py-0.5 rounded-full ml-1">1</span>
+</button>
+<!-- 分类 4: 节律摆臂 -->
+<button class="flex-shrink-0 min-h-[58px] px-5 rounded-full bg-surface-container-lowest text-on-surface flex items-center gap-2 border-2 border-outline-variant hover:border-primary font-label-lg font-label-lg whitespace-nowrap active:scale-95 transition-transform" type="button">
+<span class="material-symbols-outlined text-[24px] text-secondary" data-icon="music_note">music_note</span>
+<span class="tracking-wide">节律摆臂</span>
+<span class="bg-surface-container text-on-surface-variant text-label-md font-label-md px-2 py-0.5 rounded-full ml-1">1</span>
+</button>
+<!-- 分类 5: 防跌倒稳定 -->
+<button class="flex-shrink-0 min-h-[58px] px-5 rounded-full bg-surface-container-lowest text-on-surface flex items-center gap-2 border-2 border-outline-variant hover:border-primary font-label-lg font-label-lg whitespace-nowrap active:scale-95 transition-transform" type="button">
+<span class="material-symbols-outlined text-[24px] text-tertiary-container" data-icon="shield">shield</span>
+<span class="tracking-wide">防跌倒稳定</span>
+<span class="bg-surface-container text-on-surface-variant text-label-md font-label-md px-2 py-0.5 rounded-full ml-1">1</span>
+</button>
+</div>
+</section>
+<!-- ================= 核心训练动作卡片列表 ================= -->
+<section aria-label="今日推荐康复动作卡片" class="space-y-space-lg">
+<!-- ================= 卡片 1【上肢力量】：坐位弹力带胸前推举 ================= -->
+<article class="bg-surface-container-lowest rounded-3xl p-6 border-2 border-outline-variant shadow-sm hover:border-primary transition-all">
+<!-- 头部说明与动作序号 -->
+<div class="flex items-start justify-between gap-4">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1.5">
+<span class="w-8 h-8 rounded-xl bg-primary text-on-primary flex items-center justify-center font-headline-sm text-sm font-bold">1</span>
+<h3 class="text-headline-md font-headline-md text-on-surface font-bold tracking-tight">坐位弹力带胸前推举</h3>
+</div>
+<p class="text-body-lg font-body-lg text-on-surface-variant leading-relaxed">
+              强化双侧胸大肌与上肢抓握，抵抗肌强直屈曲姿态，扩展胸腔呼吸。
+            </p>
+</div>
+<!-- Q版医学骨骼小示意插图容器 -->
+<div class="w-20 h-20 rounded-2xl bg-secondary-container flex items-center justify-center flex-shrink-0 border-2 border-secondary text-secondary">
+<span class="material-symbols-outlined text-[44px]" data-icon="fitness_center">fitness_center</span>
+</div>
+</div>
+<!-- 药丸标签横向排布 (严格 flex-row flex-wrap 杜绝文字竖排) -->
+<div class="flex flex-row flex-wrap items-center gap-2.5 my-5">
+<span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-secondary-fixed text-on-secondary-fixed text-label-md font-label-md font-bold border border-secondary">
+<span class="material-symbols-outlined text-[18px]" data-icon="check_circle">check_circle</span>
+            低风险-自主完成
+          </span>
+<span class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-surface-container text-primary text-label-md font-label-md font-bold border border-outline-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="tune">tune</span>
+            阻力带 2级
+          </span>
+<span class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-surface-container text-on-surface-variant text-label-md font-label-md font-bold border border-outline-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="shield">shield</span>
+            防肌萎缩
+          </span>
+<span class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-surface-container text-on-surface-variant text-label-md font-label-md font-bold border border-outline-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="schedule">schedule</span>
+            用时 8分钟
+          </span>
+</div>
+<!-- 训练核心指标量化展示 (适老化大字版) -->
+<div class="grid grid-cols-2 gap-3 mb-5 p-3.5 rounded-2xl bg-surface-container-low border border-outline-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[26px]" data-icon="repeat">repeat</span>
+<div>
+<span class="text-label-md font-label-md text-on-surface-variant block">推荐组数</span>
+<span class="text-label-xl font-label-xl text-primary font-bold">3组 × 10次</span>
+</div>
+</div>
+<div class="flex items-center gap-2 border-l border-outline-variant pl-3">
+<span class="material-symbols-outlined text-secondary text-[26px]" data-icon="healing">healing</span>
+<div>
+<span class="text-label-md font-label-md text-on-surface-variant block">临床目标</span>
+<span class="text-label-xl font-label-xl text-primary font-bold">缓解僵直·稳固</span>
+</div>
+</div>
+</div>
+<!-- 超大启动训练主按钮 (>=80dp 高，防震颤误触) -->
+<button aria-label="开始训练坐位弹力带胸前推举" class="w-full min-h-[80px] h-20 rounded-3xl bg-primary text-on-primary flex items-center justify-between px-6 shadow-md hover:bg-primary-container active:scale-[0.98] transition-all border-2 border-primary" type="button">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-2xl bg-white text-primary flex items-center justify-center shadow-inner">
+<span class="material-symbols-outlined text-[36px]" data-icon="play_arrow">play_arrow</span>
+</div>
+<div class="text-left">
+<span class="text-headline-sm font-headline-sm text-white font-bold block leading-none">开始训练</span>
+<span class="text-label-md font-label-md text-on-primary-container block mt-1">配有节拍计数与语音跟练</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-[26px] text-white" data-icon="chevron_right">chevron_right</span>
+</div>
+</button>
+</article>
+<!-- ================= 卡片 2【平衡步伐】：视听双引导节拍步态训练 ================= -->
+<article class="bg-surface-container-lowest rounded-3xl p-6 border-2 border-secondary shadow-sm hover:border-primary transition-all relative overflow-hidden">
+<!-- 重点节奏指示条 -->
+<div class="absolute top-0 left-0 right-0 h-2 bg-secondary"></div>
+<div class="flex items-start justify-between gap-4 pt-1">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1.5">
+<span class="w-8 h-8 rounded-xl bg-secondary text-on-secondary flex items-center justify-center font-headline-sm text-sm font-bold">2</span>
+<h3 class="text-headline-md font-headline-md text-on-surface font-bold tracking-tight">节拍步态节律训练 (RAS 60 BPM)</h3>
+</div>
+<p class="text-body-lg font-body-lg text-on-surface-variant leading-relaxed">
+              听觉律动诱发与视觉激光光带同步，跨越地面冻结卡顿，重建均匀步长。
+            </p>
+</div>
+<!-- 节拍动画指示 Q版圆环 -->
+<div class="w-20 h-20 rounded-2xl bg-secondary-fixed flex flex-col items-center justify-center flex-shrink-0 border-2 border-secondary text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[32px]" data-icon="metronome">file_map_stack</span>
+<span class="text-label-md font-label-md font-bold">60 BPM</span>
+</div>
+</div>
+<!-- 药丸标签横向排布 (flex-row flex-wrap) -->
+<div class="flex flex-row flex-wrap items-center gap-2.5 my-5">
+<span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-secondary-fixed text-on-secondary-fixed text-label-md font-label-md font-bold border border-secondary">
+<span class="material-symbols-outlined text-[18px]" data-icon="check_circle">check_circle</span>
+            低风险-稳态步行
+          </span>
+<span class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-secondary-container text-on-secondary-container text-label-md font-label-md font-bold border border-secondary">
+<span class="material-symbols-outlined text-[18px]" data-icon="headphones">headphones</span>
+            听觉伴奏 (RAS)
+          </span>
+<span class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-surface-container text-on-surface-variant text-label-md font-label-md font-bold border border-outline-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="do_not_step">do_not_step</span>
+            防冻结步态
+          </span>
+<span class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-surface-container text-on-surface-variant text-label-md font-label-md font-bold border border-outline-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="schedule">schedule</span>
+            用时 12分钟
+          </span>
+</div>
+<!-- 节律步态节奏条微交互组件 -->
+<div class="mb-5 p-4 rounded-2xl bg-secondary-container/40 border border-secondary flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary text-white flex items-center justify-center font-bold">
+<span class="material-symbols-outlined text-[24px]" data-icon="graphic_eq">graphic_eq</span>
+</div>
+<div>
+<span class="text-label-lg font-label-lg text-on-secondary-container font-bold">鼓点定步器：稳踏 - 踏 - 踏</span>
+<span class="text-label-md font-label-md text-on-surface-variant block">请保持走廊无杂物，扶手在触手可及处</span>
+</div>
+</div>
+<span class="text-label-lg font-label-lg text-secondary font-extrabold">推荐步数 200步</span>
+</div>
+<!-- 超大启动训练主按钮 (>=80dp 高) -->
+<button aria-label="开启节拍步态训练" class="w-full min-h-[80px] h-20 rounded-3xl bg-secondary text-on-secondary flex items-center justify-between px-6 shadow-md hover:bg-on-secondary-container active:scale-[0.98] transition-all border-2 border-secondary" type="button">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-2xl bg-white text-secondary flex items-center justify-center shadow-inner">
+<span class="material-symbols-outlined text-[36px]" data-icon="directions_walk">directions_walk</span>
+</div>
+<div class="text-left">
+<span class="text-headline-sm font-headline-sm text-white font-bold block leading-none">启动节拍器与步伐</span>
+<span class="text-label-md font-label-md text-secondary-fixed block mt-1">自动外放平稳鼓点 · 佩戴防跌手环</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-[26px] text-white" data-icon="chevron_right">chevron_right</span>
+</div>
+</button>
+</article>
+<!-- ================= 卡片 3【节律摆臂】：坐位交替大摆臂与躯干抗旋 ================= -->
+<article class="bg-surface-container-lowest rounded-3xl p-6 border-2 border-outline-variant shadow-sm hover:border-primary transition-all">
+<div class="flex items-start justify-between gap-4">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1.5">
+<span class="w-8 h-8 rounded-xl bg-primary text-on-primary flex items-center justify-center font-headline-sm text-sm font-bold">3</span>
+<h3 class="text-headline-md font-headline-md text-on-surface font-bold tracking-tight">坐位交替大摆臂与躯干抗旋</h3>
+</div>
+<p class="text-body-lg font-body-lg text-on-surface-variant leading-relaxed">
+              扩大肩关节活动度与胸椎旋转，改善行走时单侧手臂摆动减弱与轴性僵硬。
+            </p>
+</div>
+<!-- Q版图标 -->
+<div class="w-20 h-20 rounded-2xl bg-surface-container flex items-center justify-center flex-shrink-0 border-2 border-outline-variant text-primary">
+<span class="material-symbols-outlined text-[44px]" data-icon="self_improvement">self_improvement</span>
+</div>
+</div>
+<!-- 药丸标签横向排布 (flex-row flex-wrap) -->
+<div class="flex flex-row flex-wrap items-center gap-2.5 my-5">
+<span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-secondary-fixed text-on-secondary-fixed text-label-md font-label-md font-bold border border-secondary">
+<span class="material-symbols-outlined text-[18px]" data-icon="check_circle">check_circle</span>
+            极低风险
+          </span>
+<span class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-surface-container text-primary text-label-md font-label-md font-bold border border-outline-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="rotate_right">rotate_right</span>
+            躯干灵活性
+          </span>
+<span class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-surface-container text-on-surface-variant text-label-md font-label-md font-bold border border-outline-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="wb_sunny">wb_sunny</span>
+            晨间僵硬缓解
+          </span>
+<span class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-surface-container text-on-surface-variant text-label-md font-label-md font-bold border border-outline-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="schedule">schedule</span>
+            用时 6分钟
+          </span>
+</div>
+<div class="grid grid-cols-2 gap-3 mb-5 p-3.5 rounded-2xl bg-surface-container-low border border-outline-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[26px]" data-icon="timer">timer</span>
+<div>
+<span class="text-label-md font-label-md text-on-surface-variant block">动作节奏</span>
+<span class="text-label-xl font-label-xl text-primary font-bold">每分钟 35次交替</span>
+</div>
+</div>
+<div class="flex items-center gap-2 border-l border-outline-variant pl-3">
+<span class="material-symbols-outlined text-primary text-[26px]" data-icon="chair">chair</span>
+<div>
+<span class="text-label-md font-label-md text-on-surface-variant block">安全姿态</span>
+<span class="text-label-xl font-label-xl text-primary font-bold">端坐硬质靠背椅</span>
+</div>
+</div>
+</div>
+<!-- 超大启动训练主按钮 (>=80dp 高) -->
+<button aria-label="开始训练坐位交替大摆臂" class="w-full min-h-[80px] h-20 rounded-3xl bg-primary text-on-primary flex items-center justify-between px-6 shadow-md hover:bg-primary-container active:scale-[0.98] transition-all border-2 border-primary" type="button">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-2xl bg-white text-primary flex items-center justify-center shadow-inner">
+<span class="material-symbols-outlined text-[36px]" data-icon="play_arrow">play_arrow</span>
+</div>
+<div class="text-left">
+<span class="text-headline-sm font-headline-sm text-white font-bold block leading-none">开始摆臂训练</span>
+<span class="text-label-md font-label-md text-on-primary-container block mt-1">视频大字放大演示</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-[26px] text-white" data-icon="chevron_right">chevron_right</span>
+</div>
+</button>
+</article>
+<!-- ================= 卡片 4【下肢与防跌倒】：椅旁辅助双脚交替抬膝 ================= -->
+<article class="bg-surface-container-lowest rounded-3xl p-6 border-2 border-tertiary-fixed-dim shadow-sm hover:border-tertiary-container transition-all">
+<div class="flex items-start justify-between gap-4">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1.5">
+<span class="w-8 h-8 rounded-xl bg-tertiary text-on-tertiary flex items-center justify-center font-headline-sm text-sm font-bold">4</span>
+<h3 class="text-headline-md font-headline-md text-on-surface font-bold tracking-tight">椅旁辅助双脚交替抬膝</h3>
+</div>
+<p class="text-body-lg font-body-lg text-on-surface-variant leading-relaxed">
+              增强股四头肌与髂腰肌收缩力，改善足下垂，降低行走绊倒危险。
+            </p>
+</div>
+<!-- 照护看护警示标识 -->
+<div class="w-20 h-20 rounded-2xl bg-tertiary-fixed flex flex-col items-center justify-center flex-shrink-0 border-2 border-tertiary-container text-tertiary-container">
+<span class="material-symbols-outlined text-[36px]" data-icon="supervisor_account">supervisor_account</span>
+<span class="text-label-md font-label-md font-bold mt-0.5">需看护</span>
+</div>
+</div>
+<!-- 药丸标签横向排布 (含有跌倒防范醒目标签) -->
+<div class="flex flex-row flex-wrap items-center gap-2.5 my-5">
+<span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed text-label-md font-label-md font-bold border-2 border-tertiary-container">
+<span class="material-symbols-outlined text-[18px] text-tertiary-container" data-icon="warning">warning</span>
+            需照护者旁护
+          </span>
+<span class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-surface-container text-primary text-label-md font-label-md font-bold border border-outline-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="transfer_within_a_station">transfer_within_a_station</span>
+            下肢肌力
+          </span>
+<span class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-surface-container text-tertiary text-label-md font-label-md font-bold border border-outline-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="health_and_safety">health_and_safety</span>
+            跌倒预防
+          </span>
+<span class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-surface-container text-on-surface-variant text-label-md font-label-md font-bold border border-outline-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="schedule">schedule</span>
+            用时 10分钟
+          </span>
+</div>
+<!-- 跌倒风险提示容器 (Fall Risk Safety Box) -->
+<div class="mb-5 p-4 rounded-2xl bg-[#FFF7ED] border-2 border-[#C2410C] flex items-center gap-3">
+<span class="material-symbols-outlined text-[30px] text-[#C2410C] flex-shrink-0" data-icon="error">error</span>
+<p class="text-body-md font-body-md text-on-surface font-semibold">
+            安全警示：请右手牢固握住坚固椅背或扶手。若感到下肢发软，立即坐下休息。
+          </p>
+</div>
+<!-- 超大启动训练主按钮 (>=80dp 高) -->
+<button aria-label="照护确认并开始抬膝训练" class="w-full min-h-[80px] h-20 rounded-3xl bg-tertiary text-on-tertiary flex items-center justify-between px-6 shadow-md hover:bg-tertiary-container active:scale-[0.98] transition-all border-2 border-tertiary-container" type="button">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-2xl bg-white text-tertiary flex items-center justify-center shadow-inner">
+<span class="material-symbols-outlined text-[36px]" data-icon="play_arrow">play_arrow</span>
+</div>
+<div class="text-left">
+<span class="text-headline-sm font-headline-sm text-white font-bold block leading-none">照护确认并开始</span>
+<span class="text-label-md font-label-md text-tertiary-fixed block mt-1">2组 × 8次 · 旁护安全确认</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-[26px] text-white" data-icon="chevron_right">chevron_right</span>
+</div>
+</button>
+</article>
+</section>
+<!-- 底部照护联络与求助常驻小卡片 (辅助安全网) -->
+<section class="mt-8 mb-4">
+<div class="bg-surface-container rounded-3xl p-5 border-2 border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-2xl bg-[#FFF7ED] text-[#C2410C] flex items-center justify-center border-2 border-[#C2410C]">
+<span class="material-symbols-outlined text-[28px]" data-icon="phone_in_talk">phone_in_talk</span>
+</div>
+<div>
+<span class="text-label-xl font-label-xl text-primary font-bold block">照护者快速联系</span>
+<span class="text-body-md font-body-md text-on-surface-variant">一键呼叫家属或康复师介入</span>
+</div>
+</div>
+<button class="h-14 px-5 rounded-2xl bg-[#C2410C] text-white font-label-lg font-label-lg font-bold flex items-center gap-2 active:scale-95 transition-transform shadow-sm" type="button">
+<span>呼叫看护</span>
+</button>
+</div>
+</section>
+</main>
+<!-- ================= BOTTOM NAVIGATION BAR (Shared Component Anchor) ================= -->
+<!-- 
+    Authority Rule:
+    destination_count: 5
+    label_texts: ["首页", "训练", "记录", "预警", "患者"]
+    icons: ["home", "fitness_center", "assignment", "warning", "person"]
+    Active destination: "训练" (Exercises list page strictly matches "训练")
+    Active styles strictly map: bg-secondary-container text-on-secondary-container rounded-xl px-3 py-1.5 min-h-[56px]
+    Inactive styles: text-on-surface-variant px-3 py-1.5 min-h-[56px]
+  -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-space-xs h-[76px] bg-surface-container-lowest shadow-sm">
+<!-- 1. 首页 (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1.5 min-h-[56px] hover:bg-surface-container-high active:scale-95 transition-transform duration-150" href="#home">
+<span class="material-symbols-outlined text-[28px]" data-icon="home">home</span>
+<span class="text-label-md font-label-md mt-0.5">首页</span>
+</a>
+<!-- 2. 训练 (Active - 当前训练列表页) -->
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-xl px-4 py-1.5 min-h-[56px] hover:bg-surface-container-high active:scale-95 transition-transform duration-150 font-bold" href="#exercises">
+<span class="material-symbols-outlined text-[28px]" data-icon="fitness_center" style="font-variation-settings: 'FILL' 1;">fitness_center</span>
+<span class="text-label-md font-label-md mt-0.5">训练</span>
+</a>
+<!-- 3. 记录 (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1.5 min-h-[56px] hover:bg-surface-container-high active:scale-95 transition-transform duration-150" href="#records">
+<span class="material-symbols-outlined text-[28px]" data-icon="assignment">assignment</span>
+<span class="text-label-md font-label-md mt-0.5">记录</span>
+</a>
+<!-- 4. 预警 (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1.5 min-h-[56px] hover:bg-surface-container-high active:scale-95 transition-transform duration-150" href="#alerts">
+<span class="material-symbols-outlined text-[28px]" data-icon="warning">warning</span>
+<span class="text-label-md font-label-md mt-0.5">预警</span>
+</a>
+<!-- 5. 患者 (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1.5 min-h-[56px] hover:bg-surface-container-high active:scale-95 transition-transform duration-150" href="#profile">
+<span class="material-symbols-outlined text-[28px]" data-icon="person">person</span>
+<span class="text-label-md font-label-md mt-0.5">患者</span>
+</a>
+</nav>
+<!-- 震颤反馈交互与防误触模拟微脚本 -->
+<script>
+    document.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', function() {
+        if (navigator.vibrate) {
+          navigator.vibrate(30); // 30ms 触觉确认
+        }
+      });
+    });
+  </script>
+</body></html>

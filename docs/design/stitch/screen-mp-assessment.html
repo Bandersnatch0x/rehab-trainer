@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>帕金森肌力康复 - 每日晨间状态自评</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Atkinson Hyperlegible Next Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container-highest": "#d5e3fc",
+            "tertiary": "#6f1f00",
+            "on-primary-fixed-variant": "#024394",
+            "inverse-primary": "#aec6ff",
+            "surface-bright": "#f8f9ff",
+            "outline": "#737783",
+            "on-secondary-container": "#006f67",
+            "inverse-surface": "#233144",
+            "on-secondary-fixed-variant": "#00504a",
+            "surface-container-high": "#dce9ff",
+            "surface-container-lowest": "#ffffff",
+            "secondary-container": "#99efe5",
+            "on-surface": "#0d1c2e",
+            "secondary": "#006a63",
+            "surface-container": "#e6eeff",
+            "on-tertiary": "#ffffff",
+            "surface-tint": "#2c5cae",
+            "on-tertiary-fixed": "#390c00",
+            "on-secondary": "#ffffff",
+            "secondary-fixed": "#9cf2e8",
+            "on-primary-fixed": "#001a42",
+            "error": "#ba1a1a",
+            "secondary-fixed-dim": "#80d5cb",
+            "on-tertiary-fixed-variant": "#832600",
+            "surface-container-low": "#eff4ff",
+            "primary-fixed": "#d8e2ff",
+            "on-error-container": "#93000a",
+            "tertiary-fixed-dim": "#ffb59d",
+            "on-background": "#0d1c2e",
+            "on-primary": "#ffffff",
+            "tertiary-container": "#962d00",
+            "on-error": "#ffffff",
+            "primary": "#00387e",
+            "surface": "#f8f9ff",
+            "surface-variant": "#d5e3fc",
+            "on-secondary-fixed": "#00201d",
+            "tertiary-fixed": "#ffdbd0",
+            "on-tertiary-container": "#ffb39a",
+            "error-container": "#ffdad6",
+            "on-primary-container": "#abc5ff",
+            "primary-fixed-dim": "#aec6ff",
+            "background": "#f8f9ff",
+            "primary-container": "#1a4fa0",
+            "outline-variant": "#c3c6d3",
+            "on-surface-variant": "#434751",
+            "surface-dim": "#ccdbf3",
+            "inverse-on-surface": "#eaf1ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin-desktop": "3rem",
+            "space-xl": "2.5rem",
+            "margin-tablet": "2rem",
+            "space-xs": "0.5rem",
+            "gutter": "1rem",
+            "space-sm": "0.75rem",
+            "space-lg": "1.75rem",
+            "gutter-tablet": "1.5rem",
+            "margin": "1.25rem",
+            "space-md": "1.25rem"
+          },
+          "fontFamily": {
+            "headline-xl-mobile": ["Atkinson Hyperlegible Next"],
+            "body-md": ["Atkinson Hyperlegible Next"],
+            "headline-lg": ["Atkinson Hyperlegible Next"],
+            "body-lg": ["Atkinson Hyperlegible Next"],
+            "label-xl": ["Atkinson Hyperlegible Next"],
+            "headline-md": ["Atkinson Hyperlegible Next"],
+            "body-xl": ["Atkinson Hyperlegible Next"],
+            "headline-xl": ["Atkinson Hyperlegible Next"],
+            "label-lg": ["Atkinson Hyperlegible Next"],
+            "label-md": ["Atkinson Hyperlegible Next"],
+            "headline-sm": ["Atkinson Hyperlegible Next"]
+          },
+          "fontSize": {
+            "headline-xl-mobile": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+            "body-md": ["16px", {"lineHeight": "26px", "fontWeight": "500"}],
+            "headline-lg": ["28px", {"lineHeight": "38px", "fontWeight": "700"}],
+            "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+            "label-xl": ["18px", {"lineHeight": "24px", "fontWeight": "700"}],
+            "headline-md": ["24px", {"lineHeight": "34px", "fontWeight": "700"}],
+            "body-xl": ["20px", {"lineHeight": "32px", "fontWeight": "400"}],
+            "headline-xl": ["36px", {"lineHeight": "48px", "fontWeight": "700"}],
+            "label-lg": ["16px", {"lineHeight": "22px", "fontWeight": "700"}],
+            "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+            "headline-sm": ["20px", {"lineHeight": "30px", "fontWeight": "600"}]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* 适老防误触与无障碍强化 */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 28;
+    }
+    .option-radio:focus-visible {
+      outline: 3px solid #1a4fa0;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen flex flex-col justify-between selection:bg-secondary-container">
+<!-- ==================== 顶部状态栏与微信小程序标准胶囊区域 ==================== -->
+<header class="sticky top-0 z-50 bg-surface-container-lowest shadow-sm">
+<!-- 模拟微信小程序系统状态条 -->
+<div class="h-6 flex items-center justify-between px-6 pt-1 text-on-surface-variant opacity-80 text-xs">
+<span class="font-semibold tracking-wider">08:30</span>
+<div class="flex items-center space-x-1.5">
+<span class="material-symbols-outlined text-[14px]">signal_cellular_4_bar</span>
+<span class="material-symbols-outlined text-[14px]">wifi</span>
+<span class="material-symbols-outlined text-[14px]">battery_full</span>
+</div>
+</div>
+<!-- 小程序自研导航栏（包含返回、大字语音朗读关怀、微信小程序胶囊按键） -->
+<div class="h-16 flex items-center justify-between px-margin">
+<!-- 左侧：返回键与快速辅助 -->
+<div class="flex items-center gap-2">
+<button aria-label="返回上一页" class="w-11 h-11 flex items-center justify-center rounded-xl bg-surface-container hover:bg-surface-container-high active:scale-95 transition-transform text-primary" type="button">
+<span class="material-symbols-outlined text-headline-sm">arrow_back</span>
+</button>
+<button aria-label="语音朗读问卷" class="flex items-center gap-1 px-3 h-10 rounded-full bg-secondary-container text-on-secondary-container text-label-md font-label-md active:scale-95 transition-all" id="tts-toggle" type="button">
+<span class="material-symbols-outlined text-[18px]">volume_up</span>
+<span>朗读问卷</span>
+</button>
+</div>
+<!-- 中间标题 -->
+<h1 class="text-headline-sm font-headline-sm text-primary tracking-tight">晨间状态自评</h1>
+<!-- 右侧：微信小程序经典胶囊按键（“··· ⨀”） -->
+<div class="flex items-center bg-surface-container-low border border-outline-variant/60 rounded-full px-3 py-1.5 shadow-sm space-x-2">
+<button aria-label="小程序更多操作" class="flex items-center justify-center text-on-surface" type="button">
+<span class="material-symbols-outlined text-[18px]">more_horiz</span>
+</button>
+<div class="w-[1px] h-3.5 bg-outline-variant"></div>
+<button aria-label="关闭或返回主界面" class="flex items-center justify-center text-on-surface" type="button">
+<span class="material-symbols-outlined text-[18px]">radio_button_checked</span>
+</button>
+</div>
+</div>
+</header>
+<!-- ==================== 主内容区（Single-Axis Guardrail 单轴适老网格） ==================== -->
+<main class="flex-grow px-margin py-space-sm max-w-xl mx-auto w-full space-y-space-md pb-32">
+<!-- 模块 1: 亲切问候与温馨提醒卡片（伴随萌暖小鹿治愈元素） -->
+<section class="bg-surface-container-lowest rounded-2xl p-space-md border border-outline-variant shadow-sm relative overflow-hidden">
+<div class="flex items-center gap-4">
+<!-- 萌宠/治愈吉祥物图片（使用用户提供的温和暖心小鹿资产） -->
+<div class="relative flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden border border-outline-variant/40 bg-surface-container-low shadow-inner">
+<img alt="暖心陪伴小鹿" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1Xb8o0u1632jlMAjrWXAh194c_ZSVgRVJ9OtIIUh2d-82rPoWX6J7j30UqYjH6aiCtgsRlZaCsh7_cfNQKKa1rhzLxA6rNCMG1jojBQ_liZ5dlSvCXpyy5hArf8onTd7ZP-cmFBTy51TGuMA3nG2G6V10k-Kyx4grmm0e9K_ex8jtQYtknuFxQPt_2c97FwNS-90djhyyAAZcJadPVGzwpCuG-0iowa9Td1TH54asehm6K3_MEoUtUXPLs"/>
+<div class="absolute bottom-1 right-1 bg-surface-container-lowest/90 px-1.5 py-0.5 rounded text-[10px] font-bold text-secondary flex items-center">
+<span class="material-symbols-outlined text-[11px] mr-0.5" style="font-variation-settings: 'FILL' 1;">favorite</span>守护
+          </div>
+</div>
+<!-- 关怀文案与状态标签 -->
+<div class="flex-1 space-y-1.5">
+<div class="inline-flex items-center gap-1.5 bg-surface-container px-2.5 py-1 rounded-full text-primary font-label-md text-label-md">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span>今日晨起评测 · 自动关联训练</span>
+</div>
+<h2 class="text-headline-sm font-headline-sm text-primary leading-snug">
+            建国叔，早安！
+          </h2>
+<p class="text-body-md font-body-md text-on-surface-variant">
+            先喝半杯温水，咱们花1分钟看看今天的身体状态。
+          </p>
+</div>
+</div>
+<!-- 提示条：华东神经康复专家指导 -->
+<div class="mt-3 pt-3 border-t border-outline-variant/40 flex items-center justify-between text-label-md font-label-md text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-secondary text-[18px]">verified</span>
+          华东神经康复中心 · 适老化评估
+        </span>
+<span class="text-primary font-bold">1 / 3 阶段</span>
+</div>
+</section>
+<!-- 模块 2: 每日晨间生活化自评问卷核心区 -->
+<form class="space-y-space-md" id="evaluation-form" onsubmit="event.preventDefault();">
+<!-- ================= 问题一：下肢与起卧表现 ================= -->
+<article class="bg-surface-container-lowest rounded-2xl p-space-md border border-outline-variant shadow-sm transition-all hover:border-primary-container" id="card-q1">
+<div class="flex items-start justify-between mb-2">
+<div class="flex items-center gap-2">
+<span class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-label-lg">1</span>
+<h3 class="text-headline-sm font-headline-sm text-on-surface">今天早晨起床起身是否轻便？</h3>
+</div>
+<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-container text-primary flex items-center">
+<span class="material-symbols-outlined text-[14px] mr-1">accessibility_new</span>起卧
+          </span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant pl-10 mb-4">
+          提示：从床上坐起、站立下床穿鞋的整个过程感受
+        </p>
+<!-- 超大药丸选项组（min-h-[58px]，防抖防误触） -->
+<div aria-labelledby="q1-label" class="space-y-3" role="radiogroup">
+<!-- 选项 A -->
+<label class="option-label group flex items-center justify-between w-full min-h-[60px] p-3.5 rounded-xl border-2 border-outline-variant bg-surface-container-lowest cursor-pointer transition-all active:scale-[0.99] select-none">
+<div class="flex items-center gap-3">
+<input checked="" class="hidden q-radio" name="q1" type="radio" value="A"/>
+<div class="radio-indicator w-7 h-7 rounded-full border-2 border-outline-variant flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-white text-[18px] opacity-0 radio-check">check</span>
+</div>
+<div class="flex flex-col">
+<span class="text-label-xl font-label-xl text-on-surface group-data-[checked]:text-white">很轻松</span>
+<span class="text-label-md font-label-md text-on-surface-variant group-data-[checked]:text-primary-fixed">步态稳健、起步顺畅自如</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary text-[26px]">sentiment_satisfied</span>
+</label>
+<!-- 选项 B -->
+<label class="option-label group flex items-center justify-between w-full min-h-[60px] p-3.5 rounded-xl border-2 border-outline-variant bg-surface-container-lowest cursor-pointer transition-all active:scale-[0.99] select-none">
+<div class="flex items-center gap-3">
+<input class="hidden q-radio" name="q1" type="radio" value="B"/>
+<div class="radio-indicator w-7 h-7 rounded-full border-2 border-outline-variant flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-white text-[18px] opacity-0 radio-check">check</span>
+</div>
+<div class="flex flex-col">
+<span class="text-label-xl font-label-xl text-on-surface">稍有费力</span>
+<span class="text-label-md font-label-md text-on-surface-variant">需要放慢速度、扶一下床沿</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[26px]">pan_tool</span>
+</label>
+<!-- 选项 C -->
+<label class="option-label group flex items-center justify-between w-full min-h-[60px] p-3.5 rounded-xl border-2 border-outline-variant bg-surface-container-lowest cursor-pointer transition-all active:scale-[0.99] select-none">
+<div class="flex items-center gap-3">
+<input class="hidden q-radio" name="q1" type="radio" value="C"/>
+<div class="radio-indicator w-7 h-7 rounded-full border-2 border-outline-variant flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-white text-[18px] opacity-0 radio-check">check</span>
+</div>
+<div class="flex flex-col">
+<span class="text-label-xl font-label-xl text-on-surface">需要协助</span>
+<span class="text-label-md font-label-md text-on-surface-variant">身体发沉，需要老伴或家人搀扶</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-tertiary-container text-[26px]">help_outline</span>
+</label>
+</div>
+</article>
+<!-- ================= 问题二：上肢精细动作与肌张力 ================= -->
+<article class="bg-surface-container-lowest rounded-2xl p-space-md border border-outline-variant shadow-sm transition-all hover:border-primary-container" id="card-q2">
+<div class="flex items-start justify-between mb-2">
+<div class="flex items-center gap-2">
+<span class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-label-lg">2</span>
+<h3 class="text-headline-sm font-headline-sm text-on-surface">手部握筷、扣纽扣是否顺畅？</h3>
+</div>
+<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-container text-primary flex items-center">
+<span class="material-symbols-outlined text-[14px] mr-1">front_hand</span>上肢精细
+          </span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant pl-10 mb-4">
+          提示：早饭拿勺筷、解扣纽扣或系鞋带时的手部灵活性
+        </p>
+<div class="space-y-3" role="radiogroup">
+<!-- 选项 A -->
+<label class="option-label group flex items-center justify-between w-full min-h-[60px] p-3.5 rounded-xl border-2 border-outline-variant bg-surface-container-lowest cursor-pointer transition-all active:scale-[0.99] select-none">
+<div class="flex items-center gap-3">
+<input checked="" class="hidden q-radio" name="q2" type="radio" value="A"/>
+<div class="radio-indicator w-7 h-7 rounded-full border-2 border-outline-variant flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-white text-[18px] opacity-0 radio-check">check</span>
+</div>
+<div class="flex flex-col">
+<span class="text-label-xl font-label-xl text-on-surface">很轻松</span>
+<span class="text-label-md font-label-md text-on-surface-variant">手指灵活，无明显发僵或阻滞</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary text-[26px]">task_alt</span>
+</label>
+<!-- 选项 B -->
+<label class="option-label group flex items-center justify-between w-full min-h-[60px] p-3.5 rounded-xl border-2 border-outline-variant bg-surface-container-lowest cursor-pointer transition-all active:scale-[0.99] select-none">
+<div class="flex items-center gap-3">
+<input class="hidden q-radio" name="q2" type="radio" value="B"/>
+<div class="radio-indicator w-7 h-7 rounded-full border-2 border-outline-variant flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-white text-[18px] opacity-0 radio-check">check</span>
+</div>
+<div class="flex flex-col">
+<span class="text-label-xl font-label-xl text-on-surface">稍有费力</span>
+<span class="text-label-md font-label-md text-on-surface-variant">动作稍慢、有轻微颤抖或小幅度僵硬</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[26px]">pending</span>
+</label>
+<!-- 选项 C -->
+<label class="option-label group flex items-center justify-between w-full min-h-[60px] p-3.5 rounded-xl border-2 border-outline-variant bg-surface-container-lowest cursor-pointer transition-all active:scale-[0.99] select-none">
+<div class="flex items-center gap-3">
+<input class="hidden q-radio" name="q2" type="radio" value="C"/>
+<div class="radio-indicator w-7 h-7 rounded-full border-2 border-outline-variant flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-white text-[18px] opacity-0 radio-check">check</span>
+</div>
+<div class="flex flex-col">
+<span class="text-label-xl font-label-xl text-on-surface">需要协助</span>
+<span class="text-label-md font-label-md text-on-surface-variant">手部僵硬发紧、难以握紧餐具纽扣</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-tertiary-container text-[26px]">emergency</span>
+</label>
+</div>
+</article>
+<!-- ================= 问题三：服药后开期感受（帕金森核心特征） ================= -->
+<article class="bg-surface-container-lowest rounded-2xl p-space-md border border-outline-variant shadow-sm transition-all hover:border-primary-container" id="card-q3">
+<div class="flex items-start justify-between mb-2">
+<div class="flex items-center gap-2">
+<span class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-label-lg">3</span>
+<h3 class="text-headline-sm font-headline-sm text-on-surface">晨起服药后，身体感觉放松了吗？</h3>
+</div>
+<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-container text-secondary flex items-center">
+<span class="material-symbols-outlined text-[14px] mr-1">medication</span>药物开期
+          </span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant pl-10 mb-4">
+          提示：美多芭/息宁等早晨药物起效感受（是否进入开期窗口）
+        </p>
+<div class="space-y-3" role="radiogroup">
+<!-- 选项 A -->
+<label class="option-label group flex items-center justify-between w-full min-h-[60px] p-3.5 rounded-xl border-2 border-outline-variant bg-surface-container-lowest cursor-pointer transition-all active:scale-[0.99] select-none">
+<div class="flex items-center gap-3">
+<input checked="" class="hidden q-radio" name="q3" type="radio" value="A"/>
+<div class="radio-indicator w-7 h-7 rounded-full border-2 border-outline-variant flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-white text-[18px] opacity-0 radio-check">check</span>
+</div>
+<div class="flex flex-col">
+<span class="text-label-xl font-label-xl text-on-surface">身体已舒展</span>
+<span class="text-label-md font-label-md text-on-surface-variant">药效已充分起效，进入黄金训练状态</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary text-[26px]">spa</span>
+</label>
+<!-- 选项 B -->
+<label class="option-label group flex items-center justify-between w-full min-h-[60px] p-3.5 rounded-xl border-2 border-outline-variant bg-surface-container-lowest cursor-pointer transition-all active:scale-[0.99] select-none">
+<div class="flex items-center gap-3">
+<input class="hidden q-radio" name="q3" type="radio" value="B"/>
+<div class="radio-indicator w-7 h-7 rounded-full border-2 border-outline-variant flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-white text-[18px] opacity-0 radio-check">check</span>
+</div>
+<div class="flex flex-col">
+<span class="text-label-xl font-label-xl text-on-surface">正在慢慢起效</span>
+<span class="text-label-md font-label-md text-on-surface-variant">感觉四肢在逐步变软、逐渐舒缓中</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[26px]">hourglass_top</span>
+</label>
+<!-- 选项 C -->
+<label class="option-label group flex items-center justify-between w-full min-h-[60px] p-3.5 rounded-xl border-2 border-outline-variant bg-surface-container-lowest cursor-pointer transition-all active:scale-[0.99] select-none">
+<div class="flex items-center gap-3">
+<input class="hidden q-radio" name="q3" type="radio" value="C"/>
+<div class="radio-indicator w-7 h-7 rounded-full border-2 border-outline-variant flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-white text-[18px] opacity-0 radio-check">check</span>
+</div>
+<div class="flex flex-col">
+<span class="text-label-xl font-label-xl text-on-surface">仍感沉重紧绷</span>
+<span class="text-label-md font-label-md text-on-surface-variant">药效尚未显现或稍迟缓，仍处于关期</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-tertiary-container text-[26px]">bedtime</span>
+</label>
+</div>
+</article>
+<!-- 模块 3: 辅助快捷补充（贴心胶囊单选） -->
+<section class="bg-surface-container-lowest rounded-2xl p-space-md border border-outline-variant shadow-sm space-y-3">
+<div class="flex items-center justify-between">
+<span class="text-label-xl font-label-xl text-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[20px]">health_and_safety</span>
+            今日是否有突发“冻步”或轻微头晕？
+          </span>
+<span class="text-label-md font-label-md text-secondary font-bold">安全监测</span>
+</div>
+<div class="grid grid-cols-2 gap-3" id="freezing-gait-group">
+<button class="quick-toggle flex items-center justify-center gap-2 py-3 px-2 rounded-xl border-2 border-primary bg-primary text-on-primary font-label-lg active:scale-95 transition-all" data-value="normal" type="button">
+<span class="material-symbols-outlined text-[20px]">check_circle</span>
+<span>无不适 · 步履安稳</span>
+</button>
+<button class="quick-toggle flex items-center justify-center gap-2 py-3 px-2 rounded-xl border-2 border-outline-variant bg-surface-container-lowest text-on-surface font-label-lg active:scale-95 transition-all" data-value="slight" type="button">
+<span class="material-symbols-outlined text-outline text-[20px]">info</span>
+<span>略有轻微发沉</span>
+</button>
+</div>
+</section>
+<!-- 专家安全与家属同步声明 -->
+<div class="p-3.5 bg-surface-container-low rounded-xl border border-outline-variant/60 flex items-start gap-2.5">
+<span class="material-symbols-outlined text-secondary text-[22px] mt-0.5 flex-shrink-0">shield</span>
+<p class="text-label-md font-label-md text-on-surface-variant leading-relaxed">
+          评估结果将实时同步至 <strong class="text-on-surface font-bold">林华主管医生</strong> 与家人微信，系统已自动调配今日专属 <span class="text-primary font-bold">88bpm 听觉节律步伐</span> 与抗阻康复操。
+        </p>
+</div>
+</form>
+</main>
+<!-- ==================== 底部固定提交行动区（超大尺寸，防误触设计） ==================== -->
+<footer class="fixed bottom-0 left-0 w-full z-40 bg-surface-container-lowest/95 backdrop-blur border-t border-outline-variant/40 px-margin pt-3 pb-6 shadow-lg">
+<div class="max-w-xl mx-auto space-y-2">
+<!-- 超大醒目药丸提交主按钮 (70dp高) -->
+<button class="w-full h-[68px] rounded-2xl bg-primary-container text-on-primary flex items-center justify-center gap-3 shadow-md hover:bg-primary active:scale-[0.98] transition-all focus:outline-none focus:ring-4 focus:ring-primary-container/30" id="submit-btn" type="button">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">assignment_turned_in</span>
+<span class="text-headline-sm font-headline-sm font-bold tracking-wide">完成自评 · 智能调整今日训练</span>
+</button>
+<!-- 快速紧急求助悬浮辅助栏 -->
+<div class="flex items-center justify-between px-2 pt-1 text-label-md font-label-md">
+<span class="text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-secondary text-[16px]">schedule</span>
+          预计耗时 40 秒
+        </span>
+<button class="text-tertiary-container font-bold hover:underline flex items-center gap-0.5" onclick="alert('正在接通照护人家属电话...')" type="button">
+<span class="material-symbols-outlined text-[18px]">phone_in_talk</span>
+          一键联系陪护人
+        </button>
+</div>
+</div>
+</footer>
+<!-- ==================== 交互脚本（原生物联网切换、自评即时高亮反馈） ==================== -->
+<script>
+    // 问卷单选交互逻辑
+    document.addEventListener('DOMContentLoaded', () => {
+      // 遍历所有 radio 输入框，设置初始视觉态
+      function updateVisualRadioStates() {
+        document.querySelectorAll('.option-label').forEach(label => {
+          const radio = label.querySelector('.q-radio');
+          const indicator = label.querySelector('.radio-indicator');
+          const checkIcon = label.querySelector('.radio-check');
+          const title = label.querySelector('.text-label-xl');
+          const desc = label.querySelector('.text-label-md');
+
+          if (radio && radio.checked) {
+            // 选中态：品牌高对比深蓝底色 + 白色字体 + 对勾清晰呈现
+            label.classList.remove('border-outline-variant', 'bg-surface-container-lowest');
+            label.classList.add('border-primary-container', 'bg-primary-container', 'shadow-md');
+            
+            indicator.classList.remove('border-outline-variant');
+            indicator.classList.add('bg-white', 'border-white');
+            checkIcon.classList.remove('opacity-0', 'text-white');
+            checkIcon.classList.add('opacity-100', 'text-primary-container');
+            
+            if (title) {
+              title.classList.remove('text-on-surface');
+              title.classList.add('text-white', 'font-bold');
+            }
+            if (desc) {
+              desc.classList.remove('text-on-surface-variant');
+              desc.classList.add('text-primary-fixed');
+            }
+          } else if (radio) {
+            // 未选中态：高清晰轻柔边框 + 浅底白卡片
+            label.classList.remove('border-primary-container', 'bg-primary-container', 'shadow-md');
+            label.classList.add('border-outline-variant', 'bg-surface-container-lowest');
+            
+            indicator.classList.remove('bg-white', 'border-white');
+            indicator.classList.add('border-outline-variant');
+            checkIcon.classList.remove('opacity-100', 'text-primary-container');
+            checkIcon.classList.add('opacity-0', 'text-white');
+            
+            if (title) {
+              title.classList.remove('text-white', 'font-bold');
+              title.classList.add('text-on-surface');
+            }
+            if (desc) {
+              desc.classList.remove('text-primary-fixed');
+              desc.classList.add('text-on-surface-variant');
+            }
+          }
+        });
+      }
+
+      // 绑定每个点击选项事件
+      document.querySelectorAll('.option-label').forEach(label => {
+        label.addEventListener('click', (e) => {
+          const radio = label.querySelector('.q-radio');
+          if (radio) {
+            radio.checked = true;
+            updateVisualRadioStates();
+          }
+        });
+      });
+
+      // 初始化选项视觉状态
+      updateVisualRadioStates();
+
+      // 快捷补充“步态冻结状态”切换交互
+      const toggles = document.querySelectorAll('.quick-toggle');
+      toggles.forEach(btn => {
+        btn.addEventListener('click', () => {
+          toggles.forEach(t => {
+            t.classList.remove('border-primary', 'bg-primary', 'text-on-primary');
+            t.classList.add('border-outline-variant', 'bg-surface-container-lowest', 'text-on-surface');
+            const icon = t.querySelector('.material-symbols-outlined');
+            if (icon) {
+              icon.classList.remove('text-white');
+              icon.classList.add('text-outline');
+            }
+          });
+          btn.classList.remove('border-outline-variant', 'bg-surface-container-lowest', 'text-on-surface');
+          btn.classList.add('border-primary', 'bg-primary', 'text-on-primary');
+          const activeIcon = btn.querySelector('.material-symbols-outlined');
+          if (activeIcon) {
+            activeIcon.classList.remove('text-outline');
+            activeIcon.classList.add('text-white');
+          }
+        });
+      });
+
+      // 语音朗读模拟交互
+      let isReading = false;
+      const ttsBtn = document.getElementById('tts-toggle');
+      ttsBtn.addEventListener('click', () => {
+        isReading = !isReading;
+        if (isReading) {
+          ttsBtn.classList.remove('bg-secondary-container', 'text-on-secondary-container');
+          ttsBtn.classList.add('bg-primary-container', 'text-white');
+          ttsBtn.innerHTML = `<span class="material-symbols-outlined text-[18px]">graphic_eq</span><span>正在播报...</span>`;
+        } else {
+          ttsBtn.classList.remove('bg-primary-container', 'text-white');
+          ttsBtn.classList.add('bg-secondary-container', 'text-on-secondary-container');
+          ttsBtn.innerHTML = `<span class="material-symbols-outlined text-[18px]">volume_up</span><span>朗读问卷</span>`;
+        }
+      });
+
+      // 完成自评提交反馈
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.addEventListener('click', () => {
+        submitBtn.innerHTML = `
+          <span class="material-symbols-outlined animate-spin text-[28px]">autorenew</span>
+          <span class="text-headline-sm font-headline-sm font-bold">同步医生端，调配训练中...</span>
+        `;
+        submitBtn.classList.add('opacity-90');
+        setTimeout(() => {
+          submitBtn.innerHTML = `
+            <span class="material-symbols-outlined text-[28px]">check_circle</span>
+            <span class="text-headline-sm font-headline-sm font-bold">自评完成 · 开启今日88bpm训练</span>
+          `;
+          submitBtn.classList.remove('bg-primary-container', 'opacity-90');
+          submitBtn.classList.add('bg-secondary');
+        }, 1200);
+      });
+    });
+  </script>
+</body></html>

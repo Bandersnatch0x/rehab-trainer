@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>华东神经康复中心 (D10隔离租户) - 康复随访台账与计划中心</title>
+<!-- Material Symbols Outlined Font -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Atkinson Hyperlegible Next Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with Forms and Container Queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-background": "#131b2e",
+            "outline": "#737783",
+            "on-primary": "#ffffff",
+            "surface": "#faf8ff",
+            "tertiary": "#5c2f00",
+            "surface-container-highest": "#dae2fd",
+            "on-error": "#ffffff",
+            "surface-dim": "#d2d9f4",
+            "secondary-fixed-dim": "#72d8c8",
+            "tertiary-container": "#7e4200",
+            "primary-fixed-dim": "#aec6ff",
+            "on-surface-variant": "#434751",
+            "background": "#faf8ff",
+            "on-tertiary-fixed-variant": "#6e3900",
+            "error-container": "#ffdad6",
+            "on-tertiary": "#ffffff",
+            "inverse-surface": "#283044",
+            "on-secondary": "#ffffff",
+            "surface-tint": "#2c5cae",
+            "on-tertiary-fixed": "#2f1500",
+            "surface-container-low": "#f2f3ff",
+            "surface-variant": "#dae2fd",
+            "on-surface": "#131b2e",
+            "tertiary-fixed-dim": "#ffb77d",
+            "on-tertiary-container": "#ffb579",
+            "on-secondary-fixed-variant": "#005048",
+            "on-primary-fixed-variant": "#024394",
+            "tertiary-fixed": "#ffdcc3",
+            "on-error-container": "#93000a",
+            "surface-container-high": "#e2e7ff",
+            "surface-container": "#eaedff",
+            "on-primary-container": "#abc5ff",
+            "on-secondary-fixed": "#00201c",
+            "on-primary-fixed": "#001a42",
+            "inverse-primary": "#aec6ff",
+            "surface-bright": "#faf8ff",
+            "primary-container": "#1a4fa0",
+            "primary": "#00387e",
+            "secondary-container": "#8ef4e4",
+            "inverse-on-surface": "#eef0ff",
+            "outline-variant": "#c3c6d3",
+            "on-secondary-container": "#007166",
+            "secondary-fixed": "#8ef4e4",
+            "secondary": "#006a60",
+            "primary-fixed": "#d8e2ff",
+            "surface-container-lowest": "#ffffff",
+            "error": "#ba1a1a"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-sm": "0.75rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "space-xl": "2.25rem",
+            "margin": "1.5rem",
+            "gutter": "1.5rem",
+            "space-xs": "0.5rem",
+            "space-2xl": "3rem"
+          },
+          "fontFamily": {
+            "body-md": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "headline-md": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "headline-sm": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "headline-lg": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "label-lg": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "display-counter-lg": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "label-md": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "display-counter": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "body-xl": ["Atkinson Hyperlegible Next", "sans-serif"],
+            "body-lg": ["Atkinson Hyperlegible Next", "sans-serif"]
+          },
+          "fontSize": {
+            "body-md": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "headline-md": ["26px", { "lineHeight": "34px", "fontWeight": "700" }],
+            "headline-sm": ["22px", { "lineHeight": "30px", "fontWeight": "600" }],
+            "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+            "label-lg": ["18px", { "lineHeight": "24px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+            "display-counter-lg": ["72px", { "lineHeight": "80px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+            "label-md": ["16px", { "lineHeight": "22px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+            "display-counter": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-xl": ["22px", { "lineHeight": "32px", "fontWeight": "500" }],
+            "body-lg": ["20px", { "lineHeight": "30px", "fontWeight": "400" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 24px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
+    /* Custom scrollbars for data-dense tables */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f2f3ff;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c3c6d3;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #737783;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md text-body-md antialiased h-full flex flex-col overflow-hidden">
+<!-- ================= TOP NAVIGATION BAR (TopNavBar Shared Component) ================= -->
+<header class="flex justify-between items-center h-16 px-space-lg w-full z-40 bg-surface-container-lowest dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none flex-shrink-0">
+<!-- Brand Title & Global Search -->
+<div class="flex items-center gap-space-lg flex-1">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="neurology">neurology</span>
+<span class="font-headline-sm text-headline-sm text-primary dark:text-inverse-primary font-bold tracking-tight">华东神经康复中心 (D10隔离租户)</span>
+</div>
+<!-- Top Search Bar -->
+<div class="relative w-80 max-w-md hidden lg:block">
+<span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-outline">
+<span class="material-symbols-outlined text-xl" data-icon="search">search</span>
+</span>
+<input class="w-full pl-10 pr-4 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm transition-colors duration-150" placeholder="全局检索患者姓名、PID或随访编号..." type="text"/>
+</div>
+</div>
+<!-- Trailing Action Icons & Physician Identity -->
+<div class="flex items-center gap-space-md">
+<!-- Trailing Action: notifications -->
+<button class="relative p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-colors duration-150" title="通知提醒">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-surface-container-lowest"></span>
+</button>
+<!-- Trailing Action: help -->
+<button class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-colors duration-150" title="帮助中心">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<div class="h-6 w-px bg-outline-variant mx-1"></div>
+<!-- User Profile Badge -->
+<div class="flex items-center gap-space-sm pl-2">
+<div class="w-9 h-9 rounded-full ring-2 ring-primary/20 overflow-hidden bg-surface-container-high flex items-center justify-center">
+<img class="w-full h-full object-cover" data-alt="A dignified close-up portrait of Dr. Li, a senior male neurologist wearing a clean white clinical consultation coat with a stethoscope around his neck in a bright hospital suite. High key professional clinic setting with cool blue accents and gentle lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIm1gMgXN5chegesLgGaHgOdvgq3-GdmhfG55R_QJwjbxP3FovcEb9wWYn7W-_7IjK6ht1JsluDIcQM8xHTegzWXCWYXLFgZkMe5MMPBbpjLCP8GO9RwrWRklo1iIxNKd_EFA-ncUaF0r0O9waHlYvqophEMsWOYxji82tWj522EJwyCiiNR6N3R644wPxrutncjDpaaFseaJF_P7XqxIOrvc01RPFNhKCZauL_wQEeud5aLaYpoJ4bswHunL8nnp_Q2b_5FjD7Xsq"/>
+</div>
+<div class="flex flex-col text-left">
+<span class="font-label-md text-label-md text-on-surface leading-tight font-semibold">李副主任医师</span>
+<span class="text-xs text-outline leading-none mt-0.5">神经运动障碍专业组</span>
+</div>
+</div>
+<!-- Trailing Primary Action: 退出 -->
+<button class="flex items-center gap-1 ml-space-sm px-3 py-1.5 rounded-lg border border-outline-variant text-error hover:bg-error-container hover:text-on-error-container transition-colors duration-150 font-label-md text-sm font-semibold" title="退出系统">
+<span class="material-symbols-outlined text-lg" data-icon="logout">logout</span>
+<span>退出</span>
+</button>
+</div>
+</header>
+<!-- ================= MAIN LAYOUT WRAPPER ================= -->
+<div class="flex flex-1 h-[calc(100vh-4rem)] overflow-hidden">
+<!-- ================= LEFT NAVIGATION BAR (SideNavBar Shared Component) ================= -->
+<aside class="w-64 h-full flex flex-col justify-between py-space-lg px-space-md border-r border-outline-variant dark:border-outline bg-surface-container-low dark:bg-inverse-surface flex-shrink-0 z-30 overflow-y-auto">
+<div class="flex flex-col gap-space-lg">
+<!-- Header Clinical System Info -->
+<div class="px-space-xs pb-space-sm border-b border-outline-variant/60">
+<div class="flex items-center gap-space-sm mb-1">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="clinical_notes">clinical_notes</span>
+<span class="font-headline-sm text-headline-sm text-primary dark:text-inverse-primary font-bold">帕金森临床康复系统</span>
+</div>
+<p class="text-xs text-outline pl-8">UPDRS &amp; H-Y 分期平台</p>
+</div>
+<!-- Emergency Action CTA Button -->
+<button class="w-full h-11 px-4 flex items-center justify-center gap-2 bg-error text-on-error hover:bg-on-error-container transition-all duration-200 rounded-lg shadow-sm font-label-lg text-sm font-bold">
+<span class="material-symbols-outlined text-xl" data-icon="e911_emergency">e911_emergency</span>
+<span>发起紧急干预</span>
+</button>
+<!-- Navigation Tabs Cluster (Active tab: 随访台账) -->
+<nav class="flex flex-col gap-1">
+<!-- 1. 患者工作台 -->
+<a class="flex items-center gap-3 px-space-md py-space-sm text-on-surface-variant dark:text-inverse-on-surface font-body-md text-body-md hover:bg-surface-container-high dark:hover:bg-surface-variant rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="clinical_notes">clinical_notes</span>
+<span class="text-base font-medium">患者工作台</span>
+</a>
+<!-- 2. 分期确认 -->
+<a class="flex items-center gap-3 px-space-md py-space-sm text-on-surface-variant dark:text-inverse-on-surface font-body-md text-body-md hover:bg-surface-container-high dark:hover:bg-surface-variant rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="fact_check">fact_check</span>
+<span class="text-base font-medium">分期确认</span>
+</a>
+<!-- 3. 处方编辑 -->
+<a class="flex items-center gap-3 px-space-md py-space-sm text-on-surface-variant dark:text-inverse-on-surface font-body-md text-body-md hover:bg-surface-container-high dark:hover:bg-surface-variant rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="edit_calendar">edit_calendar</span>
+<span class="text-base font-medium">处方编辑</span>
+</a>
+<!-- 4. 预警处置中心 -->
+<a class="flex items-center gap-3 px-space-md py-space-sm text-on-surface-variant dark:text-inverse-on-surface font-body-md text-body-md hover:bg-surface-container-high dark:hover:bg-surface-variant rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="warning">warning</span>
+<span class="text-base font-medium">预警处置中心</span>
+<span class="ml-auto px-1.5 py-0.5 text-xs font-bold rounded-full bg-error-container text-on-error-container">3</span>
+</a>
+<!-- 5. 随访台账 (ACTIVE TAB) -->
+<a class="flex items-center gap-3 px-space-md py-space-sm bg-primary-container text-on-primary-container font-label-lg text-label-lg rounded-lg border-l-4 border-primary transition-all duration-200 shadow-sm" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="inventory_2">inventory_2</span>
+<span class="text-base font-bold text-white">随访台账</span>
+<span class="ml-auto w-2 h-2 rounded-full bg-secondary-container"></span>
+</a>
+<!-- 6. 权限管理 -->
+<a class="flex items-center gap-3 px-space-md py-space-sm text-on-surface-variant dark:text-inverse-on-surface font-body-md text-body-md hover:bg-surface-container-high dark:hover:bg-surface-variant rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="admin_panel_settings">admin_panel_settings</span>
+<span class="text-base font-medium">权限管理</span>
+</a>
+</nav>
+</div>
+<!-- Footer Tabs & System Configurations -->
+<div class="flex flex-col gap-1 pt-space-md border-t border-outline-variant/60">
+<a class="flex items-center gap-3 px-space-md py-space-sm text-on-surface-variant dark:text-inverse-on-surface font-body-md text-body-md hover:bg-surface-container-high dark:hover:bg-surface-variant rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="settings">settings</span>
+<span class="text-sm font-medium">系统配置</span>
+</a>
+<a class="flex items-center gap-3 px-space-md py-space-sm text-on-surface-variant dark:text-inverse-on-surface font-body-md text-body-md hover:bg-surface-container-high dark:hover:bg-surface-variant rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="support_agent">support_agent</span>
+<span class="text-sm font-medium">临床帮助指南</span>
+</a>
+</div>
+</aside>
+<!-- ================= RIGHT WORKSPACE CONTENT CANVAS ================= -->
+<main class="flex-1 flex flex-col overflow-y-auto bg-surface px-space-lg py-space-md space-y-space-md">
+<!-- Breadcrumbs & Page Header Section -->
+<div class="flex flex-col gap-2">
+<nav aria-label="Breadcrumb" class="flex items-center gap-1.5 text-xs text-outline">
+<span class="hover:text-primary cursor-pointer">康复工作台</span>
+<span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+<span class="hover:text-primary cursor-pointer">随访管理</span>
+<span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+<span class="text-on-surface font-semibold">康复随访台账与计划中心</span>
+</nav>
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<!-- Page Title & Status Indicator Badges -->
+<div class="flex flex-wrap items-center gap-3">
+<h1 class="font-headline-lg text-headline-lg text-on-background font-bold tracking-tight">康复随访台账与计划中心</h1>
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-secondary-container/50 text-secondary border border-secondary-container text-xs font-bold">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+                今日待随访 12 人
+              </span>
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary-fixed text-primary border border-outline-variant/40 text-xs font-bold">
+<span class="material-symbols-outlined text-xs" data-icon="trending_up">trending_up</span>
+                本月随访达成率 94.2%
+              </span>
+</div>
+</div>
+<!-- Top Action Controls -->
+<div class="flex items-center gap-2 flex-wrap">
+<!-- View Mode Switch -->
+<div class="bg-surface-container-high p-1 rounded-lg flex items-center border border-outline-variant/40">
+<button class="px-2.5 py-1 text-xs font-bold rounded-md bg-surface-container-lowest text-primary shadow-xs flex items-center gap-1">
+<span class="material-symbols-outlined text-base" data-icon="calendar_month">calendar_month</span>
+<span>综合看板</span>
+</button>
+<button class="px-2.5 py-1 text-xs font-semibold text-on-surface-variant hover:text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-base" data-icon="table_chart">table_chart</span>
+<span>纯列表</span>
+</button>
+</div>
+<!-- Batch Export Button -->
+<button class="px-3.5 py-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container-high transition-colors font-label-md text-sm font-semibold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base" data-icon="ios_share">ios_share</span>
+<span>批量导出 Excel</span>
+</button>
+<!-- New Follow-up Record Primary Button -->
+<button class="px-4 py-2 rounded-lg bg-primary hover:bg-primary-container text-on-primary transition-colors font-label-md text-sm font-bold flex items-center gap-1.5 shadow-sm" onclick="document.getElementById('newFollowupModal').classList.remove('hidden')">
+<span class="material-symbols-outlined text-lg" data-icon="add">add</span>
+<span>新增随访记录</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Core Telemetry Metric Overview Cards (4 Grid Cards) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
+<!-- Metric Card 1: 本月应随访人次 -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl border border-outline-variant/60 shadow-sm flex flex-col justify-between hover:border-primary/50 transition-colors">
+<div class="flex items-center justify-between text-outline">
+<span class="font-label-md text-sm font-semibold text-on-surface-variant">本月应随访人次</span>
+<div class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-xl" data-icon="groups">groups</span>
+</div>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<span class="font-display-counter text-4xl font-bold text-on-surface">168 <span class="text-sm font-normal text-outline">人次</span></span>
+<span class="text-xs font-bold text-secondary flex items-center gap-0.5">
+<span class="material-symbols-outlined text-xs" data-icon="arrow_upward">arrow_upward</span>
+              8.5% 同比
+            </span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full mt-3 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 82%;"></div>
+</div>
+</div>
+<!-- Metric Card 2: 待电话回访 -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl border border-outline-variant/60 shadow-sm flex flex-col justify-between hover:border-tertiary-fixed-dim transition-colors">
+<div class="flex items-center justify-between text-outline">
+<span class="font-label-md text-sm font-semibold text-on-surface-variant">待电话回访 (黄标待办)</span>
+<div class="w-8 h-8 rounded-lg bg-tertiary-fixed flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-xl" data-icon="phone_in_talk">phone_in_talk</span>
+</div>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<span class="font-display-counter text-4xl font-bold text-tertiary-container">18 <span class="text-sm font-normal text-outline">例</span></span>
+<span class="text-xs px-2 py-0.5 rounded font-bold bg-error-container text-on-error-container">
+              高风险优先 4 例
+            </span>
+</div>
+<div class="flex items-center justify-between text-xs text-outline mt-3">
+<span>今日已处理 6 例</span>
+<span class="text-tertiary font-semibold">剩余 12 例待打</span>
+</div>
+</div>
+<!-- Metric Card 3: 已完成评定 -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl border border-outline-variant/60 shadow-sm flex flex-col justify-between hover:border-secondary transition-colors">
+<div class="flex items-center justify-between text-outline">
+<span class="font-label-md text-sm font-semibold text-on-surface-variant">已完成评定 (绿标良好)</span>
+<div class="w-8 h-8 rounded-lg bg-secondary-container flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-xl" data-icon="task_alt">task_alt</span>
+</div>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<span class="font-display-counter text-4xl font-bold text-secondary">142 <span class="text-sm font-normal text-outline">例</span></span>
+<span class="text-xs font-bold text-secondary px-2 py-0.5 rounded bg-secondary-container/40">
+              完成率 84.5%
+            </span>
+</div>
+<div class="flex items-center gap-2 mt-3 text-xs text-outline">
+<span>门诊复核 68</span>
+<span>·</span>
+<span>远程视频 46</span>
+<span>·</span>
+<span>电话评估 28</span>
+</div>
+</div>
+<!-- Metric Card 4: 失访与异常未应答 -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl border border-outline-variant/60 shadow-sm flex flex-col justify-between hover:border-error transition-colors">
+<div class="flex items-center justify-between text-outline">
+<span class="font-label-md text-sm font-semibold text-on-surface-variant">失访与异常未应答</span>
+<div class="w-8 h-8 rounded-lg bg-error-container flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-xl" data-icon="person_alert">person_alert</span>
+</div>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<span class="font-display-counter text-4xl font-bold text-error">8 <span class="text-sm font-normal text-outline">例</span></span>
+<span class="text-xs px-2 py-0.5 rounded font-bold bg-error-container text-on-error-container flex items-center gap-0.5">
+<span class="material-symbols-outlined text-xs" data-icon="emergency_home">emergency_home</span>
+              社工/紧急联系人协同
+            </span>
+</div>
+<p class="text-xs text-outline mt-3 truncate">超3次未接通 5 例 / 拒绝随访 3 例</p>
+</div>
+</div>
+<!-- Core Work Area: Follow-up Calendar & Patient Registry split -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-md">
+<!-- ================= LEFT: Follow-up Calendar & Schedule (4 Columns) ================= -->
+<div class="xl:col-span-4 bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm p-space-md flex flex-col gap-3">
+<div class="flex items-center justify-between border-b border-outline-variant/40 pb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="calendar_month">calendar_month</span>
+<h2 class="font-label-lg text-base font-bold text-on-surface">随访排期看板 (2024年10月)</h2>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-1 rounded hover:bg-surface-container-high text-outline">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_left">chevron_left</span>
+</button>
+<span class="text-xs font-bold text-on-surface">第 4 周</span>
+<button class="p-1 rounded hover:bg-surface-container-high text-outline">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Calendar Mini Grid Header -->
+<div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-outline">
+<span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span class="text-tertiary">六</span><span class="text-tertiary">日</span>
+</div>
+<!-- Calendar Schedule Grid Cells -->
+<div class="grid grid-cols-7 gap-1.5 text-xs">
+<!-- Mon 21 -->
+<div class="p-1 min-h-[58px] rounded-lg border border-outline-variant/30 bg-surface-container-low flex flex-col justify-between">
+<span class="font-bold text-outline">21</span>
+<div class="flex flex-col gap-0.5">
+<span class="bg-secondary-container/40 text-on-secondary-container text-[10px] px-1 rounded truncate">已办 6</span>
+</div>
+</div>
+<!-- Tue 22 -->
+<div class="p-1 min-h-[58px] rounded-lg border border-outline-variant/30 bg-surface-container-low flex flex-col justify-between">
+<span class="font-bold text-outline">22</span>
+<div class="flex flex-col gap-0.5">
+<span class="bg-secondary-container/40 text-on-secondary-container text-[10px] px-1 rounded truncate">已办 8</span>
+</div>
+</div>
+<!-- Wed 23 -->
+<div class="p-1 min-h-[58px] rounded-lg border border-outline-variant/30 bg-surface-container-low flex flex-col justify-between">
+<span class="font-bold text-outline">23</span>
+<div class="flex flex-col gap-0.5">
+<span class="bg-secondary-container/40 text-on-secondary-container text-[10px] px-1 rounded truncate">已办 9</span>
+</div>
+</div>
+<!-- Thu 24 (TODAY - HIGHLIGHTED) -->
+<div class="p-1 min-h-[58px] rounded-lg border-2 border-primary bg-primary-fixed/30 flex flex-col justify-between shadow-xs">
+<div class="flex items-center justify-between">
+<span class="font-extrabold text-primary">24</span>
+<span class="w-1.5 h-1.5 rounded-full bg-error animate-ping"></span>
+</div>
+<div class="flex flex-col gap-0.5">
+<span class="bg-primary text-white text-[10px] px-1 rounded truncate font-bold">待访 12</span>
+</div>
+</div>
+<!-- Fri 25 -->
+<div class="p-1 min-h-[58px] rounded-lg border border-outline-variant/30 bg-surface flex flex-col justify-between">
+<span class="font-bold text-on-surface">25</span>
+<div class="flex flex-col gap-0.5">
+<span class="bg-surface-container-highest text-primary text-[10px] px-1 rounded truncate">计划 15</span>
+</div>
+</div>
+<!-- Sat 26 -->
+<div class="p-1 min-h-[58px] rounded-lg border border-outline-variant/30 bg-surface flex flex-col justify-between">
+<span class="font-bold text-tertiary">26</span>
+<div class="flex flex-col gap-0.5">
+<span class="bg-tertiary-fixed text-tertiary text-[10px] px-1 rounded truncate">值班 4</span>
+</div>
+</div>
+<!-- Sun 27 -->
+<div class="p-1 min-h-[58px] rounded-lg border border-outline-variant/30 bg-surface flex flex-col justify-between">
+<span class="font-bold text-tertiary">27</span>
+<div class="flex flex-col gap-0.5">
+<span class="text-outline text-[10px] px-1 rounded">休息</span>
+</div>
+</div>
+</div>
+<!-- Today's Schedule Breakdown Section -->
+<div class="mt-2 bg-surface-container-low rounded-lg p-2.5 border border-outline-variant/40 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="timer">timer</span>
+                今日 (10-24) 随访任务负荷
+              </span>
+<span class="text-[11px] font-bold text-primary px-1.5 py-0.2 bg-primary-fixed rounded">负荷度：满额</span>
+</div>
+<div class="grid grid-cols-3 gap-1.5 text-center">
+<div class="bg-surface-container-lowest p-1.5 rounded border border-outline-variant/30">
+<div class="text-xs text-outline">📞 电话回访</div>
+<div class="text-sm font-bold text-primary">8 <span class="text-[10px] font-normal">例</span></div>
+</div>
+<div class="bg-surface-container-lowest p-1.5 rounded border border-outline-variant/30">
+<div class="text-xs text-outline">🏥 门诊复核</div>
+<div class="text-sm font-bold text-secondary">3 <span class="text-[10px] font-normal">例</span></div>
+</div>
+<div class="bg-surface-container-lowest p-1.5 rounded border border-outline-variant/30">
+<div class="text-xs text-outline">🏡 居家视频</div>
+<div class="text-sm font-bold text-tertiary">1 <span class="text-[10px] font-normal">例</span></div>
+</div>
+</div>
+<!-- Priority Notice Banner -->
+<div class="bg-error-container/40 p-2 rounded border border-error/20 flex items-start gap-2 text-xs">
+<span class="material-symbols-outlined text-error text-base shrink-0" data-icon="priority_high">priority_high</span>
+<div>
+<span class="font-bold text-error">重点注意：</span>
+<span class="text-on-surface">上午已发生1例失联（陈建安），请注意下午重点跟进高危跌倒患者张建国。</span>
+</div>
+</div>
+</div>
+</div>
+<!-- ================= RIGHT: Follow-up Patient Registry Table (8 Columns) ================= -->
+<div class="xl:col-span-8 bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm flex flex-col justify-between">
+<div>
+<!-- Tabs Segmented Filter -->
+<div class="px-space-md pt-space-sm border-b border-outline-variant/40 flex items-center justify-between flex-wrap gap-2">
+<div class="flex items-center gap-1 overflow-x-auto">
+<button class="px-3 py-2 text-sm font-semibold border-b-2 border-transparent text-outline hover:text-on-surface flex items-center gap-1.5">
+<span>全部</span>
+<span class="px-1.5 py-0.5 rounded-full text-xs bg-surface-container-high">168</span>
+</button>
+<button class="px-3 py-2 text-sm font-bold border-b-2 border-primary text-primary flex items-center gap-1.5">
+<span>待电话回访</span>
+<span class="px-1.5 py-0.5 rounded-full text-xs bg-primary-fixed text-primary">18</span>
+</button>
+<button class="px-3 py-2 text-sm font-semibold border-b-2 border-transparent text-outline hover:text-on-surface flex items-center gap-1.5">
+<span>已完成评定</span>
+<span class="px-1.5 py-0.5 rounded-full text-xs bg-surface-container-high">142</span>
+</button>
+<button class="px-3 py-2 text-sm font-semibold border-b-2 border-transparent text-outline hover:text-on-surface flex items-center gap-1.5">
+<span>失访/超期未访</span>
+<span class="px-1.5 py-0.5 rounded-full text-xs bg-error-container text-on-error-container">8</span>
+</button>
+<button class="px-3 py-2 text-sm font-semibold border-b-2 border-transparent text-outline hover:text-on-surface flex items-center gap-1.5">
+<span>本周新增排期</span>
+<span class="px-1.5 py-0.5 rounded-full text-xs bg-surface-container-high">24</span>
+</button>
+</div>
+<!-- Quick Search Input inside Registry -->
+<div class="relative py-1.5">
+<span class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-outline">
+<span class="material-symbols-outlined text-base" data-icon="search">search</span>
+</span>
+<input class="pl-8 pr-3 py-1 rounded-md border border-outline-variant text-xs bg-surface-container-low w-36 focus:w-48 transition-all" placeholder="搜姓名/PID..." type="text"/>
+</div>
+</div>
+<!-- Advanced Filter Bar -->
+<div class="p-space-sm bg-surface-container-low/50 border-b border-outline-variant/30 flex flex-wrap items-center gap-2 text-xs">
+<span class="font-bold text-outline">多维筛选项：</span>
+<select class="py-1 px-2.5 rounded border border-outline-variant bg-surface-container-lowest text-xs text-on-surface">
+<option>H-Y分期: 全部</option>
+<option>H-Y 1.0 - 1.5期 (早期单侧)</option>
+<option selected="">H-Y 2.0 - 2.5期 (轻中度双侧)</option>
+<option>H-Y 3.0期 (姿势不稳中度)</option>
+<option>H-Y 4.0 - 5.0期 (重度卧床依赖)</option>
+</select>
+<select class="py-1 px-2.5 rounded border border-outline-variant bg-surface-container-lowest text-xs text-on-surface">
+<option>跌倒风险: 全部</option>
+<option>高风险 (BBS &lt; 40)</option>
+<option>中度风险</option>
+<option>低风险</option>
+</select>
+<select class="py-1 px-2.5 rounded border border-outline-variant bg-surface-container-lowest text-xs text-on-surface">
+<option>责任医生: 全部</option>
+<option selected="">李副主任医师 (我负责的)</option>
+<option>陈康复师</option>
+<option>赵神经治疗师</option>
+</select>
+<select class="py-1 px-2.5 rounded border border-outline-variant bg-surface-container-lowest text-xs text-on-surface">
+<option>时间范围: 本周内</option>
+<option>今日 (10-24)</option>
+<option>未来7天</option>
+<option>本月全期</option>
+</select>
+<button class="ml-auto px-2 py-1 text-primary hover:underline font-semibold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-xs" data-icon="refresh">refresh</span>
+                重置筛选
+              </button>
+</div>
+<!-- Registry Data Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse text-xs">
+<thead>
+<tr class="bg-surface-container-high/40 border-b border-outline-variant/40 text-outline uppercase font-semibold">
+<th class="p-3 w-10 text-center">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+</th>
+<th class="p-3">患者信息</th>
+<th class="p-3">随访形式</th>
+<th class="p-3">计划时段</th>
+<th class="p-3 min-w-[200px]">最近一次恢复/评定简况</th>
+<th class="p-3">随访状态</th>
+<th class="p-3">责任人</th>
+<th class="p-3 text-right">操作</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30">
+<!-- Patient Row 1 (待电话回访 - 张建国) -->
+<tr class="hover:bg-surface-container-low transition-colors bg-primary-fixed/10">
+<td class="p-3 text-center">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+</td>
+<td class="p-3">
+<div class="flex items-center gap-2">
+<div>
+<div class="font-bold text-sm text-on-surface flex items-center gap-1">
+<span>张建国</span>
+<span class="text-xs font-normal text-outline">68岁 男</span>
+</div>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="text-[11px] text-outline">PID: 20240012</span>
+<span class="px-1.5 py-0.2 rounded text-[10px] bg-primary-fixed text-primary font-bold">H-Y 2.0期</span>
+</div>
+</div>
+</div>
+</td>
+<td class="p-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary-fixed text-tertiary font-bold text-[11px]">
+<span class="material-symbols-outlined text-xs" data-icon="phone_callback">phone_callback</span>
+                        电话回访
+                      </span>
+</td>
+<td class="p-3">
+<div class="font-bold text-on-surface">今日 14:30</div>
+<span class="text-tertiary font-semibold text-[10px]">[待执行]</span>
+</td>
+<td class="p-3 text-outline">
+<p class="line-clamp-2 text-on-surface-variant">开期维持稳定，无新发冻步；左侧僵硬评分略降，自述上午服药后起动延迟好转。</p>
+</td>
+<td class="p-3">
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-tertiary-fixed-dim/60 text-tertiary-container font-bold text-[11px]">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                        待电话回访
+                      </span>
+</td>
+<td class="p-3">
+<div class="font-semibold text-on-surface">李副主任医师</div>
+<div class="text-[10px] text-outline">神经内科</div>
+</td>
+<td class="p-3 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2 py-1 rounded bg-primary text-white font-bold hover:bg-primary-container text-xs transition-colors" onclick="document.getElementById('newFollowupModal').classList.remove('hidden')">
+                          填写随访记录
+                        </button>
+<button class="p-1 rounded text-outline hover:text-on-surface" title="更多操作">
+<span class="material-symbols-outlined text-base" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Patient Row 2 (已完成评定 - 刘淑珍) -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="p-3 text-center">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+</td>
+<td class="p-3">
+<div>
+<div class="font-bold text-sm text-on-surface flex items-center gap-1">
+<span>刘淑珍</span>
+<span class="text-xs font-normal text-outline">72岁 女</span>
+</div>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="text-[11px] text-outline">PID: 20240089</span>
+<span class="px-1.5 py-0.2 rounded text-[10px] bg-secondary-container text-on-secondary-container font-bold">H-Y 2.5期</span>
+</div>
+</div>
+</td>
+<td class="p-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container text-secondary font-bold text-[11px]">
+<span class="material-symbols-outlined text-xs" data-icon="domain">domain</span>
+                        门诊复核
+                      </span>
+</td>
+<td class="p-3">
+<div class="font-semibold text-on-surface">2024-10-24 10:00</div>
+<span class="text-secondary font-semibold text-[10px]">[已完成]</span>
+</td>
+<td class="p-3 text-outline">
+<p class="line-clamp-2 text-on-surface-variant">步态拖拽好转，遵医嘱居家训练达成率90%，RAS节律引导下步频提升至68BPM。</p>
+</td>
+<td class="p-3">
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-secondary-container text-secondary font-bold text-[11px]">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                        已完成评定
+                      </span>
+</td>
+<td class="p-3">
+<div class="font-semibold text-on-surface">陈康复师</div>
+<div class="text-[10px] text-outline">物理治疗PT</div>
+</td>
+<td class="p-3 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2 py-1 rounded border border-outline-variant text-on-surface hover:bg-surface-container-high font-semibold text-xs">
+                          查看台账
+                        </button>
+<button class="p-1 rounded text-outline hover:text-on-surface" title="更多操作">
+<span class="material-symbols-outlined text-base" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Patient Row 3 (失访/未应答 - 陈建安) -->
+<tr class="hover:bg-surface-container-low transition-colors bg-error-container/10">
+<td class="p-3 text-center">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+</td>
+<td class="p-3">
+<div>
+<div class="font-bold text-sm text-on-surface flex items-center gap-1">
+<span>陈建安</span>
+<span class="text-xs font-normal text-outline">81岁 男</span>
+</div>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="text-[11px] text-outline">PID: 20240105</span>
+<span class="px-1.5 py-0.2 rounded text-[10px] bg-error-container text-on-error-container font-bold">H-Y 4.0期</span>
+</div>
+</div>
+</td>
+<td class="p-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-error-container text-error font-bold text-[11px]">
+<span class="material-symbols-outlined text-xs" data-icon="perm_phone_msg">perm_phone_msg</span>
+                        电话回访
+                      </span>
+</td>
+<td class="p-3">
+<div class="font-semibold text-error">今日 09:30</div>
+<span class="text-error font-semibold text-[10px]">[超期未应答]</span>
+</td>
+<td class="p-3 text-outline">
+<p class="line-clamp-2 text-error font-medium">连续3次电话未接通，家属座机占线；高危跌倒体征，已触发社工联合紧急协查。</p>
+</td>
+<td class="p-3">
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-error-container text-on-error-container font-bold text-[11px]">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                        失访/未应答
+                      </span>
+</td>
+<td class="p-3">
+<div class="font-semibold text-on-surface">李副主任医师</div>
+<div class="text-[10px] text-outline">神经内科</div>
+</td>
+<td class="p-3 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2 py-1 rounded bg-error text-white font-bold hover:bg-on-error-container text-xs transition-colors">
+                          紧急联系家属
+                        </button>
+<button class="p-1 rounded text-outline hover:text-on-surface" title="更多操作">
+<span class="material-symbols-outlined text-base" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Patient Row 4 (已改期 - 王秀兰) -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="p-3 text-center">
+<input class="rounded border-outline-variant text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+</td>
+<td class="p-3">
+<div>
+<div class="font-bold text-sm text-on-surface flex items-center gap-1">
+<span>王秀兰</span>
+<span class="text-xs font-normal text-outline">65岁 女</span>
+</div>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="text-[11px] text-outline">PID: 20240144</span>
+<span class="px-1.5 py-0.2 rounded text-[10px] bg-surface-container-high text-on-surface-variant font-bold">H-Y 1.5期</span>
+</div>
+</div>
+</td>
+<td class="p-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-bold text-[11px]">
+<span class="material-symbols-outlined text-xs" data-icon="videocam">videocam</span>
+                        远程视频
+                      </span>
+</td>
+<td class="p-3">
+<div class="font-semibold text-outline">原定 10-24 16:00</div>
+<span class="text-outline font-semibold text-[10px]">[调整至 10-26]</span>
+</td>
+<td class="p-3 text-outline">
+<p class="line-clamp-2 text-on-surface-variant">患者因外出复诊调整随访；远程平板运动日志同步正常，近两日无异动预警。</p>
+</td>
+<td class="p-3">
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-bold text-[11px]">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+                        已改期
+                      </span>
+</td>
+<td class="p-3">
+<div class="font-semibold text-on-surface">陈康复师</div>
+<div class="text-[10px] text-outline">物理治疗PT</div>
+</td>
+<td class="p-3 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2 py-1 rounded border border-outline-variant text-on-surface hover:bg-surface-container-high font-semibold text-xs">
+                          调整排期
+                        </button>
+<button class="p-1 rounded text-outline hover:text-on-surface" title="更多操作">
+<span class="material-symbols-outlined text-base" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Bottom Batch Bar & Standard Pagination Footer -->
+<div class="p-space-sm bg-surface-container-low border-t border-outline-variant/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+<!-- Left Batch Action Floating Controls -->
+<div class="flex items-center gap-2">
+<span class="font-bold text-primary flex items-center gap-1 bg-primary-fixed px-2 py-1 rounded">
+<span class="material-symbols-outlined text-xs" data-icon="check_box">check_box</span>
+                已选中 3 项
+              </span>
+<button class="px-2.5 py-1 rounded border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container-high font-semibold">
+                批量转派责任人
+              </button>
+<button class="px-2.5 py-1 rounded border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container-high font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="file_download">file_download</span>
+                批量导出选中记录
+              </button>
+</div>
+<!-- Standard Pagination Controls -->
+<div class="flex items-center gap-2 text-outline">
+<span>共 <strong class="text-on-surface">168</strong> 条记录</span>
+<select class="py-0.5 px-2 rounded border border-outline-variant bg-surface-container-lowest text-xs text-on-surface">
+<option>10 条/页</option>
+<option>20 条/页</option>
+<option>50 条/页</option>
+</select>
+<div class="flex items-center gap-1">
+<button class="p-1 rounded border border-outline-variant bg-surface-container-lowest disabled:opacity-50">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="px-2.5 py-1 rounded font-bold bg-primary text-white">1</button>
+<button class="px-2.5 py-1 rounded hover:bg-surface-container-high text-on-surface">2</button>
+<button class="px-2.5 py-1 rounded hover:bg-surface-container-high text-on-surface">3</button>
+<span>...</span>
+<button class="px-2.5 py-1 rounded hover:bg-surface-container-high text-on-surface">17</button>
+<button class="p-1 rounded border border-outline-variant bg-surface-container-lowest hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- ================= MODAL: 新建患者康复随访记录与计划安排 (New Follow-up Modal) ================= -->
+<!-- Note: Pre-rendered overlay modal ready for interaction -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/50 backdrop-blur-xs p-4" id="newFollowupModal">
+<div class="bg-surface-container-lowest w-full max-w-3xl rounded-2xl border-2 border-outline-variant/60 shadow-2xl overflow-hidden flex flex-col max-h-[921px] animate-in fade-in zoom-in-95 duration-150">
+<!-- Modal Header -->
+<div class="px-space-lg py-4 bg-primary text-on-primary flex items-center justify-between flex-shrink-0">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-2xl" data-icon="post_add">post_add</span>
+<div>
+<h3 class="font-headline-sm text-lg font-bold text-white">新建患者康复随访记录与计划安排</h3>
+<p class="text-xs text-on-primary-container">华东神经康复中心 · 临床运动障碍评估随访表单</p>
+</div>
+</div>
+<button class="p-1 rounded-lg text-white hover:bg-primary-container transition-colors" onclick="document.getElementById('newFollowupModal').classList.add('hidden')">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<!-- Modal Body (Form Fields) -->
+<div class="p-space-lg overflow-y-auto space-y-4 text-xs">
+<!-- Patient Association Info Pill -->
+<div class="p-3 rounded-xl bg-surface-container-low border border-outline-variant/50 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container text-white flex items-center justify-center font-bold text-sm">
+              张
+            </div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-bold text-sm text-on-surface">张建国</span>
+<span class="text-outline">男 / 68岁</span>
+<span class="px-2 py-0.5 rounded bg-primary-fixed text-primary font-bold text-[10px]">H-Y 2.0期 (轻中度)</span>
+</div>
+<div class="text-outline mt-0.5">住院PID: 20240012 · 诊断：原发性帕金森病 (PD) · 跌倒中危</div>
+</div>
+</div>
+<button class="px-2.5 py-1 rounded border border-outline-variant text-primary hover:bg-surface-container-high font-semibold">
+            更换患者
+          </button>
+</div>
+<!-- Follow-up Modality Selector (Segmented Radio) -->
+<div>
+<label class="block font-bold text-on-surface mb-1.5 text-xs">随访形式 <span class="text-error">*</span></label>
+<div class="grid grid-cols-4 gap-2">
+<label class="flex items-center justify-center gap-1.5 p-2 rounded-lg border-2 border-primary bg-primary-fixed/20 text-primary font-bold cursor-pointer">
+<input checked="" class="hidden" name="modal_type" type="radio"/>
+<span class="material-symbols-outlined text-base" data-icon="phone_in_talk">phone_in_talk</span>
+<span>电话随访 📞</span>
+</label>
+<label class="flex items-center justify-center gap-1.5 p-2 rounded-lg border border-outline-variant text-on-surface hover:bg-surface-container-high font-medium cursor-pointer">
+<input class="hidden" name="modal_type" type="radio"/>
+<span class="material-symbols-outlined text-base" data-icon="domain">domain</span>
+<span>门诊复核 🏥</span>
+</label>
+<label class="flex items-center justify-center gap-1.5 p-2 rounded-lg border border-outline-variant text-on-surface hover:bg-surface-container-high font-medium cursor-pointer">
+<input class="hidden" name="modal_type" type="radio"/>
+<span class="material-symbols-outlined text-base" data-icon="videocam">videocam</span>
+<span>远程视频 📱</span>
+</label>
+<label class="flex items-center justify-center gap-1.5 p-2 rounded-lg border border-outline-variant text-on-surface hover:bg-surface-container-high font-medium cursor-pointer">
+<input class="hidden" name="modal_type" type="radio"/>
+<span class="material-symbols-outlined text-base" data-icon="home">home</span>
+<span>上门家访 🚗</span>
+</label>
+</div>
+</div>
+<!-- Follow-up Time & Physician Executer -->
+<div class="grid grid-cols-2 gap-3">
+<div>
+<label class="block font-semibold text-on-surface mb-1 text-xs">执行随访时间</label>
+<input class="w-full py-1.5 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-xs" type="datetime-local" value="2024-10-24T14:30"/>
+</div>
+<div>
+<label class="block font-semibold text-on-surface mb-1 text-xs">随访责任人</label>
+<input class="w-full py-1.5 px-3 rounded-lg border border-outline-variant bg-surface-container-low text-xs text-outline cursor-not-allowed" readonly="" type="text" value="李副主任医师 (神内)"/>
+</div>
+</div>
+<!-- Clinical Recovery Description Textarea -->
+<div>
+<div class="flex items-center justify-between mb-1">
+<label class="font-bold text-on-surface text-xs">患者恢复情况综合评估与记录 <span class="text-error">*</span></label>
+<span class="text-outline text-[11px]">支持结构化快捷词条</span>
+</div>
+<textarea class="w-full p-2.5 rounded-lg border border-outline-variant text-xs text-on-surface leading-relaxed focus:ring-2 focus:ring-primary focus:outline-none" placeholder="输入患者肢体震颤、开期状态、肌张力变化、跌倒发生等描述..." rows="3">肢体震颤控制良好，晨起开期服药后起步顺畅；无头晕及跌倒事件，主诉双腿肌力较上月有提升。RAS节律依从性高，每日可坚持居家平板节律步态训练20分钟。</textarea>
+</div>
+<!-- Clinical Scale Quick Check Section -->
+<div class="p-3 rounded-lg bg-surface-container-low/70 border border-outline-variant/40 space-y-2">
+<div class="font-bold text-on-surface text-xs">临床量表快速简评</div>
+<div class="grid grid-cols-2 gap-3">
+<div>
+<span class="text-outline block mb-1">UPDRS-III 运动功能简评评分：</span>
+<div class="flex items-center gap-2">
+<input class="w-full accent-primary" max="108" min="0" type="range" value="24"/>
+<span class="font-bold text-primary w-8 text-right">24 分</span>
+</div>
+</div>
+<div>
+<span class="text-outline block mb-1">跌倒风险评级：</span>
+<div class="flex items-center gap-3">
+<label class="flex items-center gap-1 cursor-pointer">
+<input class="text-secondary focus:ring-secondary" name="fall_risk" type="radio"/>
+<span>低危</span>
+</label>
+<label class="flex items-center gap-1 cursor-pointer font-bold text-tertiary">
+<input checked="" class="text-tertiary focus:ring-tertiary" name="fall_risk" type="radio"/>
+<span>中危</span>
+</label>
+<label class="flex items-center gap-1 cursor-pointer text-error">
+<input class="text-error focus:ring-error" name="fall_risk" type="radio"/>
+<span>高危</span>
+</label>
+</div>
+</div>
+</div>
+</div>
+<!-- Next Follow-up Planning & Notifications -->
+<div class="space-y-2 pt-1 border-t border-outline-variant/40">
+<label class="block font-bold text-on-surface text-xs">下次随访计划安排</label>
+<div class="flex items-center gap-2">
+<button class="px-2.5 py-1 rounded bg-surface-container-high hover:bg-primary hover:text-white font-medium" type="button">2周后 (11-07)</button>
+<button class="px-2.5 py-1 rounded bg-primary text-white font-bold" type="button">1个月后 (11-24)</button>
+<button class="px-2.5 py-1 rounded bg-surface-container-high hover:bg-primary hover:text-white font-medium" type="button">自定义日期</button>
+<input class="py-1 px-2 rounded border border-outline-variant text-xs ml-auto" type="date" value="2024-11-24"/>
+</div>
+<div class="flex items-center gap-2 mt-1">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary h-4 w-4" id="pushNotice" type="checkbox"/>
+<label class="text-on-surface font-semibold cursor-pointer" for="pushNotice">
+              自动向家属及患者端平板小程序推送本次评估报告及下次日程提醒
+            </label>
+</div>
+</div>
+</div>
+<!-- Modal Footer Action Bar -->
+<div class="px-space-lg py-3 bg-surface-container-low border-t border-outline-variant/50 flex items-center justify-between flex-shrink-0">
+<button class="px-4 py-2 rounded-lg border border-outline-variant text-on-surface hover:bg-surface-container-high font-semibold text-xs transition-colors" onclick="document.getElementById('newFollowupModal').classList.add('hidden')">
+          取消
+        </button>
+<div class="flex items-center gap-2">
+<button class="px-4 py-2 rounded-lg border border-primary text-primary hover:bg-primary-fixed/40 font-semibold text-xs transition-colors">
+            存为草稿
+          </button>
+<button class="px-5 py-2 rounded-lg bg-primary hover:bg-primary-container text-white font-bold text-xs shadow-sm transition-colors flex items-center gap-1" onclick="document.getElementById('newFollowupModal').classList.add('hidden')">
+<span class="material-symbols-outlined text-sm" data-icon="check">check</span>
+            确认并生成随访计划
+          </button>
+</div>
+</div>
+</div>
+</div>
+</body></html>

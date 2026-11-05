@@ -1,0 +1,223 @@
+{
+  "android_home": {
+    "title": "帕金森病肌肉保护训练系统 - 首页",
+    "screen_id": "d107f4407f7d465e9659573bbdc50909",
+    "deviceType": "MOBILE",
+    "html_file": "screen-android-home.html",
+    "png_file": "screen-android-home.png"
+  },
+  "android_exercises": {
+    "title": "帕金森康复 - 训练列表 (适老化大触控)",
+    "screen_id": "bfa2f4db1d7d48398a0df4b489bfc79c",
+    "deviceType": "MOBILE",
+    "html_file": "screen-android-exercises.html",
+    "png_file": "screen-android-exercises.png"
+  },
+  "web_patients": {
+    "title": "帕金森康复工作台 - 患者名册与分期管理",
+    "screen_id": "811cbaadb90048818b17e4f6ea6db80b",
+    "deviceType": "DESKTOP",
+    "html_file": "screen-web-patients.html",
+    "png_file": "screen-web-patients.png"
+  },
+  "android_training_portrait": {
+    "title": "帕金森康复 Android 训练执行页 (竖屏)",
+    "screen_id": "53cc050a731343f28349a15f720c0d57",
+    "deviceType": "MOBILE",
+    "html_file": "screen-android-training-portrait.html",
+    "png_file": "screen-android-training-portrait.png",
+    "html_resource": "projects/11862456065489782403/files/f001fc10833f4318adf7f19e8c240fc0",
+    "png_resource": "projects/11862456065489782403/files/cb6c8367780f4f668e6fe41efcb557f3",
+    "prompt": "帕金森康复 Android 训练执行页 (竖屏 D22 双播放): 上方教学视频示范区(约占35%高，紧凑16:9卡片，带示范循环与节拍)，下方患者实时摄像头捕获区(占约45%高，视口充足；左上角大字报实时动作计数与演示数据标注，右上角RAS节拍开关，底部柔和脚部入镜状态条放置在画面最下沿避免遮挡面部)；底部紧凑常驻控制底栏(高度合理，避免占满1/3屏幕；左侧暂停、中间完成本组，右侧醒目高对比度紧急停止按钮>=80dp高)；圆润Q版风格，遵循适老化与D20无病症敏感词规范。"
+  },
+  "android_training_landscape": {
+    "title": "帕金森康复 Android 训练执行页 (横屏平板)",
+    "screen_id": "8d7b916561f44e52b740deb84f547e91",
+    "deviceType": "DESKTOP",
+    "html_file": "screen-android-training-landscape.html",
+    "png_file": "screen-android-training-landscape.png",
+    "html_resource": "projects/11862456065489782403/files/f707ae2a2e464278b879bcc29aab0ae5",
+    "png_resource": "projects/11862456065489782403/files/b2b3da71fae145c0b9f681923047b77b",
+    "prompt": "帕金森康复 Android 训练执行页 (横屏平板模式 D22 双播放): 左半屏为标准示范教学视频与动作要领详解卡片；右半屏为患者实时摄像头捕获区，带等宽实时计数大字报、64BPM RAS节拍波形与足部状态条；底部通栏常驻安全操作条(暂停、完成本组、右侧红色大字号紧急停止按钮)；大字体>=18sp，Q版圆润友善风格，适老化高对比度。"
+  },
+  "android_records": {
+    "title": "帕金森康复 Android 训练记录页",
+    "screen_id": "1177b5a9cf27480c98439b6fbadedd5b",
+    "deviceType": "MOBILE",
+    "html_file": "screen-android-records.html",
+    "png_file": "screen-android-records.png",
+    "html_resource": "projects/11862456065489782403/files/b27acd88dae14fdab6d10ee0dcaabd6a",
+    "png_resource": "projects/11862456065489782403/files/7a92e1b5185643b2b826f56e83de810c",
+    "prompt": "帕金森康复 Android 训练记录页 (Records): 顶部鼓励文案与卡通徽章(连续打卡天数、坚持成就鼓励)，本周训练依从度日历图表(打卡圆点清晰、无障碍大字体)，历史训练条目卡片流(踏步训练、躯干牵伸、完成组数与时长、动作质量星星)，遵循D20禁用词(不含H-Y分级或跌倒字样)，正文>=18sp，圆角大卡片。"
+  },
+  "android_alerts": {
+    "title": "帕金森康复 Android 预警通知页",
+    "screen_id": "1bad347980fe4498b8e5b6765e0ea720",
+    "deviceType": "MOBILE",
+    "html_file": "screen-android-alerts.html",
+    "png_file": "screen-android-alerts.png",
+    "html_resource": null,
+    "png_resource": "projects/11862456065489782403/files/a1fb171d9d294472990150f7e4be12c4",
+    "prompt": "帕金森康复 Android 预警与关怀提醒页 (Alerts): 患者端友好关怀通知，避免惊吓式红色报警；橙色温馨卡片提醒休息、水分补充、站立稳定性提示、联系家属按钮(>=80dp高触控大按钮)；符合D20规范(绝对不含跌倒风险、H-Y分级、疾病恶化等字眼)，Q版温暖插画吉祥物指引。"
+  },
+  "android_patients": {
+    "title": "帕金森康复 Android 患者档案与个人中心",
+    "screen_id": "48c35c46b22d4e63a1674e3b44eaf9c1",
+    "deviceType": "MOBILE",
+    "html_file": "screen-android-patients.html",
+    "png_file": "screen-android-patients.png",
+    "html_resource": "projects/11862456065489782403/files/48e736390ce24dbc93a77d5ac4e0dbf6",
+    "png_resource": "projects/11862456065489782403/files/ae75f1922f5043e7a81bc3323e77d0b1",
+    "prompt": "帕金森康复 Android 个人中心与健康档案 (Patients Profile): 大头像与亲切昵称、紧急联系家属电话一键拨打大卡片、康复阶段卡片(表述为阶段2·稳定提升期，遵循D20无H-Y分级)、大按钮设置中心(字体字号调节、听觉节拍音量、无障碍模式)，大触控区。"
+  },
+  "android_settings": {
+    "title": "帕金森康复 Android 系统设置页",
+    "screen_id": "bda36872e8d245a8b104872dcb08a32a",
+    "deviceType": "MOBILE",
+    "html_file": "screen-android-settings.html",
+    "png_file": "screen-android-settings.png",
+    "html_resource": "projects/11862456065489782403/files/e6f4e790d2804e879350e8c032bdf393",
+    "png_resource": "projects/11862456065489782403/files/5704047fccc141788447429d5c956a65",
+    "prompt": "帕金森康复 Android 设置中心 (Settings): 超大字号选项(标准/超大)、骨传导耳机配对开关、节拍声音提示音效选择(木鱼声/柔和鼓点)、高对比度模式开关、关于本系统与离线演示模式标注；操作开关触控区>=80dp，圆润大药丸按钮。"
+  },
+  "mp_home": {
+    "title": "微信小程序 - 康复首页",
+    "screen_id": "a0c295f0724148d08fa8ad27ecc9da28",
+    "deviceType": "MOBILE",
+    "html_file": "screen-mp-home.html",
+    "png_file": "screen-mp-home.png",
+    "html_resource": null,
+    "png_resource": "projects/11862456065489782403/files/d8ae3098967d4da8b98075a96f5c982a",
+    "prompt": "微信小程序 帕金森康复打卡首页: Q版温暖小鹿吉祥物插画与问候语'今天感觉怎么样？'，今日任务大卡片('原地踏步训练' 立即开始大按钮>=80dp)、连续打卡天数激励徽章、家属关联快捷卡片；微信原生小程序底部Tab栏(首页、训练、记录、我的)，完全遵循D20与适老化。"
+  },
+  "mp_profile": {
+    "title": "微信小程序 - 档案页",
+    "screen_id": "d8951048230248be8a365faf9bd1edab",
+    "deviceType": "MOBILE",
+    "html_file": "screen-mp-profile.html",
+    "png_file": "screen-mp-profile.png",
+    "html_resource": "projects/11862456065489782403/files/4730b2cad59844338b981892d8c30eef",
+    "png_resource": "projects/11862456065489782403/files/7578e205aa8643dd9d6d0171ed123ecd",
+    "prompt": "微信小程序 患者个人档案与家属绑定页: 就诊卡号、当前康复阶段(适合温和运动)、照护家属微信快捷绑定与紧急呼叫电话、适老化字号切换开关；清爽卡片圆角16px，柔和色调。"
+  },
+  "mp_alerts": {
+    "title": "微信小程序 - 关怀提醒与预警页",
+    "screen_id": "ab9690d0760c4cdeb5e8b70d7e8df30b",
+    "deviceType": "MOBILE",
+    "html_file": "screen-mp-alerts.html",
+    "png_file": "screen-mp-alerts.png",
+    "html_resource": "projects/11862456065489782403/files/5fb9a8172d6c42e7baeab4f3cc035434",
+    "png_resource": "projects/11862456065489782403/files/1e72fef4be5940d9a0001e940cf8eafa",
+    "prompt": "微信小程序 关怀提醒与安全通知页: 柔和温暖卡片流：'今日训练已达成，注意喝水与坐位放松'、'动作偏快提示'、一键联系家庭医生/康复师大按钮；严禁违禁词(无跌倒/恶化/H-Y)。"
+  },
+  "mp_assessment": {
+    "title": "微信小程序 - 症状自评问卷页",
+    "screen_id": "279b1c3b14854713affb37e3db33e1de",
+    "deviceType": "MOBILE",
+    "html_file": "screen-mp-assessment.html",
+    "png_file": "screen-mp-assessment.png",
+    "html_resource": "projects/11862456065489782403/files/f8e17f12499b420fbda609cf3496be1e",
+    "png_resource": "projects/11862456065489782403/files/de28268521864171a5d9e806d4481ef5",
+    "prompt": "微信小程序 每日晨间状态自评页: 以通俗生活语言询问('今天早晨起身是否轻便？'、'手部握筷是否顺畅？')，单选大药丸按钮('很轻松'、'稍有费力'、'需要协助')，触控区极易点击，提交问卷大按钮。"
+  },
+  "mp_training": {
+    "title": "微信小程序 - 动作指导与跟练页",
+    "screen_id": "7b074108b0514a3cb1099c5eba3c594f",
+    "deviceType": "MOBILE",
+    "html_file": "screen-mp-training.html",
+    "png_file": "screen-mp-training.png",
+    "html_resource": "projects/11862456065489782403/files/e86b663e2c0a4c9c894abd9b828b8dd7",
+    "png_resource": "projects/11862456065489782403/files/0d746f9eab5d4d0dbe474199c4612925",
+    "prompt": "微信小程序 动作示范与节拍跟练页面: 顶部视频示范动画、中间节拍跳动指示球(64 BPM)、大字号倒计时与组数计数、底部'暂停/继续'与'结束训练'大圆角按钮，Q版动作分解指导步骤卡片。"
+  },
+  "web_login": {
+    "title": "管理端 - 医护人员登录页",
+    "screen_id": "d6c2061705a3488a867391f89d218282",
+    "deviceType": "DESKTOP",
+    "html_file": "screen-web-login.html",
+    "png_file": "screen-web-login.png",
+    "html_resource": "projects/11862456065489782403/files/3b05a684a2ca42ed823766577fd6529c",
+    "png_resource": "projects/11862456065489782403/files/726e36cf3dfa4c548b357fe9bd10ebcd",
+    "prompt": "PC Web 管理端 康复工作站登录界面: 专业医疗深蓝风格，左侧为系统介绍与康复数据监控大屏插画，右侧为医护工号/账号密码登录表单、机构选择下拉框、安全验证码与登录按钮。"
+  },
+  "web_patient_detail": {
+    "title": "管理端 - 患者详情与病历档案",
+    "screen_id": "5b3149a8369c4c279cbff621d0b08a34",
+    "deviceType": "DESKTOP",
+    "html_file": "screen-web-patient-detail.html",
+    "png_file": "screen-web-patient-detail.png",
+    "html_resource": "projects/11862456065489782403/files/d6ef497123744fec86d1307235d37f9a",
+    "png_resource": "projects/11862456065489782403/files/2940595cf72a45d882595713762043e3",
+    "prompt": "PC Web 管理端 患者康复全景详情页: 顶部面包屑与患者基本信息卡片(姓名、年龄、病程、H-Y分级2期、跌倒风险评估分值)；左侧步态雷达图与肌肉维持曲线图表；右侧近期处方执行列表与步态冻结(FoG)发作频次记录；右上角'调整处方'与'分期复核'操作按钮。"
+  },
+  "web_staging": {
+    "title": "管理端 - H-Y 临床分期确认",
+    "screen_id": "d33b21a981f34bf89262db6c3985d778",
+    "deviceType": "DESKTOP",
+    "html_file": "screen-web-staging.html",
+    "png_file": "screen-web-staging.png",
+    "html_resource": "projects/11862456065489782403/files/4877132870344fc4afc263c7b5fbf685",
+    "png_resource": "projects/11862456065489782403/files/1fb1b08d147e4893b0646e570d3e4500",
+    "prompt": "PC Web 管理端 临床分期复核确认工作台: 当前AI初步推断分期与医生专家复核对比面板；五级 Hoehn & Yahr 标准量表选择器(1-5期分级卡片，包含临床表征勾选)、医生临床意见输入框、确认分期生效主按钮、历史分期变更轨迹表格。"
+  },
+  "web_prescription": {
+    "title": "管理端 - 康复处方编辑工作台",
+    "screen_id": "958c95899e7e41ebb9c62ec90a6fb3b4",
+    "deviceType": "DESKTOP",
+    "html_file": "screen-web-prescription.html",
+    "png_file": "screen-web-prescription.png",
+    "html_resource": "projects/11862456065489782403/files/d0f4b6d823404ae292bff55b16f93463",
+    "png_resource": "projects/11862456065489782403/files/a407e3d8db5d445a8199b78e9189d758",
+    "prompt": "PC Web 管理端 康复运动处方编排与编辑页面: 左右分栏布局：左侧动作库(牵伸放松、肌力维持、节律步态RAS、姿势矫正)，右侧当前患者处方列表(可拖拽排序，调节每组次数、节拍BPM频次、每周训练天数、注意事项)，保存并下发患者端按钮。"
+  },
+  "web_alerts": {
+    "title": "管理端 - 临床预警中心台账",
+    "screen_id": "39ff490a019c46a7afbf3dd9b13fe07a",
+    "deviceType": "DESKTOP",
+    "html_file": "screen-web-alerts.html",
+    "png_file": "screen-web-alerts.png",
+    "html_resource": "projects/11862456065489782403/files/4cae6ff1876843ba98537f553fdece98",
+    "png_resource": "projects/11862456065489782403/files/8f8bfd0a994e4a6999094221e2e8c6ad",
+    "prompt": "PC Web 管理端 临床异常与跌倒风险预警台账: 预警级别过滤筛选器(紧急红标、高危橙标、日常黄标)、患者异常事件表格(患者姓名、预警类型：训练心率偏高/姿势失稳/跌倒可疑、触发时间、处理状态)、右侧事件处理抽屉(电话跟进、医生研判、关闭工单)。"
+  },
+  "web_followup": {
+    "title": "管理端 - 随访台账与依从度跟踪",
+    "screen_id": "7ab957e931eb400896ad9b6014cbeed0",
+    "deviceType": "DESKTOP",
+    "html_file": "screen-web-followup.html",
+    "png_file": "screen-web-followup.png",
+    "html_resource": "projects/11862456065489782403/files/e725941057b34b14a434bf017e07dfc7",
+    "png_resource": "projects/11862456065489782403/files/a38e646bdf7b4f928c5d925d083fb079",
+    "prompt": "PC Web 管理端 康复随访台账与计划中心: 随访日历看板、患者随访状态表格(待电话回访、已完成评定、失访)、新增随访记录模态框(随访形式、患者恢复情况描述、下次随访日期安排)、批量导出Excel按钮。"
+  },
+  "web_permissions": {
+    "title": "管理端 - 角色与医护权限管理",
+    "screen_id": "a374e86ab70c4cb38b0e39d4823c1de0",
+    "deviceType": "DESKTOP",
+    "html_file": "screen-web-permissions.html",
+    "png_file": "screen-web-permissions.png",
+    "html_resource": "projects/11862456065489782403/files/4f58061aaccc437ea2020d21e3b212be",
+    "png_resource": "projects/11862456065489782403/files/6263b51d587b4e959d20131579ae09ea",
+    "prompt": "PC Web 管理端 医护角色与权限配置: 角色树形结构(超级管理员、科室主任、康复治疗师、护士)、功能权限矩阵表格(分期确认权限、处方开具权限、预警处置权限、患者数据脱敏导出权限勾选)、医护人员账号列表与'添加医护人员'按钮。"
+  },
+  "mp_records": {
+    "title": "微信小程序 - 训练记录页",
+    "screen_id": "33bd6fede15e41369ef17f5387abfa1e",
+    "deviceType": "MOBILE",
+    "html_file": "screen-mp-records.html",
+    "png_file": "screen-mp-records.png",
+    "html_resource": "projects/11862456065489782403/files/876017c8e8bb47b7be2d3a973596daca",
+    "png_resource": "projects/11862456065489782403/files/10af8968350d456ca271fee4402878af",
+    "prompt": "微信小程序 历史打卡与训练记录: 月度打卡日历圆盘、动作完成组数统计、动作规范度星级评分卡片流、家属一键点赞鼓励互动卡片；大字号>=18sp，无障碍高对比度。"
+  },
+  "android_training_camera_only": {
+    "title": "帕金森康复 Android 训练执行页 (纯拍摄+语音模式)",
+    "screen_id": "f5bc2b4c7ce6447b9cefe4f2d21b0775",
+    "deviceType": "MOBILE",
+    "html_file": "screen-android-training-camera-only.html",
+    "png_file": "screen-android-training-camera-only.png",
+    "html_resource": "projects/11862456065489782403/files/02cfe87cbcac4a4fa854c866b836b96e",
+    "png_resource": "projects/11862456065489782403/files/9ba8a7c9ee6a4e3cb56423e9d5dda998",
+    "prompt": "帕金森康复 Android 训练执行页 (模式2: 纯实景拍摄+动作语音提示): 顶部包含大触控模式切换胶囊栏(已选中'📷 纯拍摄+语音'，可切换至'🎬 同屏示范')；紧凑动作语音指导卡片(深色卡片带🔊小图标，播报'保持挺胸直视前方，大腿抬高至水平，落地轻柔跟随 64 BPM 节奏【AI语音教练·演示数据】')；实景摄像头捕获区占满剩余视口(左上角实时动作计数等宽大字报 5/12 次【演示数据】，右上角 64 BPM RAS 节拍开关，下边缘带柔和足部入镜安全提示)；底部常驻安全控制栏(暂停、完成本组、右侧高对比度红色'🛑 紧急停止'大按钮>=80dp高，绝对常驻可见不被裁切)；适老化高对比度，Q版圆润友善风格，严格遵循D20无病症敏感词规范。"
+  }
+}

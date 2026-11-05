@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>活力动作训练 - D22双视窗界面</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Font: Atkinson Hyperlegible Next -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400..700;1,400..700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Theme Configuration -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary": "#ffffff",
+            "secondary-container": "#99efe5",
+            "primary-fixed-dim": "#aec6ff",
+            "on-error-container": "#93000a",
+            "secondary-fixed": "#9cf2e8",
+            "outline-variant": "#c3c6d3",
+            "on-tertiary-container": "#ffb39a",
+            "inverse-primary": "#aec6ff",
+            "tertiary-fixed-dim": "#ffb59d",
+            "surface-container-high": "#dce9ff",
+            "primary-fixed": "#d8e2ff",
+            "primary": "#00387e",
+            "on-surface": "#0d1c2e",
+            "surface-dim": "#ccdbf3",
+            "on-tertiary-fixed": "#390c00",
+            "on-secondary-fixed": "#00201d",
+            "on-secondary-container": "#006f67",
+            "surface-variant": "#d5e3fc",
+            "on-secondary-fixed-variant": "#00504a",
+            "inverse-on-surface": "#eaf1ff",
+            "surface-container-highest": "#d5e3fc",
+            "surface": "#f8f9ff",
+            "tertiary-container": "#962d00",
+            "outline": "#737783",
+            "on-surface-variant": "#434751",
+            "tertiary-fixed": "#ffdbd0",
+            "surface-container": "#e6eeff",
+            "inverse-surface": "#233144",
+            "error": "#ba1a1a",
+            "error-container": "#ffdad6",
+            "on-secondary": "#ffffff",
+            "surface-container-lowest": "#ffffff",
+            "on-background": "#0d1c2e",
+            "surface-tint": "#2c5cae",
+            "surface-container-low": "#eff4ff",
+            "on-primary": "#ffffff",
+            "on-primary-container": "#abc5ff",
+            "on-primary-fixed": "#001a42",
+            "background": "#f8f9ff",
+            "on-tertiary-fixed-variant": "#832600",
+            "tertiary": "#6f1f00",
+            "secondary": "#006a63",
+            "on-primary-fixed-variant": "#024394",
+            "on-error": "#ffffff",
+            "surface-bright": "#f8f9ff",
+            "primary-container": "#1a4fa0",
+            "secondary-fixed-dim": "#80d5cb"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-lg": "1.75rem",
+            "margin-tablet": "2rem",
+            "space-xs": "0.5rem",
+            "margin": "1.25rem",
+            "gutter": "1rem",
+            "space-sm": "0.75rem",
+            "space-md": "1.25rem",
+            "margin-desktop": "3rem",
+            "gutter-tablet": "1.5rem",
+            "space-xl": "2.5rem"
+          },
+          "fontFamily": {
+            "headline-md": ["Atkinson Hyperlegible Next"],
+            "body-md": ["Atkinson Hyperlegible Next"],
+            "label-lg": ["Atkinson Hyperlegible Next"],
+            "headline-xl": ["Atkinson Hyperlegible Next"],
+            "headline-lg": ["Atkinson Hyperlegible Next"],
+            "label-xl": ["Atkinson Hyperlegible Next"],
+            "label-md": ["Atkinson Hyperlegible Next"],
+            "headline-sm": ["Atkinson Hyperlegible Next"],
+            "body-xl": ["Atkinson Hyperlegible Next"],
+            "headline-xl-mobile": ["Atkinson Hyperlegible Next"],
+            "body-lg": ["Atkinson Hyperlegible Next"]
+          },
+          "fontSize": {
+            "headline-md": ["24px", { "lineHeight": "34px", "fontWeight": "700" }],
+            "body-md": ["16px", { "lineHeight": "26px", "fontWeight": "500" }],
+            "label-lg": ["16px", { "lineHeight": "22px", "fontWeight": "700" }],
+            "headline-xl": ["36px", { "lineHeight": "48px", "fontWeight": "700" }],
+            "headline-lg": ["28px", { "lineHeight": "38px", "fontWeight": "700" }],
+            "label-xl": ["18px", { "lineHeight": "24px", "fontWeight": "700" }],
+            "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "headline-sm": ["20px", { "lineHeight": "30px", "fontWeight": "600" }],
+            "body-xl": ["20px", { "lineHeight": "32px", "fontWeight": "400" }],
+            "headline-xl-mobile": ["30px", { "lineHeight": "40px", "fontWeight": "700" }],
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 600, 'GRAD' 0, 'opsz' 28;
+    }
+    .material-symbols-outlined-fill {
+      font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 28;
+    }
+    @keyframes pulse-wave {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.18); opacity: 0.4; }
+    }
+    .pulse-rhythm {
+      animation: pulse-wave 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes bar-dance {
+      0%, 100% { height: 6px; }
+      50% { height: 18px; }
+    }
+    .sound-bar-1 { animation: bar-dance 0.7s ease-in-out infinite; }
+    .sound-bar-2 { animation: bar-dance 0.5s ease-in-out infinite 0.2s; }
+    .sound-bar-3 { animation: bar-dance 0.6s ease-in-out infinite 0.4s; }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface h-full flex flex-col font-body-md select-none overflow-hidden antialiased">
+<!-- ==================== 1. 顶部紧凑状态栏与导航条 ==================== -->
+<header class="w-full bg-surface-container-lowest z-40 px-margin pt-3 pb-2 shadow-sm border-b border-outline-variant flex items-center justify-between flex-shrink-0">
+<!-- 左侧：返回大靶点 + 节次胶囊 -->
+<div class="flex items-center gap-space-sm">
+<button aria-label="返回上一页" class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary active:bg-surface-variant active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[28px]">arrow_back</span>
+</button>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="inline-block w-2.5 h-2.5 rounded-full bg-secondary"></span>
+<span class="font-label-md text-label-md text-secondary uppercase tracking-wide">训练中 · 第 2/4 节</span>
+</div>
+<h1 class="font-headline-sm text-headline-sm text-primary tracking-tight">坐位律动舒展</h1>
+</div>
+</div>
+<!-- 右侧：RAS节律指示器与广播语音切换 -->
+<div class="flex items-center gap-2">
+<!-- RAS 60 BPM 节拍微胶囊 -->
+<div class="bg-secondary-container text-on-secondary-container px-3 py-1.5 rounded-full flex items-center gap-2 border border-secondary">
+<span class="relative flex h-3 w-3">
+<span class="pulse-rhythm absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-secondary"></span>
+</span>
+<span class="font-label-lg text-label-lg text-on-secondary-container">RAS 60 拍</span>
+</div>
+<!-- 适老化广播音量大按钮 -->
+<button aria-label="语音播报开关" class="w-12 h-12 rounded-xl bg-surface-container-low border border-outline-variant flex items-center justify-center text-primary active:bg-surface-variant active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[28px]">volume_up</span>
+</button>
+</div>
+</header>
+<!-- 主体工作区：上下双视窗结构 (单轴防误触网格) -->
+<main class="flex-1 flex flex-col px-margin py-2 gap-2 overflow-hidden">
+<!-- ==================== 2. 上方示范视频教学区 (紧凑 16:9 圆角卡片，约 35%) ==================== -->
+<section class="relative w-full rounded-2xl overflow-hidden bg-surface-container border-[1.5px] border-outline-variant shadow-sm flex-shrink-0 max-h-[318px] flex flex-col justify-center">
+<!-- 示范背景画面模拟 -->
+<img class="absolute inset-0 w-full h-full object-cover brightness-[0.96]" data-alt="A warm, bright clinical rehabilitation studio setting with soft indirect daylight. A friendly senior occupational movement coach in comfortable navy blue and teal athletic attire demonstrates a sitting rhythmic chest expansion exercise. Gentle glowing skeletal alignment arcs show expansive posture. The atmosphere is encouraging, clean, and dignified with calm tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVPPXaLrDeu6RSOkhVZPwQTB3A510kAp7LmoAZCX7knZT830fPHwVitr0yC_xdl2od23ksZXT0IsgILATWMQoWguDn8IIAxfuwBJSjuzKkdLUWJ8CX6tjWVqYGSuvlc_kUiRwlCMMUe8hv8T5sglMM-au05rpul46Id0DcBoWsS804LMB2tRMO8splNIVaNhqpTqb-DR6ThRWyo2gL26RMZoW4w_8OpCHSDaRnn7DZ_9p1IeUVoQc3dWf4WClY7nhyA6lz0gdlRTOq"/>
+<!-- 柔和遮罩增强文字与骨骼可视度 -->
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-primary/40 pointer-events-none"></div>
+<!-- 示范骨骼投影示意线条 (SVG仿真) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" preserveaspectratio="none" viewbox="0 0 400 220">
+<circle cx="200" cy="55" fill="none" opacity="0.9" r="16" stroke="#99efe5" stroke-width="3"></circle>
+<line stroke="#99efe5" stroke-linecap="round" stroke-width="4" x1="200" x2="200" y1="71" y2="125"></line>
+<!-- 躯干到双臂延展 -->
+<line stroke="#9cf2e8" stroke-linecap="round" stroke-width="4" x1="200" x2="140" y1="85" y2="95"></line>
+<line stroke="#9cf2e8" stroke-linecap="round" stroke-width="4" x1="140" x2="90" y1="95" y2="115"></line>
+<line stroke="#9cf2e8" stroke-linecap="round" stroke-width="4" x1="200" x2="260" y1="85" y2="95"></line>
+<line stroke="#9cf2e8" stroke-linecap="round" stroke-width="4" x1="260" x2="310" y1="95" y2="115"></line>
+<!-- 关节点柔和圆环 -->
+<circle cx="90" cy="115" fill="#006a63" r="6" stroke="#ffffff" stroke-width="2"></circle>
+<circle cx="310" cy="115" fill="#006a63" r="6" stroke="#ffffff" stroke-width="2"></circle>
+<circle cx="200" cy="85" fill="#006a63" r="5" stroke="#ffffff" stroke-width="2"></circle>
+</svg>
+<!-- 教学浮层标签：左上慢动作引导 -->
+<div class="absolute top-2.5 left-2.5 flex items-center gap-2 bg-inverse-surface/85 backdrop-blur-sm text-inverse-on-surface px-3 py-1 rounded-full border border-outline-variant">
+<span class="material-symbols-outlined text-secondary-fixed text-[20px]">smart_display</span>
+<span class="font-label-md text-label-md text-white font-bold tracking-wide">标准示范 · 跟随律动</span>
+</div>
+<!-- 右上角功能微调：镜面翻转 & 慢速说明 -->
+<div class="absolute top-2.5 right-2.5 flex items-center gap-2">
+<button class="bg-surface-container-lowest/90 hover:bg-surface-container-lowest text-primary px-3 py-1.5 rounded-xl border border-outline-variant flex items-center gap-1.5 shadow-sm active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]">flip</span>
+<span class="font-label-md text-label-md">镜面</span>
+</button>
+</div>
+<!-- 底部节奏动作指令横幅 -->
+<div class="absolute bottom-2 inset-x-2 bg-surface-container-lowest/95 backdrop-blur-md rounded-xl p-2 px-3 border border-outline-variant flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-2">
+<span class="w-8 h-8 rounded-lg bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold">
+<span class="material-symbols-outlined text-[22px]">directions_run</span>
+</span>
+<p class="font-label-xl text-label-xl text-primary font-bold tracking-tight">吸气展开双臂 · 呼气自然回正</p>
+</div>
+<div class="text-right flex items-center gap-1 bg-surface-variant/80 px-2.5 py-1 rounded-lg">
+<span class="font-label-md text-label-md text-on-surface-variant">节拍：</span>
+<span class="font-label-lg text-label-lg text-primary font-extrabold">1 - 2 - 3 - 4</span>
+</div>
+</div>
+</section>
+<!-- ==================== 3. 下方实时摄像头视觉捕捉区 (开阔视口，约 45%) ==================== -->
+<section class="relative flex-1 w-full rounded-2xl overflow-hidden bg-on-background border-2 border-primary shadow-md flex flex-col justify-between">
+<!-- 实时摄像头图像模拟 -->
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="A front-facing viewpoint capturing an active, cheerful senior exercising in a safe living room with soft natural lighting and zero clutter. AI augmented neon mint green skeletal tracking lines are projected over arms and shoulders with glowing circular nodes at wrists and elbows, indicating accurate symmetrical body posture. High contrast, clear, and reassuring." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTNTXtmctebgQoO7Pedm_LqZjUkueHPDjnT4eps7SotfxHjD7WLceCfuI7P-XlCOJMpT89auKLET4gew-Eml7VcygN5y9cDsWzuGiUZJ5cE9k-9OGfrWuNg4gtupBNjWvzp19HVZalpwth6v3jFS4sRLFx_pxx2KbBmhXt7GL8ekQGCSFWCeugF6ThvakHSg9Wva7P2Qz2VCeDNRGzUEjfjN4w6xjc4N8Rh1RTIsidVtwMcBSkIHvWKhBLBPhm4KsEVM67oPN7MAq9"/>
+<!-- AI骨骼追踪图层与动态关节点绿色光环高亮 -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" preserveaspectratio="none" viewbox="0 0 400 320">
+<!-- 躯干核心与肩颈骨骼线 -->
+<line stroke="#006f67" stroke-dasharray="1 1" stroke-linecap="round" stroke-width="5" x1="200" x2="200" y1="60" y2="170"></line>
+<line stroke="#006f67" stroke-linecap="round" stroke-width="5" x1="140" x2="260" y1="100" y2="100"></line>
+<!-- 左臂动态线与目标达标弧度 -->
+<line stroke="#99efe5" stroke-linecap="round" stroke-width="6" x1="140" x2="70" y1="100" y2="120"></line>
+<line stroke="#99efe5" stroke-linecap="round" stroke-width="6" x1="70" x2="30" y1="120" y2="150"></line>
+<!-- 右臂动态线与目标达标弧度 -->
+<line stroke="#99efe5" stroke-linecap="round" stroke-width="6" x1="260" x2="330" y1="100" y2="120"></line>
+<line stroke="#99efe5" stroke-linecap="round" stroke-width="6" x1="330" x2="370" y1="120" y2="150"></line>
+<!-- 关节点高亮脉冲光环 (绿色达标提示) -->
+<circle cx="70" cy="120" fill="#9cf2e8" fill-opacity="0.5" r="10"></circle>
+<circle cx="70" cy="120" fill="#006a63" r="5" stroke="#ffffff" stroke-width="2"></circle>
+<circle cx="330" cy="120" fill="#9cf2e8" fill-opacity="0.5" r="10"></circle>
+<circle cx="330" cy="120" fill="#006a63" r="5" stroke="#ffffff" stroke-width="2"></circle>
+<circle cx="200" cy="60" fill="#006a63" r="6" stroke="#ffffff" stroke-width="2"></circle>
+</svg>
+<!-- 顶部浮层：左侧特大字报实时数据窗 + 右侧快速辅助工具 -->
+<div class="relative z-10 w-full p-2.5 flex items-start justify-between">
+<!-- 左上角大字报实时数据悬浮窗 (极高对比度适老化设计) -->
+<div class="bg-surface-container-lowest/95 backdrop-blur-md rounded-2xl p-3 border-2 border-primary shadow-lg max-w-[210px]">
+<!-- 实时次数 -->
+<div class="flex items-baseline gap-1.5 border-b border-outline-variant pb-1.5 mb-1.5">
+<span class="font-label-md text-label-md text-on-surface-variant font-bold">已完成</span>
+<span class="font-headline-xl text-headline-xl text-primary font-black tracking-tight leading-none">8</span>
+<span class="font-headline-sm text-headline-sm text-outline font-bold">/ 12 次</span>
+</div>
+<!-- 达标度状态 -->
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined-fill text-secondary text-[22px]">check_circle</span>
+<div>
+<div class="flex items-baseline gap-1">
+<span class="font-headline-sm text-headline-sm text-secondary font-extrabold leading-none">96%</span>
+<span class="font-label-md text-label-md text-secondary font-bold">极佳幅度</span>
+</div>
+<p class="font-label-md text-label-md text-on-surface-variant mt-0.5">关节开合 ROM 85°</p>
+</div>
+</div>
+</div>
+<!-- 右上角悬浮控制按钮列 (大触控靶点) -->
+<div class="flex flex-col gap-2">
+<!-- RAS 节拍波形律动开关 -->
+<button class="bg-surface-container-lowest/95 backdrop-blur-md text-primary px-3 py-2 rounded-xl border border-primary shadow-sm flex items-center gap-2 active:scale-95 transition-all" type="button">
+<div class="flex items-end gap-0.5 h-5 w-4 justify-center">
+<span class="w-1 bg-secondary rounded-full sound-bar-1"></span>
+<span class="w-1 bg-secondary rounded-full sound-bar-2"></span>
+<span class="w-1 bg-secondary rounded-full sound-bar-3"></span>
+</div>
+<span class="font-label-md text-label-md font-bold">律动音开启</span>
+</button>
+<!-- 骨骼显隐切换按钮 -->
+<button class="bg-surface-container-lowest/95 backdrop-blur-md text-on-surface px-3 py-2 rounded-xl border border-outline-variant shadow-sm flex items-center gap-1.5 active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[22px] text-primary">accessibility_new</span>
+<span class="font-label-md text-label-md font-bold">姿态标线</span>
+</button>
+</div>
+</div>
+<!-- 画面最下沿柔和安全状态条 (置于画面底边，杜绝遮挡面部) -->
+<div class="relative z-10 w-full px-2.5 pb-2">
+<div class="bg-surface-container-lowest/90 backdrop-blur-md py-2 px-3 rounded-xl border border-outline-variant flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-2">
+<span class="inline-block w-3.5 h-3.5 rounded-full bg-secondary ring-4 ring-secondary-container"></span>
+<span class="font-label-lg text-label-lg text-on-surface font-bold">全身姿态捕捉完整 · 空间适宜 (2.1 米)</span>
+</div>
+<span class="font-label-md text-label-md text-secondary bg-secondary-container px-2 py-0.5 rounded-md font-bold">安全站位</span>
+</div>
+</div>
+</section>
+</main>
+<!-- ==================== 4. 底部紧凑常驻控制底栏 (占比约 18-20%，杜绝侵占屏幕) ==================== -->
+<footer class="w-full bg-surface-container-lowest border-t-2 border-outline-variant px-margin py-3 shadow-lg flex items-center justify-between gap-3 flex-shrink-0">
+<!-- 左侧：大圆角次级按钮 (暂停/休息片刻，倒计时建议) -->
+<button class="flex-1 min-h-[64px] bg-surface-container-low hover:bg-surface-container border-2 border-outline-variant text-primary rounded-2xl flex flex-col items-center justify-center p-2 active:scale-95 transition-all" type="button">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[24px]">pause_circle</span>
+<span class="font-label-xl text-label-xl font-bold">稍事休息</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant font-medium">建议放松 30秒</span>
+</button>
+<!-- 中间：饱满的圆角主按钮 (完成本组，进入下一节) -->
+<button class="flex-[1.4] min-h-[64px] bg-primary hover:bg-primary-container text-on-primary rounded-2xl flex items-center justify-center gap-2 p-2 shadow-md active:bg-primary-container active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[28px]">arrow_forward</span>
+<span class="font-headline-sm text-headline-sm text-on-primary font-bold">完成本组</span>
+</button>
+<!-- 右侧：特大防跌/防突发红色紧急安全按钮 (高度 80dp，大字体大图标，防误触边框) -->
+<button aria-label="紧急停止或立即呼叫" class="min-h-[80px] px-3.5 bg-error hover:bg-tertiary-container text-on-error rounded-2xl border-4 border-error-container shadow-lg flex flex-col items-center justify-center active:scale-95 transition-all flex-shrink-0" type="button">
+<span class="material-symbols-outlined-fill text-[30px] text-white">emergency</span>
+<span class="font-label-lg text-label-lg font-black text-white leading-tight">紧急求助</span>
+<span class="font-label-md text-label-md text-error-container leading-none scale-90">呼叫家属</span>
+</button>
+</footer>
+<!-- 轻量交互与可访问性防抖脚本 -->
+<script>
+    // 律动节拍器简单交互响应（供前端视效演练）
+    let isPlaying = true;
+    document.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('touchstart', () => {}, {passive: true});
+    });
+  </script>
+</body></html>

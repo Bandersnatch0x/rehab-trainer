@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>华东神经康复中心 - 帕金森专病数字化临床管理系统</title>
+<!-- Google Fonts: Atkinson Hyperlegible Next -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "background": "#f8f9ff",
+            "tertiary": "#6f1f00",
+            "primary-fixed-dim": "#aec6ff",
+            "on-surface-variant": "#434751",
+            "outline": "#737783",
+            "on-secondary-fixed": "#00201d",
+            "surface-container-highest": "#d5e3fc",
+            "surface-variant": "#d5e3fc",
+            "on-tertiary-container": "#ffb39a",
+            "on-primary-container": "#abc5ff",
+            "on-background": "#0d1c2e",
+            "outline-variant": "#c3c6d3",
+            "on-surface": "#0d1c2e",
+            "error": "#ba1a1a",
+            "surface-container-low": "#eff4ff",
+            "surface-container-lowest": "#ffffff",
+            "on-tertiary-fixed-variant": "#832600",
+            "secondary-container": "#99efe5",
+            "secondary": "#006a63",
+            "error-container": "#ffdad6",
+            "tertiary-container": "#962d00",
+            "surface-dim": "#ccdbf3",
+            "secondary-fixed": "#9cf2e8",
+            "on-error": "#ffffff",
+            "surface-bright": "#f8f9ff",
+            "on-secondary-container": "#006f67",
+            "on-primary-fixed": "#001a42",
+            "on-secondary-fixed-variant": "#00504a",
+            "surface": "#f8f9ff",
+            "on-primary-fixed-variant": "#024394",
+            "surface-tint": "#2c5cae",
+            "secondary-fixed-dim": "#80d5cb",
+            "on-error-container": "#93000a",
+            "tertiary-fixed-dim": "#ffb59d",
+            "inverse-surface": "#233144",
+            "inverse-on-surface": "#eaf1ff",
+            "surface-container": "#e6eeff",
+            "on-secondary": "#ffffff",
+            "primary": "#00387e",
+            "tertiary-fixed": "#ffdbd0",
+            "primary-container": "#1a4fa0",
+            "surface-container-high": "#dce9ff",
+            "on-tertiary-fixed": "#390c00",
+            "on-tertiary": "#ffffff",
+            "inverse-primary": "#aec6ff",
+            "primary-fixed": "#d8e2ff",
+            "on-primary": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xs": "0.5rem",
+            "margin-tablet": "2rem",
+            "gutter": "1rem",
+            "margin-desktop": "3rem",
+            "space-lg": "1.75rem",
+            "gutter-tablet": "1.5rem",
+            "space-xl": "2.5rem",
+            "space-md": "1.25rem",
+            "space-sm": "0.75rem",
+            "margin": "1.25rem"
+          },
+          "fontFamily": {
+            "headline-xl-mobile": ["Atkinson Hyperlegible Next"],
+            "headline-lg": ["Atkinson Hyperlegible Next"],
+            "label-xl": ["Atkinson Hyperlegible Next"],
+            "label-md": ["Atkinson Hyperlegible Next"],
+            "headline-md": ["Atkinson Hyperlegible Next"],
+            "body-lg": ["Atkinson Hyperlegible Next"],
+            "headline-sm": ["Atkinson Hyperlegible Next"],
+            "headline-xl": ["Atkinson Hyperlegible Next"],
+            "body-md": ["Atkinson Hyperlegible Next"],
+            "label-lg": ["Atkinson Hyperlegible Next"],
+            "body-xl": ["Atkinson Hyperlegible Next"]
+          },
+          "fontSize": {
+            "headline-xl-mobile": ["30px", { "lineHeight": "40px", "fontWeight": "700" }],
+            "headline-lg": ["28px", { "lineHeight": "38px", "fontWeight": "700" }],
+            "label-xl": ["18px", { "lineHeight": "24px", "fontWeight": "700" }],
+            "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "headline-md": ["24px", { "lineHeight": "34px", "fontWeight": "700" }],
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "headline-sm": ["20px", { "lineHeight": "30px", "fontWeight": "600" }],
+            "headline-xl": ["36px", { "lineHeight": "48px", "fontWeight": "700" }],
+            "body-md": ["16px", { "lineHeight": "26px", "fontWeight": "500" }],
+            "label-lg": ["16px", { "lineHeight": "22px", "fontWeight": "700" }],
+            "body-xl": ["20px", { "lineHeight": "32px", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+      display: inline-block;
+    }
+    @keyframes pulseRing {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.05); opacity: 0.4; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .pulse-glow {
+      animation: pulseRing 3.5s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface h-full flex flex-col font-body-md text-body-md antialiased overflow-x-hidden selection:bg-primary selection:text-on-primary">
+<!-- Top Security Diagnostic Bar -->
+<header class="bg-surface-container-lowest border-b border-outline-variant px-margin-tablet py-2 text-xs flex justify-between items-center z-20">
+<div class="flex items-center gap-4">
+<span class="inline-flex items-center gap-1.5 text-primary font-semibold">
+<span class="material-symbols-outlined text-sm text-secondary" data-icon="shield">shield</span>
+        国家网络安全三级等保环境认证 (SM4 加密 · TLS 1.3 专线链路)
+      </span>
+<span class="text-outline-variant">|</span>
+<span class="text-on-surface-variant flex items-center gap-1">
+<span class="inline-block w-2 h-2 rounded-full bg-secondary animate-ping"></span>
+        徐汇总院节点：在线正常 · 延迟 8ms
+      </span>
+</div>
+<div class="flex items-center gap-6 text-on-surface-variant font-medium">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm" data-icon="terminal">terminal</span> 节点: SH-XH-REHAB-01</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm" data-icon="contact_support">contact_support</span> 运维热线: 400-880-9921</span>
+</div>
+</header>
+<!-- Main Container (2-Column Desktop Grid) -->
+<main class="flex-1 flex flex-col lg:flex-row w-full max-w-[1580px] mx-auto p-4 sm:p-6 lg:p-10 gap-8 lg:gap-12 items-center justify-center">
+<!-- LEFT COLUMN: System Showcase & Live Clinical Analytics -->
+<section class="w-full lg:w-7/12 flex flex-col justify-between h-full max-w-3xl space-y-6">
+<!-- Center Branding & System Identity -->
+<div>
+<div class="flex items-center gap-3 mb-4">
+<div class="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-on-primary text-2xl" data-icon="neurology">neurology</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-primary font-bold tracking-tight">华东神经康复中心</span>
+<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-container text-primary border border-outline-variant">专病平台 v4.8.2</span>
+</div>
+<p class="text-xs text-on-surface-variant font-medium tracking-wide">帕金森专病数字化临床管理系统 (RehabTrack v4.8 · D10隔离租户)</p>
+</div>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-primary font-bold tracking-tight leading-tight mb-3">
+          精准评估 · 智能节律诱导 · 全周期肌力保护
+        </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-6 leading-relaxed">
+          基于 UPDRS-III 运动量表数字化追踪与 Hoehn-Yahr 临床分期协议，结合听觉节律刺激 (RAS) 与步态冻结 (FoG) 实时智能拦截，为神经内科及康复医师提供循证闭环诊疗。
+        </p>
+</div>
+<!-- Live Clinical Monitoring Bento Grid Card (High Visual Quietude & Tactile Depth) -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 shadow-sm relative overflow-hidden">
+<!-- Top Status Sub-bar -->
+<div class="flex items-center justify-between border-b border-outline-variant pb-4 mb-5">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="monitor_heart">monitor_heart</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold">全科室实时康复监护大屏</span>
+<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-secondary-fixed text-on-secondary-fixed">实时数据流 (10Hz)</span>
+</div>
+<span class="text-xs text-on-surface-variant font-medium">更新频率: 实时</span>
+</div>
+<!-- Metric Trio -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+<!-- Metric 1 -->
+<div class="bg-surface-container-low rounded-lg p-4 border border-outline-variant">
+<div class="flex items-center justify-between text-on-surface-variant mb-1">
+<span class="text-xs font-medium">在管患者总数</span>
+<span class="material-symbols-outlined text-sm text-primary" data-icon="groups">groups</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="font-headline-md text-headline-md text-primary font-bold">142</span>
+<span class="text-xs font-bold text-on-surface-variant">例</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-1.5 flex items-center gap-1">
+<span class="text-secondary font-bold">今日已完成 98 人</span> (完成率 69%)
+            </p>
+</div>
+<!-- Metric 2 -->
+<div class="bg-surface-container-low rounded-lg p-4 border border-outline-variant">
+<div class="flex items-center justify-between text-on-surface-variant mb-1">
+<span class="text-xs font-medium">步态冻结 (FoG) 预警拦截</span>
+<span class="material-symbols-outlined text-sm text-secondary" data-icon="do_not_disturb_on">do_not_disturb_on</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="font-headline-md text-headline-md text-secondary font-bold">96.4%</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-1.5">
+              RAS 声光协同节律即时触发
+            </p>
+</div>
+<!-- Metric 3 -->
+<div class="bg-surface-container-low rounded-lg p-4 border border-outline-variant">
+<div class="flex items-center justify-between text-on-surface-variant mb-1">
+<span class="text-xs font-medium">开期黄金训练依从度</span>
+<span class="material-symbols-outlined text-sm text-primary" data-icon="task_alt">task_alt</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="font-headline-md text-headline-md text-primary font-bold">91.2%</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-1.5">
+              多巴胺受体有效窗口达标
+            </p>
+</div>
+</div>
+<!-- Visual Sensor Waveform Preview Card -->
+<div class="bg-surface rounded-lg p-4 border border-outline-variant relative">
+<div class="flex justify-between items-center mb-3">
+<div class="flex items-center gap-2">
+<span class="inline-block w-2.5 h-2.5 rounded-full bg-secondary"></span>
+<span class="text-xs font-bold text-on-surface">RAS 听觉节律同步刺激 &amp; 肌电 (EMG) 传导波形监测</span>
+</div>
+<div class="flex items-center gap-3 text-xs">
+<span class="flex items-center gap-1 text-on-surface-variant">
+<span class="inline-block w-3 h-0.5 bg-primary"></span> 目标步频 (108 BPM)
+              </span>
+<span class="flex items-center gap-1 text-on-surface-variant">
+<span class="inline-block w-3 h-0.5 bg-secondary"></span> 患者自主步态相位
+              </span>
+</div>
+</div>
+<!-- Synthetic Pulse Visualization (High Contrast Graphic) -->
+<div class="h-20 w-full flex items-end gap-1.5 pt-2 pb-1 px-1 bg-surface-container-low rounded border border-outline-variant">
+<div class="flex-1 bg-primary/20 h-8 rounded-sm"></div>
+<div class="flex-1 bg-primary/30 h-11 rounded-sm"></div>
+<div class="flex-1 bg-secondary h-16 rounded-sm"></div>
+<div class="flex-1 bg-primary/40 h-10 rounded-sm"></div>
+<div class="flex-1 bg-primary/30 h-7 rounded-sm"></div>
+<div class="flex-1 bg-primary/20 h-5 rounded-sm"></div>
+<div class="flex-1 bg-secondary h-14 rounded-sm"></div>
+<div class="flex-1 bg-primary/30 h-9 rounded-sm"></div>
+<div class="flex-1 bg-primary/40 h-12 rounded-sm"></div>
+<div class="flex-1 bg-secondary h-16 rounded-sm"></div>
+<div class="flex-1 bg-primary/20 h-8 rounded-sm"></div>
+<div class="flex-1 bg-secondary/80 h-15 rounded-sm"></div>
+<div class="flex-1 bg-primary/30 h-10 rounded-sm"></div>
+<div class="flex-1 bg-primary/20 h-6 rounded-sm"></div>
+<div class="flex-1 bg-secondary h-14 rounded-sm"></div>
+<div class="flex-1 bg-primary/40 h-11 rounded-sm"></div>
+<div class="flex-1 bg-primary/30 h-8 rounded-sm"></div>
+<div class="flex-1 bg-primary/20 h-7 rounded-sm"></div>
+<div class="flex-1 bg-secondary h-16 rounded-sm"></div>
+<div class="flex-1 bg-primary/30 h-10 rounded-sm"></div>
+</div>
+<!-- Bottom Micro Status -->
+<div class="mt-2.5 flex items-center justify-between text-xs text-on-surface-variant">
+<span>当前在训床位: 18 张 / 步态分析仪实时在线: 12 台</span>
+<span class="text-secondary font-semibold">自适应步频抑制算法: 运行中</span>
+</div>
+</div>
+</div>
+<!-- Trust Badges & Clinical Standards -->
+<div class="flex flex-wrap items-center gap-4 text-xs text-on-surface-variant pt-2 border-t border-outline-variant">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base text-secondary" data-icon="verified_user">verified_user</span>
+          国家网络安全等级保护三级
+        </span>
+<span class="text-outline-variant">·</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base text-primary" data-icon="assignment_turned_in">assignment_turned_in</span>
+          《帕金森病康复中国指南》推荐标准
+        </span>
+<span class="text-outline-variant">·</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base text-on-surface-variant" data-icon="lock">lock</span>
+          商用密码SM4全面合规
+        </span>
+</div>
+</section>
+<!-- RIGHT COLUMN: Medical Staff Login Card -->
+<section class="w-full lg:w-5/12 max-w-md">
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-lg p-6 sm:p-8">
+<!-- Portal Header -->
+<div class="text-center pb-5 mb-5 border-b border-outline-variant">
+<div class="inline-flex p-3 rounded-full bg-surface-container mb-2 text-primary">
+<span class="material-symbols-outlined text-3xl" data-icon="badge">badge</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-primary font-bold">医护工作站授权登录</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">请验证临床医师 / 康复治疗师合法权限</p>
+</div>
+<!-- Mode Switcher Tab -->
+<div class="flex p-1 bg-surface-container rounded-lg mb-6 border border-outline-variant">
+<button class="flex-1 py-2 text-xs font-bold rounded-md bg-surface-container-lowest text-primary shadow-sm transition-all text-center" id="tab-staff" type="button">
+            医护工号登录
+          </button>
+<button class="flex-1 py-2 text-xs font-semibold rounded-md text-on-surface-variant hover:text-primary transition-all text-center" id="tab-sms" type="button">
+            手机验证码
+          </button>
+<button class="flex-1 py-2 text-xs font-semibold rounded-md text-on-surface-variant hover:text-primary transition-all text-center" id="tab-ca" type="button">
+            CA 证书扫码
+          </button>
+</div>
+<!-- Form Elements -->
+<form class="space-y-4" onsubmit="event.preventDefault(); handleLogin();">
+<!-- Field 1: Medical Institution Selector -->
+<div>
+<label class="block text-xs font-bold text-on-surface mb-1.5 flex items-center justify-between">
+<span>所属医疗机构 / 康复中心院区</span>
+<span class="text-[11px] font-semibold text-secondary">认证院区</span>
+</label>
+<div class="relative">
+<span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-on-surface-variant">
+<span class="material-symbols-outlined text-lg" data-icon="domain">domain</span>
+</span>
+<select class="w-full pl-10 pr-8 py-3 text-sm rounded-lg bg-surface border border-outline-variant text-on-surface font-medium focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+<option selected="" value="xh">华东神经康复中心 (徐汇总院院区)</option>
+<option value="pd">华东神经康复中心 (浦东分中心)</option>
+<option value="hk">华东神经康复中心 (虹口门诊部)</option>
+<option value="remote">华东医联体远程康复指导中心 (D10隔离租户)</option>
+</select>
+<span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-outline">
+<span class="material-symbols-outlined text-base" data-icon="arrow_drop_down">arrow_drop_down</span>
+</span>
+</div>
+</div>
+<!-- Field 2: Staff ID / Account -->
+<div>
+<label class="block text-xs font-bold text-on-surface mb-1.5">
+              医护人员工号 / 专病账号
+            </label>
+<div class="relative">
+<span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-on-surface-variant">
+<span class="material-symbols-outlined text-lg" data-icon="person">person</span>
+</span>
+<input class="w-full pl-10 pr-3 py-3 text-sm rounded-lg bg-surface border border-outline-variant text-on-surface font-medium focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-outline-variant" placeholder="请输入医护工号 (如 DOC2024xxx) / 手机号" type="text" value="DOC-2024-819"/>
+</div>
+</div>
+<!-- Field 3: Password -->
+<div>
+<div class="flex justify-between items-center mb-1.5">
+<label class="text-xs font-bold text-on-surface">登录密码</label>
+<a class="text-xs text-primary hover:underline font-semibold" href="#">忘记密码?</a>
+</div>
+<div class="relative">
+<span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-on-surface-variant">
+<span class="material-symbols-outlined text-lg" data-icon="lock">lock</span>
+</span>
+<input class="w-full pl-10 pr-10 py-3 text-sm rounded-lg bg-surface border border-outline-variant text-on-surface font-medium focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-outline-variant" id="password-field" placeholder="请输入管理密码" type="password" value="RehabDoctor#2024"/>
+<button class="absolute inset-y-0 right-0 flex items-center pr-3 text-on-surface-variant hover:text-primary" onclick="togglePasswordVisibility()" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="visibility" id="eye-icon">visibility</span>
+</button>
+</div>
+</div>
+<!-- Field 4: Security Captcha -->
+<div>
+<label class="block text-xs font-bold text-on-surface mb-1.5">图形安全验证码 (防暴力破解)</label>
+<div class="flex gap-3">
+<div class="relative flex-1">
+<span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-on-surface-variant">
+<span class="material-symbols-outlined text-lg" data-icon="verified">verified</span>
+</span>
+<input class="w-full pl-10 pr-3 py-3 text-sm rounded-lg bg-surface border border-outline-variant text-on-surface font-medium focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-outline-variant" maxlength="4" placeholder="4位字符" type="text"/>
+</div>
+<!-- Synthetic Captcha Badge -->
+<div class="flex items-center gap-1.5 bg-surface-container px-3 py-1.5 rounded-lg border border-outline-variant select-none">
+<span class="font-mono text-lg font-extrabold tracking-widest text-primary italic select-none line-through">N8K2</span>
+<button class="text-on-surface-variant hover:text-primary p-1" title="更换验证码" type="button">
+<span class="material-symbols-outlined text-sm" data-icon="refresh">refresh</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Auxiliary Controls: Remember ID & Help -->
+<div class="flex items-center justify-between py-1">
+<label class="flex items-center gap-2 cursor-pointer select-none">
+<input checked="" class="w-4 h-4 rounded text-primary focus:ring-primary border-outline-variant" type="checkbox"/>
+<span class="text-xs text-on-surface font-semibold">记住工号与机构设置</span>
+</label>
+<span class="text-xs text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="support_agent">support_agent</span>
+<a class="hover:underline" href="#">联系科室管理员</a>
+</span>
+</div>
+<!-- Primary Submit CTA -->
+<div class="pt-2">
+<button class="w-full py-3.5 px-4 bg-primary hover:bg-primary-container text-on-primary rounded-lg font-label-xl text-label-xl shadow-md transition-all flex items-center justify-center gap-2 group" id="login-button" type="submit">
+<span id="btn-text">登 录 工 作 站</span>
+<span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<!-- Emergency Fast Track Link -->
+<div class="pt-3 border-t border-outline-variant text-center">
+<div class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-surface-container text-tertiary font-bold text-xs hover:bg-surface-container-high transition-colors cursor-pointer border border-tertiary-fixed">
+<span class="material-symbols-outlined text-sm text-tertiary" data-icon="crisis_alert">crisis_alert</span>
+<span>急诊抢救 / 突发异动症床旁快速应急通道</span>
+</div>
+</div>
+</form>
+<!-- Compliance & Traceability Notice inside login box -->
+<div class="mt-6 pt-3 text-center border-t border-outline-variant text-[11px] text-on-surface-variant leading-relaxed">
+<p>操作受临床日志全量审计追踪 (HIPAA / 国密标准)</p>
+<p class="font-mono text-outline mt-0.5">SESSION_NONCE: 8F2A-44C9-SM4-2024</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Global Footer -->
+<footer class="bg-surface-container-lowest border-t border-outline-variant py-3 px-margin-tablet text-xs text-on-surface-variant flex flex-col sm:flex-row justify-between items-center gap-2">
+<div>
+<span>© 2024 华东神经康复中心 (D10隔离租户) 康复医学数字化实验室</span>
+<span class="mx-2 text-outline-variant">|</span>
+<span>临床系统版本: RehabTrack v4.8.2-medR</span>
+</div>
+<div class="flex items-center gap-4">
+<a class="hover:text-primary transition-colors" href="#">临床帮助指南</a>
+<a class="hover:text-primary transition-colors" href="#">隐私与医疗数据合规政策</a>
+<a class="hover:text-primary transition-colors" href="#">数字证书下载</a>
+</div>
+</footer>
+<!-- Interactivity Script -->
+<script>
+    function togglePasswordVisibility() {
+      const field = document.getElementById('password-field');
+      const icon = document.getElementById('eye-icon');
+      if (field.type === 'password') {
+        field.type = 'text';
+        icon.textContent = 'visibility_off';
+      } else {
+        field.type = 'password';
+        icon.textContent = 'visibility';
+      }
+    }
+
+    function handleLogin() {
+      const btn = document.getElementById('login-button');
+      const btnText = document.getElementById('btn-text');
+      btnText.textContent = '系统安全认证中...';
+      btn.classList.add('opacity-90', 'cursor-wait');
+      
+      setTimeout(() => {
+        btnText.textContent = '验证成功，正在载入临床工作台...';
+        btn.classList.remove('bg-primary');
+        btn.classList.add('bg-secondary');
+        setTimeout(() => {
+          alert('【华东神经康复中心】身份验证成功！\n已为李副主任医师载入 UPDRS-III 评定及患者监测工作台。');
+          btnText.textContent = '登 录 工 作 站';
+          btn.classList.remove('bg-secondary', 'cursor-wait', 'opacity-90');
+          btn.classList.add('bg-primary');
+        }, 600);
+      }, 900);
+    }
+
+    // Tab switcher demo states
+    const tabs = ['tab-staff', 'tab-sms', 'tab-ca'];
+    tabs.forEach(id => {
+      document.getElementById(id).addEventListener('click', function() {
+        tabs.forEach(t => {
+          const el = document.getElementById(t);
+          el.className = 'flex-1 py-2 text-xs font-semibold rounded-md text-on-surface-variant hover:text-primary transition-all text-center';
+        });
+        this.className = 'flex-1 py-2 text-xs font-bold rounded-md bg-surface-container-lowest text-primary shadow-sm transition-all text-center';
+      });
+    });
+  </script>
+</body></html>

@@ -23,7 +23,7 @@
     <label for="feeling">今天活动起来感觉怎么样？</label>
     <textarea id="feeling" class="assessment__input" value="{{feeling}}" bindinput="onFeelingInput" maxlength="1000" disabled="{{submitting}}" placeholder="例如：散步很轻松，练习后休息了一会儿。" aria-label="今日身体感受" />
     <view class="hint">{{feeling.length}} / 1000 字。这里记录您的体验，不计算量表分数。</view>
-    <view wx:if="{{!feeling && !submittedAt}}" class="hint">今天的感受还未填写，写下后即可提交。</view>
+    <view wx:if="{{!feeling && !submittedAt}}" class="btn-disabled-hint">⚠️ 今天的感受还未填写，写下后即可点击提交。</view>
     <view wx:if="{{submitError}}" class="notice notice--danger" aria-role="alert">{{submitError}}</view>
     <view wx:if="{{submittedAt}}" class="notice" aria-role="status">已提交，记录时间 {{submittedAt}}。感谢您的分享。</view>
     <button class="btn btn--primary assessment__action" bindtap="submit" loading="{{submitting}}" disabled="{{submitting || !feeling}}">{{submitting ? '正在提交…' : '提交感受记录'}}</button>

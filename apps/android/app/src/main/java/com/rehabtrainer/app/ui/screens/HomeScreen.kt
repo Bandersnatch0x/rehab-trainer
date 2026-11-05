@@ -140,11 +140,11 @@ private fun HomeQuickActions(
             style = MaterialTheme.typography.headlineLarge
         )
         Text(
-            text = "在照护者监护下开始。感到头晕或肌肉酸痛请随时休息。",
+            text = "今日计划：第 1/4 节 · 建议在照护者监护下开始。感到头晕或肌肉酸痛请随时休息。",
             style = MaterialTheme.typography.bodyLarge
         )
         ElderlyButton(
-            text = "开始今日训练（第 1/4 节）",
+            text = "开始今日训练",
             onClick = onStartTraining,
             icon = Icons.Filled.PlayArrow,
             variant = ElderlyButtonVariant.Primary
@@ -187,17 +187,39 @@ private fun HomeTodayPrescription() {
                 shape = MaterialTheme.shapes.small,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceAround
+                Column(
+                    modifier = Modifier.padding(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = "64 BPM", style = MaterialTheme.typography.headlineMedium)
-                        Text(text = "听觉节拍", style = MaterialTheme.typography.bodyMedium)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "听觉节拍引导 【演示数据】",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            text = "64 BPM",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = "3 组 × 12 次", style = MaterialTheme.typography.headlineMedium)
-                        Text(text = "剂量设定", style = MaterialTheme.typography.bodyMedium)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "训练剂量设定 【演示数据】",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            text = "3 组 × 12 次",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
                 }
             }
@@ -220,11 +242,11 @@ private fun HomeSafetyGuide() {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "跌倒风险防护提醒",
+                text = "居家运动安全提醒",
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                text = "请穿防滑鞋，清理地面杂物，身旁备有稳固扶手座椅。",
+                text = "请穿防滑软底鞋，清理周围地面杂物，身旁备有稳固扶手座椅。",
                 style = MaterialTheme.typography.bodyMedium
             )
         }

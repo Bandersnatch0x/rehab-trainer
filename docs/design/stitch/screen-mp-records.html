@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>帕金森肌力康复 - 打卡与训练记录</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "secondary-container": "#99efe5",
+            "on-primary-fixed-variant": "#024394",
+            "on-error": "#ffffff",
+            "tertiary-container": "#962d00",
+            "error": "#ba1a1a",
+            "on-tertiary-container": "#ffb39a",
+            "error-container": "#ffdad6",
+            "primary-container": "#1a4fa0",
+            "inverse-on-surface": "#eaf1ff",
+            "on-background": "#0d1c2e",
+            "surface-container-high": "#dce9ff",
+            "primary-fixed": "#d8e2ff",
+            "tertiary-fixed": "#ffdbd0",
+            "surface-container-highest": "#d5e3fc",
+            "on-primary": "#ffffff",
+            "tertiary-fixed-dim": "#ffb59d",
+            "surface-container-lowest": "#ffffff",
+            "surface-tint": "#2c5cae",
+            "surface-bright": "#f8f9ff",
+            "on-secondary-container": "#006f67",
+            "inverse-primary": "#aec6ff",
+            "on-secondary-fixed": "#00201d",
+            "on-tertiary-fixed-variant": "#832600",
+            "on-primary-fixed": "#001a42",
+            "surface-dim": "#ccdbf3",
+            "on-primary-container": "#abc5ff",
+            "on-secondary-fixed-variant": "#00504a",
+            "inverse-surface": "#233144",
+            "background": "#f8f9ff",
+            "on-tertiary": "#ffffff",
+            "tertiary": "#6f1f00",
+            "surface-variant": "#d5e3fc",
+            "secondary-fixed": "#9cf2e8",
+            "surface-container-low": "#eff4ff",
+            "outline": "#737783",
+            "on-secondary": "#ffffff",
+            "secondary-fixed-dim": "#80d5cb",
+            "surface": "#f8f9ff",
+            "primary-fixed-dim": "#aec6ff",
+            "primary": "#00387e",
+            "on-error-container": "#93000a",
+            "on-surface": "#0d1c2e",
+            "secondary": "#006a63",
+            "on-tertiary-fixed": "#390c00",
+            "surface-container": "#e6eeff",
+            "on-surface-variant": "#434751",
+            "outline-variant": "#c3c6d3"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xl": "2.5rem",
+            "space-xs": "0.5rem",
+            "space-md": "1.25rem",
+            "gutter-tablet": "1.5rem",
+            "space-lg": "1.75rem",
+            "margin-tablet": "2rem",
+            "gutter": "1rem",
+            "space-sm": "0.75rem",
+            "margin-desktop": "3rem",
+            "margin": "1.25rem"
+          },
+          "fontFamily": {
+            "headline-md": ["Atkinson Hyperlegible Next", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+            "label-xl": ["Atkinson Hyperlegible Next", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+            "body-md": ["Atkinson Hyperlegible Next", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+            "headline-xl-mobile": ["Atkinson Hyperlegible Next", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+            "headline-sm": ["Atkinson Hyperlegible Next", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+            "headline-xl": ["Atkinson Hyperlegible Next", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+            "headline-lg": ["Atkinson Hyperlegible Next", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+            "body-xl": ["Atkinson Hyperlegible Next", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+            "body-lg": ["Atkinson Hyperlegible Next", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+            "label-md": ["Atkinson Hyperlegible Next", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+            "label-lg": ["Atkinson Hyperlegible Next", "PingFang SC", "Microsoft YaHei", "sans-serif"]
+          },
+          "fontSize": {
+            "headline-md": ["24px", { "lineHeight": "34px", "fontWeight": "700" }],
+            "label-xl": ["18px", { "lineHeight": "24px", "fontWeight": "700" }],
+            "body-md": ["16px", { "lineHeight": "26px", "fontWeight": "500" }],
+            "headline-xl-mobile": ["30px", { "lineHeight": "40px", "fontWeight": "700" }],
+            "headline-sm": ["20px", { "lineHeight": "30px", "fontWeight": "600" }],
+            "headline-xl": ["36px", { "lineHeight": "48px", "fontWeight": "700" }],
+            "headline-lg": ["28px", { "lineHeight": "38px", "fontWeight": "700" }],
+            "body-xl": ["20px", { "lineHeight": "32px", "fontWeight": "400" }],
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "label-lg": ["16px", { "lineHeight": "22px", "fontWeight": "700" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 28;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 28;
+    }
+    /* Anti-tremor focus / safe touch feel */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen flex justify-center selection:bg-secondary-container">
+<!-- Mobile Viewport Container (微信小程序 390px 适老关怀比例设计) -->
+<div class="w-full max-w-[440px] bg-background min-h-screen flex flex-col relative pb-36 shadow-2xl">
+<!-- 微信小程序原生模拟顶部状态栏与胶囊区 -->
+<header class="sticky top-0 left-0 w-full z-40 bg-surface-container-lowest border-b border-outline-variant/60 shadow-sm pt-2 pb-2.5 px-4">
+<!-- 微信胶囊模拟与状态栏 -->
+<div class="flex items-center justify-between h-9 mb-1.5">
+<!-- 返回与简要状态 -->
+<button aria-label="返回上一页" class="flex items-center justify-center w-10 h-10 -ml-1 rounded-full text-on-surface hover:bg-surface-container-high active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-2xl font-bold" data-icon="arrow_back">arrow_back</span>
+</button>
+<!-- 标题居中偏胶囊左侧 -->
+<h1 class="text-headline-sm font-headline-sm text-primary tracking-tight font-bold">
+          打卡与训练记录
+        </h1>
+<!-- 微信小程序原生右上角双胶囊按钮 -->
+<div class="flex items-center bg-surface-container-high/70 border border-outline/30 rounded-full px-2.5 py-1 space-x-2">
+<span class="material-symbols-outlined text-base text-on-surface" data-icon="more_horiz">more_horiz</span>
+<div class="w-px h-3.5 bg-outline/40"></div>
+<span class="material-symbols-outlined text-base text-on-surface" data-icon="adjust">adjust</span>
+</div>
+</div>
+<!-- 适老化无障碍工具栏：语音朗读与关怀切换 -->
+<div class="flex items-center justify-between bg-surface-container-low rounded-xl p-2 border border-outline-variant/40 mt-1">
+<div class="flex items-center space-x-2 pl-1">
+<span class="flex h-3 w-3 relative">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-secondary"></span>
+</span>
+<span class="text-label-md font-label-md text-primary font-bold">大字关怀模式开启</span>
+<span class="bg-surface-container text-on-surface-variant text-[12px] px-2 py-0.5 rounded-full font-bold">字号+40%</span>
+</div>
+<!-- 语音大按钮 -->
+<button class="flex items-center space-x-1.5 bg-primary text-on-primary px-3 py-1.5 rounded-lg active:scale-95 transition-all shadow-sm" id="tts-btn" onclick="toggleSpeech()">
+<span class="material-symbols-outlined text-lg fill-icon" data-icon="volume_up">volume_up</span>
+<span class="text-label-md font-label-md">朗读记录</span>
+</button>
+</div>
+</header>
+<!-- 主体滚动流区域 -->
+<main class="flex-1 px-4 pt-3 space-y-5">
+<!-- 1. 顶部关怀激励横幅 (伴练小鹿吉祥物插图 + 连续打卡激励) -->
+<section class="bg-surface-container-lowest border-2 border-primary/20 rounded-2xl p-4 shadow-sm relative overflow-hidden flex items-center justify-between">
+<div class="flex-1 pr-3 z-10">
+<div class="inline-flex items-center space-x-1.5 bg-secondary-container/60 text-on-secondary-container px-2.5 py-1 rounded-full mb-2">
+<span class="material-symbols-outlined text-base fill-icon" data-icon="workspace_premium">workspace_premium</span>
+<span class="text-label-md font-label-md font-bold">肌力维持 · 阶段卓越</span>
+</div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface font-bold leading-tight">
+            建国叔，您已连续坚持训练 <span class="text-primary font-extrabold text-2xl underline decoration-secondary-container decoration-4">28</span> 天！
+          </h2>
+<p class="text-body-md font-body-md text-on-surface-variant mt-1.5">
+            动作平稳，步态冻结发生率降低 <strong class="text-secondary font-bold">78%</strong>，继续保持！
+          </p>
+</div>
+<!-- 伴练小鹿吉祥物图 (参考 https://lh3.googleusercontent.com/aida/AEtjO1Xb8o0u1632jlMAjrWXAh194c_ZSVgRVJ9OtIIUh2d-82rPoWX6J7j30UqYjH6aiCtgsRlZaCsh7_cfNQKKa1rhzLxA6rNCMG1jojBQ_liZ5dlSvCXpyy5hArf8onTd7ZP-cmFBTy51TGuMA3nG2G6V10k-Kyx4grmm0e9K_ex8jtQYtknuFxQPt_2c97FwNS-90djhyyAAZcJadPVGzwpCuG-0iowa9Td1TH54asehm6K3_MEoUtUXPLs 暖心陶瓷质感温情陪伴) -->
+<div class="w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 relative rounded-2xl overflow-hidden border-2 border-surface-container shadow-inner bg-amber-50">
+<img class="w-full h-full object-cover object-center" data-alt="A warm, tactile porcelain-style fawn mascot sitting calmly wearing a soft mint green knitted winter scarf, hugging a gently glowing warm peach-colored heart with both hooves. Shot with soft studio lighting, ultra-high contrast, reassuring and tender healthcare rehabilitation companion design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7GZYGSk30c2ShH5e72rZ3s8fCf6LHfUh-ch511oG7SKl3XHaux6TQKJ598pdXoecDsp4dTkb9_dxXldGmPuFzPmFfk8S8RzzwDF7Ln0KkybL1-xoo-Q4ULab4_eCnymCi6W5rSaoZ085lPGtuLLju2CQDWN0wL8oJuPpGBnZEDYchJszQH1_H7VBt3kLwbtPaHJ_l_IoIoY8_QVJEfAQjX3I6zNIP8aXipJH7q6TT2gYRaLhKXvoqQGfLwcZ9c1fVOPRiQZJc5w6c"/>
+<div class="absolute bottom-1 right-1 bg-surface-container-lowest/90 px-1.5 py-0.5 rounded text-[11px] font-bold text-secondary shadow-sm">
+            小鹿伴练
+          </div>
+</div>
+</section>
+<!-- 2. 月度打卡日历圆盘 (高触控大字圆盘，直观红绿状态) -->
+<section class="bg-surface-container-lowest border-2 border-outline-variant/60 rounded-2xl p-4 shadow-sm">
+<!-- 日历顶部导航 -->
+<div class="flex items-center justify-between pb-3 border-b-2 border-surface-container">
+<button aria-label="上个月" class="min-h-[48px] px-3.5 py-1.5 flex items-center space-x-1 bg-surface-container rounded-xl text-primary font-bold active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-xl" data-icon="chevron_left">chevron_left</span>
+<span class="text-label-md font-label-md">上个月</span>
+</button>
+<div class="text-center">
+<span class="text-headline-sm font-headline-sm text-on-surface font-extrabold">2024 年 10 月</span>
+<p class="text-label-md font-label-md text-secondary font-bold">已达标 26 天 · 休整 2 天</p>
+</div>
+<button aria-label="下个月" class="min-h-[48px] px-3.5 py-1.5 flex items-center space-x-1 bg-surface-container rounded-xl text-primary font-bold active:scale-95 transition-transform">
+<span class="text-label-md font-label-md">下个月</span>
+<span class="material-symbols-outlined text-xl" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+<!-- 星期指示行 (大字高对比) -->
+<div class="grid grid-cols-7 gap-1 text-center py-2.5 text-on-surface-variant text-label-lg font-label-lg">
+<span class="text-tertiary">日</span>
+<span>一</span>
+<span>二</span>
+<span>三</span>
+<span>四</span>
+<span>五</span>
+<span class="text-tertiary">六</span>
+</div>
+<!-- 日历网格 (适老放大触控区，微 tremor 缓冲) -->
+<div class="grid grid-cols-7 gap-1.5 text-center pt-1 pb-2">
+<!-- 之前周置灰 -->
+<div class="h-11 flex flex-col items-center justify-center rounded-xl text-outline-variant text-body-md font-bold">29</div>
+<div class="h-11 flex flex-col items-center justify-center rounded-xl text-outline-variant text-body-md font-bold">30</div>
+<!-- 1-5号 已达标打卡 (绿勾标示) -->
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">1</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">2</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">3</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">4</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-surface-container border border-outline-variant text-on-surface-variant font-bold">
+<span class="text-body-md leading-none">5</span>
+<span class="text-[10px] text-primary font-bold">医嘱休</span>
+</div>
+<!-- 第二周 6-12 -->
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">6</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">7</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">8</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">9</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">10</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">11</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-surface-container border border-outline-variant text-on-surface-variant font-bold">
+<span class="text-body-md leading-none">12</span>
+<span class="text-[10px] text-primary font-bold">医嘱休</span>
+</div>
+<!-- 第三周 13-19 -->
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">13</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">14</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">15</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">16</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">17</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">18</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">19</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<!-- 第四周 20-26 -->
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">20</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">21</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">22</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">23</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">24</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">25</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">26</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<!-- 27号前日达标与28号【今日重点高亮】 -->
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-secondary-container/40 border border-secondary/30 text-on-secondary-fixed font-bold">
+<span class="text-body-md leading-none">27</span>
+<span class="material-symbols-outlined text-sm text-secondary font-extrabold" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<!-- 28日：今日已完成 -->
+<div class="h-12 flex flex-col items-center justify-center rounded-xl bg-primary text-on-primary ring-4 ring-primary-fixed shadow-md font-bold scale-105">
+<span class="text-label-md leading-none">今日</span>
+<span class="text-body-md font-extrabold leading-none mt-0.5">28</span>
+</div>
+<!-- 未来日期 -->
+<div class="h-12 flex flex-col items-center justify-center rounded-xl border border-outline-variant/50 text-on-surface-variant/80 font-bold bg-surface-container-lowest">
+<span class="text-body-md">29</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl border border-outline-variant/50 text-on-surface-variant/80 font-bold bg-surface-container-lowest">
+<span class="text-body-md">30</span>
+</div>
+<div class="h-12 flex flex-col items-center justify-center rounded-xl border border-outline-variant/50 text-on-surface-variant/80 font-bold bg-surface-container-lowest">
+<span class="text-body-md">31</span>
+</div>
+<div class="h-11 flex flex-col items-center justify-center rounded-xl text-outline-variant text-body-md font-bold">1</div>
+<div class="h-11 flex flex-col items-center justify-center rounded-xl text-outline-variant text-body-md font-bold">2</div>
+</div>
+<!-- 图例说明条 -->
+<div class="mt-2 pt-2.5 border-t border-outline-variant/40 flex items-center justify-around text-label-md font-label-md text-on-surface-variant">
+<div class="flex items-center space-x-1.5">
+<span class="w-3.5 h-3.5 rounded-full bg-secondary-container border border-secondary"></span>
+<span>已达标打卡</span>
+</div>
+<div class="flex items-center space-x-1.5">
+<span class="w-3.5 h-3.5 rounded-full bg-primary text-on-primary text-[10px] flex items-center justify-center">今</span>
+<span>今日重点</span>
+</div>
+<div class="flex items-center space-x-1.5">
+<span class="w-3.5 h-3.5 rounded-full bg-surface-container border border-outline-variant"></span>
+<span>医嘱休整日</span>
+</div>
+</div>
+</section>
+<!-- 3. 康复总量与动作完成组数统计 (大字卡片组合 + 粗进度条) -->
+<section class="bg-surface-container-lowest border-2 border-outline-variant/60 rounded-2xl p-4 shadow-sm space-y-3.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-2xl text-primary font-bold" data-icon="analytics">analytics</span>
+<h3 class="text-headline-sm font-headline-sm text-on-surface font-bold">本月康复总成效</h3>
+</div>
+<span class="text-label-md font-label-md text-on-surface-variant bg-surface-container px-2.5 py-1 rounded-lg">更新于 16:40</span>
+</div>
+<!-- 3个醒目核心指标 -->
+<div class="grid grid-cols-3 gap-2.5">
+<!-- 指标 1 -->
+<div class="bg-surface-container-low border border-outline-variant/80 rounded-xl p-2.5 text-center flex flex-col justify-between">
+<span class="text-label-md font-label-md text-on-surface-variant font-bold">总动作组数</span>
+<div class="my-1">
+<span class="text-2xl font-black text-primary">84</span>
+<span class="text-label-md font-bold text-outline">/120</span>
+</div>
+<span class="text-[12px] text-secondary font-bold">进度 70%</span>
+</div>
+<!-- 指标 2 -->
+<div class="bg-surface-container-low border border-outline-variant/80 rounded-xl p-2.5 text-center flex flex-col justify-between">
+<span class="text-label-md font-label-md text-on-surface-variant font-bold">总康复时长</span>
+<div class="my-1">
+<span class="text-2xl font-black text-primary">380</span>
+<span class="text-[13px] font-bold text-on-surface">分</span>
+</div>
+<span class="text-[12px] text-on-surface-variant font-bold">日均 18.5 分</span>
+</div>
+<!-- 指标 3 -->
+<div class="bg-surface-container-low border border-outline-variant/80 rounded-xl p-2.5 text-center flex flex-col justify-between">
+<span class="text-label-md font-label-md text-on-surface-variant font-bold">RAS节律率</span>
+<div class="my-1">
+<span class="text-2xl font-black text-secondary">96.4</span>
+<span class="text-[13px] font-bold text-secondary">%</span>
+</div>
+<span class="text-[12px] text-secondary font-bold">抗阻极佳</span>
+</div>
+</div>
+<!-- 大字粗壮安全进度条 (厚度14px，极易看清) -->
+<div class="bg-surface-container-high/60 rounded-xl p-3 border border-outline-variant/50">
+<div class="flex justify-between items-center mb-1.5 text-label-lg font-label-lg font-bold">
+<span class="text-on-surface">月度抗僵硬目标进度</span>
+<span class="text-primary font-extrabold text-lg">70% 已达标</span>
+</div>
+<div class="w-full bg-surface-container h-4 rounded-full overflow-hidden p-0.5 border border-outline-variant/40">
+<div class="bg-primary h-full rounded-full transition-all duration-500" style="width: 70%;"></div>
+</div>
+<p class="text-label-md font-label-md text-on-surface-variant mt-2">
+            离本阶段神经可塑性目标还剩 <strong class="text-on-surface font-extrabold">36 组</strong>，按节奏稳步完成即可。
+          </p>
+</div>
+</section>
+<!-- 4. 今日动作规范度质检星级评分卡片流 (严格遵循适老无障碍与质检反馈) -->
+<section class="space-y-3.5">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-2xl text-primary font-bold" data-icon="fact_check">fact_check</span>
+<h3 class="text-headline-sm font-headline-sm text-on-surface font-bold">今日动作质检与评分</h3>
+</div>
+<span class="text-label-lg font-label-lg text-secondary font-bold">今日已全部达标</span>
+</div>
+<!-- 卡片 1: 下肢防拖拽踏步与重心转移 -->
+<div class="bg-surface-container-lowest border-2 border-outline-variant/70 rounded-2xl p-4 shadow-sm space-y-3">
+<div class="flex items-start justify-between">
+<div>
+<div class="inline-block bg-primary-fixed text-on-primary-fixed text-label-md font-label-md font-bold px-2 py-0.5 rounded-md mb-1">
+                步态防冻结重点
+              </div>
+<h4 class="text-body-xl font-bold text-on-surface">下肢防拖拽踏步与重心转移</h4>
+<p class="text-label-lg font-label-lg text-on-surface-variant font-bold mt-0.5">完成 3组 × 12次 · 配合节律声源</p>
+</div>
+<!-- 星级评分 -->
+<div class="text-right">
+<div class="flex text-amber-500">
+<span class="material-symbols-outlined text-2xl fill-icon" data-icon="star">star</span>
+<span class="material-symbols-outlined text-2xl fill-icon" data-icon="star">star</span>
+<span class="material-symbols-outlined text-2xl fill-icon" data-icon="star">star</span>
+<span class="material-symbols-outlined text-2xl fill-icon" data-icon="star">star</span>
+<span class="material-symbols-outlined text-2xl fill-icon" data-icon="star">star</span>
+</div>
+<span class="text-label-lg font-label-lg text-primary font-extrabold">5.0分 (满分卓越)</span>
+</div>
+</div>
+<!-- 临床治疗师质检反馈气泡 (大字高对比) -->
+<div class="bg-surface-container-low border-l-4 border-secondary p-3 rounded-r-xl">
+<div class="flex items-center space-x-2 mb-1">
+<span class="material-symbols-outlined text-secondary text-lg font-bold" data-icon="verified_user">verified_user</span>
+<span class="text-label-md font-label-md font-extrabold text-on-surface">王治疗师 (主管技师) 质检评语：</span>
+</div>
+<p class="text-body-lg font-body-lg text-on-surface leading-snug font-bold">
+              “下肢离地高度达标，重心左右转换顺畅，步幅均匀，测试期间极低冻结风险！”
+            </p>
+</div>
+<!-- 触控动作大按钮 (高度>=56dp) -->
+<button class="w-full min-h-[56px] bg-surface-container hover:bg-surface-container-high border-2 border-primary/30 rounded-xl text-primary font-bold text-label-xl flex items-center justify-center space-x-2 active:scale-[0.98] transition-transform">
+<span class="material-symbols-outlined text-2xl" data-icon="play_circle">play_circle</span>
+<span>查看动作轨迹与骨骼点回放</span>
+</button>
+</div>
+<!-- 卡片 2: 坐位交替大摆臂与躯干抗旋 -->
+<div class="bg-surface-container-lowest border-2 border-outline-variant/70 rounded-2xl p-4 shadow-sm space-y-3">
+<div class="flex items-start justify-between">
+<div>
+<div class="inline-block bg-secondary-container text-on-secondary-container text-label-md font-label-md font-bold px-2 py-0.5 rounded-md mb-1">
+                改善躯干僵硬
+              </div>
+<h4 class="text-body-xl font-bold text-on-surface">坐位交替大摆臂与躯干抗旋</h4>
+<p class="text-label-lg font-label-lg text-on-surface-variant font-bold mt-0.5">完成 2组 × 10次 · 坐姿平稳</p>
+</div>
+<!-- 星级评分 -->
+<div class="text-right">
+<div class="flex text-amber-500">
+<span class="material-symbols-outlined text-2xl fill-icon" data-icon="star">star</span>
+<span class="material-symbols-outlined text-2xl fill-icon" data-icon="star">star</span>
+<span class="material-symbols-outlined text-2xl fill-icon" data-icon="star">star</span>
+<span class="material-symbols-outlined text-2xl fill-icon" data-icon="star">star</span>
+<span class="material-symbols-outlined text-2xl" data-icon="star_half">star_half</span>
+</div>
+<span class="text-label-lg font-label-lg text-primary font-extrabold">4.5分 (动作优异)</span>
+</div>
+</div>
+<!-- 质检反馈气泡 -->
+<div class="bg-surface-container-low border-l-4 border-secondary p-3 rounded-r-xl">
+<div class="flex items-center space-x-2 mb-1">
+<span class="material-symbols-outlined text-secondary text-lg font-bold" data-icon="verified_user">verified_user</span>
+<span class="text-label-md font-label-md font-extrabold text-on-surface">林治疗师 质检意见：</span>
+</div>
+<p class="text-body-lg font-body-lg text-on-surface leading-snug font-bold">
+              “双侧肩关节活动充分，左侧摆幅较上周增加约15度，有效改善晨间僵硬。”
+            </p>
+</div>
+<button class="w-full min-h-[56px] bg-surface-container hover:bg-surface-container-high border-2 border-primary/30 rounded-xl text-primary font-bold text-label-xl flex items-center justify-center space-x-2 active:scale-[0.98] transition-transform">
+<span class="material-symbols-outlined text-2xl" data-icon="slow_motion_video">slow_motion_video</span>
+<span>查看摆臂对称度分析</span>
+</button>
+</div>
+<!-- 卡片 3: 坐位弹力带胸前推举抗阻 -->
+<div class="bg-surface-container-lowest border-2 border-outline-variant/70 rounded-2xl p-4 shadow-sm space-y-3">
+<div class="flex items-start justify-between">
+<div>
+<div class="inline-block bg-primary-fixed text-on-primary-fixed text-label-md font-label-md font-bold px-2 py-0.5 rounded-md mb-1">
+                上肢肌力激活
+              </div>
+<h4 class="text-body-xl font-bold text-on-surface">坐位弹力带胸前推举抗阻</h4>
+<p class="text-label-lg font-label-lg text-on-surface-variant font-bold mt-0.5">完成 3组 × 10次 · 黄色低阻带</p>
+</div>
+<!-- 星级评分 -->
+<div class="text-right">
+<div class="flex text-amber-500">
+<span class="material-symbols-outlined text-2xl fill-icon" data-icon="star">star</span>
+<span class="material-symbols-outlined text-2xl fill-icon" data-icon="star">star</span>
+<span class="material-symbols-outlined text-2xl fill-icon" data-icon="star">star</span>
+<span class="material-symbols-outlined text-2xl fill-icon" data-icon="star">star</span>
+<span class="material-symbols-outlined text-2xl fill-icon" data-icon="star">star</span>
+</div>
+<span class="text-label-lg font-label-lg text-primary font-extrabold">5.0分 (发力标准)</span>
+</div>
+</div>
+<!-- 质检反馈气泡 -->
+<div class="bg-surface-container-low border-l-4 border-secondary p-3 rounded-r-xl">
+<div class="flex items-center space-x-2 mb-1">
+<span class="material-symbols-outlined text-secondary text-lg font-bold" data-icon="verified_user">verified_user</span>
+<span class="text-label-md font-label-md font-extrabold text-on-surface">系统AI与康复科联审：</span>
+</div>
+<p class="text-body-lg font-body-lg text-on-surface leading-snug font-bold">
+              “推举过程无屏气，肩胛骨下沉稳定，震颤幅度被弹力阻尼有效吸收。”
+            </p>
+</div>
+</div>
+</section>
+<!-- 5. 家属一键点赞鼓励互动卡片 (亲情守护与温情双向反馈) -->
+<section class="bg-surface-container-lowest border-2 border-secondary/40 rounded-2xl p-4 shadow-sm space-y-3.5">
+<div class="flex items-center justify-between pb-2 border-b border-surface-container">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-2xl text-secondary font-bold" data-icon="volunteer_activism">volunteer_activism</span>
+<h3 class="text-headline-sm font-headline-sm text-on-surface font-bold">亲情鼓励与互动</h3>
+</div>
+<span class="bg-secondary-container/70 text-on-secondary-container text-label-md font-bold px-2.5 py-1 rounded-full">
+            已同步女儿手机
+          </span>
+</div>
+<!-- 亲情留言气泡 -->
+<div class="flex space-x-3 bg-surface-container-low p-3.5 rounded-2xl border border-outline-variant/60">
+<div class="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center text-primary font-extrabold text-xl flex-shrink-0 border-2 border-secondary">
+            华
+          </div>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="text-body-lg font-bold text-on-surface">女儿（晓华）</span>
+<span class="text-label-md text-on-surface-variant">今天 15:42</span>
+</div>
+<p class="text-body-lg font-body-lg text-on-surface mt-1.5 leading-relaxed font-bold">
+              “老爸今天踏步特别稳！视频里看您双腿抬得很有精神，太棒了！给您点赞加小红花🌸～晚上我炖排骨带过来！”
+            </p>
+<div class="mt-2 flex items-center space-x-1.5 text-tertiary-container font-extrabold text-label-lg">
+<span class="material-symbols-outlined text-xl text-error fill-icon" data-icon="favorite">favorite</span>
+<span>已赠送 1 朵鼓励小红花</span>
+</div>
+</div>
+</div>
+<!-- 一键大触控互动按钮组 (大按键高度>=56dp) -->
+<div class="grid grid-cols-2 gap-3 pt-1">
+<button class="min-h-[58px] bg-secondary-container text-on-secondary-container border-2 border-secondary font-bold text-label-xl rounded-xl flex items-center justify-center space-x-2 active:scale-95 transition-all shadow-sm" id="btn-flower" onclick="handleLike()">
+<span class="material-symbols-outlined text-2xl fill-icon" data-icon="sentiment_very_satisfied">sentiment_very_satisfied</span>
+<span>回赠笑脸红花</span>
+</button>
+<button class="min-h-[58px] bg-primary text-on-primary font-bold text-label-xl rounded-xl flex items-center justify-center space-x-2 active:scale-95 transition-all shadow-sm" id="btn-audio" onclick="handleSafeCall()">
+<span class="material-symbols-outlined text-2xl fill-icon" data-icon="mic">mic</span>
+<span>语音报个平安</span>
+</button>
+</div>
+</section>
+<!-- 6. 跌倒与冻结安全预警保障条 (高对比橙红醒目求助) -->
+<section class="bg-amber-50 border-2 border-tertiary-container rounded-2xl p-3.5 shadow-sm flex items-center justify-between space-x-3">
+<div class="flex items-start space-x-2.5">
+<span class="material-symbols-outlined text-3xl text-tertiary-container mt-0.5 fill-icon" data-icon="warning">warning</span>
+<div>
+<h4 class="text-body-lg font-bold text-tertiary leading-tight">步态防冻与跌倒关怀</h4>
+<p class="text-label-md font-label-md text-on-surface-variant font-bold mt-0.5">
+              如有下肢冻结或眩晕，请立即坐稳抓牢扶手。
+            </p>
+</div>
+</div>
+<!-- 一键求助电话呼叫按钮 (极醒目大红底) -->
+<a aria-label="一键求助电话" class="min-h-[56px] px-3.5 flex-shrink-0 bg-error text-on-error rounded-xl font-extrabold text-label-lg flex items-center justify-center space-x-1.5 shadow-md active:scale-95 transition-transform" href="tel:120">
+<span class="material-symbols-outlined text-xl fill-icon" data-icon="call">call</span>
+<span>一键求助</span>
+</a>
+</section>
+</main>
+<!-- 7. 微信小程序适老底部固定导航栏 (按照 Shared Components JSON 强制规范映射) -->
+<!-- BottomNavBar: labels: ["首页", "训练", "记录", "预警", "患者"], 当前激活项: "记录" (Exact Match) -->
+<nav aria-label="主要导航" class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-space-xs h-[76px] bg-surface-container-lowest border-t border-outline-variant dark:border-outline-variant shadow-lg" role="navigation">
+<!-- 1. 首页 -->
+<button aria-label="首页" class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high px-3 py-1.5 min-h-[56px] active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-2xl" data-icon="home">home</span>
+<span class="text-label-md font-label-md font-bold mt-0.5">首页</span>
+</button>
+<!-- 2. 训练 -->
+<button aria-label="训练" class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high px-3 py-1.5 min-h-[56px] active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-2xl" data-icon="fitness_center">fitness_center</span>
+<span class="text-label-md font-label-md font-bold mt-0.5">训练</span>
+</button>
+<!-- 3. 记录 (当前页面 - 严格使用 style_active_navigation) -->
+<button aria-current="page" aria-label="记录 当前页面" class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary-container text-on-secondary-container dark:text-on-secondary-container rounded-xl px-3 py-1.5 min-h-[56px] active:scale-95 transition-transform shadow-sm">
+<span class="material-symbols-outlined text-2xl fill-icon" data-icon="assignment" data-weight="fill">assignment</span>
+<span class="text-label-md font-label-md font-extrabold mt-0.5">记录</span>
+</button>
+<!-- 4. 预警 -->
+<button aria-label="预警" class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high px-3 py-1.5 min-h-[56px] active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-2xl" data-icon="warning">warning</span>
+<span class="text-label-md font-label-md font-bold mt-0.5">预警</span>
+</button>
+<!-- 5. 患者 -->
+<button aria-label="患者" class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high px-3 py-1.5 min-h-[56px] active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-2xl" data-icon="person">person</span>
+<span class="text-label-md font-label-md font-bold mt-0.5">患者</span>
+</button>
+</nav>
+<!-- 交互提示吐司 (Toast) -->
+<div class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-inverse-surface text-inverse-on-surface px-5 py-3 rounded-2xl shadow-xl flex items-center space-x-2 text-label-xl font-bold transition-opacity duration-300 opacity-0 pointer-events-none" id="toast">
+<span class="material-symbols-outlined text-secondary text-2xl" data-icon="check_circle" id="toast-icon">check_circle</span>
+<span id="toast-text">已发送回赠！</span>
+</div>
+</div>
+<!-- 轻量交互与无障碍语音模拟脚本 -->
+<script>
+    let isSpeaking = false;
+    function showToast(text, icon = 'check_circle') {
+      const toast = document.getElementById('toast');
+      const toastText = document.getElementById('toast-text');
+      const toastIcon = document.getElementById('toast-icon');
+      toastText.innerText = text;
+      toastIcon.innerText = icon;
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none');
+      }, 2400);
+    }
+
+    function toggleSpeech() {
+      const btn = document.getElementById('tts-btn');
+      if (!isSpeaking) {
+        isSpeaking = true;
+        btn.classList.add('ring-4', 'ring-secondary-container');
+        btn.querySelector('span:last-child').innerText = '播报中...';
+        showToast('正在为您大声播报今日康复记录...', 'volume_up');
+        setTimeout(() => {
+          isSpeaking = false;
+          btn.classList.remove('ring-4', 'ring-secondary-container');
+          btn.querySelector('span:last-child').innerText = '朗读记录';
+        }, 4000);
+      } else {
+        isSpeaking = false;
+        btn.classList.remove('ring-4', 'ring-secondary-container');
+        btn.querySelector('span:last-child').innerText = '朗读记录';
+      }
+    }
+
+    function handleLike() {
+      showToast('已向女儿回赠暖心小红花🌸！', 'favorite');
+    }
+
+    function handleSafeCall() {
+      showToast('已录制并向女儿发送“老爸一切都好，放心吧！”', 'mic');
+    }
+  </script>
+</body></html>

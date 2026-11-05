@@ -41,28 +41,33 @@
 
 .entry-grid {
   display: flex;
-  flex-wrap: wrap;
-  gap: 24rpx;
+  flex-direction: column;
+  gap: 20rpx;
 }
 
 .entry-tile {
-  width: calc(50% - 12rpx);
-  min-height: 192rpx;
-  padding: 28rpx;
+  width: 100%;
+  min-height: 140rpx;
+  padding: 32rpx 36rpx;
   background-color: #ffffff;
   border: 2rpx solid #cbd5e1;
   border-radius: 20rpx;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .entry-tile:active {
   background-color: #f1f5f9;
 }
 
+.entry-tile__body {
+  flex: 1;
+}
+
 .entry-tile__title {
-  font-size: 36rpx;
+  font-size: 38rpx;
   font-weight: 700;
   color: #0f172a;
 }
@@ -70,8 +75,15 @@
 .entry-tile__desc {
   margin-top: 8rpx;
   color: #334155;
-  font-size: 30rpx;
+  font-size: 32rpx;
   line-height: 1.5;
+}
+
+.entry-tile__arrow {
+  margin-left: 20rpx;
+  font-size: 44rpx;
+  color: #94a3b8;
+  flex-shrink: 0;
 }
 
 .identity {

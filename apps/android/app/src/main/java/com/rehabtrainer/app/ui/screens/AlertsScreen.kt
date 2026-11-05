@@ -41,7 +41,7 @@ fun AlertsScreen(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(dimens.sectionSpacing)
     ) {
         Text(
-            text = "风险预警中心",
+            text = "关怀提醒中心",
             style = MaterialTheme.typography.headlineLarge
         )
 
@@ -50,29 +50,29 @@ fun AlertsScreen(modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.medium,
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                contentColor = MaterialTheme.colorScheme.onErrorContainer
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
             ),
-            border = BorderStroke(2.dp, MaterialTheme.colorScheme.error)
+            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.secondary)
         ) {
             Row(
-                modifier = Modifier.padding(20.dp),
+                modifier = Modifier.padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Icon(
                     imageVector = Icons.Filled.Warning,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error
+                    tint = MaterialTheme.colorScheme.secondary
                 )
                 Text(
-                    text = "紧急安全原则：如出现剧烈胸痛、呼吸困难或严重步态冻结，请立即停止训练并呼救！",
+                    text = "运动安全建议：练习时请量力而行，身旁备有座椅，感到疲劳随时休息！",
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
         }
 
-        // Critical Alert Card
+        // Caring Alert Card
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.medium,
@@ -80,10 +80,10 @@ fun AlertsScreen(modifier: Modifier = Modifier) {
                 containerColor = MaterialTheme.colorScheme.surface,
                 contentColor = MaterialTheme.colorScheme.onSurface
             ),
-            border = BorderStroke(2.dp, MaterialTheme.colorScheme.error)
+            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.outline)
         ) {
             Column(
-                modifier = Modifier.padding(20.dp),
+                modifier = Modifier.padding(18.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Row(
@@ -92,13 +92,13 @@ fun AlertsScreen(modifier: Modifier = Modifier) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Surface(
-                        color = MaterialTheme.colorScheme.error,
-                        shape = MaterialTheme.shapes.extraSmall
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = MaterialTheme.shapes.small
                     ) {
                         Text(
-                            text = "严重预警 · 待处理",
+                            text = "温和提示 · 建议休息",
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onError,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                         )
                     }
@@ -110,18 +110,18 @@ fun AlertsScreen(modifier: Modifier = Modifier) {
                 }
 
                 Text(
-                    text = "主观晨僵感连续 3 天加重",
+                    text = "自测身体动作略感沉重",
                     style = MaterialTheme.typography.titleLarge
                 )
                 Text(
-                    text = "触发自评阈值规则 RULE-RIGIDITY-03，系统已自动向责任治疗师发送随访警报。",
+                    text = "近几天身体可能有些疲惫，建议今日适当减少组数，多做舒展放松。",
                     style = MaterialTheme.typography.bodyLarge
                 )
 
                 ElderlyButton(
                     text = "📞 呼叫康复治疗师",
                     onClick = { /* 调起电话或语音服务 */ },
-                    variant = ElderlyButtonVariant.Danger
+                    variant = ElderlyButtonVariant.Primary
                 )
             }
         }
@@ -136,15 +136,15 @@ fun AlertsScreen(modifier: Modifier = Modifier) {
             )
         ) {
             Column(
-                modifier = Modifier.padding(20.dp),
+                modifier = Modifier.padding(18.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "提示 · 步态指标波动",
+                    text = "提示 · 步态节奏建议",
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    text = "昨日节律踏步对称性轻微下降，建议今日放慢踏步频率。",
+                    text = "昨日节律踏步节奏偏快，建议今日跟随听觉节拍放慢踏步，保持平稳。",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

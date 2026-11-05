@@ -89,21 +89,16 @@ fun PatientsScreen(modifier: Modifier = Modifier) {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = "累计训练：36 次",
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            Text(
-                                text = "连续坚持：12 天",
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                        }
                         Text(
-                            text = "本周完成率：96% (坚持就是胜利～)",
+                            text = "累计完成训练：36 次 【演示数据】",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            text = "连续健康打卡：12 天 【演示数据】",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            text = "本周完成率：96% (坚持就是胜利～) 【演示数据】",
                             style = MaterialTheme.typography.bodyLarge
                         )
                         Text(
@@ -135,7 +130,7 @@ fun PatientsScreen(modifier: Modifier = Modifier) {
                     style = MaterialTheme.typography.titleLarge
                 )
                 Text(
-                    text = "当前为「本人直接操作」。如患者手部震颤加剧无法自行打卡，可授权照护人代为执行。",
+                    text = "当前为「本人直接操作」。如按键操作有困难或需家属协助，可授权照护人代为执行。",
                     style = MaterialTheme.typography.bodyLarge
                 )
                 ElderlyButton(

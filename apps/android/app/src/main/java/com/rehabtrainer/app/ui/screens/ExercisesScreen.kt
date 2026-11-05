@@ -53,40 +53,40 @@ fun ExercisesScreen(
         // Category 1: 节律步态 (RAS)
         ExerciseCategoryCard(
             categoryTitle = "节律步态训练 (RAS)",
-            categoryDesc = "利用固定听觉节拍引导步伐，预防冻结步态 (FoG)。",
+            categoryDesc = "跟着舒适节拍踏步，帮助步伐更加连贯稳健。",
             exerciseName = "原地节律踏步训练",
-            parameters = "节拍: 64 BPM · 3 组 × 12 次",
-            riskLevel = "低风险 · 适合当前阶段",
+            parameters = "推荐剂量：3 组 × 12 次 · 64 BPM 听觉节拍",
+            suitabilityTag = "适宜阶段 · 自主完成",
             onStart = { onSelectExercise("EX-RAS-01") }
         )
 
         // Category 2: 牵伸放松
         ExerciseCategoryCard(
             categoryTitle = "牵伸放松训练",
-            categoryDesc = "缓解四肢齿轮样强直与晨僵，扩大关节活动度。",
+            categoryDesc = "轻柔拉伸身体各部位，让全身动作更加舒展轻松。",
             exerciseName = "坐位双上肢躯干伸展",
-            parameters = "无节拍限制 · 2 组 × 10 次",
-            riskLevel = "安全条目 (全分期适用)",
+            parameters = "推荐剂量：2 组 × 10 次 · 自主节律无需设备",
+            suitabilityTag = "轻柔舒缓 · 自主完成",
             onStart = { onSelectExercise("EX-STRETCH-01") }
         )
 
         // Category 3: 肌力维持
         ExerciseCategoryCard(
             categoryTitle = "肌力维持训练",
-            categoryDesc = "维持双下肢支撑肌群力量，延缓肌少症。",
+            categoryDesc = "增强双腿站立力量，日常走路更有劲。",
             exerciseName = "下肢靠墙微蹲训练",
-            parameters = "需有稳固扶手 · 2 组 × 8 次",
-            riskLevel = "中风险 (需照护者在场)",
+            parameters = "推荐剂量：2 组 × 8 次 · 需身旁有稳固扶手",
+            suitabilityTag = "温和强化 · 家属陪同",
             onStart = { onSelectExercise("EX-STRENGTH-01") }
         )
 
         // Category 4: 姿势矫正
         ExerciseCategoryCard(
             categoryTitle = "姿势矫正训练",
-            categoryDesc = "通过关节角度与标准动作模板比对，改善前倾姿态。",
+            categoryDesc = "根据实时动作指引，保持挺拔舒展的站立姿态。",
             exerciseName = "站立位脊柱对齐矫正",
-            parameters = "端上实时姿态比对偏差输出",
-            riskLevel = "需分期确认准入",
+            parameters = "推荐剂量：3 组 × 10 次 · 端上实时姿态比对",
+            suitabilityTag = "动作规范 · 实时矫正",
             onStart = { onSelectExercise("EX-POSTURE-01") }
         )
     }
@@ -98,7 +98,7 @@ private fun ExerciseCategoryCard(
     categoryDesc: String,
     exerciseName: String,
     parameters: String,
-    riskLevel: String,
+    suitabilityTag: String,
     onStart: () -> Unit
 ) {
     val dimens = LocalElderlyDimens.current
@@ -116,39 +116,39 @@ private fun ExerciseCategoryCard(
             modifier = Modifier.padding(dimens.screenPadding),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     text = categoryTitle,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
-                Surface(
-                    color = MaterialTheme.colorScheme.secondaryContainer,
-                    shape = MaterialTheme.shapes.extraSmall
-                ) {
-                    Text(
-                        text = riskLevel,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
-                }
+                Text(
+                    text = exerciseName,
+                    style = MaterialTheme.typography.titleLarge
+                )
             }
 
-            Text(
-                text = exerciseName,
-                style = MaterialTheme.typography.titleLarge
-            )
+            // 适宜性标签（整行自适应，防止 P1-1 竖排单字）
+            Surface(
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                shape = MaterialTheme.shapes.small
+            ) {
+                Text(
+                    text = suitabilityTag,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    maxLines = 1,
+                    softWrap = false,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                )
+            }
 
             Text(
                 text = categoryDesc,
                 style = MaterialTheme.typography.bodyMedium
             )
 
+            // 参数胶囊（单行或结构化排布，彻底消除 P1-15 孤立「次」字折行）
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant,
                 shape = MaterialTheme.shapes.small,

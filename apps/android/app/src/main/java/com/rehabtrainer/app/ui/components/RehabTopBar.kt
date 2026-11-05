@@ -1,5 +1,6 @@
 package com.rehabtrainer.app.ui.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,14 +22,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.rehabtrainer.app.ui.theme.LocalElderlyDimens
 
 /**
- * 自绘顶栏：标准 TopAppBar 高度装不下 80dp 的「菜单」按钮。
- *
- * 传 null 给 [onMenuClick] 时不显示菜单按钮（平板侧栏模式）。
+ * 自绘顶栏：支持手机竖屏、横屏与平板侧栏自适应。
+ * 在手机横屏下自动压缩为紧凑高度 (52dp)，避免挤占画面垂直空间 (P0-1)。
  */
 @Composable
 fun RehabTopBar(
@@ -38,6 +39,11 @@ fun RehabTopBar(
 ) {
     val dimens = LocalElderlyDimens.current
     val menuClick = onMenuClick
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val isTablet = configuration.smallestScreenWidthDp >= 600
+    val isPhoneLandscape = isLandscape && !isTablet
+
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface,
@@ -48,32 +54,31 @@ fun RehabTopBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .windowInsetsPadding(WindowInsets.statusBars)
-                .heightIn(min = 96.dp)
-                .padding(horizontal = dimens.screenPadding),
+                .heightIn(min = if (isPhoneLandscape) 52.dp else 72.dp)
+                .padding(horizontal = if (isPhoneLandscape) 12.dp else dimens.screenPadding),
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (menuClick != null) {
-                Button(
+                Surface(
                     onClick = menuClick,
-                    modifier = Modifier.heightIn(min = dimens.minTouchTarget),
-                    contentPadding = PaddingValues(horizontal = 24.dp)
+                    shape = MaterialTheme.shapes.medium,
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(if (isPhoneLandscape) 44.dp else 56.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Menu,
-                        contentDescription = null,
-                        modifier = Modifier.size(30.dp)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = "菜单",
-                        style = MaterialTheme.typography.labelLarge
-                    )
+                    androidx.compose.foundation.layout.Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Filled.Menu,
+                            contentDescription = "菜单",
+                            modifier = Modifier.size(if (isPhoneLandscape) 26.dp else 32.dp)
+                        )
+                    }
                 }
-                Spacer(modifier = Modifier.width(dimens.itemSpacing))
+                Spacer(modifier = Modifier.width(if (isPhoneLandscape) 8.dp else dimens.itemSpacing))
             }
             Text(
                 text = title,
-                style = MaterialTheme.typography.headlineMedium,
+                style = if (isPhoneLandscape) MaterialTheme.typography.titleMedium else MaterialTheme.typography.headlineMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
