@@ -10,6 +10,8 @@ process.env.E2E_RUN_ID ??= randomUUID();
 process.env.E2E_PASSWORD ??= randomBytes(24).toString('hex');
 process.env.REHAB_JWT_SECRET ??= randomBytes(32).toString('hex');
 process.env.REHAB_DATABASE_URL = `sqlite:///${artifacts.replaceAll('\\', '/')}${process.env.E2E_RUN_ID}.db`;
+// 上传用例把视频写进临时目录，禁止落到仓库工作区。
+process.env.REHAB_MEDIA_ROOT = `${artifacts.replaceAll('\\', '/')}media`;
 process.env.VITE_API_BASE_URL = '/v1';
 
 // 端口可配置：本机残留进程占用默认端口时，用环境变量换端口而不是改代码。

@@ -39,7 +39,11 @@ data class Exercise(
     val variants: List<ExerciseVariant>? = null,
     val defaultDosage: Dosage? = null,
     val videoUri: String? = null,
-    val audioUri: String? = null
+    val audioUri: String? = null,
+    /** 视频来源署名，客户端叠加显示，不烧录进文件。 */
+    val videoCreditLine: String? = null,
+    /** 视频水印文字，客户端叠加显示，不烧录进文件。 */
+    val videoWatermarkText: String? = null
 )
 
 /** 契约 `ExercisePage`。 */

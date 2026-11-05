@@ -4,6 +4,7 @@ import AlertsPage from "../pages/AlertsPage";
 import FollowUpsPage from "../pages/FollowUpsPage";
 import ForbiddenPage from "../pages/ForbiddenPage";
 import LoginPage from "../pages/LoginPage";
+import MediaAssetsPage from "../pages/MediaAssetsPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import PatientDetailPage from "../pages/PatientDetailPage";
 import PatientsPage from "../pages/PatientsPage";
@@ -59,6 +60,7 @@ export const router = createBrowserRouter([
           { path: "alerts", element: <AlertsPage /> },
           { path: "follow-ups", element: <FollowUpsPage /> },
           { path: "research", element: <ResearchPage /> },
+          { path: "media-assets", element: <MediaAssetsPage /> },
           {
             path: "admin/permissions",
             element: (

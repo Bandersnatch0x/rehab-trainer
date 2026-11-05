@@ -29,6 +29,14 @@ class Settings(BaseSettings):
     login_max_failures: int = 5
     login_window_seconds: int = 300
 
+    # 媒体静态根：后端把上传文件写到这里，nginx 用同一路径对外托管。
+    # 生产部署时两者必须指向同一目录（见 docs/deployment/README.md）。
+    media_root: str = "./media"
+    # 对外访问前缀；storage_path 拼在其后即为客户端拿到的 videoUri。
+    media_public_base_url: str = "http://127.0.0.1:8000/media"
+    # 单文件上限，默认 200 MB。
+    media_max_upload_bytes: int = 200 * 1024 * 1024
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -9,6 +9,7 @@ from app.models.identity import (
     Org,
     RoleBinding,
 )
+from app.models.media import MediaAsset
 from app.models.prescription import Prescription, PrescriptionItem
 from app.models.record import SessionRecord
 
@@ -21,6 +22,7 @@ __all__ = [
     "Exercise",
     "ExerciseVariant",
     "ExternalIdentity",
+    "MediaAsset",
     "NotificationDelivery",
     "Org",
     "Patient",

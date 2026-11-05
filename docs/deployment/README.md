@@ -148,3 +148,33 @@ git diff --check
 2026-11-04 本地结果为部署自检通过、后端全量 36 项通过、Python 语法解析通过、`git diff --check` 通过。测试产生现有 HTTP 客户端弃用及依赖版本警告。未执行云部署，独立审查交由协调者完成。
 
 仓库内有 `.github/workflows/ci.yml`（按路径触发 Android 构建、小程序类型检查、管理端构建、后端 pytest 与契约校验），但仓库没有远端流水线，**该配置未在真实 CI 上运行过**。未做蓝绿部署，未提供云资源编排、存量 SQLite 数据搬迁及生产账号初始化。现有登录限流使用进程内状态，多副本及重启不能共享计数；扩容前应单独治理。存量 ORM 与 PostgreSQL 的完整业务兼容性已在本机容器内的 PostgreSQL 17 上跑通主链路（18/18 契约操作），但未做长时压测与并发验证。
+
+## 训练视频存储与静态托管
+
+训练视频由管理端上传，接口为 `POST /v1/media-assets/upload`（multipart），资产元数据落库，文件落盘到 API 的媒体静态根。
+
+配置项（均为非秘密，可随环境覆盖）：
+
+| 变量 | 默认值 | 说明 |
+| --- | --- | --- |
+| `REHAB_MEDIA_ROOT` | `./media` | 上传写入目录；容器内建议挂载持久卷（如 `/data/media`） |
+| `REHAB_MEDIA_PUBLIC_BASE_URL` | `http://127.0.0.1:8000/media` | 对外访问前缀，决定客户端拿到的 `videoUri` |
+| `REHAB_MEDIA_MAX_UPLOAD_BYTES` | `209715200`（200 MB） | 单文件上限 |
+
+上传安全约束由服务端强制执行，不依赖客户端：
+
+- 只接受 MP4，按文件头魔数（`ftyp` + 品牌）判定，不信任扩展名与 `Content-Type`；
+- 文件名由服务端生成（UUID + `.mp4`），客户端文件名被忽略，避免路径穿越；
+- 落盘路径固定在 `REHAB_MEDIA_ROOT` 下，任何 `..`、绝对路径或盘符都会被拒绝；
+- 超过上限立即中止并清理临时文件，不会留下半截文件；
+- 计算 SHA-256 供去重与完整性校验；
+- 上传结果为 `draft`，需在管理端「上架」且设置适用分期后才会下发。
+
+静态文件托管：
+
+- API 在本地开发时直接挂载 `/media`（`REHAB_MEDIA_PUBLIC_BASE_URL` 指向它即可）。生产建议由 nginx 或对象存储前缀托管同一目录，只读挂载给静态服务器，API 保持写权限。
+- 反向代理需关闭目录列表，仅允许视频类型，并按 UUID 文件名设置长缓存（文件内容不可变）。
+- `docker-compose.yml` 已把媒体目录挂到命名卷 `media_data`（容器内 `/data/media`）。若在前面加 nginx，把它以只读方式挂载同一卷即可；compose 当前不包含 nginx 服务，按实际网关补充。
+- 上传目录必须对 API 运行用户（镜像内 UID 10001）可写；权限不足时接口返回 500，不会静默丢文件。
+
+表结构由 `deploy/migrations/versions/0003_media_asset.py` 建立，发布时随 `alembic -c deploy/alembic.ini upgrade head` 一起执行。

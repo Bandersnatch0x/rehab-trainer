@@ -9,6 +9,8 @@ _TEST_DIR = Path(tempfile.mkdtemp(prefix="rehab-api-tests-"))
 os.environ["REHAB_DATABASE_URL"] = f"sqlite:///{_TEST_DIR.as_posix()}/test.db"
 os.environ["REHAB_JWT_SECRET"] = "test-only-secret-0123456789abcdef-0123"
 os.environ["REHAB_AUTO_CREATE_SCHEMA"] = "true"
+# 上传测试必须写临时目录，绝不能碰开发机上的媒体静态根。
+os.environ["REHAB_MEDIA_ROOT"] = f"{_TEST_DIR.as_posix()}/media"
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402

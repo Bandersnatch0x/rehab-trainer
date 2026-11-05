@@ -1,4 +1,11 @@
-import { api, toResult, type ApiResult } from "./client";
+import {
+  API_BASE_URL,
+  api,
+  normalizeApiError,
+  toResult,
+  type ApiResult,
+} from "./client";
+import { getAccessToken, notifyUnauthorized } from "../auth/session";
 import type {
   Alert,
   AlertListQuery,
@@ -12,6 +19,10 @@ import type {
   ExercisePage,
   LoginRequest,
   LoginResponse,
+  MediaAsset,
+  MediaAssetListQuery,
+  MediaAssetPage,
+  MediaAssetPatch,
   Me,
   Patient,
   PatientCreate,
@@ -35,7 +46,7 @@ import type {
 } from "./types";
 
 /**
- * 契约 openapi.yaml 的全部操作，一一对应（当前 18 个）。
+ * 契约 openapi.yaml 的全部操作，一一对应（当前 21 个）。
  * 页面只调用本文件，不直接接触 openapi-fetch 的原始返回结构。
  */
 
@@ -218,4 +229,103 @@ export function getResearchDataQuality(): Promise<
   ApiResult<ResearchDataQuality>
 > {
   return toResult<ResearchDataQuality>(api.GET("/research/data-quality"));
+}
+
+// ---------- media ----------
+
+/** 18. GET /media-assets — 列出本机构的视频资产 */
+export function listMediaAssets(
+  query: MediaAssetListQuery = {},
+): Promise<ApiResult<MediaAssetPage>> {
+  return toResult<MediaAssetPage>(
+    api.GET("/media-assets", { params: { query } }),
+  );
+}
+
+export interface MediaUploadMeta {
+  exerciseCode?: string;
+  applicableStages?: number[];
+  watermarkText?: string;
+  creditLine?: string;
+  note?: string;
+}
+
+export interface UploadProgress {
+  loaded: number;
+  total: number;
+}
+
+function parseJson(text: string): unknown {
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * 19. POST /media-assets/upload — 上传 MP4（multipart，带上传进度）
+ *
+ * 走 XMLHttpRequest 而不是 openapi-fetch：上传进度只有 XHR 能拿到，
+ * 否则大文件上传期间界面无法反馈。错误结构仍用同一套归一化。
+ */
+export function uploadMediaAsset(
+  file: File,
+  meta: MediaUploadMeta,
+  onProgress?: (progress: UploadProgress) => void,
+): Promise<ApiResult<MediaAsset>> {
+  const form = new FormData();
+  form.append("file", file, file.name);
+  if (meta.exerciseCode) form.append("exerciseCode", meta.exerciseCode);
+  if (meta.applicableStages?.length) {
+    form.append("applicableStages", meta.applicableStages.join(","));
+  }
+  if (meta.watermarkText) form.append("watermarkText", meta.watermarkText);
+  if (meta.creditLine) form.append("creditLine", meta.creditLine);
+  if (meta.note) form.append("note", meta.note);
+
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${API_BASE_URL}/media-assets/upload`);
+    const token = getAccessToken();
+    if (token) {
+      xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    }
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        onProgress?.({ loaded: event.loaded, total: event.total });
+      }
+    };
+    xhr.onload = () => {
+      const payload = parseJson(xhr.responseText);
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve({ ok: true, data: payload as MediaAsset });
+        return;
+      }
+      if (xhr.status === 401) {
+        notifyUnauthorized();
+      }
+      resolve({ ok: false, error: normalizeApiError(payload, xhr.status) });
+    };
+    xhr.onerror = () => {
+      resolve({
+        ok: false,
+        error: { code: "NETWORK_ERROR", message: "网络请求失败" },
+      });
+    };
+    xhr.send(form);
+  });
+}
+
+/** 20. PATCH /media-assets/{assetId} — 修改水印、署名、适用分期或上下架状态 */
+export function updateMediaAsset(
+  assetId: string,
+  body: MediaAssetPatch,
+): Promise<ApiResult<MediaAsset>> {
+  return toResult<MediaAsset>(
+    api.PATCH("/media-assets/{assetId}", {
+      params: { path: { assetId } },
+      body,
+    }),
+  );
 }
