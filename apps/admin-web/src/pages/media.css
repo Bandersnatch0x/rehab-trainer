@@ -1,0 +1,270 @@
+.media-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.media-upload,
+.media-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 20px;
+  border: 1px solid var(--border-card);
+  border-radius: 8px;
+  background: var(--bg-card);
+}
+
+.media-upload h2,
+.media-list h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.media-upload-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px 16px;
+}
+
+.media-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.media-field > span,
+.media-field legend {
+  color: var(--text-secondary);
+}
+
+.media-field--wide {
+  grid-column: 1 / -1;
+}
+
+.media-field input[type="text"],
+.media-field select,
+.media-edit input[type="text"] {
+  padding: 6px 8px;
+  border: 1px solid var(--border-card);
+  border-radius: 6px;
+  font: inherit;
+  background: #fff;
+}
+
+.media-stage-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.media-stage-options label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.media-warn {
+  color: #b45309;
+}
+
+.media-hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.media-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.media-progress {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--color-primary-light);
+  overflow: hidden;
+  font-size: 12px;
+}
+
+.media-progress-bar {
+  height: 100%;
+  background: var(--color-primary);
+  transition: width 0.15s ease-out;
+}
+
+.media-progress span {
+  position: absolute;
+  left: 8px;
+  color: var(--text-primary);
+}
+
+.media-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.media-filters {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.media-filters label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+}
+
+.media-filters select {
+  padding: 4px 6px;
+  border: 1px solid var(--border-card);
+  border-radius: 6px;
+  font: inherit;
+}
+
+.media-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.media-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-card);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.media-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+}
+
+.media-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+/* 预览：16:9 深色底，水印右下角、署名左下角，模拟播放器叠加效果。 */
+.media-preview {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(135deg, #1f2937, #111827);
+  overflow: hidden;
+}
+
+.media-preview--form {
+  max-width: 480px;
+  border-radius: 6px;
+}
+
+.media-preview-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+.media-watermark {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  max-width: 70%;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgb(0 0 0 / 45%);
+  color: rgb(255 255 255 / 88%);
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  pointer-events: none;
+}
+
+.media-credit {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  max-width: 60%;
+  color: rgb(255 255 255 / 72%);
+  font-size: 11px;
+  pointer-events: none;
+}
+
+.media-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.media-badge--draft {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.media-badge--published {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.media-badge--retired {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.media-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+  margin: 0;
+  font-size: 12px;
+}
+
+.media-meta dt {
+  color: var(--text-tertiary);
+}
+
+.media-meta dd {
+  margin: 0;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  word-break: break-all;
+}
+
+.media-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border-card);
+  font-size: 13px;
+}
+
+.media-edit label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--text-secondary);
+}

@@ -48,7 +48,11 @@ data class ExerciseMeta(
     val sets: Int,
     val repsPerSet: Int,
     val requiresFullBody: Boolean,
-    val restSeconds: Int = 30
+    val restSeconds: Int = 30,
+    // 服务端下发的示范视频；为空时回退 APK 内置演示视频。
+    val videoUri: String? = null,
+    val watermarkText: String? = null,
+    val creditLine: String? = null
 )
 
 /** 首页「开始今日训练」与训练列表共用同一训练条目代码。 */

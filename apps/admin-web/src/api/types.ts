@@ -35,6 +35,10 @@ export type SessionBatchResult = components["schemas"]["SessionBatchResult"];
 export type NotificationDelivery = components["schemas"]["NotificationDelivery"];
 export type Alert = components["schemas"]["Alert"];
 export type AlertPage = components["schemas"]["AlertPage"];
+export type MediaAssetStatus = components["schemas"]["MediaAssetStatus"];
+export type MediaAsset = components["schemas"]["MediaAsset"];
+export type MediaAssetPage = components["schemas"]["MediaAssetPage"];
+export type MediaAssetPatch = components["schemas"]["MediaAssetPatch"];
 export type ResearchOverview = components["schemas"]["ResearchOverview"];
 export type ResearchDataQuality = components["schemas"]["ResearchDataQuality"];
 export type ResearchBucket = components["schemas"]["ResearchBucket"];
@@ -58,6 +62,10 @@ export type SessionBatchRequest =
   paths["/sessions"]["post"]["requestBody"]["content"]["application/json"];
 export type AlertUpdate =
   paths["/alerts/{alertId}"]["patch"]["requestBody"]["content"]["application/json"];
+export type MediaAssetListQuery =
+  paths["/media-assets"]["get"]["parameters"]["query"];
+export type MediaAssetUploadForm =
+  paths["/media-assets/upload"]["post"]["requestBody"]["content"]["multipart/form-data"];
 
 // ---------- 查询参数 ----------
 export type PatientListQuery = NonNullable<

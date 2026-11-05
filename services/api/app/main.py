@@ -1,9 +1,11 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.config import get_settings
@@ -14,6 +16,7 @@ from app.routers import (
     assessments,
     auth,
     exercises,
+    media,
     patients,
     prescriptions,
     research,
@@ -90,5 +93,11 @@ for router in (
     sessions.router,
     alerts.router,
     research.router,
+    media.router,
 ):
     app.include_router(router, prefix=API_PREFIX)
+
+# 本地开发直接由 API 托管媒体文件；生产环境由 nginx 指向同一目录
+# （见 deploy/nginx/rehab-media.conf），此时该挂载前缀不会被命中。
+Path(settings.media_root).mkdir(parents=True, exist_ok=True)
+app.mount("/media", StaticFiles(directory=settings.media_root), name="media")

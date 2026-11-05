@@ -44,6 +44,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.rehabtrainer.app.core.pose.CaptureGate
 import com.rehabtrainer.app.core.pose.PoseAnalyzer
 import com.rehabtrainer.app.core.pose.PoseFrame
+import com.rehabtrainer.app.core.training.InstructionalVideoSource
 import com.rehabtrainer.app.core.training.SetProgress
 import com.rehabtrainer.app.core.training.TrainingDisplayMode
 import com.rehabtrainer.app.core.training.TrainingDisplayPolicy
@@ -75,6 +76,11 @@ fun TrainingScreen(
     val currentExercise = DEFAULT_EXERCISES.firstOrNull { it.code == exerciseCode }
         ?: DEFAULT_EXERCISES.first()
     val requiresFullBody = currentExercise.requiresFullBody
+    val videoSource = InstructionalVideoSource(
+        remoteUrl = currentExercise.videoUri,
+        watermarkText = currentExercise.watermarkText,
+        creditLine = currentExercise.creditLine
+    )
 
     var hasCameraPermission by remember {
         mutableStateOf(
@@ -348,7 +354,8 @@ fun TrainingScreen(
                             modifier = Modifier
                                 .weight(0.38f)
                                 .fillMaxWidth(),
-                            isPaused = isPaused
+                            isPaused = isPaused,
+                            videoSource = videoSource
                         )
 
                         PatientRealtimeCameraPane(
@@ -381,7 +388,8 @@ fun TrainingScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxHeight(),
-                            isPaused = isPaused
+                            isPaused = isPaused,
+                            videoSource = videoSource
                         )
 
                         PatientRealtimeCameraPane(
@@ -414,7 +422,8 @@ fun TrainingScreen(
                             modifier = Modifier
                                 .weight(0.40f)
                                 .fillMaxHeight(),
-                            isPaused = isPaused
+                            isPaused = isPaused,
+                            videoSource = videoSource
                         )
 
                         PatientRealtimeCameraPane(

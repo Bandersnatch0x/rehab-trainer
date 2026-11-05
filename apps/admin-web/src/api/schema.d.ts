@@ -894,6 +894,168 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/media-assets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 列出本机构的视频资产
+         * @description 仅 care_admin 与 rehab_therapist。按机构隔离，跨机构不可见。
+         */
+        get: {
+            parameters: {
+                query?: {
+                    status?: components["schemas"]["MediaAssetStatus"];
+                    exerciseCode?: string;
+                    /**
+                     * @description 不透明游标，取自上一页的 `nextCursor`。服务端按排序键定位，
+                     *     翻页期间有新增或删除也不会重复或漏行。客户端不应解析其内容。
+                     */
+                    cursor?: components["parameters"]["Cursor"];
+                    limit?: components["parameters"]["Limit"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description 视频资产列表 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MediaAssetPage"];
+                    };
+                };
+                403: components["responses"]["Forbidden"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media-assets/upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 上传训练视频（multipart）
+         * @description 仅 care_admin 与 rehab_therapist。服务端只接受 MP4，按文件头魔数校验
+         *     真实类型，不信任扩展名与 `Content-Type`；文件名由服务端生成
+         *     （UUID + `.mp4`），客户端提供的文件名被忽略；落盘路径固定在配置的
+         *     媒体静态根下，拒绝任何 `..` 或绝对路径；超过单文件上限返回 413。
+         *
+         *     上传结果为 `draft`，需通过 PATCH 置为 `published` 才会下发。
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "multipart/form-data": {
+                        /**
+                         * Format: binary
+                         * @description MP4 视频文件
+                         */
+                        file: string;
+                        /** @description 关联训练条目；留空表示通用素材 */
+                        exerciseCode?: string;
+                        /** @description 适用 H-Y 分期，逗号分隔，如 `1,2,3`；留空表示尚未裁决 */
+                        applicableStages?: string;
+                        /** @description 水印文字（客户端叠加显示，不烧录进文件） */
+                        watermarkText?: string;
+                        /** @description 来源署名 */
+                        creditLine?: string;
+                        note?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description 已上传的草稿资产 */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MediaAsset"];
+                    };
+                };
+                403: components["responses"]["Forbidden"];
+                422: components["responses"]["ValidationError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media-assets/{assetId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * 修改水印、署名、适用分期或上下架状态
+         * @description 状态置为 `published` 时要求已设置适用分期，否则返回 422；
+         *     `published` / `retired` 变更写审计 `media.published` / `media.retired`。
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    assetId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["MediaAssetPatch"];
+                };
+            };
+            responses: {
+                /** @description 已更新 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MediaAsset"];
+                    };
+                };
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+            };
+        };
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1031,14 +1193,65 @@ export interface components {
             dangerSignals?: string[];
             variants?: components["schemas"]["ExerciseVariant"][];
             defaultDosage?: components["schemas"]["Dosage"];
-            /** Format: uri */
+            /**
+             * Format: uri
+             * @description 服务端按患者 H-Y 分期挑选的已上架视频；无匹配时不下发。
+             */
             videoUri?: string;
             /** Format: uri */
             audioUri?: string;
+            /** @description 视频来源署名，播放时展示。 */
+            videoCreditLine?: string;
+            /** @description 水印文字，客户端以叠加层显示，不烧录进文件。 */
+            videoWatermarkText?: string;
         };
         ExercisePage: {
             items: components["schemas"]["Exercise"][];
             nextCursor?: string | null;
+        };
+        /** @enum {string} */
+        MediaAssetStatus: "draft" | "published" | "retired";
+        MediaAsset: {
+            id: string;
+            /** @description 为空表示通用素材。 */
+            exerciseCode?: string | null;
+            /**
+             * Format: uri
+             * @description 拼装后的可访问地址，仅由服务端生成。
+             */
+            publicUrl: string;
+            /** @description 服务端按魔数认定的类型，恒为 video/mp4。 */
+            contentType: string;
+            sizeBytes: number;
+            /** @description 文件摘要，用于去重与完整性校验。 */
+            sha256: string;
+            /** @description 水印文字，客户端叠加显示，不烧录进文件。 */
+            watermarkText?: string | null;
+            /** @description 来源署名。 */
+            creditLine?: string | null;
+            status: components["schemas"]["MediaAssetStatus"];
+            /** @description 适用 H-Y 分期；空数组表示尚未裁决，不下发。 */
+            applicableStages: number[];
+            /** Format: date-time */
+            publishedAt?: string | null;
+            /** Format: date-time */
+            retiredAt?: string | null;
+            createdBy?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        MediaAssetPage: {
+            items: components["schemas"]["MediaAsset"][];
+            nextCursor?: string | null;
+        };
+        MediaAssetPatch: {
+            watermarkText?: string;
+            creditLine?: string;
+            applicableStages?: number[];
+            status?: components["schemas"]["MediaAssetStatus"];
+            note?: string;
         };
         PrescriptionItem: {
             exerciseCode: string;

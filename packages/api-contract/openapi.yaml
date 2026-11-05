@@ -31,6 +31,7 @@ tags:
   - name: sessions
   - name: alerts
   - name: research
+  - name: media
 
 paths:
   /auth/bind:
@@ -550,6 +551,113 @@ paths:
         "403":
           $ref: "#/components/responses/Forbidden"
 
+  /media-assets:
+    get:
+      tags: [media]
+      summary: 列出本机构的视频资产
+      description: |
+        仅 care_admin 与 rehab_therapist。按机构隔离，跨机构不可见。
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/MediaAssetStatus"
+        - name: exerciseCode
+          in: query
+          schema:
+            type: string
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: 视频资产列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaAssetPage"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /media-assets/upload:
+    post:
+      tags: [media]
+      summary: 上传训练视频（multipart）
+      description: |
+        仅 care_admin 与 rehab_therapist。服务端只接受 MP4，按文件头魔数校验
+        真实类型，不信任扩展名与 `Content-Type`；文件名由服务端生成
+        （UUID + `.mp4`），客户端提供的文件名被忽略；落盘路径固定在配置的
+        媒体静态根下，拒绝任何 `..` 或绝对路径；超过单文件上限返回 413。
+
+        上传结果为 `draft`，需通过 PATCH 置为 `published` 才会下发。
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: MP4 视频文件
+                exerciseCode:
+                  type: string
+                  description: 关联训练条目；留空表示通用素材
+                applicableStages:
+                  type: string
+                  description: 适用 H-Y 分期，逗号分隔，如 `1,2,3`；留空表示尚未裁决
+                watermarkText:
+                  type: string
+                  description: 水印文字（客户端叠加显示，不烧录进文件）
+                creditLine:
+                  type: string
+                  description: 来源署名
+                note:
+                  type: string
+      responses:
+        "201":
+          description: 已上传的草稿资产
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaAsset"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /media-assets/{assetId}:
+    patch:
+      tags: [media]
+      summary: 修改水印、署名、适用分期或上下架状态
+      description: |
+        状态置为 `published` 时要求已设置适用分期，否则返回 422；
+        `published` / `retired` 变更写审计 `media.published` / `media.retired`。
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MediaAssetPatch"
+      responses:
+        "200":
+          description: 已更新
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaAsset"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -897,9 +1005,16 @@ components:
         videoUri:
           type: string
           format: uri
+          description: 服务端按患者 H-Y 分期挑选的已上架视频；无匹配时不下发。
         audioUri:
           type: string
           format: uri
+        videoCreditLine:
+          type: string
+          description: 视频来源署名，播放时展示。
+        videoWatermarkText:
+          type: string
+          description: 水印文字，客户端以叠加层显示，不烧录进文件。
 
     ExercisePage:
       type: object
@@ -912,6 +1027,108 @@ components:
         nextCursor:
           type: string
           nullable: true
+
+    MediaAssetStatus:
+      type: string
+      enum: [draft, published, retired]
+
+    MediaAsset:
+      type: object
+      required:
+        - id
+        - publicUrl
+        - contentType
+        - sizeBytes
+        - sha256
+        - status
+        - applicableStages
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+        exerciseCode:
+          type: string
+          nullable: true
+          description: 为空表示通用素材。
+        publicUrl:
+          type: string
+          format: uri
+          description: 拼装后的可访问地址，仅由服务端生成。
+        contentType:
+          type: string
+          description: 服务端按魔数认定的类型，恒为 video/mp4。
+        sizeBytes:
+          type: integer
+        sha256:
+          type: string
+          description: 文件摘要，用于去重与完整性校验。
+        watermarkText:
+          type: string
+          nullable: true
+          description: 水印文字，客户端叠加显示，不烧录进文件。
+        creditLine:
+          type: string
+          nullable: true
+          description: 来源署名。
+        status:
+          $ref: "#/components/schemas/MediaAssetStatus"
+        applicableStages:
+          type: array
+          description: 适用 H-Y 分期；空数组表示尚未裁决，不下发。
+          items:
+            type: integer
+            minimum: 1
+            maximum: 5
+        publishedAt:
+          type: string
+          format: date-time
+          nullable: true
+        retiredAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdBy:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    MediaAssetPage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/MediaAsset"
+        nextCursor:
+          type: string
+          nullable: true
+
+    MediaAssetPatch:
+      type: object
+      properties:
+        watermarkText:
+          type: string
+          maxLength: 128
+        creditLine:
+          type: string
+          maxLength: 255
+        applicableStages:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+            maximum: 5
+        status:
+          $ref: "#/components/schemas/MediaAssetStatus"
+        note:
+          type: string
 
     PrescriptionItem:
       type: object

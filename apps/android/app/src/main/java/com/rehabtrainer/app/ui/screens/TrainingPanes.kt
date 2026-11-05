@@ -30,6 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.camera.view.PreviewView
 import com.rehabtrainer.app.R
+import com.rehabtrainer.app.core.training.InstructionalVideoSource
 import com.rehabtrainer.app.core.training.SetProgress
 import com.rehabtrainer.app.core.training.TrainingDisplayMode
 import com.rehabtrainer.app.ui.ExerciseMeta
@@ -352,14 +354,22 @@ internal fun VoiceGuidanceBanner(
     }
 }
 
+/** APK 内置演示视频地址：服务端未下发视频或加载失败时使用。 */
+private fun demoVideoUri(context: android.content.Context): String =
+    "android.resource://${context.packageName}/${R.raw.demo_exercise}"
+
 /**
  * 教学视频播放区。离开组合（切到纯拍摄模式）时通过 onRelease 停止并释放播放器。
+ *
+ * 视频优先播放服务端下发的地址；地址缺失或播放失败时回退到 APK 内置演示视频，
+ * 训练不中断。水印与署名由客户端叠加（见 [InstructionalVideoSource]），不烧录进文件。
  */
 @Composable
 internal fun InstructionalVideoPane(
     videoTitle: String,
     modifier: Modifier = Modifier,
-    isPaused: Boolean
+    isPaused: Boolean,
+    videoSource: InstructionalVideoSource = InstructionalVideoSource()
 ) {
     Card(
         modifier = modifier,
@@ -371,26 +381,40 @@ internal fun InstructionalVideoPane(
         border = BorderStroke(1.5.dp, Color(0xFF334155))
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            AndroidView(
-                factory = { context ->
-                    VideoView(context).apply {
-                        setVideoURI(
-                            Uri.parse("android.resource://${context.packageName}/${R.raw.demo_exercise}")
-                        )
-                        setOnPreparedListener { player ->
-                            player.isLooping = true
-                            // 教学视频静音，音频通道留给动作语音与节拍音。
-                            player.setVolume(0f, 0f)
-                            if (!isPaused) start()
+            // 地址变化时重建播放器，避免在同一个 VideoView 上反复 setVideoURI。
+            key(videoSource.resolvedRemoteUrl) {
+                AndroidView(
+                    factory = { context ->
+                        val demoUri = demoVideoUri(context)
+                        val initialUri = videoSource.resolvedRemoteUrl ?: demoUri
+                        VideoView(context).apply {
+                            tag = initialUri
+                            setVideoURI(Uri.parse(initialUri))
+                            setOnPreparedListener { player ->
+                                player.isLooping = true
+                                // 教学视频静音，音频通道留给动作语音与节拍音。
+                                player.setVolume(0f, 0f)
+                                if (!isPaused) start()
+                            }
+                            setOnErrorListener { _, _, _ ->
+                                // 远端不可用时回退内置演示视频；内置视频再失败就停止重试。
+                                if (tag != demoUri) {
+                                    tag = demoUri
+                                    setVideoURI(Uri.parse(demoUri))
+                                    true
+                                } else {
+                                    false
+                                }
+                            }
                         }
-                    }
-                },
-                update = { view ->
-                    if (isPaused) view.pause() else if (!view.isPlaying) view.start()
-                },
-                onRelease = { view -> view.stopPlayback() },
-                modifier = Modifier.fillMaxSize()
-            )
+                    },
+                    update = { view ->
+                        if (isPaused) view.pause() else if (!view.isPlaying) view.start()
+                    },
+                    onRelease = { view -> view.stopPlayback() },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
 
             Column(
                 modifier = Modifier
@@ -426,6 +450,38 @@ internal fun InstructionalVideoPane(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
+                }
+
+                if (videoSource.hasOverlay) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // 署名左下、水印右下，模拟播放器叠加，兼顾版权标注可读性。
+                        Text(
+                            text = videoSource.creditLabel.orEmpty(),
+                            fontSize = 12.sp,
+                            color = Color(0xB3FFFFFF),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
+                        )
+                        if (videoSource.watermarkLabel != null) {
+                            Surface(
+                                color = Color(0x73000000),
+                                shape = RoundedCornerShape(4.dp)
+                            ) {
+                                Text(
+                                    text = videoSource.watermarkLabel.orEmpty(),
+                                    fontSize = 12.sp,
+                                    color = Color(0xE0FFFFFF),
+                                    maxLines = 1,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
+                                )
+                            }
+                        }
+                    }
                 }
 
                 Row(

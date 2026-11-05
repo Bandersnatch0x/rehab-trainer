@@ -14,6 +14,7 @@ from app.core.errors import api_error
 from app.core.pagination import decode_cursor, encode_cursor
 from app.models.clinical import Patient
 from app.models.content import Exercise
+from app.routers.media import resolve_video_payload
 from app.schemas.enums import ExerciseCategory
 from app.schemas.exercise import ExerciseOut, ExercisePage
 
@@ -62,6 +63,30 @@ def _visible_for_stage(exercise: Exercise, stage_filter: int) -> bool:
     return bool(stages) and stage_filter in stages
 
 
+def _with_media(
+    db: Session,
+    principal: Principal,
+    rows: list[Exercise],
+    patient: Patient | None,
+    stage_filter: int | None = None,
+) -> list[ExerciseOut]:
+    """把服务端挑选的视频字段注入响应。
+
+    患者上下文按本人 H-Y 分期挑选；临床角色按查询里的 stage 挑选，
+    两者都没有时取不限分期的已上架资产。分期本身不回传（D20）。
+    """
+    if patient is not None:
+        stage = patient.hy_stage
+    else:
+        stage = stage_filter
+    outputs = []
+    for row in rows:
+        payload = resolve_video_payload(db, principal.org_id, row.code, stage)
+        base = ExerciseOut.model_validate(row)
+        outputs.append(base.model_copy(update=payload) if payload else base)
+    return outputs
+
+
 @router.get("", response_model=ExercisePage, response_model_exclude_none=True)
 def list_exercises(
     principal: Principal = Depends(get_principal),
@@ -93,7 +118,7 @@ def list_exercises(
     page = visible[:limit]
     has_more = len(visible) > limit
     return ExercisePage(
-        items=[ExerciseOut.model_validate(row) for row in page],
+        items=_with_media(db, principal, page, patient, stage),
         next_cursor=encode_cursor(k=page[-1].code) if has_more and page else None,
     )
 
@@ -114,4 +139,4 @@ def get_exercise(
     if patient is not None and not _visible_for_patient(exercise, patient, None):
         # 患者上下文下，不可用条目与不存在同义，避免暴露未发布内容。
         raise api_error(404, "NOT_FOUND", "训练条目不存在")
-    return ExerciseOut.model_validate(exercise)
+    return _with_media(db, principal, [exercise], patient)[0]

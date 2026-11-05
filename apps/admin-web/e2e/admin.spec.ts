@@ -223,3 +223,65 @@ test('科研页展示聚合画像且不显示被抑制的小样本', async ({ pa
   expect(body.minCellCount).toBe(5);
   expect(JSON.stringify(body)).not.toMatch(/strideLengthCm|gaitSpeedMps|swingPhasePercent|rasApplicab/);
 });
+
+/** 最小 MP4 头：上传接口只按魔数（ftyp + 品牌）判定类型。 */
+function mp4Buffer(): Buffer {
+  return Buffer.concat([
+    Buffer.from([0x00, 0x00, 0x00, 0x18]),
+    Buffer.from('ftypisom', 'latin1'),
+    Buffer.from([0x00, 0x00, 0x02, 0x00]),
+    Buffer.alloc(16, 0),
+  ]);
+}
+
+test('上传视频为草稿，上架后才下发', async ({ page, data }) => {
+  await login(page, data);
+  await page.getByRole('link', { name: '训练视频' }).click();
+  await expect(page.getByRole('heading', { name: '训练视频管理' })).toBeVisible();
+  await expect(page.getByText('还没有符合条件的视频资产。')).toBeVisible();
+
+  const form = page.locator('form.media-upload');
+  await form.getByLabel('视频文件（仅 MP4）').setInputFiles({
+    name: 'demo.mp4',
+    mimeType: 'video/mp4',
+    buffer: mp4Buffer(),
+  });
+  await form.getByLabel('关联训练条目').selectOption('ex-stretch-01');
+  await form.getByLabel('水印文字').fill('演示水印');
+  await form.getByLabel('来源署名').fill('来源：测试机构');
+  await form.getByRole('button', { name: '上传为草稿' }).click();
+  await expect(page.getByText(/已上传草稿资产/)).toBeVisible();
+
+  const card = page.locator('.media-card').first();
+  await expect(card.locator('.media-badge')).toHaveText('草稿');
+  await expect(card).toContainText('演示水印');
+  await expect(card).toContainText('来源：测试机构');
+
+  page.on('dialog', (dialog) => void dialog.accept());
+  await card.getByRole('button', { name: '上架' }).click();
+  await expect(card.locator('.media-badge')).toHaveText('已上架');
+  await expect(card.getByText('上架时间').locator('..')).not.toContainText('—');
+});
+
+test('未设置适用分期的视频不能上架', async ({ page, data }) => {
+  await login(page, data);
+  await page.goto('/media-assets');
+  const form = page.locator('form.media-upload');
+  await form.getByLabel('视频文件（仅 MP4）').setInputFiles({
+    name: 'no-stage.mp4',
+    mimeType: 'video/mp4',
+    buffer: mp4Buffer(),
+  });
+  for (const stage of ['H-Y 1 期', 'H-Y 2 期', 'H-Y 3 期', 'H-Y 4 期']) {
+    await form.getByLabel(stage, { exact: true }).uncheck();
+  }
+  await expect(form.getByText(/未选择分期时上架会被拒绝/)).toBeVisible();
+  await form.getByRole('button', { name: '上传为草稿' }).click();
+  await expect(page.getByText(/已上传草稿资产/)).toBeVisible();
+
+  page.on('dialog', (dialog) => void dialog.accept());
+  const card = page.locator('.media-card').first();
+  await card.getByRole('button', { name: '上架' }).click();
+  await expect(page.getByText('未设置适用分期，上架后不会下发任何患者')).toBeVisible();
+  await expect(card.locator('.media-badge')).toHaveText('草稿');
+});

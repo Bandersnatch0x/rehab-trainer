@@ -42,6 +42,9 @@ class ExerciseOut(APIModel):
     default_dosage: Dosage | None = None
     video_uri: str | None = None
     audio_uri: str | None = None
+    # 版权标注：来源署名与水印文字。水印由客户端叠加显示，不烧录进文件。
+    video_credit_line: str | None = None
+    video_watermark_text: str | None = None
 
 
 class ExercisePage(APIModel):

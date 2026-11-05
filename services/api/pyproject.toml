@@ -14,6 +14,8 @@ dependencies = [
   "pydantic>=2.7,<3.0",
   "pydantic-settings>=2.3,<3.0",
   "pyjwt>=2.8,<3.0",
+  # 媒体上传用 multipart/form-data，FastAPI 的 File/UploadFile 依赖该包。
+  "python-multipart>=0.0.9,<1.0",
 ]
 
 [project.optional-dependencies]

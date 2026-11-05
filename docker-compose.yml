@@ -21,6 +21,11 @@ services:
       REHAB_DATABASE_URL: ${REHAB_DATABASE_URL:?Set REHAB_DATABASE_URL}
       REHAB_JWT_SECRET: ${REHAB_JWT_SECRET:?Set REHAB_JWT_SECRET}
       REHAB_AUTO_CREATE_SCHEMA: "false"
+      # 上传目录挂在持久卷上，避免重建容器丢视频。
+      REHAB_MEDIA_ROOT: /data/media
+      REHAB_MEDIA_PUBLIC_BASE_URL: ${REHAB_MEDIA_PUBLIC_BASE_URL:-http://127.0.0.1:8000/media}
+    volumes:
+      - media_data:/data/media
     ports:
       - "127.0.0.1:${API_PORT:-8000}:8000"
     depends_on:
@@ -29,3 +34,4 @@ services:
     restart: unless-stopped
 volumes:
   postgres_data:
+  media_data:

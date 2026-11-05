@@ -43,6 +43,12 @@ class SupportLevel(StrEnum):
     seated = "seated"
 
 
+class MediaAssetStatus(StrEnum):
+    draft = "draft"
+    published = "published"
+    retired = "retired"
+
+
 class PrescriptionStatus(StrEnum):
     draft = "draft"
     active = "active"
