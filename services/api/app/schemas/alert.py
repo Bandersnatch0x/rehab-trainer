@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from pydantic import Field
+
 from app.schemas.common import APIModel
 from app.schemas.enums import (
     AlertActionStatus,
@@ -35,4 +37,4 @@ class AlertPage(APIModel):
 
 class AlertPatch(APIModel):
     status: AlertActionStatus
-    note: str | None = None
+    note: str | None = Field(default=None, max_length=1024)

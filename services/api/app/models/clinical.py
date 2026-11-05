@@ -7,6 +7,7 @@ from sqlalchemy import (
     DateTime,
     Float,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
@@ -78,6 +79,10 @@ class StageConfirmation(Base):
 
 class Assessment(Base):
     __tablename__ = "assessment"
+    __table_args__ = (
+        # 患者详情按患者 + 评估时间倒序分页。
+        Index("ix_assessment_patient_assessed", "patient_id", "assessed_at", "id"),
+    )
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     org_id: Mapped[str] = mapped_column(

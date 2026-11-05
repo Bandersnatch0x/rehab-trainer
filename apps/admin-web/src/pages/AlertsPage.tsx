@@ -44,7 +44,7 @@ export default function AlertsPage() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [pendingId, setPendingId] = useState<string | null>(null);
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const [capped, setCapped] = useState(false);
 
   // 跟随游标取全量后在本地筛选：计数不会被分页截断，也不会随筛选互相污染。
@@ -91,12 +91,16 @@ export default function AlertsPage() {
   async function handleStatus(
     alert: Alert,
     status: "acknowledged" | "followed_up" | "closed",
-    note: string,
   ) {
-    setPendingId(alert.id);
+    setPendingIds((prev) => new Set(prev).add(alert.id));
     setError(null);
-    const result = await updateAlert(alert.id, { status, note });
-    setPendingId(null);
+    // 不发送固定 note：避免覆盖接口或他处写入的处置说明。
+    const result = await updateAlert(alert.id, { status });
+    setPendingIds((prev) => {
+      const next = new Set(prev);
+      next.delete(alert.id);
+      return next;
+    });
     if (!result.ok) {
       setError(`预警 ${alert.id} 状态更新失败：${result.error.message}`);
       return;
@@ -227,8 +231,8 @@ export default function AlertsPage() {
                         <button
                           className="btn-secondary"
                           style={{ padding: "4px 12px", minHeight: 32, fontSize: 13 }}
-                          disabled={pendingId === a.id}
-                          onClick={() => void handleStatus(a, "acknowledged", "管理端确认收到")}
+                          disabled={pendingIds.has(a.id)}
+                          onClick={() => void handleStatus(a, "acknowledged")}
                         >
                           确认
                         </button>
@@ -237,18 +241,18 @@ export default function AlertsPage() {
                         <button
                           className="btn-primary"
                           style={{ padding: "4px 12px", minHeight: 32, fontSize: 13 }}
-                          disabled={pendingId === a.id}
-                          onClick={() => void handleStatus(a, "followed_up", "管理端登记随访")}
+                          disabled={pendingIds.has(a.id)}
+                          onClick={() => void handleStatus(a, "followed_up")}
                         >
-                          {pendingId === a.id ? "登记中…" : "登记随访"}
+                          {pendingIds.has(a.id) ? "登记中…" : "登记随访"}
                         </button>
                       ) : null}
                       {a.status !== "closed" ? (
                         <button
                           className="btn-secondary"
                           style={{ padding: "4px 12px", minHeight: 32, fontSize: 13 }}
-                          disabled={pendingId === a.id}
-                          onClick={() => void handleStatus(a, "closed", "管理端关闭预警")}
+                          disabled={pendingIds.has(a.id)}
+                          onClick={() => void handleStatus(a, "closed")}
                         >
                           关闭
                         </button>

@@ -57,3 +57,46 @@ def test_alert_cross_org_update_rejected(client, seed):
     )
     assert response.status_code == 403
     assert response.json()["code"] == "FORBIDDEN"
+
+
+def test_patient_does_not_see_clinical_note_or_handler(client, seed):
+    admin = login(client, "admin-a")
+    updated = client.patch(
+        f"{API}/alerts/{seed['alert_a']}",
+        json={"status": "followed_up", "note": "内部评估：家属依从性差"},
+        headers=auth_headers(admin),
+    )
+    assert updated.status_code == 200, updated.text
+
+    patient = login(client, "patient-a")
+    items = client.get(f"{API}/alerts", headers=auth_headers(patient)).json()["items"]
+    assert items[0]["status"] == "followed_up"
+    # 处置说明与处理人是临床内部信息，患者端不得读取。
+    assert items[0]["note"] is None
+    assert items[0]["handledBy"] is None
+
+
+def test_closed_alert_cannot_reopen(client, seed):
+    admin = login(client, "admin-a")
+    closed = client.patch(
+        f"{API}/alerts/{seed['alert_a']}",
+        json={"status": "closed"},
+        headers=auth_headers(admin),
+    )
+    assert closed.status_code == 200, closed.text
+
+    reopen = client.patch(
+        f"{API}/alerts/{seed['alert_a']}",
+        json={"status": "acknowledged"},
+        headers=auth_headers(admin),
+    )
+    assert reopen.status_code == 409
+    assert reopen.json()["code"] == "INVALID_TRANSITION"
+
+    # 终态的幂等重复提交仍然允许。
+    again = client.patch(
+        f"{API}/alerts/{seed['alert_a']}",
+        json={"status": "closed"},
+        headers=auth_headers(admin),
+    )
+    assert again.status_code == 200

@@ -10,13 +10,15 @@ from app.schemas.enums import (
 
 
 class Dosage(APIModel):
-    sets: int | None = Field(default=None, ge=0)
-    repetitions: int | None = Field(default=None, ge=0)
+    """剂量。上限是资源与安全兜底，不是临床规则；临床分界仍待签核（C3/C4）。"""
+
+    sets: int | None = Field(default=None, ge=0, le=50)
+    repetitions: int | None = Field(default=None, ge=0, le=500)
     # TODO: 待临床签核（C3）：BPM 个体化规则，本服务不计算 BPM。
-    bpm: int | None = Field(default=None, ge=0)
-    duration_minutes: float | None = Field(default=None, ge=0)
-    frequency_per_week: int | None = Field(default=None, ge=0)
-    rest_seconds: int | None = Field(default=None, ge=0)
+    bpm: int | None = Field(default=None, ge=0, le=240)
+    duration_minutes: float | None = Field(default=None, ge=0, le=600)
+    frequency_per_week: int | None = Field(default=None, ge=0, le=14)
+    rest_seconds: int | None = Field(default=None, ge=0, le=3600)
 
 
 class ExerciseVariantOut(APIModel):

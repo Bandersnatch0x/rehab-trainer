@@ -34,11 +34,11 @@
 
 | 项目 | 结果 | 证据 | 备注 |
 | --- | --- | --- | --- |
-| 后端测试 | 101 项通过，0 失败 | `python -m pytest -q services/api/tests` | 覆盖契约操作集、参数与响应字段、机构隔离、分页、处方乐观锁、记录幂等、科研抑制、分期准入 |
+| 后端测试 | 108 项通过，0 失败 | `python -m pytest -q services/api/tests` | 覆盖契约操作集、参数与响应字段、机构隔离、分页、处方乐观锁、记录幂等、科研抑制、分期准入 |
 | 契约一致性 | 21 个路径、25 个操作；实现与契约的操作集、参数、成功响应字段一致 | `services/api/tests/test_contract.py` 4 项；契约 `servers[0]` 前缀 `/v1` | 实现多一个或少一个操作都会失败 |
-| 部署自检 | 17 张业务表；SQLite 升级、重复升级、降级、再升级；模型差异为空；PostgreSQL 离线 SQL；YAML | `python deploy/verify.py` | 输出 `PASS: 17 tables; ...`；当前迁移 head 为 `0003` |
+| 部署自检 | 17 张业务表；SQLite 升级、重复升级、降级、再升级；模型差异为空；PostgreSQL 离线 SQL；YAML | `python deploy/verify.py` | 输出 `PASS: 17 tables; ...`；当前迁移 head 为 `0004` |
 | 管理端类型检查 | 通过 | `cd apps/admin-web && npx tsc --noEmit` | 退出码 0 |
-| 管理端 E2E | 22 项通过，0 失败 | `cd apps/admin-web && npx playwright test` | 覆盖登录与 403、分期入口权限、患者筛选与详情、处方冲突与读取失败保护、预警确认/随访/关闭与持久化、随访台账、患者超过单页上限、科研小样本抑制、404、视频上架门禁、身体感受记录回读、新建患者持久化、多条目剂量调整、审计日志与 CSV 导出 |
+| 管理端 E2E | 23 项通过，0 失败 | `cd apps/admin-web && npx playwright test` | 覆盖登录与 403、分期入口权限、患者筛选与详情、处方冲突与读取失败保护、预警确认/随访/关闭与持久化、随访台账、患者超过单页上限、科研小样本抑制、404、视频上架门禁、身体感受记录回读、新建患者持久化、多条目剂量调整、审计日志服务端筛选与 CSV 导出、处方条目添加/移除 |
 | 小程序类型检查 | 通过 | `cd apps/miniprogram && npx --no-install tsc --noEmit` | 退出码 0 |
 | 小程序行为测试 | 17 项通过，0 失败 | `cd apps/miniprogram && node --test tests/patient-data.cjs` | 以 `wx` 桩驱动请求层与五个页面 |
 | 小程序静态检查 | 通过 | `cd apps/miniprogram && python tests/static_check.py .` | 页面与绑定一致性、事件处理函数存在性、患者端禁用词、WCAG AA 对比度 |
@@ -46,7 +46,7 @@
 | Android 构建 | `assembleDebug` 成功 | `cd apps/android && ./gradlew.bat :app:assembleDebug --no-daemon` | 生成调试 APK；未安装到真机 |
 | API 联调 | 25 个契约操作全部通过（21 个路径） | `python scripts/smoke-api.py --config .agent/tmp/smoke-config.json` | 覆盖全部契约操作，含科研聚合端点与媒体上传/上架；退出码 0 |
 | 联调脚本回归 | 2 项通过 | `python -m unittest discover -s scripts -p "test_*.py"` | 覆盖联调脚本自身行为 |
-| 本地容器与 PostgreSQL | 见 `docs/deployment/README.md` 的「容器与真实 PostgreSQL 验证（2026-11-05）」表 | 该记录由部署轮次在 WSL2 内实跑 | 该证据对应迁移 `0001` 且当时契约为 18 个操作；当前 head 为 `0003`、契约为 25 个操作，未在容器内复跑 |
+| 本地容器与 PostgreSQL | 见 `docs/deployment/README.md` 的「容器与真实 PostgreSQL 验证（2026-11-05）」表 | 该记录由部署轮次在 WSL2 内实跑 | 该证据对应迁移 `0001` 且当时契约为 18 个操作；当前 head 为 `0004`、契约为 25 个操作，未在容器内复跑 |
 | 全量校验脚本 | 后端、部署自检、管理端构建、管理端 E2E、小程序、Android 各步全部通过 | `python scripts/verify_all.py` | 串行失败即停；Android 步骤已改用绝对路径调用 `gradlew.bat` |
 | 提交门禁 | `git diff --check` 通过 | 仓库根目录执行 | 仅覆盖空白与行尾错误 |
 

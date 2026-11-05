@@ -152,3 +152,39 @@ def test_prescription_is_therapist_only(client, seed):
     )
     assert response.status_code == 403
     assert response.json()["code"] == "FORBIDDEN"
+
+
+def test_create_rejects_duplicate_exercise_codes(client, seed):
+    token = login(client, "therapist-a")
+    body = _create_body(seed, exercise_code="ex-low")
+    body["items"] = [body["items"][0], body["items"][0]]
+    response = client.post(f"{API}/prescriptions", json=body, headers=auth_headers(token))
+    assert response.status_code == 422, response.text
+
+
+def test_create_rejects_out_of_range_dosage(client, seed):
+    token = login(client, "therapist-a")
+    body = _create_body(seed)
+    body["items"][0]["dosage"] = {"sets": 9999, "bpm": 99999}
+    response = client.post(f"{API}/prescriptions", json=body, headers=auth_headers(token))
+    assert response.status_code == 422, response.text
+
+
+def test_patch_rejects_duplicate_items(client, seed):
+    token = login(client, "therapist-a")
+    headers = auth_headers(token)
+    created = client.post(
+        f"{API}/prescriptions",
+        json=_create_body(seed),
+        headers=headers,
+    )
+    assert created.status_code == 201, created.text
+    prescription = created.json()
+
+    item = {"exerciseCode": "ex-low", "dosage": {"sets": 2}}
+    response = client.patch(
+        f"{API}/prescriptions/{prescription['id']}",
+        json={"items": [item, item]},
+        headers={**headers, "If-Match": prescription["version"]},
+    )
+    assert response.status_code == 422, response.text

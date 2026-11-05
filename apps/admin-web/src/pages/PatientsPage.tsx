@@ -27,6 +27,7 @@ export default function PatientsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [capped, setCapped] = useState(false);
+  const [reloadToken, setReloadToken] = useState(0);
 
   const [showCreate, setShowCreate] = useState(false);
   const [createName, setCreateName] = useState("");
@@ -84,7 +85,7 @@ export default function PatientsPage() {
     return () => {
       cancelled = true;
     };
-  }, [stage]);
+  }, [stage, reloadToken]);
 
   async function onCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -113,7 +114,8 @@ export default function PatientsPage() {
       setCreateError(result.error.message);
       return;
     }
-    setPatients((prev) => [result.data, ...prev]);
+    // 重新按当前筛选拉取，避免本地前插破坏筛选或与在途请求竞争。
+    setReloadToken((value) => value + 1);
     setShowCreate(false);
     setCreateName("");
     setCreateBirthYear("");

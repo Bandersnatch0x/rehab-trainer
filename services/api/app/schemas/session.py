@@ -7,7 +7,12 @@ from app.schemas.common import APIModel, ErrorBody
 
 
 class SessionRecordCreate(APIModel):
-    client_record_id: str = Field(min_length=1, max_length=128)
+    # 幂等键必须是客户端生成的受控标识；禁止 `= + - @` 等可被表格软件解释的字符。
+    client_record_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern=r"^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+    )
     patient_id: str = Field(min_length=1)
     prescription_id: str = Field(min_length=1)
     recorded_at: datetime

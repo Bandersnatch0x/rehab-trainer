@@ -33,6 +33,8 @@ export default function PatientDetailPage() {
   const [prescriptionError, setPrescriptionError] = useState<string | null>(null);
   const [sessionsError, setSessionsError] = useState<string | null>(null);
   const [assessmentsError, setAssessmentsError] = useState<string | null>(null);
+  const [assessmentsCapped, setAssessmentsCapped] = useState(false);
+  const [patientFailed, setPatientFailed] = useState(false);
 
   useEffect(() => {
     if (!patientId) {
@@ -51,6 +53,8 @@ export default function PatientDetailPage() {
     setPrescriptionError(null);
     setSessionsError(null);
     setAssessmentsError(null);
+    setAssessmentsCapped(false);
+    setPatientFailed(false);
 
     Promise.all([
       getPatient(patientId),
@@ -64,6 +68,7 @@ export default function PatientDetailPage() {
       setLoading(false);
       if (!patientResult.ok) {
         setError(patientResult.error.message);
+        setPatientFailed(true);
         return;
       }
       setPatient(patientResult.data);
@@ -83,6 +88,7 @@ export default function PatientDetailPage() {
 
       if (assessmentResult.ok) {
         setAssessments(assessmentResult.data.items);
+        setAssessmentsCapped(Boolean(assessmentResult.data.nextCursor));
       } else {
         setAssessmentsError(assessmentResult.error.message);
       }
@@ -293,6 +299,7 @@ export default function PatientDetailPage() {
         <div className="card-title">身体感受与评估记录</div>
         <p className="hint" style={{ margin: "0 0 12px" }}>
           量表分界值待临床签核，本页只展示患者提交的记录，不输出风险分级。
+          {assessmentsCapped ? " 仅显示最近 100 条。" : ""}
         </p>
         <div className="table-container">
           <table>
@@ -309,6 +316,10 @@ export default function PatientDetailPage() {
               {loading ? (
                 <tr>
                   <td colSpan={5}>正在读取评估记录…</td>
+                </tr>
+              ) : patientFailed ? (
+                <tr>
+                  <td colSpan={5}>患者档案读取失败，无法加载评估记录。</td>
                 </tr>
               ) : assessmentsError ? (
                 <tr>

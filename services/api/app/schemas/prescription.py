@@ -14,9 +14,15 @@ class PrescriptionItemIn(APIModel):
     dosage: Dosage | None = None
 
 
+def _reject_duplicate_codes(items: list[PrescriptionItemIn]) -> None:
+    codes = [item.exercise_code for item in items]
+    if len(set(codes)) != len(codes):
+        raise ValueError("同一训练条目不能重复")
+
+
 class PrescriptionCreate(APIModel):
     patient_id: str = Field(min_length=1)
-    items: list[PrescriptionItemIn] = Field(min_length=1)
+    items: list[PrescriptionItemIn] = Field(min_length=1, max_length=20)
     issued_at: datetime
     valid_from: datetime
     valid_until: datetime
@@ -29,13 +35,22 @@ class PrescriptionCreate(APIModel):
         start = to_utc_naive(self.valid_from)
         if until is not None and start is not None and until < start:
             raise ValueError("validUntil 不得早于 validFrom")
+        _reject_duplicate_codes(self.items)
         return self
 
 
 class PrescriptionPatch(APIModel):
-    items: list[PrescriptionItemIn] | None = None
+    items: list[PrescriptionItemIn] | None = Field(default=None, max_length=20)
     valid_until: datetime | None = None
-    note: str | None = None
+    note: str | None = Field(default=None, max_length=1024)
+
+    @model_validator(mode="after")
+    def _check_items(self) -> "PrescriptionPatch":
+        if self.items is not None:
+            if not self.items:
+                raise ValueError("处方至少保留一个训练条目")
+            _reject_duplicate_codes(self.items)
+        return self
 
 
 class PrescriptionItemOut(APIModel):

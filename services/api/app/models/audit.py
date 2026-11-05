@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import JSON, DateTime, ForeignKey, String
+from sqlalchemy import JSON, DateTime, ForeignKey, Index, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -10,6 +10,10 @@ from app.core.timeutils import utcnow
 
 class AuditEvent(Base):
     __tablename__ = "audit_event"
+    __table_args__ = (
+        # 审计页与合规导出按机构 + 时间倒序分页。
+        Index("ix_audit_event_org_created", "org_id", "created_at", "id"),
+    )
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     org_id: Mapped[str | None] = mapped_column(

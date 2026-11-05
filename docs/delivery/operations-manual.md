@@ -214,7 +214,7 @@ python -m unittest discover -s scripts -p "test_*.py"
 
 预期：
 
-- 后端测试 101 项全部通过。
+- 后端测试 108 项全部通过。
 - 部署自检输出 `PASS: 17 tables; SQLite upgrade/repeat/downgrade/upgrade; model diff empty; PostgreSQL SQL; YAML`。
 - 联调脚本回归测试 2 项通过。
 
@@ -226,7 +226,7 @@ npx tsc --noEmit
 npx playwright test
 ```
 
-预期：类型检查退出 0；E2E 22 项全部通过。
+预期：类型检查退出 0；E2E 23 项全部通过。
 
 ### 9.4 小程序
 

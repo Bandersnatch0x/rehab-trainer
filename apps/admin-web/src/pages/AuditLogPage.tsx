@@ -1,16 +1,34 @@
 import { useEffect, useState } from "react";
 import { listAuditEvents } from "../api/operations";
-import { formatServerTime, parseServerTime } from "../api/time";
+import { formatServerTime } from "../api/time";
 import type { AuditEvent } from "../api/types";
+
+type AuditQuery = {
+  action?: string;
+  resourceType?: string;
+  actorAccountId?: string;
+  from?: string;
+  to?: string;
+};
 
 const OUTCOME_LABEL: Record<string, string> = {
   success: "成功",
   denied: "已拒绝",
 };
 
-/** CSV 单元格转义：引号包裹并把内部引号翻倍。 */
+/** CSV 单元格转义：中和公式注入，再按引号包裹并把内部引号翻倍。 */
 function csvCell(value: string): string {
-  return `"${value.replace(/"/g, '""')}"`;
+  const safe = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+  return `"${safe.replace(/"/g, '""')}"`;
+}
+
+/** 日期输入转 ISO；缺时区按浏览器本地时区解释。 */
+function toIso(date: string, endOfDay: boolean): string | undefined {
+  if (!date) {
+    return undefined;
+  }
+  const value = new Date(`${date}T${endOfDay ? "23:59:59.999" : "00:00:00"}`);
+  return Number.isNaN(value.getTime()) ? undefined : value.toISOString();
 }
 
 export default function AuditLogPage() {
@@ -24,6 +42,8 @@ export default function AuditLogPage() {
   const [actor, setActor] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  // 筛选在服务端执行；未点「查询」前不改动已加载结果。
+  const [query, setQuery] = useState<AuditQuery>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -36,7 +56,8 @@ export default function AuditLogPage() {
       let cursor: string | undefined;
       do {
         const result = await listAuditEvents({
-          limit: 200,
+          limit: 100,
+          ...query,
           ...(cursor ? { cursor } : {}),
         });
         if (cancelled) {
@@ -69,28 +90,28 @@ export default function AuditLogPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [query]);
 
-  const from = fromDate ? new Date(`${fromDate}T00:00:00`) : null;
-  const to = toDate ? new Date(`${toDate}T23:59:59.999`) : null;
+  function applyFilters() {
+    setQuery({
+      ...(action.trim() ? { action: action.trim() } : {}),
+      ...(resourceType.trim() ? { resourceType: resourceType.trim() } : {}),
+      ...(actor.trim() ? { actorAccountId: actor.trim() } : {}),
+      ...(toIso(fromDate, false) ? { from: toIso(fromDate, false) } : {}),
+      ...(toIso(toDate, true) ? { to: toIso(toDate, true) } : {}),
+    });
+  }
 
-  const visible = events.filter((event) => {
-    if (action.trim() && !event.action.includes(action.trim())) {
-      return false;
-    }
-    if (resourceType.trim() && !(event.resourceType ?? "").includes(resourceType.trim())) {
-      return false;
-    }
-    if (actor.trim() && !(event.actorAccountId ?? "").includes(actor.trim())) {
-      return false;
-    }
-    const time = parseServerTime(event.createdAt);
-    if (time) {
-      if (from && time < from) return false;
-      if (to && time > to) return false;
-    }
-    return true;
-  });
+  function resetFilters() {
+    setAction("");
+    setResourceType("");
+    setActor("");
+    setFromDate("");
+    setToDate("");
+    setQuery({});
+  }
+
+  const visible = events;
 
   function exportCsv() {
     const header = ["时间", "操作人", "动作", "资源类型", "资源ID", "结果", "详情"];
@@ -125,7 +146,7 @@ export default function AuditLogPage() {
         <button
           className="btn-primary"
           onClick={exportCsv}
-          disabled={loading || visible.length === 0}
+          disabled={loading || capped || visible.length === 0}
         >
           导出 CSV
         </button>
@@ -160,12 +181,18 @@ export default function AuditLogPage() {
           <span>结束日期</span>
           <input type="date" value={toDate} onChange={(event) => setToDate(event.target.value)} />
         </label>
+        <button className="btn-primary" onClick={applyFilters} disabled={loading}>
+          查询
+        </button>
+        <button className="btn-secondary" onClick={resetFilters} disabled={loading}>
+          重置
+        </button>
         <span className="hint" style={{ marginLeft: "auto" }}>
           {loading
             ? "加载中…"
             : capped
-              ? `已加载 ${events.length} 条（达到 1000 条上限，请用筛选缩小范围）`
-              : `共 ${visible.length} / ${events.length} 条`}
+              ? `已加载 ${events.length} 条（达到 1000 条上限，请缩小筛选范围后重新查询；此时禁止导出）`
+              : `共 ${visible.length} 条`}
         </span>
       </div>
 

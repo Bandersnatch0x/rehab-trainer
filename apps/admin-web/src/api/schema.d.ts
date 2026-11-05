@@ -1229,8 +1229,12 @@ export interface components {
             /** @description 量表编码，如 HY_SELF / SARC_F / SARC_CALF / RIGIDITY_5 / STEADI / FES_I */
             instrument: string;
             score?: number;
+            /**
+             * @description 结构化答案。值只能是标量；单条文本不超过 1000 字，
+             *     序列化后总长度不超过 4 KB（服务端校验）。
+             */
             answers?: {
-                [key: string]: unknown;
+                [key: string]: string | number | boolean | null;
             };
             /** Format: date-time */
             assessedAt: string;
@@ -1391,7 +1395,10 @@ export interface components {
             nextCursor?: string | null;
         };
         SessionRecordCreate: {
-            /** @description 客户端生成的幂等键 */
+            /**
+             * @description 客户端生成的幂等键，仅允许字母、数字与 `.` `_` `:` `-`；
+             *     重试与补传必须复用同一个值。
+             */
             clientRecordId: string;
             patientId: string;
             prescriptionId: string;

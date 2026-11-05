@@ -134,3 +134,41 @@ def test_patient_creation_roles_and_defaults(client, seed):
     assert body["hyStage"] == 1
     assert body["stageConfirmationStatus"] == "suspected"
     assert body["status"] == "active"
+
+
+def test_assessment_rejects_oversized_or_nested_answers(client, seed):
+    token = login(client, "patient-unconfirmed")
+    headers = auth_headers(token)
+
+    too_long = client.post(
+        f"{API}/patients/{seed['patient_unconfirmed']}/assessments",
+        json={
+            "instrument": "DAILY_FEELING",
+            "answers": {"feeling": "x" * 5000},
+            "assessedAt": "2026-11-04T10:00:00Z",
+        },
+        headers=headers,
+    )
+    assert too_long.status_code == 422
+
+    nested = client.post(
+        f"{API}/patients/{seed['patient_unconfirmed']}/assessments",
+        json={
+            "instrument": "DAILY_FEELING",
+            "answers": {"feeling": {"nested": "value"}},
+            "assessedAt": "2026-11-04T10:00:00Z",
+        },
+        headers=headers,
+    )
+    assert nested.status_code == 422
+
+    too_many = client.post(
+        f"{API}/patients/{seed['patient_unconfirmed']}/assessments",
+        json={
+            "instrument": "DAILY_FEELING",
+            "answers": {f"k{index}": 1 for index in range(40)},
+            "assessedAt": "2026-11-04T10:00:00Z",
+        },
+        headers=headers,
+    )
+    assert too_many.status_code == 422

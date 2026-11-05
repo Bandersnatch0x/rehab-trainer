@@ -235,7 +235,15 @@ export function updateAlert(
 
 /** 16. GET /audit-events — 查询本机构审计事件 */
 export function listAuditEvents(
-  query: { cursor?: string; limit?: number } = {},
+  query: {
+    cursor?: string;
+    limit?: number;
+    action?: string;
+    resourceType?: string;
+    actorAccountId?: string;
+    from?: string;
+    to?: string;
+  } = {},
 ): Promise<ApiResult<AuditEventPage>> {
   return toResult<AuditEventPage>(
     api.GET("/audit-events", { params: { query } }),

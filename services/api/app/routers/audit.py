@@ -26,7 +26,7 @@ def list_audit_events(
     from_: datetime | None = Query(default=None, alias="from"),
     to: datetime | None = Query(default=None),
     cursor: str | None = Query(default=None),
-    limit: int = Query(default=50, ge=1, le=200),
+    limit: int = Query(default=20, ge=1, le=100),
 ):
     keyset = decode_cursor(cursor, keys=("k", "i"))
     # 只返回本机构事件；系统级事件（org_id 为空）不对外暴露。

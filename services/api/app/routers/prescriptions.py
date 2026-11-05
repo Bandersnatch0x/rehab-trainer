@@ -3,7 +3,7 @@ from typing import Annotated
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, Header, Path, Query
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.access import get_patient_scoped
@@ -263,6 +263,32 @@ def update_prescription(
         for item in prescription.items
     ]
 
+    previous_version = prescription.version
+    new_version = _bump_version(previous_version)
+
+    # 乐观锁下沉到 SQL：两个请求同时通过上面的快速比较时，只有一条能更新成功。
+    locked = db.execute(
+        update(Prescription)
+        .where(
+            Prescription.id == prescription.id,
+            Prescription.org_id == principal.org_id,
+            Prescription.version == previous_version,
+        )
+        .values(version=new_version, updated_at=utcnow())
+    )
+    if locked.rowcount != 1:
+        db.rollback()
+        raise api_error(
+            409,
+            "VERSION_CONFLICT",
+            "处方版本冲突，请基于最新版本重试",
+            {"currentVersion": previous_version},
+        )
+
+    # 条件更新后重新加载，避免会话中的旧对象在提交时覆盖刚写入的版本。
+    db.expire_all()
+    prescription = db.get(Prescription, prescription_id)
+
     if payload.items is not None:
         prescription.items = [
             _new_item(item, prescription.id, position)
@@ -272,10 +298,6 @@ def update_prescription(
         prescription.valid_until = to_utc_naive(payload.valid_until)
     if payload.note is not None:
         prescription.note = payload.note
-
-    previous_version = prescription.version
-    prescription.version = _bump_version(previous_version)
-    prescription.updated_at = utcnow()
 
     record_audit(
         db,
@@ -287,7 +309,7 @@ def update_prescription(
         detail={
             "patientId": prescription.patient_id,
             "previousVersion": previous_version,
-            "newVersion": prescription.version,
+            "newVersion": new_version,
             # 旧版本内容留痕，满足「旧版本保留可追溯」。
             "previousItems": before,
         },

@@ -82,10 +82,12 @@ test('审计日志显示本机构操作并可导出 CSV', async ({ page, data })
   const createdRow = page.getByRole('row').filter({ hasText: 'patient.created' });
   await expect(createdRow.first()).toContainText(profile.accountId);
 
-  // 动作筛选：不存在的动作给出空态，恢复后重新出现。
+  // 动作筛选在服务端执行：点击「查询」后不存在的动作给出空态，恢复后重新出现。
   await page.getByLabel('动作').fill('no.such.action');
+  await page.getByRole('button', { name: '查询' }).click();
   await expect(page.getByText('当前筛选条件下没有审计事件。')).toBeVisible();
   await page.getByLabel('动作').fill('patient.created');
+  await page.getByRole('button', { name: '查询' }).click();
   await expect(createdRow.first()).toBeVisible();
 
   const downloadPromise = page.waitForEvent('download');
@@ -229,8 +231,25 @@ test('可调整处方中第二个训练条目的剂量', async ({ page, data, re
   const { items } = await listed.json();
   const rows = items[0].items as { exerciseCode: string; dosage?: { sets?: number } }[];
   expect(rows.find((row) => row.exerciseCode === 'ex-strength-01')?.dosage?.sets).toBe(5);
-  // 编辑第二条不应连带改写第一条的剂量。
-  expect(rows.find((row) => row.exerciseCode === 'ex-stretch-01')?.dosage?.sets).toBe(3);
+  // 未编辑的第一条原剂量为空，不应被页面默认值写脏。
+  expect(rows.find((row) => row.exerciseCode === 'ex-stretch-01')?.dosage ?? null).toBeNull();
+});
+
+test('处方可添加与移除训练条目', async ({ page, data }) => {
+  await login(page, data);
+  await page.goto(`/patients/${data.patientId}/prescription`);
+
+  await expect(page.getByRole('group', { name: '训练条目 2' })).toBeVisible();
+  await page.getByRole('button', { name: /添加训练条目/ }).click();
+
+  const third = page.getByRole('group', { name: '训练条目 3' });
+  await expect(third).toBeVisible();
+  // 新条目自动选用尚未占用的编码。
+  await expect(third.locator('select')).toHaveValue('ex-gait-01');
+
+  await third.getByRole('button', { name: '移除' }).click();
+  await expect(third).toHaveCount(0);
+  await expect(page.getByRole('group', { name: '训练条目 2' })).toBeVisible();
 });
 
 test('随访台账只显示已处置的预警', async ({ page, data, request }) => {

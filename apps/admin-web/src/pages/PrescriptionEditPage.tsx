@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router";
 import {
   createPrescription,
@@ -23,32 +23,42 @@ function addDays(from: Date, days: number): string {
 const DEFAULT_DOSAGE = { sets: 3, reps: 12, bpm: 64, frequency: 5 };
 
 type EditableItem = {
+  rowId: number;
   exerciseCode: string;
   variantCode?: string;
   sets: number;
   reps: number;
   bpm: number;
   frequency: number;
+  /** 用户是否改过该行；未改动的行按原样回传，避免把 UI 默认值写进空剂量。 */
+  touched: boolean;
+  originalDosage?: Prescription["items"][number]["dosage"];
 };
 
-/** 把处方条目转成可编辑行；缺失剂量用保守默认值补齐。 */
+/** 把处方条目转成可编辑行；缺失剂量用保守默认值展示，但不代表已保存。 */
 function toEditable(
   item: Prescription["items"][number] | undefined,
   fallbackCode: string,
+  rowId: number,
+  touched = false,
 ): EditableItem {
   return {
+    rowId,
     exerciseCode: item?.exerciseCode ?? fallbackCode,
     ...(item?.variantCode ? { variantCode: item.variantCode } : {}),
     sets: item?.dosage?.sets ?? DEFAULT_DOSAGE.sets,
     reps: item?.dosage?.repetitions ?? DEFAULT_DOSAGE.reps,
     bpm: item?.dosage?.bpm ?? DEFAULT_DOSAGE.bpm,
     frequency: item?.dosage?.frequencyPerWeek ?? DEFAULT_DOSAGE.frequency,
+    touched,
+    originalDosage: item?.dosage ?? undefined,
   };
 }
 
 export default function PrescriptionEditPage() {
   const { patientId } = useParams<{ patientId: string }>();
   const navigate = useNavigate();
+  const nextRowId = useRef(1);
 
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [current, setCurrent] = useState<Prescription | null>(null);
@@ -64,10 +74,12 @@ export default function PrescriptionEditPage() {
     setCurrent(prescription);
     if (prescription && prescription.items.length > 0) {
       setItems(
-        prescription.items.map((item) => toEditable(item, item.exerciseCode)),
+        prescription.items.map((item) =>
+          toEditable(item, item.exerciseCode, nextRowId.current++),
+        ),
       );
     } else if (available[0]) {
-      setItems([toEditable(undefined, available[0].code)]);
+      setItems([toEditable(undefined, available[0].code, nextRowId.current++, true)]);
     } else {
       setItems([]);
     }
@@ -84,6 +96,10 @@ export default function PrescriptionEditPage() {
     setLoadError(null);
     setCurrent(null);
     setExercises([]);
+    setItems([]);
+    setSuccessVersion(null);
+    setError(null);
+    setSubmitting(false);
 
     Promise.all([listExercises({ limit: 100 }), findCurrentPrescription(patientId)]).then(
       ([exerciseResult, prescriptionResult]) => {
@@ -165,12 +181,19 @@ export default function PrescriptionEditPage() {
       exerciseCode: item.exerciseCode,
       // 条目未换时保留原有难度变体，避免一次剂量调整把变体清掉。
       ...(item.variantCode ? { variantCode: item.variantCode } : {}),
-      dosage: {
-        sets: item.sets,
-        repetitions: item.reps,
-        bpm: item.bpm,
-        frequencyPerWeek: item.frequency,
-      },
+      // 未改动的行原样回传；原剂量为空时不要写入 UI 默认值。
+      ...(item.touched
+        ? {
+            dosage: {
+              sets: item.sets,
+              repetitions: item.reps,
+              bpm: item.bpm,
+              frequencyPerWeek: item.frequency,
+            },
+          }
+        : item.originalDosage
+          ? { dosage: item.originalDosage }
+          : {}),
     }));
     const now = new Date();
 
@@ -206,24 +229,31 @@ export default function PrescriptionEditPage() {
     setError(result.error.message);
   }
 
-  function updateItem(index: number, patch: Partial<EditableItem>) {
+  function updateItem(rowId: number, patch: Partial<EditableItem>) {
     setItems((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, ...patch } : item)),
+      prev.map((item) =>
+        item.rowId === rowId ? { ...item, ...patch, touched: true } : item,
+      ),
     );
   }
 
   function addItem() {
-    const used = new Set(items.map((item) => item.exerciseCode));
-    const next = exercises.find((exercise) => !used.has(exercise.code));
-    if (!next) {
-      return;
-    }
-    setItems((prev) => [...prev, toEditable(undefined, next.code)]);
+    const rowId = nextRowId.current++;
+    setItems((prev) => {
+      // 在函数式更新里重算已用编码，连续快速点击也不会选出同一条。
+      const used = new Set(prev.map((item) => item.exerciseCode));
+      const next = exercises.find((exercise) => !used.has(exercise.code));
+      if (!next) {
+        return prev;
+      }
+      return [...prev, toEditable(undefined, next.code, rowId, true)];
+    });
   }
 
-  function removeItem(index: number) {
+  function removeItem(rowId: number) {
+    // 按稳定行 ID 删除：重复触发只会删到同一行，不会误删移位后的下一行。
     setItems((prev) =>
-      prev.length > 1 ? prev.filter((_, i) => i !== index) : prev,
+      prev.length > 1 ? prev.filter((item) => item.rowId !== rowId) : prev,
     );
   }
 
@@ -276,11 +306,14 @@ export default function PrescriptionEditPage() {
         <form onSubmit={handleSubmit}>
           <div className="card">
             <div className="card-title">1. 训练条目与剂量（逐条可调）</div>
+            <p className="hint" style={{ margin: "0 0 12px" }}>
+              未修改的条目按原剂量保存；原剂量为空时不会把页面默认值写入。
+            </p>
             {items.map((item, index) => {
               const usedElsewhere = new Set(
                 items
-                  .filter((_, row) => row !== index)
-                  .map((row) => row.exerciseCode),
+                  .filter((other) => other.rowId !== item.rowId)
+                  .map((other) => other.exerciseCode),
               );
               const options = exercises.filter(
                 (exercise) =>
@@ -289,7 +322,7 @@ export default function PrescriptionEditPage() {
               );
               return (
                 <div
-                  key={index}
+                  key={item.rowId}
                   role="group"
                   aria-label={`训练条目 ${index + 1}`}
                   style={{
@@ -311,7 +344,7 @@ export default function PrescriptionEditPage() {
                       <select
                         value={item.exerciseCode}
                         onChange={(event) =>
-                          updateItem(index, {
+                          updateItem(item.rowId, {
                             exerciseCode: event.target.value,
                             variantCode: undefined,
                           })
@@ -338,7 +371,7 @@ export default function PrescriptionEditPage() {
                         max={10}
                         value={item.sets}
                         onChange={(event) =>
-                          updateItem(index, { sets: Number(event.target.value) })
+                          updateItem(item.rowId, { sets: Number(event.target.value) })
                         }
                         required
                       />
@@ -352,7 +385,7 @@ export default function PrescriptionEditPage() {
                         max={50}
                         value={item.reps}
                         onChange={(event) =>
-                          updateItem(index, { reps: Number(event.target.value) })
+                          updateItem(item.rowId, { reps: Number(event.target.value) })
                         }
                         required
                       />
@@ -366,7 +399,7 @@ export default function PrescriptionEditPage() {
                         max={120}
                         value={item.bpm}
                         onChange={(event) =>
-                          updateItem(index, { bpm: Number(event.target.value) })
+                          updateItem(item.rowId, { bpm: Number(event.target.value) })
                         }
                         required
                       />
@@ -380,7 +413,7 @@ export default function PrescriptionEditPage() {
                         max={7}
                         value={item.frequency}
                         onChange={(event) =>
-                          updateItem(index, { frequency: Number(event.target.value) })
+                          updateItem(item.rowId, { frequency: Number(event.target.value) })
                         }
                         required
                       />
@@ -389,7 +422,7 @@ export default function PrescriptionEditPage() {
                     <button
                       type="button"
                       className="btn-secondary"
-                      onClick={() => removeItem(index)}
+                      onClick={() => removeItem(item.rowId)}
                       disabled={items.length === 1}
                     >
                       移除

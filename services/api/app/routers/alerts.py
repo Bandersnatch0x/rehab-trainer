@@ -18,6 +18,14 @@ from app.schemas.enums import AlertLevel, AlertStatus
 
 router = APIRouter(prefix="/alerts", tags=["alerts"])
 
+# 处置状态只能向前推进；closed 为终态，仅允许幂等重复提交。
+ALLOWED_TRANSITIONS: dict[str, set[str]] = {
+    "open": {"acknowledged", "followed_up", "closed"},
+    "acknowledged": {"followed_up", "closed"},
+    "followed_up": {"closed"},
+    "closed": {"closed"},
+}
+
 
 @router.get("", response_model=AlertPage)
 def list_alerts(
@@ -63,8 +71,17 @@ def list_alerts(
         last = page[-1]
         next_cursor = cursor_from(key=datetime_key(last.triggered_at), ident=last.id)
 
+    items = []
+    for row in page:
+        out = AlertOut.model_validate(row)
+        # 处置说明与处理人仅对临床角色可见；患者/照护者只看到状态与通知进展。
+        if not principal.is_clinician:
+            out.handled_by = None
+            out.note = None
+        items.append(out)
+
     return AlertPage(
-        items=[AlertOut.model_validate(row) for row in page],
+        items=items,
         next_cursor=next_cursor,
     )
 
@@ -100,10 +117,22 @@ def update_alert(
         db.commit()
         raise api_error(403, "FORBIDDEN", "跨机构访问被拒绝")
 
-    alert.status = payload.status.value
+    target = payload.status.value
+    allowed = ALLOWED_TRANSITIONS.get(alert.status, set())
+    if target not in allowed:
+        raise api_error(
+            409,
+            "INVALID_TRANSITION",
+            f"预警状态不能从 {alert.status} 变更为 {target}",
+            {"currentStatus": alert.status},
+        )
+
+    previous_status = alert.status
+    previous_note = alert.note
+    alert.status = target
     if payload.note is not None:
         alert.note = payload.note
-    if payload.status.value == "acknowledged" and alert.acknowledged_at is None:
+    if alert.status == "acknowledged" and alert.acknowledged_at is None:
         alert.acknowledged_at = utcnow()
     alert.handled_by = principal.account_id
 
@@ -114,7 +143,13 @@ def update_alert(
         action="alert.updated",
         resource_type="alert_event",
         resource_id=alert.id,
-        detail={"status": alert.status, "patientId": alert.patient_id},
+        detail={
+            "status": alert.status,
+            "previousStatus": previous_status,
+            "patientId": alert.patient_id,
+            "note": alert.note,
+            "previousNote": previous_note,
+        },
     )
     db.commit()
     return AlertOut.model_validate(alert)

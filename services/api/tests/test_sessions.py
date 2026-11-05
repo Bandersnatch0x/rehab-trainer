@@ -198,3 +198,12 @@ def test_session_requires_algorithm_versions(client, seed):
     )
     assert response.status_code == 422
     assert response.json()["code"] == "VALIDATION_FAILED"
+
+
+def test_client_record_id_rejects_formula_and_control_chars(client, seed):
+    token = login(client, "patient-a")
+    headers = auth_headers(token)
+    for bad_id in ("=1+1", "@SUM(A1)", "-2", "a\nb"):
+        payload = {"records": [_record_payload(seed, client_record_id=bad_id)]}
+        response = client.post(f"{API}/sessions", json=payload, headers=headers)
+        assert response.status_code == 422, f"{bad_id!r} 应被拒绝"
