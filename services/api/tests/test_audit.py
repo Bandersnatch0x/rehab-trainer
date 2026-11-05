@@ -32,3 +32,26 @@ def test_audit_list_is_org_scoped_and_filterable(client, seed):
     other_response = client.get(f"{API}/audit-events", headers=auth_headers(other))
     assert other_response.status_code == 200
     assert other_response.json()["items"] == []
+
+
+def test_audit_pagination_does_not_repeat_or_skip(client, seed):
+    admin = login(client, "admin-a")
+    headers = auth_headers(admin)
+    for name in ("审计甲", "审计乙"):
+        created = client.post(
+            f"{API}/patients", json={"displayName": name}, headers=headers
+        )
+        assert created.status_code == 201, created.text
+
+    first = client.get(f"{API}/audit-events?limit=1", headers=headers)
+    assert first.status_code == 200
+    page1 = first.json()
+    assert page1["items"] and page1["nextCursor"]
+
+    second = client.get(
+        f"{API}/audit-events?limit=1&cursor={page1['nextCursor']}", headers=headers
+    )
+    assert second.status_code == 200
+    page2 = second.json()
+    assert page2["items"]
+    assert page1["items"][0]["id"] != page2["items"][0]["id"]

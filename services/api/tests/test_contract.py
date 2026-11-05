@@ -49,20 +49,41 @@ def test_app_prefix_matches_contract_server():
     assert API_PREFIX == _contract_prefix()
 
 
-def _parameters(spec: dict, op: dict) -> list[tuple[str, str, bool]]:
-    """把参数归一化成 (in, name, required)；契约里的 $ref 先解析。"""
+def _parameters(spec: dict, op: dict) -> list[tuple]:
+    """把参数归一化成 (in, name, required, default, minimum, maximum)。
+
+    只比较数值边界与默认值：契约是唯一真源，`limit` 的默认值或上限不一致
+    会让生成客户端按错误范围校验。字符串格式与枚举暂不在此断言。
+    """
     resolved = []
     for param in op.get("parameters", []):
         if "$ref" in param:
             ref = param["$ref"].split("/")[-1]
             param = spec["components"]["parameters"][ref]
+        schema = param.get("schema") or {}
+        if "$ref" in schema:
+            name = schema["$ref"].split("/")[-1]
+            schema = spec["components"]["schemas"][name]
+        # FastAPI 对 Optional 参数生成 anyOf[<真实 schema>, null]，边界在非 null 分支。
+        if "anyOf" in schema:
+            schema = next(
+                (part for part in schema["anyOf"] if part.get("type") != "null"),
+                {},
+            )
         resolved.append(
-            (param.get("in"), param.get("name"), bool(param.get("required")))
+            (
+                param.get("in"),
+                param.get("name"),
+                bool(param.get("required")),
+                schema.get("default"),
+                schema.get("minimum"),
+                schema.get("maximum"),
+            )
         )
     return sorted(resolved)
 
 
-def _contract_parameters() -> dict[tuple[str, str], list[tuple[str, str, bool]]]:
+def _contract_parameters() -> dict[tuple[str, str], list[tuple]]:
     spec = _contract_spec()
     prefix = _contract_prefix()
     out = {}
@@ -73,7 +94,7 @@ def _contract_parameters() -> dict[tuple[str, str], list[tuple[str, str, bool]]]
     return out
 
 
-def _app_parameters() -> dict[tuple[str, str], list[tuple[str, str, bool]]]:
+def _app_parameters() -> dict[tuple[str, str], list[tuple]]:
     spec = app.openapi()
     out = {}
     for path, item in spec["paths"].items():
@@ -84,7 +105,11 @@ def _app_parameters() -> dict[tuple[str, str], list[tuple[str, str, bool]]]:
 
 
 def test_contract_and_app_expose_same_parameters():
-    """参数名/位置/必填也要一致：改名会让生成客户端 422，而操作集比较看不出来。"""
+    """参数名/位置/必填/默认值与数值边界也要一致。
+
+    改名会让生成客户端 422；默认值或上限漂移会让客户端按错误范围校验，
+    而仅比较操作集时看不出来。
+    """
     contract = _contract_parameters()
     implemented = _app_parameters()
 

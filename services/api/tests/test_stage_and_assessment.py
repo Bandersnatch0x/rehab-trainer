@@ -172,3 +172,36 @@ def test_assessment_rejects_oversized_or_nested_answers(client, seed):
         headers=headers,
     )
     assert too_many.status_code == 422
+
+
+def test_assessment_list_paginates_without_repeats(client, seed):
+    token = login(client, "patient-unconfirmed")
+    headers = auth_headers(token)
+    for index in range(2):
+        created = client.post(
+            f"{API}/patients/{seed['patient_unconfirmed']}/assessments",
+            json={
+                "instrument": "DAILY_FEELING",
+                "answers": {"feeling": f"第 {index} 天"},
+                "assessedAt": f"2026-11-0{3 + index}T10:00:00Z",
+            },
+            headers=headers,
+        )
+        assert created.status_code == 201, created.text
+
+    first = client.get(
+        f"{API}/patients/{seed['patient_unconfirmed']}/assessments?limit=1",
+        headers=headers,
+    )
+    assert first.status_code == 200
+    page1 = first.json()
+    assert len(page1["items"]) == 1 and page1["nextCursor"]
+
+    second = client.get(
+        f"{API}/patients/{seed['patient_unconfirmed']}/assessments?limit=1&cursor={page1['nextCursor']}",
+        headers=headers,
+    )
+    assert second.status_code == 200
+    page2 = second.json()
+    assert len(page2["items"]) == 1
+    assert page1["items"][0]["id"] != page2["items"][0]["id"]

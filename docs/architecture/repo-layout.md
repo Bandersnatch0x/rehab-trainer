@@ -9,7 +9,7 @@
 | `apps/android/` | Kotlin + Jetpack Compose,手机与平板同一 App | CameraX + MediaPipe 实时上肢计数与训练页已落地;`assembleDebug` 通过(SDK 在 D:\Android\Sdk) |
 | `apps/miniprogram/` | 微信原生小程序 + TypeScript | 5 个页面接真实接口(index/patient/records/alerts/assessment),训练执行页仅渲染选中条目、不录制不上传;行为测试 17 项、类型检查通过 |
 | `apps/admin-web/` | React + Vite + TypeScript | 路由、鉴权、9 个业务页接真实 API(含随访台账、审计、科研、视频管理);E2E 23 条全部通过 |
-| `services/api/` | FastAPI + SQLAlchemy 后端 | 21 路径 / 25 操作,17 张表,迁移 head `0004`,108 项测试通过 |
+| `services/api/` | FastAPI + SQLAlchemy 后端 | 21 路径 / 25 操作,17 张表,迁移 head `0004`,110 项测试通过 |
 | `services/cv-worker/` | 云端 CV 异步推理 | 占位,仅 README |
 | `packages/api-contract/` | OpenAPI 契约(唯一真源) | 21 路径 / 25 操作,含 `GET /prescriptions`、审计与媒体上传/上架 |
 | `packages/api-client-ts/` | TypeScript 生成客户端目录 | 空,仅 .gitkeep 与说明;实际生成物在各自 app 内 |

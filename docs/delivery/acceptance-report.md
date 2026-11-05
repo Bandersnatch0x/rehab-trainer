@@ -34,7 +34,7 @@
 
 | 项目 | 结果 | 证据 | 备注 |
 | --- | --- | --- | --- |
-| 后端测试 | 108 项通过，0 失败 | `python -m pytest -q services/api/tests` | 覆盖契约操作集、参数与响应字段、机构隔离、分页、处方乐观锁、记录幂等、科研抑制、分期准入 |
+| 后端测试 | 110 项通过，0 失败 | `python -m pytest -q services/api/tests` | 覆盖契约操作集、参数与响应字段、机构隔离、分页、处方乐观锁、记录幂等、科研抑制、分期准入 |
 | 契约一致性 | 21 个路径、25 个操作；实现与契约的操作集、参数、成功响应字段一致 | `services/api/tests/test_contract.py` 4 项；契约 `servers[0]` 前缀 `/v1` | 实现多一个或少一个操作都会失败 |
 | 部署自检 | 17 张业务表；SQLite 升级、重复升级、降级、再升级；模型差异为空；PostgreSQL 离线 SQL；YAML | `python deploy/verify.py` | 输出 `PASS: 17 tables; ...`；当前迁移 head 为 `0004` |
 | 管理端类型检查 | 通过 | `cd apps/admin-web && npx tsc --noEmit` | 退出码 0 |
