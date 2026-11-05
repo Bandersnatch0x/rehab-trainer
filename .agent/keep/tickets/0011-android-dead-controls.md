@@ -1,7 +1,7 @@
 ---
 id: "0011"
 type: task
-status: open
+status: closed
 assignee: null
 part-of: null
 blocked-by: []
@@ -37,3 +37,9 @@ created: 2026-11-05
 - `gradlew :app:testDebugUnitTest :app:assembleDebug` 通过；新增 3 项拨号单测。
 - 详情与证据：`.agent/tmp/ANDROID-CONTROLS.md`、`.agent/tmp/shots/controls/`。
 - 残余：解绑后未跳转绑定入口页（规格禁止改 `RehabNavHost`），改为设置页原地状态说明。
+
+### 2026-11-06 复核关闭
+
+- 代码复核：`TherapistDialer`（含 3 条单测）、三项偏好读写、照护者绑定置灰与说明均在当前代码中；`gradlew :app:testDebugUnitTest :app:assembleDebug` 通过。
+- 证据诚实性：上文引用的 `.agent/tmp/ANDROID-CONTROLS.md` 与 `.agent/tmp/shots/controls/` 已随临时目录清理，无法作为当前证据引用；本轮无真机，设备逐项截图未复跑。
+- 残余同前：解绑后停留在设置页并提示重新绑定，未跳转绑定入口。

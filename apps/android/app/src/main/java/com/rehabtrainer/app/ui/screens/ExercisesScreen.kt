@@ -53,11 +53,7 @@ fun ExercisesScreen(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(dimens.sectionSpacing)
     ) {
-        Text(
-            text = "康复训练条目",
-            style = MaterialTheme.typography.headlineLarge
-        )
-
+        // 页面标题由顶栏统一承担，页内不再重复大标题。
         Text(
             text = "以下为演示用训练条目，实际处方由康复治疗师制定。请在适宜体力下按顺序完成。",
             style = MaterialTheme.typography.bodyLarge

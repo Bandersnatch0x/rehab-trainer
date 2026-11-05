@@ -36,11 +36,7 @@ fun RecordsScreen(modifier: Modifier = Modifier) {
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(dimens.sectionSpacing)
     ) {
-        Text(
-            text = "训练历史记录",
-            style = MaterialTheme.typography.headlineLarge
-        )
-
+        // 页面标题由顶栏统一承担，页内不再重复大标题。
         // D21：记录、指标与模型版本均为 mock；接入真实训练记录 API 时本声明与 mock 一并移除。
         Text(
             text = "演示数据：当前为演示模式，下列训练记录、指标与模型版本均为示例数据，不是真实患者记录。",

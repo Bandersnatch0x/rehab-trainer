@@ -36,11 +36,7 @@ fun PatientsScreen(modifier: Modifier = Modifier) {
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(dimens.sectionSpacing)
     ) {
-        Text(
-            text = "患者档案",
-            style = MaterialTheme.typography.headlineLarge
-        )
-
+        // 页面标题由顶栏统一承担，页内不再重复大标题。
         // Profile Overview Card
         Card(
             modifier = Modifier.fillMaxWidth(),

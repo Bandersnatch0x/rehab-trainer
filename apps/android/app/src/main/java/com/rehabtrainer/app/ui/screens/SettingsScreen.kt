@@ -61,11 +61,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(dimens.sectionSpacing)
     ) {
-        Text(
-            text = "系统与适老设置",
-            style = MaterialTheme.typography.headlineLarge
-        )
-
+        // 页面标题由顶栏统一承担，页内不再重复大标题。
         // Accessibility Settings Card
         Card(
             modifier = Modifier.fillMaxWidth(),
