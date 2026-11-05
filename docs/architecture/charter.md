@@ -57,7 +57,7 @@
 | --- | --- | --- | --- | --- |
 | `Prescription` | `prescription` | `issued_at`、`status`、`version` | `prescriptionFor`、`prescribedBy`、`referencesExercise`、`prescribedDosage` | 须治疗师签发(D12) |
 | `SessionRecord` | `session_record` | 完成次数、错误次数、中断次数、有效帧占比、存疑标记、模型版本、模型 SHA-256、指标算法版本、阈值配置版本 | `recordsPrescription`、`recordedFor` | D14、T7 |
-| `AssessmentRecord` | `assessment_record` | — | `recordsAssessment`、`recordedBy` | — |
+| `AssessmentRecord` | `assessment` | — | `recordsAssessment`、`recordedBy` | — |
 
 ## 2. 三端职责矩阵
 
@@ -73,6 +73,9 @@
 | 随访登记 | — | — | ✅ 照护管理员 |
 | 权限管理 | — | — | ✅ |
 | 离线视频 | ✅ 预缓存 | ⚠️ 受微信缓存上限约束(未决项 10) | — |
+
+> 表中 ✅ 表示责任分工，不代表当前交付状态。小程序云端异步 CV 本轮未启动（D26），
+> Android 端上实时 CV 只在训练页做动作计数；以 `docs/delivery/acceptance-report.md` 为准。
 
 ## 3. API 契约骨架
 
@@ -90,7 +93,7 @@
 | 训练记录 | `POST /sessions`(批量幂等)、`GET /sessions` | 患者/照护者 | D14、T7 |
 | 预警 | `GET /alerts`、`PATCH /alerts/{id}` | 照护管理员/治疗师 | D6 |
 | 内容清单 | `GET /content/manifest`、签名 URL | 全角色 | T3 |
-| 审计 | `GET /audit/events`(脱敏导出) | 管理员 | 说明书第 5 节 |
+| 审计 | `GET /audit-events`(本机构查询与 CSV 导出) | 照护管理员/治疗师 | 说明书第 5 节 |
 
 ## 4. 治疗师工作流
 
