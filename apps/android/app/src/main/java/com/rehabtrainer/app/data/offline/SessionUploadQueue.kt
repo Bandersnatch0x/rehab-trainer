@@ -44,9 +44,20 @@ interface SessionUploadQueue {
     /** 主动丢弃记录（例如数据损坏且用户确认）。 */
     suspend fun remove(clientRecordIds: Collection<String>)
 
-    suspend fun count(): Int
+    /** 待上传记录数（pending 计数），含等待重试的条目。 */
+    suspend fun pendingCount(): Int
 
     companion object {
         const val MAX_BATCH_SIZE: Int = 100
+
+        /**
+         * 不可重试的逐条错误码：业务拒绝，重试不会改变结果。
+         * 命中后应移出重试队列，留待人工处置；其余错误走退避重试。
+         */
+        val NON_RETRYABLE_ERROR_CODES: Set<String> =
+            setOf("VALIDATION_FAILED", "FORBIDDEN", "NOT_FOUND")
+
+        fun isRetryable(errorCode: String): Boolean =
+            errorCode !in NON_RETRYABLE_ERROR_CODES
     }
 }
