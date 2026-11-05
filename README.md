@@ -67,3 +67,4 @@ docker compose --env-file .agent/tmp/deployment.env up --build -d --wait
 | `services/` | 服务:API(FastAPI)、云端 CV 推理(占位) |
 | `packages/` | API 契约与生成客户端 |
 | `docs/architecture/` | 架构与仓库结构说明 |
+| `docs/delivery/` | 交付文档:用户操作手册、部署与运维手册、验收与合规说明 |
