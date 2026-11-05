@@ -23,6 +23,8 @@ class AlertOut(APIModel):
     level: AlertLevel
     triggered_at: datetime
     status: AlertStatus
+    handled_by: str | None = None
+    note: str | None = None
     deliveries: list[NotificationDeliveryOut] = []
 
 

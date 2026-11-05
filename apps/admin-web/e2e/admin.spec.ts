@@ -158,14 +158,14 @@ test('调整处方不会删除同一处方里的其他训练条目', async ({ pa
 
 test('随访台账只显示已处置的预警', async ({ page, data, request }) => {
   const signedIn = await login(page, data, 'care_admin');
-  const { accessToken } = await signedIn.json();
+  const { accessToken, profile } = await signedIn.json();
 
   await page.goto('/follow-ups');
   await expect(page.getByText('暂无已处置的预警记录。')).toBeVisible();
 
   const resolved = await request.patch(`/v1/alerts/${data.alertId}`, {
     headers: { Authorization: `Bearer ${accessToken}` },
-    data: { status: 'followed_up' },
+    data: { status: 'followed_up', note: '电话随访：患者已缓解' },
   });
   expect(resolved.status()).toBe(200);
 
@@ -173,6 +173,9 @@ test('随访台账只显示已处置的预警', async ({ page, data, request }) 
   const row = page.getByRole('row').filter({ hasText: 'PAIN_PERSISTENT' });
   await expect(row).toHaveCount(1);
   await expect(row).toContainText('已随访');
+  // 台账须显示处置人与处置说明，而不是只有状态。
+  await expect(row).toContainText(profile.accountId);
+  await expect(row).toContainText('电话随访：患者已缓解');
 });
 
 test('患者超过单页上限时列表仍完整显示', async ({ page }) => {

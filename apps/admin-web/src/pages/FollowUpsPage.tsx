@@ -101,7 +101,7 @@ export default function FollowUpsPage() {
         <div>
           <strong>台账口径：</strong>
           数据来自预警处置记录（PATCH /alerts/&#123;id&#125;）中状态为「已随访」或「已关闭」的条目。
-          契约未提供处理人与结论字段，处理明细需从审计日志导出，本页不臆造。
+          处理人与处置说明随预警返回；契约暂无独立的「处置结论」字段，本页不臆造。
         </div>
       </div>
 
@@ -122,16 +122,18 @@ export default function FollowUpsPage() {
               <th>级别</th>
               <th>通知进展</th>
               <th>处置状态</th>
+              <th>处理人</th>
+              <th>处置说明</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={7}>正在读取随访台账…</td>
+                <td colSpan={9}>正在读取随访台账…</td>
               </tr>
             ) : alerts.length === 0 ? (
               <tr>
-                <td colSpan={7}>暂无已处置的预警记录。</td>
+                <td colSpan={9}>暂无已处置的预警记录。</td>
               </tr>
             ) : (
               alerts.map((alert) => (
@@ -168,6 +170,8 @@ export default function FollowUpsPage() {
                       {STATUS_LABEL[alert.status] ?? alert.status}
                     </span>
                   </td>
+                  <td>{alert.handledBy ?? "—"}</td>
+                  <td>{alert.note ?? "—"}</td>
                 </tr>
               ))
             )}

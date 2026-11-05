@@ -38,6 +38,9 @@ def test_alert_update_by_admin(client, seed, db_session):
     assert response.status_code == 200, response.text
     body = response.json()
     assert body["status"] == "acknowledged"
+    # 处置人与处置说明随预警返回，随访台账不再只能显示状态。
+    assert body["handledBy"] == "admin-a"
+    assert body["note"] == "已电话随访"
 
     db_session.expire_all()
     alert = db_session.get(AlertEvent, seed["alert_a"])

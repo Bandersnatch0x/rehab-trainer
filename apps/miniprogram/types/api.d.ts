@@ -1368,6 +1368,8 @@ export interface components {
             triggeredAt: string;
             /** @enum {string} */
             status: "open" | "acknowledged" | "followed_up" | "closed";
+            handledBy?: string | null;
+            note?: string | null;
             deliveries?: components["schemas"]["NotificationDelivery"][];
         };
         AlertPage: {

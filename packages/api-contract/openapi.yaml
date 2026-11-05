@@ -1371,6 +1371,12 @@ components:
         status:
           type: string
           enum: [open, acknowledged, followed_up, closed]
+        handledBy:
+          type: string
+          nullable: true
+        note:
+          type: string
+          nullable: true
         deliveries:
           type: array
           items:
