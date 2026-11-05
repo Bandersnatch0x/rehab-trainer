@@ -1,8 +1,8 @@
 {
-  "appid": "touristappid",
+  "appid": "wx382fd7b3fa2377aa",
   "compileType": "miniprogram",
   "projectname": "rehab-trainer-miniprogram",
-  "description": "康复训练微信小程序。本地调试关闭域名校验；发布前恢复 urlCheck 并配置 HTTPS 合法域名。",
+  "description": "康复训练微信小程序。本地调试关闭域名校验；发布前恢复 urlCheck 并配置 HTTPS 合法域名。AppID 已接入真实主体。",
   "setting": {
     "urlCheck": false,
     "es6": true,

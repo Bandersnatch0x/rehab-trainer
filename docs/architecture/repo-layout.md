@@ -35,12 +35,13 @@
 ## 小程序骨架
 
 - 原生小程序(TypeScript),未使用 Taro 或 uni-app(决策 T8)。
-- `project.config.json` 的 `appid` 为 `touristappid`,接入真实主体时替换;本地调试关闭 `urlCheck`,发布前恢复。
-- 页面:`index`、`patient`、`records`、`alerts`、`assessment`、`training`。
+- `project.config.json` 的 `appid` 已接入真实主体 `wx382fd7b3fa2377aa`;本地调试关闭 `urlCheck`,发布前恢复并配置 HTTPS 合法域名。
+- 页面:`index`、`patient`、`records`、`alerts`、`assessment`、`training`,含 `sitemap.json`(disallow 全部页面)。
 - 请求层已具备 Bearer 注入与 401 刷新重放;`API_BASE_URL` 指向 `http://127.0.0.1:8000/v1`。
 - 取数与字段投影集中在 `utils/patient-data.ts`,页面只做绑定;临床字段(分级/症状)不进入患者端页面数据(D20)。
 - 行为测试 `node --test apps/miniprogram/tests/patient-data.cjs`(15 项)用 `global.wx` 桩驱动真实请求层与五个 Page。
-- 本机无微信开发者工具,实际渲染与真机运行**未验证**;类型检查与行为测试可执行。
+- 静态一致性检查 `python tests/static_check.py .`:页面文件齐全、tabBar 指向有效、WXML 绑定键与 `data` 对齐、事件处理函数存在、D20 禁用词扫描。
+- 微信开发者工具实跑:`cli islogin` 为 true,`cli open --project` 成功,`cli preview` 编译通过并生成预览码(包体 62.4 KB)。**真机渲染与交互仍未验证**;自动化端口(9420)未开启。
 
 ## Web 后台骨架
 
@@ -76,7 +77,7 @@
 | 后端测试 | `pytest` 40 项通过(含处方读取、机构隔离与契约一致性) |
 | 管理端 E2E | `npx playwright test` **14 passed / 0 failed**(真实后端 + 每例独立机构数据) |
 | 管理端构建 | `tsc --noEmit` 退出 0;`vite build` 通过 |
-| 小程序 | 行为测试 15 项通过、`tsc --noEmit` 退出 0;**实际渲染与真机未验证** |
+| 小程序 | 行为测试 15 项、静态一致性检查 0 问题、`tsc --noEmit` 退出 0;微信开发者工具 `open` 与 `preview` 编译通过(62.4 KB);**真机渲染与交互未验证** |
 | 联调脚本 | `scripts/smoke-api.py` 自管理模式 **18/18 契约操作**,含批量幂等与重放 |
 | 部署自检 | `deploy/verify.py` 通过:16 表迁移往返、模型差异为空、PostgreSQL 离线 SQL、YAML |
 | 容器 | 已在 WSL2(kali-linux2,Docker 27.5.1/Compose 2.32.4)实跑:构建、compose up(双 healthy)、`alembic 0001`、healthcheck、pg_dump/restore、18/18 联调通过;hadolint 2.12.0 通过 |
@@ -87,5 +88,5 @@
 ## 后续事项
 
 - Android 构建与容器主链路均已验证;仍需真机/模拟器运行、并发与长时压测。
-- 在微信开发者工具中实跑小程序,验证 WXML 渲染、输入法与合法域名配置。
+- 小程序已通过开发者工具编译与预览;仍需扫码真机验证渲染、输入法与合法域名配置。
 - CI 尚未接远端,接入后改为冻结锁文件并复用上述检查。
