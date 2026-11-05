@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.access import get_patient_scoped
 from app.core.audit import record_audit
 from app.core.auth import Principal, get_principal
+from app.core.clinical import derive_is_doubtful
 from app.core.database import get_db
 from app.core.pagination import apply_keyset, cursor_from, datetime_key, decode_cursor
 from app.core.timeutils import to_utc_naive
@@ -156,7 +157,12 @@ def _accept_record(
         movement_error_count=record.movement_error_count,
         interruption_count=record.interruption_count,
         valid_frame_ratio=record.valid_frame_ratio,
-        is_doubtful=record.is_doubtful,
+        # 存疑由服务端派生；客户端上报值仅作保守参考（D13、未决项 12）。
+        is_doubtful=derive_is_doubtful(
+            record.valid_frame_ratio,
+            record.threshold_config_version,
+            record.is_doubtful,
+        ),
         model_version=record.model_version,
         model_sha256=record.model_sha256,
         metric_algorithm_version=record.metric_algorithm_version,

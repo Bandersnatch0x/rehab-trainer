@@ -65,6 +65,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.rehabtrainer.app.R
+import com.rehabtrainer.app.core.pose.CaptureGate
 import com.rehabtrainer.app.core.pose.PoseAnalyzer
 import com.rehabtrainer.app.core.pose.PoseFrame
 import com.rehabtrainer.app.ui.components.ElderlyButton
@@ -144,7 +145,7 @@ fun TrainingScreen(
             when (frame) {
                 is PoseFrame.Detected -> {
                     armRaiseCount = frame.armRaiseCount
-                    footVisible = frame.footVisibility >= 0.5f
+                    footVisible = CaptureGate.isFootVisible(frame.footVisibility)
                     statusText = when {
                         !requiresFullBody -> "上半身姿态识别正常"
                         footVisible -> "全身姿态识别正常"

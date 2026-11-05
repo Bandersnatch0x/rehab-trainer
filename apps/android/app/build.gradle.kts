@@ -70,4 +70,7 @@ dependencies {
     implementation("androidx.camera:camera-lifecycle:1.4.2")
     implementation("androidx.camera:camera-view:1.4.2")
     implementation("com.google.mediapipe:tasks-vision:1.2.2")
+
+    // 纯逻辑 JVM 单测（D14 计数、D17 采集门限）。
+    testImplementation("junit:junit:4.13.2")
 }
