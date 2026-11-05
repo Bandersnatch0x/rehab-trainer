@@ -68,6 +68,32 @@ test('照护管理员可新建患者且刷新后仍在列表', async ({ page, da
   await expect(page.getByRole('row').filter({ hasText: name })).toHaveCount(1);
 });
 
+test('审计日志显示本机构操作并可导出 CSV', async ({ page, data }) => {
+  const signedIn = await login(page, data, 'care_admin');
+  const { profile } = await signedIn.json();
+
+  const name = `审计患者-${Date.now()}`;
+  await page.getByRole('button', { name: '新建患者' }).click();
+  await page.getByLabel('患者姓名').fill(name);
+  await page.getByRole('button', { name: '创建档案' }).click();
+  await expect(page.getByRole('row').filter({ hasText: name })).toHaveCount(1);
+
+  await page.getByRole('link', { name: '审计日志' }).click();
+  const createdRow = page.getByRole('row').filter({ hasText: 'patient.created' });
+  await expect(createdRow.first()).toContainText(profile.accountId);
+
+  // 动作筛选：不存在的动作给出空态，恢复后重新出现。
+  await page.getByLabel('动作').fill('no.such.action');
+  await expect(page.getByText('当前筛选条件下没有审计事件。')).toBeVisible();
+  await page.getByLabel('动作').fill('patient.created');
+  await expect(createdRow.first()).toBeVisible();
+
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: '导出 CSV' }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toMatch(/^audit-log-.*\.csv$/);
+});
+
 test('康复治疗师可见并进入分期确认', async ({ page, data }) => {
   await login(page, data);
   await page.goto(`/patients/${data.patientId}`);

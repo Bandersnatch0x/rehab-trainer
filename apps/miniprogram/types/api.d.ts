@@ -835,6 +835,59 @@ export interface paths {
         };
         trace?: never;
     };
+    "/audit-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 查询本机构审计事件
+         * @description 仅 care_admin 与 rehab_therapist。按发生时间倒序返回本机构审计事件，
+         *     供处理明细核验与导出；跨机构不可见。
+         */
+        get: {
+            parameters: {
+                query?: {
+                    action?: string;
+                    resourceType?: string;
+                    actorAccountId?: string;
+                    from?: string;
+                    to?: string;
+                    /**
+                     * @description 不透明游标，取自上一页的 `nextCursor`。服务端按排序键定位，
+                     *     翻页期间有新增或删除也不会重复或漏行。客户端不应解析其内容。
+                     */
+                    cursor?: components["parameters"]["Cursor"];
+                    limit?: components["parameters"]["Limit"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description 审计事件列表 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AuditEventPage"];
+                    };
+                };
+                403: components["responses"]["Forbidden"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/research/overview": {
         parameters: {
             query?: never;
@@ -1414,6 +1467,23 @@ export interface components {
         };
         AlertPage: {
             items: components["schemas"]["Alert"][];
+            nextCursor?: string | null;
+        };
+        AuditEvent: {
+            id: string;
+            actorAccountId?: string | null;
+            action: string;
+            resourceType?: string | null;
+            resourceId?: string | null;
+            outcome: string;
+            detail?: {
+                [key: string]: unknown;
+            };
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AuditEventPage: {
+            items: components["schemas"]["AuditEvent"][];
             nextCursor?: string | null;
         };
         /**

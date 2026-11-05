@@ -14,6 +14,7 @@ from app.core.errors import DEFAULT_ERROR_CODES
 from app.routers import (
     alerts,
     assessments,
+    audit,
     auth,
     exercises,
     media,
@@ -92,6 +93,7 @@ for router in (
     prescriptions.router,
     sessions.router,
     alerts.router,
+    audit.router,
     research.router,
     media.router,
 ):

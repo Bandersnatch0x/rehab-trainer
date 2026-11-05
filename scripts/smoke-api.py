@@ -181,6 +181,10 @@ def run_smoke(base_url, username, password, binding_token):
     request("GET", "/alerts?patientId=patient-demo",
             check=lambda b: any(a["id"] == "alert-demo" and a["status"] == "acknowledged" for a in b["items"]))
 
+    # 审计：本机构事件可按动作筛选，处置人来自登录账号。
+    request("GET", "/audit-events?action=alert.updated",
+            check=lambda b: any(item["action"] == "alert.updated" and item["actorAccountId"] for item in b["items"]))
+
     # 科研聚合端点：只返回聚合值，demo 数据被硬过滤，患者数应为 0。
     request("GET", "/research/overview",
             check=lambda b: b["dataOrigin"] == "real" and b["minCellCount"] >= 5

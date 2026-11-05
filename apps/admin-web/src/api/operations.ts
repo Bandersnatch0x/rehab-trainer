@@ -14,6 +14,7 @@ import type {
   Assessment,
   AssessmentCreate,
   AssessmentPage,
+  AuditEventPage,
   BindRequestBody,
   Exercise,
   ExerciseListQuery,
@@ -227,6 +228,17 @@ export function updateAlert(
       params: { path: { alertId } },
       body,
     }),
+  );
+}
+
+// ---------- audit ----------
+
+/** 16. GET /audit-events — 查询本机构审计事件 */
+export function listAuditEvents(
+  query: { cursor?: string; limit?: number } = {},
+): Promise<ApiResult<AuditEventPage>> {
+  return toResult<AuditEventPage>(
+    api.GET("/audit-events", { params: { query } }),
   );
 }
 

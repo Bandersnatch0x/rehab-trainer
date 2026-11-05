@@ -30,6 +30,7 @@ tags:
   - name: exercises
   - name: sessions
   - name: alerts
+  - name: audit
   - name: research
   - name: media
 
@@ -521,6 +522,48 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Alert"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /audit-events:
+    get:
+      tags: [audit]
+      summary: 查询本机构审计事件
+      description: |
+        仅 care_admin 与 rehab_therapist。按发生时间倒序返回本机构审计事件，
+        供处理明细核验与导出；跨机构不可见。
+      parameters:
+        - name: action
+          in: query
+          schema:
+            type: string
+        - name: resourceType
+          in: query
+          schema:
+            type: string
+        - name: actorAccountId
+          in: query
+          schema:
+            type: string
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: 审计事件列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditEventPage"
         "403":
           $ref: "#/components/responses/Forbidden"
 
@@ -1426,6 +1469,44 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Alert"
+        nextCursor:
+          type: string
+          nullable: true
+
+    AuditEvent:
+      type: object
+      required: [id, action, outcome, createdAt]
+      properties:
+        id:
+          type: string
+        actorAccountId:
+          type: string
+          nullable: true
+        action:
+          type: string
+        resourceType:
+          type: string
+          nullable: true
+        resourceId:
+          type: string
+          nullable: true
+        outcome:
+          type: string
+        detail:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+
+    AuditEventPage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditEvent"
         nextCursor:
           type: string
           nullable: true

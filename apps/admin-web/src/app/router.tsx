@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate, Outlet } from "react-router";
 import { AuthProvider } from "../auth/AuthProvider";
 import AlertsPage from "../pages/AlertsPage";
+import AuditLogPage from "../pages/AuditLogPage";
 import FollowUpsPage from "../pages/FollowUpsPage";
 import ForbiddenPage from "../pages/ForbiddenPage";
 import LoginPage from "../pages/LoginPage";
@@ -59,6 +60,7 @@ export const router = createBrowserRouter([
           },
           { path: "alerts", element: <AlertsPage /> },
           { path: "follow-ups", element: <FollowUpsPage /> },
+          { path: "audit-log", element: <AuditLogPage /> },
           { path: "research", element: <ResearchPage /> },
           { path: "media-assets", element: <MediaAssetsPage /> },
           {
