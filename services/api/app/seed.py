@@ -93,6 +93,8 @@ def _seed_patient(db) -> None:
             fall_risk="medium",
             symptoms=["Rigidity"],
             status="active",
+            # 演示库一律标 demo，科研查询默认只取 real（N1）。
+            data_origin="demo",
         )
     )
     db.flush()

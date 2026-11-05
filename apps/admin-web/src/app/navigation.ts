@@ -28,6 +28,11 @@ export const NAV_ITEMS: readonly NavItem[] = [
     roles: ["care_admin", "rehab_therapist"],
   },
   {
+    to: "/research",
+    label: "科研数据",
+    roles: ["care_admin", "rehab_therapist"],
+  },
+  {
     to: "/admin/permissions",
     label: "权限管理",
     roles: ["care_admin"],

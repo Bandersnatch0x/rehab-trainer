@@ -23,6 +23,7 @@ from app.models.alert import AlertEvent
 from app.models.clinical import Patient
 from app.models.identity import Account, Org, RoleBinding
 from app.models.prescription import Prescription, PrescriptionItem
+from app.models.record import SessionRecord
 from app.seed import _seed_exercises
 
 
@@ -74,6 +75,18 @@ def seed_case(extra_patients: int = 0):
         db.add(prescription)
         db.add(AlertEvent(id=alert_id, org_id=case_id, patient_id=patient_id,
                           rule_code="PAIN_PERSISTENT", level="warning", triggered_at=now, status="open"))
+        # 科研看板冒烟用：5 条训练记录刚好越过 n<5 阈值，患者数保持不变，
+        # 以免影响既有的患者列表计数用例。
+        for index in range(5):
+            db.add(SessionRecord(id=uuid4().hex, client_record_id=f"research-rec-{case_id}-{index}",
+                                 org_id=case_id, patient_id=patient_id,
+                                 prescription_id=prescription_id, recorded_by=therapist_id,
+                                 recorded_at=now - timedelta(hours=index), checked_in=True,
+                                 completion_count=10, movement_error_count=1,
+                                 interruption_count=0, valid_frame_ratio=0.9,
+                                 is_doubtful=False, model_version="pose-full-1.2.2",
+                                 model_sha256="a" * 64, metric_algorithm_version="metrics-0.1.0",
+                                 threshold_config_version="thresholds-2026.11", metrics={}))
         db.commit()
     print(json.dumps(dict(patientId=patient_id, otherPatientId=other_id,
                          prescriptionId=prescription_id, alertId=alert_id, accounts=accounts)))

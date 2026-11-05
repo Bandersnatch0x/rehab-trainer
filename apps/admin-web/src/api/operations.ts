@@ -23,6 +23,8 @@ import type {
   PrescriptionPatch,
   PrescriptionListQuery,
   RefreshRequestBody,
+  ResearchDataQuality,
+  ResearchOverview,
   SessionBatchRequest,
   SessionBatchResult,
   SessionListQuery,
@@ -202,4 +204,18 @@ export function updateAlert(
       body,
     }),
   );
+}
+
+// ---------- research ----------
+
+/** 16. GET /research/overview — 本机构科研聚合画像（仅临床角色） */
+export function getResearchOverview(): Promise<ApiResult<ResearchOverview>> {
+  return toResult<ResearchOverview>(api.GET("/research/overview"));
+}
+
+/** 17. GET /research/data-quality — 本机构训练数据质量看板（仅临床角色） */
+export function getResearchDataQuality(): Promise<
+  ApiResult<ResearchDataQuality>
+> {
+  return toResult<ResearchDataQuality>(api.GET("/research/data-quality"));
 }
