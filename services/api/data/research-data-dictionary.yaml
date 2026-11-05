@@ -1,0 +1,363 @@
+# 科研数据字典 v0.1
+#
+# 唯一真源：services/api/data/research-data-dictionary.yaml
+# 校验：services/api/tests/test_research_dictionary.py
+#
+# 字段约定：
+#   dataset          数据集分组（patient / session / assessment / prescription）
+#   table            ORM 表名，必须真实存在
+#   field            ORM 列名，必须真实存在
+#   label_zh         中文名
+#   dtype            string / integer / number / boolean / datetime / json
+#   unit             物理单位；无单位写 null
+#   missing_codes    缺失编码语义列表
+#   sensitivity      none / low / medium / high
+#   export_default   in-aggregate / excluded
+#   d23_status       allowed / prohibited（D23 未验证字段不得导出）
+#   derivation       取值来源；直取列写 direct，派生列写明公式
+#
+# 未决项 12（有效性阈值）尚未签核：is_doubtful 为探索性变量。
+version: "0.1"
+datasets:
+  patient:
+    - table: patient
+      field: patient_id
+      label_zh: 患者标识
+      dtype: string
+      unit: null
+      missing_codes: [not-applicable]
+      sensitivity: high
+      export_default: excluded
+      d23_status: allowed
+      derivation: direct
+    - table: patient
+      field: org_id
+      label_zh: 所属机构
+      dtype: string
+      unit: null
+      missing_codes: [not-applicable]
+      sensitivity: medium
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: patient
+      field: data_origin
+      label_zh: 数据来源
+      dtype: string
+      unit: null
+      missing_codes: [not-applicable]
+      sensitivity: low
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: patient
+      field: birth_year
+      label_zh: 出生年份
+      dtype: integer
+      unit: year
+      missing_codes: [unknown]
+      sensitivity: high
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: patient
+      field: hy_stage
+      label_zh: H-Y 分级
+      dtype: integer
+      unit: level
+      missing_codes: [not-applicable]
+      sensitivity: medium
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: patient
+      field: stage_confirmation_status
+      label_zh: 分期确认状态
+      dtype: string
+      unit: null
+      missing_codes: [not-applicable]
+      sensitivity: medium
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: patient
+      field: fall_risk
+      label_zh: 跌倒风险分级
+      dtype: string
+      unit: null
+      missing_codes: [unknown]
+      sensitivity: medium
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: patient
+      field: symptoms
+      label_zh: 症状标签
+      dtype: json
+      unit: null
+      missing_codes: [empty-list]
+      sensitivity: high
+      export_default: excluded
+      d23_status: allowed
+      derivation: direct
+    - table: patient
+      field: status
+      label_zh: 患者状态
+      dtype: string
+      unit: null
+      missing_codes: [not-applicable]
+      sensitivity: low
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+
+  session:
+    - table: session_record
+      field: client_record_id
+      label_zh: 客户端记录标识
+      dtype: string
+      unit: null
+      missing_codes: [not-applicable]
+      sensitivity: high
+      export_default: excluded
+      d23_status: allowed
+      derivation: direct
+    - table: session_record
+      field: recorded_at
+      label_zh: 训练发生时间
+      dtype: datetime
+      unit: iso-8601
+      missing_codes: [not-applicable]
+      sensitivity: medium
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: session_record
+      field: checked_in
+      label_zh: 是否打卡
+      dtype: boolean
+      unit: null
+      missing_codes: [not-applicable]
+      sensitivity: low
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: session_record
+      field: completion_count
+      label_zh: 完成次数
+      dtype: integer
+      unit: count
+      missing_codes: [not-applicable]
+      sensitivity: low
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: session_record
+      field: movement_error_count
+      label_zh: 动作错误次数
+      dtype: integer
+      unit: count
+      missing_codes: [not-applicable]
+      sensitivity: low
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: session_record
+      field: interruption_count
+      label_zh: 中断次数
+      dtype: integer
+      unit: count
+      missing_codes: [not-applicable]
+      sensitivity: low
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: session_record
+      field: valid_frame_ratio
+      label_zh: 有效帧占比
+      dtype: number
+      unit: ratio
+      missing_codes: [unknown]
+      sensitivity: low
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: session_record
+      field: is_doubtful
+      label_zh: 存疑标记（探索性变量）
+      dtype: boolean
+      unit: null
+      missing_codes: [not-applicable]
+      sensitivity: medium
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: >-
+        探索性变量：由服务端依据有效帧占比与阈值配置版本派生。
+        有效性阈值（未决项 12）尚未临床签核，该值不得作为研究结论依据。
+    - table: session_record
+      field: model_version
+      label_zh: 模型版本
+      dtype: string
+      unit: null
+      missing_codes: [not-applicable]
+      sensitivity: low
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: session_record
+      field: model_sha256
+      label_zh: 模型摘要
+      dtype: string
+      unit: null
+      missing_codes: [not-applicable]
+      sensitivity: low
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: session_record
+      field: metric_algorithm_version
+      label_zh: 指标算法版本
+      dtype: string
+      unit: null
+      missing_codes: [not-applicable]
+      sensitivity: low
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: session_record
+      field: threshold_config_version
+      label_zh: 阈值配置版本
+      dtype: string
+      unit: null
+      missing_codes: [not-applicable]
+      sensitivity: low
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: session_record
+      field: metrics
+      label_zh: 姿态指标载荷
+      dtype: json
+      unit: null
+      missing_codes: [empty-object]
+      sensitivity: high
+      export_default: excluded
+      d23_status: prohibited
+      derivation: >-
+        D23 denylist：步态绝对长度、米制速度、摆动相百分比、RAS 适用性结论
+        在完成地面标定与人工接触标注前一律禁止进入科研输出。
+
+  assessment:
+    - table: assessment
+      field: instrument
+      label_zh: 量表编码
+      dtype: string
+      unit: null
+      missing_codes: [not-applicable]
+      sensitivity: low
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: assessment
+      field: score
+      label_zh: 量表得分
+      dtype: number
+      unit: score
+      missing_codes: [unknown]
+      sensitivity: high
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: assessment
+      field: assessed_at
+      label_zh: 评估时间
+      dtype: datetime
+      unit: iso-8601
+      missing_codes: [not-applicable]
+      sensitivity: medium
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: assessment
+      field: risk_level
+      label_zh: 量表风险分级
+      dtype: string
+      unit: null
+      missing_codes: [unknown]
+      sensitivity: high
+      export_default: excluded
+      d23_status: allowed
+      derivation: >-
+        分界值待临床签核（C4）；签核前本系统不写入该列，科研输出不得使用。
+
+  prescription:
+    - table: prescription
+      field: patient_id
+      label_zh: 处方患者
+      dtype: string
+      unit: null
+      missing_codes: [not-applicable]
+      sensitivity: high
+      export_default: excluded
+      d23_status: allowed
+      derivation: direct
+    - table: prescription
+      field: version
+      label_zh: 处方版本
+      dtype: string
+      unit: null
+      missing_codes: [not-applicable]
+      sensitivity: low
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: prescription
+      field: mapping_table_version
+      label_zh: 映射表版本
+      dtype: string
+      unit: null
+      missing_codes: [not-applicable]
+      sensitivity: low
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: prescription
+      field: issued_at
+      label_zh: 开具时间
+      dtype: datetime
+      unit: iso-8601
+      missing_codes: [not-applicable]
+      sensitivity: medium
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: prescription
+      field: valid_from
+      label_zh: 生效时间
+      dtype: datetime
+      unit: iso-8601
+      missing_codes: [not-applicable]
+      sensitivity: medium
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: prescription
+      field: valid_until
+      label_zh: 失效时间
+      dtype: datetime
+      unit: iso-8601
+      missing_codes: [not-applicable]
+      sensitivity: medium
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct
+    - table: prescription
+      field: status
+      label_zh: 处方状态
+      dtype: string
+      unit: null
+      missing_codes: [not-applicable]
+      sensitivity: low
+      export_default: in-aggregate
+      d23_status: allowed
+      derivation: direct

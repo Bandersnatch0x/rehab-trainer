@@ -21,6 +21,9 @@ class Patient(Base):
     __tablename__ = "patient"
     __table_args__ = (
         CheckConstraint("hy_stage BETWEEN 1 AND 5", name="ck_patient_hy_stage"),
+        CheckConstraint(
+            "data_origin IN ('real', 'demo')", name="ck_patient_data_origin"
+        ),
     )
 
     patient_id: Mapped[str] = mapped_column(String(64), primary_key=True)
@@ -40,6 +43,10 @@ class Patient(Base):
     fall_risk: Mapped[str | None] = mapped_column(String(16), nullable=True)
     symptoms: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
     status: Mapped[str] = mapped_column(String(16), default="active", nullable=False)
+    # 科研数据底座：科研查询默认只取 real，demo 数据硬过滤（N1）。
+    data_origin: Mapped[str] = mapped_column(
+        String(8), default="real", nullable=False, index=True
+    )
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
 

@@ -16,6 +16,7 @@ from app.routers import (
     exercises,
     patients,
     prescriptions,
+    research,
     sessions,
 )
 
@@ -88,5 +89,6 @@ for router in (
     prescriptions.router,
     sessions.router,
     alerts.router,
+    research.router,
 ):
     app.include_router(router, prefix=API_PREFIX)

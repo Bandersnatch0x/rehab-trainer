@@ -202,3 +202,24 @@ test('未知路由展示404并可返回患者列表', async ({ page, data }) => 
   await page.getByRole('link', { name: '返回患者工作台' }).click();
   await expect(page).toHaveURL(/\/patients$/);
 });
+
+test('科研页展示聚合画像且不显示被抑制的小样本', async ({ page, data, request }) => {
+  const signedIn = await login(page, data);
+  const { accessToken } = await signedIn.json();
+  await page.getByRole('link', { name: '科研数据' }).click();
+  await expect(page.getByRole('heading', { name: '科研数据底座' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '机构聚合画像' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '训练数据质量' })).toBeVisible();
+  // 该例 2 位真实患者、5 条记录：患者数被抑制，记录数刚好越过阈值可见。
+  await expect(page.locator('.research-card').filter({ hasText: '真实患者数' })).toContainText('—');
+  await expect(page.locator('.research-card').filter({ hasText: '训练记录数' })).toContainText('5');
+
+  const overview = await request.get('/v1/research/overview', {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  expect(overview.status()).toBe(200);
+  const body = await overview.json();
+  expect(body.dataOrigin).toBe('real');
+  expect(body.minCellCount).toBe(5);
+  expect(JSON.stringify(body)).not.toMatch(/strideLengthCm|gaitSpeedMps|swingPhasePercent|rasApplicab/);
+});

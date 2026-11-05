@@ -802,6 +802,98 @@ export interface paths {
         };
         trace?: never;
     };
+    "/research/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 本机构科研聚合画像
+         * @description 仅 rehab_therapist 与 care_admin。只返回聚合值，不返回行级数据：
+         *     - 计数 1–4 的单元格抑制为 `count: null` 且 `suppressed: true`；
+         *     - 计数为 0 按真值公布，因为 0 不指向任何个体；
+         *     - 若某分布只隐藏了 1 个单元格且总数已公开，会再抑制一个最小可见
+         *       单元格（二次抑制），使被隐藏的值无法由总数相减反推；
+         *     - 分子 1–4 的比例同样抑制，避免由精确比例反解出分子。
+         *     不提供插值、区间或取整。默认只取 `data_origin = real` 的患者，
+         *     年龄按分段输出，不返回出生年份原值。每次访问写审计
+         *     `research.overview.viewed`。
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description 聚合画像 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ResearchOverview"];
+                    };
+                };
+                403: components["responses"]["Forbidden"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/research/data-quality": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 本机构训练数据质量看板
+         * @description 仅 rehab_therapist 与 care_admin。只返回聚合值，n<5 抑制。
+         *     版本分布按模型版本、指标算法版本与阈值配置版本分层，跨版本记录
+         *     不得直接比较趋势。`is_doubtful` 为探索性变量：有效性阈值
+         *     （未决项 12）尚未临床签核。每次访问写审计
+         *     `research.data_quality.viewed`。
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description 数据质量看板 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ResearchDataQuality"];
+                    };
+                };
+                403: components["responses"]["Forbidden"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1068,6 +1160,70 @@ export interface components {
         AlertPage: {
             items: components["schemas"]["Alert"][];
             nextCursor?: string | null;
+        };
+        /**
+         * @description 聚合计数单元格。`count` 为 null 且 `suppressed` 为 true 表示
+         *     样本数小于 5，已抑制；不得由其他字段反推该值。
+         */
+        CountCell: {
+            count?: number | null;
+            suppressed: boolean;
+        };
+        /** @description 聚合比例单元格。分母小于 5 时抑制为 `value: null`。 */
+        RateCell: {
+            value?: number | null;
+            suppressed: boolean;
+        };
+        ResearchBucket: {
+            key: string;
+            count?: number | null;
+            suppressed: boolean;
+        };
+        /** @description 版本分层计数；不足 5 条的版本不列出。 */
+        ResearchVersionBucket: {
+            key: string;
+            count: number | null;
+            suppressed: boolean;
+        };
+        ResearchOverview: {
+            orgId: string;
+            /** Format: date-time */
+            generatedAt: string;
+            /**
+             * @description 科研输出只接受真实数据；demo 数据在查询层硬过滤。
+             * @enum {string}
+             */
+            dataOrigin: "real";
+            /** @description 小样本抑制阈值，当前为 5。 */
+            minCellCount: number;
+            patientCount: components["schemas"]["CountCell"];
+            /** @description 键为 H-Y 分级 "1"–"5"。 */
+            hyStageDistribution: components["schemas"]["ResearchBucket"][];
+            /** @description 键为 confirmed / suspected。 */
+            stageConfirmationDistribution: components["schemas"]["ResearchBucket"][];
+            /**
+             * @description 年龄分段：under-60 / 60-69 / 70-79 / 80-plus / unknown。
+             *     不返回出生年份原值。
+             */
+            ageDistribution: components["schemas"]["ResearchBucket"][];
+        };
+        ResearchDataQuality: {
+            orgId: string;
+            /** Format: date-time */
+            generatedAt: string;
+            /** @enum {string} */
+            dataOrigin: "real";
+            minCellCount: number;
+            sessionRecordCount: components["schemas"]["CountCell"];
+            /** @description 键为 missing / lt-0.5 / 0.5-0.8 / gte-0.8。 */
+            validFrameRatioDistribution: components["schemas"]["ResearchBucket"][];
+            doubtfulRatio: components["schemas"]["RateCell"];
+            missingRatio: components["schemas"]["RateCell"];
+            modelVersionDistribution: components["schemas"]["ResearchVersionBucket"][];
+            metricAlgorithmVersionDistribution: components["schemas"]["ResearchVersionBucket"][];
+            thresholdConfigVersionDistribution: components["schemas"]["ResearchVersionBucket"][];
+            /** @description 探索性变量说明；有效性阈值尚未临床签核。 */
+            note: string;
         };
     };
     responses: {

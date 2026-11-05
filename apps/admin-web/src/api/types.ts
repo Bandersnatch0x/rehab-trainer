@@ -35,6 +35,10 @@ export type SessionBatchResult = components["schemas"]["SessionBatchResult"];
 export type NotificationDelivery = components["schemas"]["NotificationDelivery"];
 export type Alert = components["schemas"]["Alert"];
 export type AlertPage = components["schemas"]["AlertPage"];
+export type ResearchOverview = components["schemas"]["ResearchOverview"];
+export type ResearchDataQuality = components["schemas"]["ResearchDataQuality"];
+export type ResearchBucket = components["schemas"]["ResearchBucket"];
+export type ResearchVersionBucket = components["schemas"]["ResearchVersionBucket"];
 
 // ---------- 请求体 ----------
 export type PatientCreate = components["schemas"]["PatientCreate"];

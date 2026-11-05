@@ -9,6 +9,7 @@ import PatientDetailPage from "../pages/PatientDetailPage";
 import PatientsPage from "../pages/PatientsPage";
 import PermissionsPage from "../pages/PermissionsPage";
 import PrescriptionEditPage from "../pages/PrescriptionEditPage";
+import ResearchPage from "../pages/ResearchPage";
 import StageConfirmationPage from "../pages/StageConfirmationPage";
 import { AppLayout } from "./AppLayout";
 import { RequireAuth, RequireRole } from "./guards";
@@ -57,6 +58,7 @@ export const router = createBrowserRouter([
           },
           { path: "alerts", element: <AlertsPage /> },
           { path: "follow-ups", element: <FollowUpsPage /> },
+          { path: "research", element: <ResearchPage /> },
           {
             path: "admin/permissions",
             element: (
