@@ -72,7 +72,8 @@ def main() -> int:
             ("miniprogram static", [str(PYTHON), "tests/static_check.py", "."], MP_DIR, None, False),
         ]
     if not args.skip_android:
-        gradlew = "gradlew.bat" if os.name == "nt" else "./gradlew"
+        # Windows 的 CreateProcess 不解析当前目录里的裸文件名，必须给绝对路径。
+        gradlew = ANDROID_DIR / ("gradlew.bat" if os.name == "nt" else "gradlew")
         java_home = os.environ.get("JAVA_HOME", r"E:\jdk\jdk-17.0.11")
         android_home = os.environ.get("ANDROID_HOME", r"D:\Android\Sdk")
         android_env = {
@@ -82,7 +83,7 @@ def main() -> int:
         }
         steps.append((
             "android build+test",
-            [gradlew, ":app:testDebugUnitTest", ":app:assembleDebug", "--no-daemon"],
+            [str(gradlew), ":app:testDebugUnitTest", ":app:assembleDebug", "--no-daemon"],
             ANDROID_DIR, android_env, False,
         ))
 
