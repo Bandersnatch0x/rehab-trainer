@@ -11,6 +11,9 @@ ENV PYTHONUNBUFFERED=1 \
     REHAB_AUTO_CREATE_SCHEMA=false
 WORKDIR /opt/rehab
 COPY --from=builder /wheels /wheels
+# hadolint DL3013：不逐个写死版本，是因为 wheel 由上一阶段按 pyproject 与
+# deploy/requirements.txt 构建后本地安装（--no-index），版本已在构建产物层固定。
+# hadolint ignore=DL3013
 RUN python -m pip install --no-cache-dir --no-index --find-links=/wheels rehab-trainer-api alembic 'psycopg[binary]' \
     && rm -rf /wheels \
     && groupadd --gid 10001 rehab \

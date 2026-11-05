@@ -6,7 +6,7 @@
 
 | 路径 | 内容 | 当前状态 |
 | --- | --- | --- |
-| `apps/android/` | Kotlin + Jetpack Compose,手机与平板同一 App | CameraX + MediaPipe 实时上肢计数与训练页已落地;本机无 Android SDK,**构建未验证** |
+| `apps/android/` | Kotlin + Jetpack Compose,手机与平板同一 App | CameraX + MediaPipe 实时上肢计数与训练页已落地;`assembleDebug` 通过(SDK 在 D:\Android\Sdk) |
 | `apps/miniprogram/` | 微信原生小程序 + TypeScript | 5 个页面接真实接口(index/patient/records/alerts/assessment),训练页保持演示并标注;行为测试 15 项、类型检查通过 |
 | `apps/admin-web/` | React + Vite + TypeScript | 路由、鉴权、7 个业务页接真实 API(含随访台账);E2E 14 条全部通过 |
 | `services/api/` | FastAPI + SQLAlchemy 后端 | 15 路径 / 18 操作,16 张表,Alembic 初始迁移,41 项测试通过 |
@@ -30,7 +30,7 @@
 - `compileSdk = 36`、`targetSdk = 36`、`minSdk = 26`,Java/Kotlin 目标 17。
 - 已落地:CameraX + MediaPipe Tasks(LIVE_STREAM)实时姿态、上肢计数状态机、训练执行页双播放(D22)、`data/remote/` 契约接口。
 - `debug` 构建注入 `API_BASE_URL=http://10.0.2.2:8000/v1/` 并允许明文流量;release 不含该配置。
-- 未配置签名与图标;本机缺 Android SDK,`assembleDebug` 未执行。
+- 未配置签名与图标;`assembleDebug` 已在 JDK 17 + SDK 36 上通过(产物 `app/build/outputs/apk/debug/app-debug.apk`)。
 
 ## 小程序骨架
 
@@ -62,7 +62,7 @@
 | 项 | 结果 |
 | --- | --- |
 | 环境 | JDK 21.0.10、Gradle 9.0.0、Node 24.19.0、pnpm 10.7.1、npm 11.17.0 均可用 |
-| Android 构建 | **未验证**。仅有 `D:\platform-tools`(adb),缺少 Android SDK 的 platforms 与 build-tools,未执行 `assembleDebug` |
+| Android 构建 | `assembleDebug` **通过**(JDK 17、SDK platforms;android-36、build-tools;36.0.0、AGP 8.13.2);修复 3 处编译错误:2 处 KDoc 里 `/auth/*` 触发 Kotlin 可嵌套块注释、1 处 `NormalizedLandmark.visibility()` 返回 `Optional<Float>` 被当 `float` |
 | Gradle Wrapper | 已生成并固定 8.13;未执行下载与构建 |
 | 小程序 | JSON 文件解析通过;未安装依赖,未执行 `tsc --noEmit` |
 | Web 后台 | `package.json`/`tsconfig.json` 解析通过;未安装依赖,未执行构建 |
@@ -79,14 +79,13 @@
 | 小程序 | 行为测试 15 项通过、`tsc --noEmit` 退出 0;**实际渲染与真机未验证** |
 | 联调脚本 | `scripts/smoke-api.py` 自管理模式 **18/18 契约操作**,含批量幂等与重放 |
 | 部署自检 | `deploy/verify.py` 通过:16 表迁移往返、模型差异为空、PostgreSQL 离线 SQL、YAML |
-| 容器 | 已在 WSL2(kali-linux2,Docker 27.5.1/Compose 2.32.4)实跑:构建、compose up(双 healthy)、`alembic 0001`、healthcheck、pg_dump/restore、18/18 联调通过;hadolint 未装 |
-| Android | **未验证**:本机无 Android SDK |
+| 容器 | 已在 WSL2(kali-linux2,Docker 27.5.1/Compose 2.32.4)实跑:构建、compose up(双 healthy)、`alembic 0001`、healthcheck、pg_dump/restore、18/18 联调通过;hadolint 2.12.0 通过 |
+| Android | `assembleDebug` **通过**(SDK 装 D:\Android\Sdk、JDK 17);修复 3 处此前被「未验证」掩盖的编译错误 |
 | CI | **未验证**:仓库无远端流水线 |
 | 独立审查 | 两轮(`cb072f8..HEAD`、`d0b612d..HEAD`):3 个 HIGH 与 19 个 MEDIUM 已修;分页已由 offset 改为 keyset,契约 schema 级校验仍待排期 |
 
 ## 后续事项
 
-- 安装 Android SDK 后补跑 `./gradlew :app:assembleDebug`,并记录 AGP/Gradle 兼容结果。
-- 容器已验证主链路;仍需 hadolint 静态检查与并发/长时压测。
+- Android 构建与容器主链路均已验证;仍需真机/模拟器运行、并发与长时压测。
 - 在微信开发者工具中实跑小程序,验证 WXML 渲染、输入法与合法域名配置。
 - CI 尚未接远端,接入后改为冻结锁文件并复用上述检查。

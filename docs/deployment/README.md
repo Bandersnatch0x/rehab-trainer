@@ -141,6 +141,7 @@ git diff --check
 | 迁移失败不启动 | 用错误数据库密码启动：api 退出码 1，日志为 `password authentication failed`，8010 未监听。`restart: unless-stopped` 会让它反复重启，但始终不提供服务，平台侧仍需失败告警 |
 | 迁移/运行账号分离 | 在全新库上用 `rehab_migrator` 跑 `alembic upgrade head` 成功（退出 0）；`rehab_runtime` 执行 `CREATE TABLE` 被拒（`permission denied for schema public`）；API 用运行账号启动，healthcheck 退出 0，seed 写入成功 |
 | 管理端跨进程联调 | 管理端构建后经 Vite 预览代理 `/v1` 打到容器 API：治疗师登录成功、患者列表显示种子患者「张阿姨」、页面无 JS 错误 |
+| hadolint 静态检查 | 在 WSL 内用 hadolint 2.12.0 跑 `services/api/Dockerfile`：通过（`--failure-threshold=warning`，退出 0）。唯一的 DL3013（pip 未固定版本）已按实际情况豁免并注明理由：wheel 由构建阶段按 `pyproject.toml` 与 `deploy/requirements.txt` 生成后本地安装，版本在构建产物层锁定 |
 
 补充说明：该环境无法直连 Docker Hub，基础镜像经 `docker.m.daocloud.io` 镜像拉取后按原名打标签；这与镜像内容无关，但生产构建应配置可用的镜像仓库。未执行云上部署，也未做 hadolint 静态检查。
 
