@@ -23,3 +23,20 @@ created: 2026-11-05
 ### 2026-11-05 建票
 
 由任务 0006 拆出：该次只交付策略骨架与纯函数单测，真实下载、双上限 LRU、跨版本存活与配额下发明确留待本票，不在骨架里写半成品缓存层。
+
+### 2026-11-06 落码完成
+
+按 `.agent/tmp/orca-specs/16-offline-cache.md` 与 D25/D27 完成缓存层：
+
+- 真实下载：OkHttp 流式写 `.part`，完整改名后才登记 JSON 索引，失败清理半成品。
+- 缓存索引：`filesDir/media-cache/index.json` 原子写（tmp → rename），含 `url/sha256/bytes/pinnedByPrescriptionId/lastUsedAt/cachedAt/appVersion`；缺失文件与孤儿在启动加载时清理，绝不按 `appVersion` 清除。
+- 容量治理：手机 500MB/10 条、平板 1.5GB/30 条；非 pinned 按 `lastUsedAt` 升序淘汰；pinned 永不淘汰，pinned 自身超限只告警；可用空间 <1GB 不开始/不继续预取。
+- 预取：沿用既有策略骨架的网络门槛、并发 2、连败 3 次停止；处方变更会解除旧处方的 pinned。
+- 播放接线：`InstructionalVideoSource` 命中缓存返回本地路径，未命中保持远端并触发非计费网络下的后台补缓存；播放解析刷新 `lastUsedAt`（最多每分钟一次）。
+- 日志只记 URL 摘要（缓存键），不输出可能带签名/token 的原始媒体地址。
+
+验证：`:app:testDebugUnitTest` 13 个测试类 80 项全通过（新增缓存层 36 项与播放缓存 2 项；原有 8 项 `MediaPrefetchPolicyTest`、6 项既有 `InstructionalVideoSourceTest` 继续通过）；`:app:assembleDebug` 通过；`git diff --check` 无输出。详细证据与未做项见 `.agent/tmp/OFFLINE-CACHE.md`。
+
+未完成（原因已记）：无设备/模拟器，断网播放实测缺运行证据；训练页仍用 `DEFAULT_EXERCISES`（`videoUri` 全空）且处方数据未接 UI，预取触发入口已就绪但暂无调用方；服务端配额下发按规格另立票。
+
+边界例外：`MainActivity` 增加 `MediaCache.install`、Manifest 增加 `ACCESS_NETWORK_STATE`（普通权限），均为接线必需；未改 `ui/screens/`。

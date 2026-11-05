@@ -13,7 +13,18 @@ data class InstructionalVideoSource(
     val creditLine: String? = null
 ) {
 
-    val resolvedRemoteUrl: String? = remoteUrl?.trim()?.takeIf { it.isNotEmpty() }
+    /**
+     * 播放地址：命中离线缓存时用本地文件，否则保持远端地址并触发后台补缓存。
+     * 每次读取都重新解析，下载完成后下一次组合即可切到本地文件。
+     */
+    val resolvedRemoteUrl: String?
+        get() {
+            val remote = remoteUrl?.trim()?.takeIf { it.isNotEmpty() } ?: return null
+            val cached = CachedMediaPlayback.resolveLocalUrl(remote)
+            if (cached != null) return cached
+            CachedMediaPlayback.onPlaybackMiss(remote)
+            return remote
+        }
 
     /** 只有服务端下发了地址才尝试远端播放，否则直接用内置演示视频。 */
     val shouldUseRemote: Boolean
