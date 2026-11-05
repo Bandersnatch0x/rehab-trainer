@@ -13,3 +13,24 @@
 .exercise__action {
   margin-top: 24rpx;
 }
+
+.exercise__action--disabled {
+  color: #475569;
+  background-color: #e2e8f0;
+  border: 2rpx solid #94a3b8;
+  box-shadow: none;
+}
+
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+  margin-top: 24rpx;
+}
+
+.switch-row__label {
+  color: #0f172a;
+  font-size: 36rpx;
+  font-weight: 600;
+}

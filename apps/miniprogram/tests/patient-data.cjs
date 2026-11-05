@@ -37,10 +37,13 @@ function harness(options = {}) {
   ]);
   if (options.loggedOut) storage.clear();
   const calls = [];
+  const navigations = [];
   global.wx = {
     getStorageSync: (key) => storage.get(key),
     setStorageSync: (key, value) => storage.set(key, value),
     removeStorageSync: (key) => storage.delete(key),
+    navigateTo: (opts) => navigations.push(opts && opts.url),
+    switchTab: (opts) => navigations.push(opts && opts.url),
     request(request) {
       const url = new URL(request.url);
       calls.push({ ...request, url });
@@ -48,11 +51,19 @@ function harness(options = {}) {
       if (!response) {
         if (url.pathname === '/v1/me') response = { data: options.me || me };
         else if (url.pathname === '/v1/patients') response = { data: { items: options.patients || [patient] } };
-        else if (url.pathname === '/v1/sessions' || url.pathname === '/v1/alerts') {
-          const pages = url.pathname.endsWith('sessions') ? options.sessions || [[]] : options.alerts || [[]];
+        else if (['/v1/sessions', '/v1/alerts', '/v1/exercises'].includes(url.pathname)) {
+          const pages = url.pathname.endsWith('sessions')
+            ? options.sessions || [[]]
+            : url.pathname.endsWith('alerts')
+              ? options.alerts || [[]]
+              : options.exercises || [[]];
           const index = Number(url.searchParams.get('cursor') || '0');
           assert.ok(pages[index], '请求了不存在的分页');
           response = { data: { items: pages[index], nextCursor: index + 1 < pages.length ? String(index + 1) : null } };
+        } else if (url.pathname === '/v1/auth/bind') {
+          response = { data: { accessToken: 'bound-access', refreshToken: 'bound-refresh', expiresIn: 3600 } };
+        } else if (url.pathname === '/v1/auth/login') {
+          response = { data: { accessToken: 'demo-access', refreshToken: 'demo-refresh', expiresIn: 3600, profile: me } };
         } else if (url.pathname.endsWith('/assessments')) {
           response = { status: 201, data: { id: 'assessment-1', patientId, instrument: request.data.instrument, assessedAt: request.data.assessedAt, assessedBy: me.accountId } };
         } else {
@@ -66,7 +77,7 @@ function harness(options = {}) {
     },
   };
   const api = require(path.join(build, 'utils/patient-data.js'));
-  return { api, calls, storage };
+  return { api, calls, storage, navigations };
 }
 
 function page(name) {
@@ -258,12 +269,67 @@ test('assessment page preserves failed input, exposes backend message and preven
   assert.equal(calls.filter((call) => call.method === 'POST').length, 2);
 });
 
-test('logged out pages show the binding error without issuing unauthenticated requests', async () => {
+test('logged out pages show the binding error and a binding entry without issuing unauthenticated requests', async () => {
   const { calls } = harness({ loggedOut: true });
   const instance = page('index');
   await instance.onShow();
   assert.match(instance.data.error, /尚未登录/);
+  assert.equal(instance.data.needBinding, true);
+  const template = readFileSync(path.join(project, 'pages/index/index.wxml'), 'utf8');
+  assert.match(template, /去绑定/);
+  assert.match(template, /bindtap="goBind"/);
   assert.equal(calls.length, 0);
+});
+
+test('training entries only open low risk until a therapist confirmation is available', async () => {
+  const { api, calls } = harness({ exercises: [[
+    { code: 'ex-low', label: '肩颈牵伸', category: 'stretching-relaxation', publicationStatus: 'published', riskLevel: 'low', applicableStages: [1, 2, 3, 4], defaultDosage: { sets: 2, repetitions: 8 } },
+    { code: 'ex-medium', label: '坐位抬腿', category: 'strength-maintenance', publicationStatus: 'published', riskLevel: 'medium', applicableStages: [1, 2, 3, 4] },
+    { code: 'ex-high', label: '节拍步行', category: 'rhythmic-gait', publicationStatus: 'published', riskLevel: 'high', applicableStages: [1, 2, 3, 4] },
+    { code: 'ex-unknown', label: '靠墙站立矫正', category: 'postural-correction', publicationStatus: 'published' },
+  ]] });
+
+  const views = await api.loadExercises();
+  assert.deepEqual(views.map((view) => view.available), [true, false, false, false]);
+  assert.equal(views[0].badgeLabel, '适合您');
+  assert.equal(views[1].badgeLabel, '需治疗师确认');
+  assert.equal(views[0].dosageLine, '2 组 · 每组 8 次');
+  assert.equal(views[3].dosageLine, '待治疗师安排');
+  assert.doesNotMatch(JSON.stringify(views), /低风险|中风险|高风险/);
+  assert.ok(calls.every((call) => call.url.pathname === '/v1/exercises'));
+
+  const unlocked = await api.loadExercises(true);
+  assert.ok(unlocked.every((view) => view.available));
+  assert.equal(unlocked[2].badgeLabel, '演示已解锁');
+
+  const bad = harness({ exercises: [[{ code: 'x', label: 'x', category: 'rhythmic-gait', publicationStatus: 'published', riskLevel: 'severe' }]] });
+  await assert.rejects(bad.api.loadExercises(), { code: 'INVALID_RESPONSE' });
+});
+
+test('bind page stores the session or demo login, and surfaces backend errors', async () => {
+  const bound = harness();
+  const bindPage = page('bind');
+  bindPage.onCodeInput({ detail: { value: '  code-1  ' } });
+  await bindPage.submit();
+  assert.equal(bound.storage.get('rehab.auth.session.v1').accessToken, 'bound-access');
+  assert.equal(bound.storage.get('rehab.auth.demo.v1'), undefined);
+  assert.equal(bound.navigations.at(-1), '/pages/index/index');
+  assert.equal(bindPage.data.error, '');
+
+  const demo = harness();
+  const demoPage = page('bind');
+  await demoPage.enterDemo();
+  assert.equal(demo.storage.get('rehab.auth.session.v1').accessToken, 'demo-access');
+  assert.equal(demo.storage.get('rehab.auth.demo.v1'), true);
+  assert.equal(demo.navigations.at(-1), '/pages/index/index');
+  assert.equal(demoPage.data.demoError, '');
+
+  const failing = harness({ respond: (_, url) => url.pathname === '/v1/auth/bind' ? { status: 401, data: { code: 'UNAUTHORIZED', message: '绑定码无效' } } : null });
+  const failingPage = page('bind');
+  failingPage.onCodeInput({ detail: { value: 'wrong' } });
+  await failingPage.submit();
+  assert.equal(failingPage.data.error, '绑定码无效');
+  assert.equal(failing.navigations.length, 0);
 });
 
 test('patient templates omit clinical fields and both training surfaces explicitly remain demos', () => {
@@ -273,6 +339,6 @@ test('patient templates omit clinical fields and both training surfaces explicit
     const template = readFileSync(path.join(project, 'pages', name, 'index.wxml'), 'utf8');
     assert.match(template, /演示数据/);
     assert.match(template, /没有实时动作反馈/);
-    assert.doesNotMatch(template, /H-Y|hyStage|适用分级|5 级/);
+    assert.doesNotMatch(template, /H-Y|hyStage|适用分级|5 级|低风险|中风险|高风险/);
   }
 });

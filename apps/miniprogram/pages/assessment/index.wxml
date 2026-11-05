@@ -2,6 +2,10 @@
   <view class="page-title">身体感受记录</view>
   <view class="page-subtitle">记录今日日常活动时的身体感受；供随访与节律调整参考。</view>
 
+  <view wx:if="{{demoMode}}" class="notice notice--warning">
+    演示数据：当前为演示模式，展示预置演示患者与示例数据，不是真实患者信息。
+  </view>
+
   <view class="notice">
     记录真实的活动体验，帮助康复治疗师为您调整更舒适契合的运动节律。感到疲劳请随时休息。
   </view>
@@ -9,7 +13,8 @@
   <view wx:if="{{loading}}" class="card" aria-role="status">正在加载记录人信息…</view>
   <view wx:elif="{{error}}" class="card">
     <view class="notice notice--danger" aria-role="alert">{{error}}</view>
-    <button class="btn btn--secondary" bindtap="loadData">重新加载</button>
+    <button wx:if="{{needBinding}}" class="btn btn--primary" style="margin-top:24rpx" bindtap="goBind">去绑定</button>
+    <button class="btn btn--secondary" style="margin-top:24rpx" bindtap="loadData">重新加载</button>
   </view>
   <view wx:elif="{{context && !context.patient}}" class="card">尚未关联患者，请联系管理员完成绑定后再记录。</view>
   <view wx:elif="{{context}}" class="card assessment">

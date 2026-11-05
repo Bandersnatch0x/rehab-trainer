@@ -1,7 +1,10 @@
 <view class="page">
   <view class="page-title">训练条目</view>
-  <view class="notice notice--warning">演示数据：训练条目与上传功能尚未接入，当前页面仅供查看示例。</view>
-  <view class="page-subtitle">按治疗师安排选择适合自己的练习；本页为训练示例。</view>
+  <view wx:if="{{demoData}}" class="notice notice--warning">
+    演示数据：当前展示预置演示条目；上传与实时分析功能尚未接入。
+  </view>
+  <view wx:else class="notice">训练条目来自机构端内容库，请按治疗师安排选择适合自己的练习。</view>
+  <view class="page-subtitle">按治疗师安排选择适合自己的练习；练习中如有不适，请停止并联系治疗师。</view>
 
   <view class="notice">
     小程序端为云端异步分析：训练结束后上传视频，由服务端生成姿态指标，训练过程中没有实时动作反馈。
@@ -15,62 +18,52 @@
     <view class="chip">姿势矫正</view>
   </view>
 
-  <view class="card exercise">
+  <view wx:if="{{loading}}" class="card" aria-role="status">正在加载训练条目…</view>
+  <view wx:elif="{{error}}" class="card">
+    <view class="notice notice--danger" aria-role="alert">{{error}}</view>
+    <button wx:if="{{needBinding}}" class="btn btn--primary" style="margin-top:24rpx" bindtap="goBind">去绑定</button>
+    <button class="btn btn--secondary" style="margin-top:24rpx" bindtap="loadData">重新加载</button>
+  </view>
+  <view wx:elif="{{!exercises.length}}" class="card">目前没有可展示的训练条目，请联系治疗师确认安排。</view>
+
+  <view wx:for="{{exercises}}" wx:key="code" class="card exercise">
     <view class="exercise__head">
-      <view class="card-title">条目名称（占位）</view>
-      <text class="badge badge--success">低风险</text>
+      <view class="card-title">{{item.label}}</view>
+      <text class="badge {{item.available ? 'badge--success' : 'badge--neutral'}}">{{item.badgeLabel}}</text>
     </view>
-    <view class="muted">训练大类：牵伸放松</view>
-    <view class="muted">训练安排：— 组 × — 次</view>
-    <view class="muted">节拍：— BPM　　时长：— 分钟</view>
+    <view class="muted">训练大类：{{item.categoryLabel}}</view>
+    <view class="muted">训练安排：{{item.dosageLine}}</view>
     <navigator
+      wx:if="{{item.available}}"
       class="btn btn--primary btn--block exercise__action"
       url="/pages/training/session/index"
       aria-role="button"
-      aria-label="开始该训练条目"
+      aria-label="开始{{item.label}}"
     >
       开始训练
     </navigator>
+    <view
+      wx:else
+      class="btn btn--block exercise__action exercise__action--disabled"
+      aria-role="button"
+      aria-disabled="true"
+    >
+      暂未开放
+    </view>
+    <view wx:if="{{!item.available}}" class="hint">{{item.note}}</view>
   </view>
 
-  <view class="card exercise">
-    <view class="exercise__head">
-      <view class="card-title">条目名称（占位）</view>
-      <text class="badge badge--warning">中风险</text>
+  <view wx:if="{{demoData}}" class="card">
+    <view class="card-title">演示选项</view>
+    <view class="muted">演示行为：开启后会跳过治疗师确认与处方校验，仅用于演示，请勿用于真实训练。</view>
+    <view class="switch-row">
+      <text class="switch-row__label">演示：解锁全部条目</text>
+      <switch checked="{{demoUnlocked}}" bindchange="onDemoUnlockChange" color="#1a4fa0" />
     </view>
-    <view class="muted">训练大类：节律步态</view>
-    <view class="muted">训练安排：— 组 × — 次</view>
-    <view class="muted">节拍：— BPM　　时长：— 分钟</view>
-    <navigator
-      class="btn btn--primary btn--block exercise__action"
-      url="/pages/training/session/index"
-      aria-role="button"
-      aria-label="开始该训练条目"
-    >
-      开始训练
-    </navigator>
-  </view>
-
-  <view class="card exercise">
-    <view class="exercise__head">
-      <view class="card-title">条目名称（占位）</view>
-      <text class="badge badge--danger">高风险</text>
-    </view>
-    <view class="muted">训练大类：姿势矫正</view>
-    <view class="muted">训练安排：— 组 × — 次</view>
-    <view class="muted">节拍：— BPM　　时长：— 分钟</view>
-    <navigator
-      class="btn btn--primary btn--block exercise__action"
-      url="/pages/training/session/index"
-      aria-role="button"
-      aria-label="开始该训练条目"
-    >
-      开始训练
-    </navigator>
   </view>
 
   <view class="notice notice--warning">
-    高风险条目仅在治疗师确认适合、且已开具处方时可用；如入口不可用，请联系治疗师。
+    需治疗师确认的条目，将在治疗师确认适合并开具方案后开放；如入口不可用，请联系治疗师。
   </view>
-  <view class="hint">本页为结构占位，条目与处方数据待接入。</view>
+  <view class="hint">{{demoData ? '本页为演示数据，条目与剂量仅用于演示。' : '条目与剂量以治疗师开具的方案为准。'}}</view>
 </view>

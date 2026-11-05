@@ -1,0 +1,48 @@
+<view class="page">
+  <view class="page-title">绑定患者</view>
+  <view class="page-subtitle">绑定后即可查看训练安排与记录。</view>
+
+  <view class="notice">
+    绑定码由机构管理员提供。还没有绑定码时，请联系管理员获取；管理员会为您生成一次性绑定码。
+  </view>
+
+  <view class="card">
+    <label for="bindingCode" class="bind__label">请输入绑定码</label>
+    <input
+      id="bindingCode"
+      class="bind__input"
+      value="{{code}}"
+      bindinput="onCodeInput"
+      placeholder="绑定码"
+      placeholder-style="color:#64748b"
+      maxlength="128"
+      disabled="{{submitting}}"
+      aria-label="绑定码"
+    />
+    <view wx:if="{{error}}" class="notice notice--danger" aria-role="alert">{{error}}</view>
+    <button
+      class="btn btn--primary bind__button"
+      bindtap="submit"
+      loading="{{submitting}}"
+      disabled="{{submitting || !code}}"
+    >
+      {{submitting ? '正在绑定…' : '开始绑定'}}
+    </button>
+  </view>
+
+  <view class="card">
+    <view class="card-title">没有绑定码？</view>
+    <view class="muted">
+      演示数据：演示模式使用预置演示账号登录，进入后展示示例患者与示例训练数据，仅用于产品演示，不是真实患者信息。
+    </view>
+    <view wx:if="{{demoError}}" class="notice notice--danger" aria-role="alert">{{demoError}}</view>
+    <button
+      class="btn btn--secondary bind__button"
+      bindtap="enterDemo"
+      loading="{{demoLoading}}"
+      disabled="{{demoLoading || submitting}}"
+    >
+      {{demoLoading ? '正在进入演示…' : '进入演示模式'}}
+    </button>
+  </view>
+</view>

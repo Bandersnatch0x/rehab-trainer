@@ -1,0 +1,26 @@
+.bind__label {
+  display: block;
+  margin-bottom: 16rpx;
+  color: #0f172a;
+  font-size: 36rpx;
+  font-weight: 700;
+}
+
+.bind__input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 112rpx;
+  padding: 24rpx 28rpx;
+  color: #0f172a;
+  font-size: 40rpx;
+  letter-spacing: 2rpx;
+  background-color: #ffffff;
+  border: 4rpx solid #94a3b8;
+  border-radius: 16rpx;
+}
+
+button.bind__button {
+  width: 100%;
+  min-height: 160rpx;
+  margin-top: 28rpx;
+}

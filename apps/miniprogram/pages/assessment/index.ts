@@ -1,9 +1,18 @@
-import { errorMessage, loadPatientContext, submitAssessment, type PatientContext } from '../../utils/patient-data';
+import { isDemoMode } from '../../utils/auth';
+import {
+  errorMessage,
+  errorState,
+  loadPatientContext,
+  submitAssessment,
+  type PatientContext,
+} from '../../utils/patient-data';
 
 Page({
   data: {
     loading: false,
     error: '',
+    needBinding: false,
+    demoMode: false,
     context: null as PatientContext | null,
     feeling: '',
     submitting: false,
@@ -13,14 +22,25 @@ Page({
   onShow() { return this.loadData(); },
   async loadData() {
     if (this.data.loading || this.data.submitting) return;
-    this.setData({ loading: true, error: '', context: null, submitError: '', submittedAt: '' });
+    this.setData({
+      loading: true,
+      error: '',
+      needBinding: false,
+      demoMode: isDemoMode(),
+      context: null,
+      submitError: '',
+      submittedAt: '',
+    });
     try {
       this.setData({ context: await loadPatientContext() });
     } catch (error) {
-      this.setData({ error: errorMessage(error) });
+      this.setData(errorState(error));
     } finally {
       this.setData({ loading: false });
     }
+  },
+  goBind() {
+    wx.navigateTo({ url: '/pages/bind/index' });
   },
   onFeelingInput(event: WechatMiniprogram.TextareaInput) {
     this.setData({ feeling: event.detail.value, submitError: '', submittedAt: '' });

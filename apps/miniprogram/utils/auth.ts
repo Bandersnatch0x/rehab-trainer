@@ -4,6 +4,7 @@ import { ApiError } from './api-error';
 import { httpRequest } from './http';
 
 type TokenPair = components['schemas']['TokenPair'];
+type LoginResponse = components['schemas']['LoginResponse'];
 
 /** 本地登录态。accessToken 过期时间由服务端 expiresIn 换算为绝对时间。 */
 export interface AuthSession {
@@ -155,6 +156,20 @@ export function bindWithCode(payload: BindPayload): Promise<AuthSession> {
   }).then((pair) => saveSession(pair));
 }
 
+/** 账号密码登录，供本地演示模式使用。 */
+export function loginWithPassword(username: string, password: string): Promise<AuthSession> {
+  if (!username || !password) {
+    return Promise.reject(new ApiError('VALIDATION_FAILED', '请输入用户名与密码', 422));
+  }
+
+  return httpRequest<LoginResponse>({
+    url: API_BASE_URL + AUTH_ENDPOINTS.login,
+    method: 'POST',
+    data: { username, password },
+    timeout: REQUEST_TIMEOUT_MS,
+  }).then((response) => saveSession(response));
+}
+
 /**
  * 刷新访问令牌。并发调用合并为一次请求。
  *
@@ -194,10 +209,32 @@ export function refreshSession(): Promise<AuthSession> {
   return refreshInFlight;
 }
 
-/** 主动退出：清除登录态与代操作上下文。 */
+/** 演示模式标记：仅影响页面上的「演示数据」提示，不改变数据访问权限。 */
+export function isDemoMode(): boolean {
+  try {
+    return wx.getStorageSync(STORAGE_KEYS.demoMode) === true;
+  } catch (error) {
+    return false;
+  }
+}
+
+export function setDemoMode(active: boolean): void {
+  try {
+    if (active) {
+      wx.setStorageSync(STORAGE_KEYS.demoMode, true);
+    } else {
+      wx.removeStorageSync(STORAGE_KEYS.demoMode);
+    }
+  } catch (error) {
+    // 存储不可用时退化为不显示演示标识，不影响演示登录本身。
+  }
+}
+
+/** 主动退出：清除登录态、演示标记与代操作上下文。 */
 export function logout(): void {
   refreshInFlight = null;
   clearSession();
+  setDemoMode(false);
   setActingForPatientId(null);
 }
 

@@ -9,6 +9,10 @@
     </view>
   </view>
 
+  <view wx:if="{{demoMode}}" class="notice notice--warning">
+    演示数据：当前为演示模式，展示预置演示患者与示例数据，不是真实患者信息。
+  </view>
+
   <view class="notice">
     小程序训练使用云端异步姿态分析：训练视频上传后由服务端生成结果，训练过程中没有实时动作反馈。
   </view>
@@ -16,7 +20,8 @@
   <view wx:if="{{loading}}" class="card" aria-role="status">正在加载您的训练概览…</view>
   <view wx:elif="{{error}}" class="card">
     <view class="notice notice--danger" aria-role="alert">{{error}}</view>
-    <button class="btn btn--secondary" bindtap="loadData">重新加载</button>
+    <button wx:if="{{needBinding}}" class="btn btn--primary" style="margin-top:24rpx" bindtap="goBind">去绑定</button>
+    <button class="btn btn--secondary" style="margin-top:24rpx" bindtap="loadData">重新加载</button>
   </view>
   <view wx:elif="{{overview && !overview.context.patient}}" class="card">尚未关联患者，请先联系管理员获取绑定码。</view>
   <view wx:elif="{{overview}}" class="section">

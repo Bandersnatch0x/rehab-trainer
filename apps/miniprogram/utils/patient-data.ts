@@ -5,6 +5,7 @@ type Me = components['schemas']['Me'];
 type SessionRecord = components['schemas']['SessionRecord'];
 type Alert = components['schemas']['Alert'];
 type Assessment = components['schemas']['Assessment'];
+type Exercise = components['schemas']['Exercise'];
 
 export interface PatientContext {
   accountName: string;
@@ -76,6 +77,91 @@ export async function loadPatientContext(): Promise<PatientContext> {
     birthYear: patient.birthYear == null ? '暂未提供' : patient.birthYear + ' 年',
   };
   return context;
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  'stretching-relaxation': '牵伸放松',
+  'strength-maintenance': '肌力维持',
+  'rhythmic-gait': '节律步态',
+  'postural-correction': '姿势矫正',
+};
+
+const RISK_LEVELS = ['low', 'medium', 'high'];
+const PUBLICATION_STATUSES = ['draft', 'published', 'retired'];
+const NEEDS_THERAPIST = '需治疗师确认分期并开具处方后开放';
+
+/** 患者端训练条目视图。分级只在内部用于可用性判断，不进入文案。 */
+export interface ExerciseView {
+  code: string;
+  label: string;
+  categoryLabel: string;
+  badgeLabel: string;
+  available: boolean;
+  note: string;
+  dosageLine: string;
+}
+
+function parseDosage(value: unknown): void {
+  if (value == null) return;
+  if (!isObject(value)) return invalidResponse();
+  for (const key of ['sets', 'repetitions', 'bpm', 'durationMinutes', 'frequencyPerWeek', 'restSeconds']) {
+    const field = value[key];
+    if (field != null && (typeof field !== 'number' || !Number.isFinite(field))) return invalidResponse();
+  }
+}
+
+function parseExercise(value: unknown): Exercise {
+  if (!isObject(value) || typeof value.code !== 'string' || !value.code ||
+      typeof value.label !== 'string' || !value.label ||
+      typeof value.category !== 'string' || !Object.prototype.hasOwnProperty.call(CATEGORY_LABELS, value.category) ||
+      typeof value.publicationStatus !== 'string' || !PUBLICATION_STATUSES.includes(value.publicationStatus)) {
+    return invalidResponse();
+  }
+  if (value.riskLevel != null && (typeof value.riskLevel !== 'string' || !RISK_LEVELS.includes(value.riskLevel))) {
+    return invalidResponse();
+  }
+  if (value.applicableStages != null &&
+      (!Array.isArray(value.applicableStages) ||
+       value.applicableStages.some((stage) => !Number.isInteger(stage) || stage < 1 || stage > 5))) {
+    return invalidResponse();
+  }
+  parseDosage(value.defaultDosage);
+  return value as Exercise;
+}
+
+function dosageLine(dosage: Exercise['defaultDosage']): string {
+  if (!dosage) return '待治疗师安排';
+  const parts: string[] = [];
+  if (dosage.sets != null) parts.push(dosage.sets + ' 组');
+  if (dosage.repetitions != null) parts.push('每组 ' + dosage.repetitions + ' 次');
+  if (dosage.durationMinutes != null) parts.push(dosage.durationMinutes + ' 分钟');
+  if (dosage.bpm != null) parts.push(dosage.bpm + ' BPM');
+  return parts.length ? parts.join(' · ') : '待治疗师安排';
+}
+
+/**
+ * 训练条目准入。只有低风险条目可直接进入；中/高风险与缺失分级一律按
+ * 「需治疗师确认」处理。患者分期不下发给小程序，因此这里不臆测分期。
+ * `demoUnlocked` 仅用于演示，页面必须显式标注。
+ */
+export function exerciseView(exercise: Exercise, demoUnlocked = false): ExerciseView {
+  const lowRisk = exercise.riskLevel === 'low';
+  const available = lowRisk || demoUnlocked;
+  const badgeLabel = available ? (lowRisk ? '适合您' : '演示已解锁') : '需治疗师确认';
+  return {
+    code: exercise.code,
+    label: exercise.label,
+    categoryLabel: CATEGORY_LABELS[exercise.category] || '训练',
+    badgeLabel,
+    available,
+    note: available ? '' : NEEDS_THERAPIST,
+    dosageLine: dosageLine(exercise.defaultDosage),
+  };
+}
+
+export async function loadExercises(demoUnlocked = false): Promise<ExerciseView[]> {
+  const items = await readAll('/exercises?limit=100', parseExercise);
+  return items.map((exercise) => exerciseView(exercise, demoUnlocked));
 }
 
 function timestamp(value: string): number {
@@ -236,4 +322,12 @@ export async function submitAssessment(patientId: string, feeling: string): Prom
 
 export function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+/** 页面错误态。未登录时额外标记，页面据此显示「去绑定」入口。 */
+export function errorState(error: unknown): { error: string; needBinding: boolean } {
+  return {
+    error: errorMessage(error),
+    needBinding: error instanceof ApiError && error.isUnauthorized,
+  };
 }

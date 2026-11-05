@@ -2,6 +2,10 @@
   <view class="page-title">活力健康档案</view>
   <view class="page-subtitle">记录坚持打卡的每一天，身体越来越轻松～</view>
 
+  <view wx:if="{{demoMode}}" class="notice notice--warning">
+    演示数据：当前为演示模式，展示预置演示患者与示例数据，不是真实患者信息。
+  </view>
+
   <view class="card card--mascot">
     <view class="mascot-box">
       <text class="mascot-avatar">🦌</text>
@@ -15,7 +19,8 @@
   <view wx:if="{{loading}}" class="card" aria-role="status">正在加载健康档案…</view>
   <view wx:elif="{{error}}" class="card">
     <view class="notice notice--danger" aria-role="alert">{{error}}</view>
-    <button class="btn btn--secondary" bindtap="loadData">重新加载</button>
+    <button wx:if="{{needBinding}}" class="btn btn--primary" style="margin-top:24rpx" bindtap="goBind">去绑定</button>
+    <button class="btn btn--secondary" style="margin-top:24rpx" bindtap="loadData">重新加载</button>
   </view>
   <view wx:elif="{{overview && !overview.context.patient}}" class="card">尚未关联患者，请联系管理员完成绑定。</view>
 
