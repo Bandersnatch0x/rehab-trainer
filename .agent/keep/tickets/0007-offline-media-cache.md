@@ -1,7 +1,7 @@
 ---
 id: "0007"
 type: task
-status: open
+status: closed
 assignee: null
 part-of: null
 blocked-by: []
@@ -40,3 +40,15 @@ created: 2026-11-05
 未完成（原因已记）：无设备/模拟器，断网播放实测缺运行证据；训练页仍用 `DEFAULT_EXERCISES`（`videoUri` 全空）且处方数据未接 UI，预取触发入口已就绪但暂无调用方；服务端配额下发按规格另立票。
 
 边界例外：`MainActivity` 增加 `MediaCache.install`、Manifest 增加 `ACCESS_NETWORK_STATE`（普通权限），均为接线必需；未改 `ui/screens/`。
+
+### 2026-11-06 实现与验收
+
+真实下载、JSON 索引（原子落盘 + 损坏容错）、pinned + LRU 双上限、跨版本存活、D27 分档配额（手机 500MB/10 条、平板 1.5GB/30 条、可用空间 <1GB 停预取）全部落地。协调者独立复跑：`:app:testDebugUnitTest` **80 项 / 0 失败**、`assembleDebug` 通过。
+
+未做（已在报告写明）：
+- 断网播放真机实测（无连接设备）；
+- 预取触发无调用方（训练页仍用静态 `DEFAULT_EXERCISES`，`videoUri` 为 null；`requestStartupPrefetch` / `requestPrescriptionPrefetch` 已就绪待接线）；
+- 配额服务端下发留待另立票；
+- 下载器未做断点续传与内容哈希校验。
+
+关票。被否选项：并入视频管理一起做（会与上传/播放路径抢同一批文件）；暂缓（T3 的离线承诺将无证据）。无替代方案。

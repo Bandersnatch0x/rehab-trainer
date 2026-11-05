@@ -40,6 +40,7 @@ def run_smoke(base_url, username, password, binding_token):
         operation = re.sub(r"/prescriptions/[^/]+", "/prescriptions/{prescriptionId}", operation)
         operation = re.sub(r"/exercises/[^/]+", "/exercises/{code}", operation)
         operation = re.sub(r"/alerts/[^/]+", "/alerts/{alertId}", operation)
+        operation = re.sub(r"/media-assets/[^/]+", "/media-assets/{assetId}", operation)
         request_headers = {"Content-Type": "application/json"}
         if token:
             request_headers["Authorization"] = f"Bearer {token}"
@@ -62,7 +63,45 @@ def run_smoke(base_url, username, password, binding_token):
             covered.add(operation)
             print(f"PASS {operation} HTTP {actual_status} status_and_fields", flush=True)
             return body
-        except (AssertionError, ValueError, KeyError, TypeError, URLError) as error:
+        except (AssertionError, ValueError, KeyError, TypeError, URLError, TimeoutError) as error:
+            print(f"FAIL {operation} HTTP {actual_status}: {error}", flush=True)
+            raise
+
+    def upload(path, filename, file_bytes, fields, status=200, check=None):
+        """multipart/form-data 上传；只用于媒体上传端点。"""
+        operation = "POST " + path
+        boundary = "----smoke" + secrets.token_hex(8)
+        chunks = []
+        for name, value in fields.items():
+            chunks.append(
+                f'--{boundary}\r\nContent-Disposition: form-data; name="{name}"\r\n\r\n{value}\r\n'.encode()
+            )
+        chunks.append(
+            f'--{boundary}\r\nContent-Disposition: form-data; name="file"; filename="{filename}"\r\n'
+            f"Content-Type: video/mp4\r\n\r\n".encode() + file_bytes + b"\r\n"
+        )
+        chunks.append(f"--{boundary}--\r\n".encode())
+        headers = {"Content-Type": f"multipart/form-data; boundary={boundary}"}
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+        req = Request(base_url + path, method="POST", headers=headers, data=b"".join(chunks))
+        actual_status = None
+        try:
+            try:
+                response = opener.open(req, timeout=60)
+            except HTTPError as error:
+                response = error
+            with response:
+                actual_status = response.status
+                body = json.load(response)
+                if actual_status != status:
+                    raise AssertionError(f"expected HTTP {status}, got {actual_status}")
+                if check is not None and not check(body):
+                    raise AssertionError("关键字段断言失败")
+            covered.add(operation)
+            print(f"PASS {operation} HTTP {actual_status} status_and_fields", flush=True)
+            return body
+        except (AssertionError, ValueError, KeyError, TypeError, URLError, TimeoutError) as error:
             print(f"FAIL {operation} HTTP {actual_status}: {error}", flush=True)
             raise
 
@@ -138,6 +177,33 @@ def run_smoke(base_url, username, password, binding_token):
             check=lambda b: b["id"] == "alert-demo" and b["status"] == "acknowledged")
     request("GET", "/alerts?patientId=patient-demo",
             check=lambda b: any(a["id"] == "alert-demo" and a["status"] == "acknowledged" for a in b["items"]))
+
+    # 科研聚合端点：只返回聚合值，demo 数据被硬过滤，患者数应为 0。
+    request("GET", "/research/overview",
+            check=lambda b: b["dataOrigin"] == "real" and b["minCellCount"] >= 5
+            and "patientCount" in b)
+    request("GET", "/research/data-quality",
+            check=lambda b: b["dataOrigin"] == "real" and "sessionRecordCount" in b)
+
+    # 媒体资产：上传 → 列出 → 上架。上传的是随包演示片段，仅本地联调使用。
+    sample = ROOT / "apps/android/app/src/main/res/raw/demo_exercise.mp4"
+    if sample.exists():
+        asset = upload(
+            "/media-assets/upload", "smoke.mp4", sample.read_bytes(),
+            {"exerciseCode": "ex-stretch-01", "applicableStages": "2,3",
+             "watermarkText": "联调水印", "creditLine": "联调素材"},
+            status=201,
+            check=lambda b: b["status"] == "draft" and b["applicableStages"] == [2, 3]
+            and len(b["sha256"]) == 64,
+        )
+        asset_id = asset["id"]
+        request("GET", "/media-assets?exerciseCode=ex-stretch-01",
+                check=lambda b: any(a["id"] == asset_id for a in b["items"]))
+        request("PATCH", f"/media-assets/{asset_id}", {"status": "published"},
+                check=lambda b: b["id"] == asset_id and b["status"] == "published")
+    else:
+        print("SKIP 媒体上传：找不到演示视频样本", flush=True)
+
     expected = set()
     path = None
     for line in (ROOT / "packages/api-contract/openapi.yaml").read_text(encoding="utf-8").splitlines():

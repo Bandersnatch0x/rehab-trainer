@@ -34,17 +34,17 @@
 
 | 项目 | 结果 | 证据 | 备注 |
 | --- | --- | --- | --- |
-| 后端测试 | 73 项通过，0 失败 | `python -m pytest -q services/api/tests` | 覆盖契约操作集、参数与响应字段、机构隔离、分页、处方乐观锁、记录幂等、科研抑制、分期准入 |
-| 契约一致性 | 17 个路径、20 个操作；实现与契约的操作集、参数、成功响应字段一致 | `services/api/tests/test_contract.py` 4 项；契约 `servers[0]` 前缀 `/v1` | 实现多一个或少一个操作都会失败 |
-| 部署自检 | 16 张业务表；SQLite 升级、重复升级、降级、再升级；模型差异为空；PostgreSQL 离线 SQL；YAML | `python deploy/verify.py` | 输出 `PASS: 16 tables; ...`；当前迁移 head 为 `0002` |
+| 后端测试 | 97 项通过，0 失败 | `python -m pytest -q services/api/tests` | 覆盖契约操作集、参数与响应字段、机构隔离、分页、处方乐观锁、记录幂等、科研抑制、分期准入 |
+| 契约一致性 | 20 个路径、23 个操作；实现与契约的操作集、参数、成功响应字段一致 | `services/api/tests/test_contract.py` 4 项；契约 `servers[0]` 前缀 `/v1` | 实现多一个或少一个操作都会失败 |
+| 部署自检 | 16 张业务表；SQLite 升级、重复升级、降级、再升级；模型差异为空；PostgreSQL 离线 SQL；YAML | `python deploy/verify.py` | 输出 `PASS: 16 tables; ...`；当前迁移 head 为 `0003` |
 | 管理端类型检查 | 通过 | `cd apps/admin-web && npx tsc --noEmit` | 退出码 0 |
-| 管理端 E2E | 15 项通过，0 失败 | `cd apps/admin-web && npx playwright test` | 覆盖登录与 403、分期入口权限、患者筛选与详情、处方冲突与读取失败保护、预警持久化、随访台账、患者超过单页上限、科研小样本抑制、404 |
+| 管理端 E2E | 17 项通过，0 失败 | `cd apps/admin-web && npx playwright test` | 覆盖登录与 403、分期入口权限、患者筛选与详情、处方冲突与读取失败保护、预警持久化、随访台账、患者超过单页上限、科研小样本抑制、404 |
 | 小程序类型检查 | 通过 | `cd apps/miniprogram && npx --no-install tsc --noEmit` | 退出码 0 |
 | 小程序行为测试 | 17 项通过，0 失败 | `cd apps/miniprogram && node --test tests/patient-data.cjs` | 以 `wx` 桩驱动请求层与五个页面 |
 | 小程序静态检查 | 通过 | `cd apps/miniprogram && python tests/static_check.py .` | 页面与绑定一致性、事件处理函数存在性、患者端禁用词、WCAG AA 对比度 |
-| Android 单元测试 | 36 项通过，0 失败 | `cd apps/android && ./gradlew.bat :app:testDebugUnitTest --no-daemon` | 7 个测试类：动作计数、采集门禁、组进度、准入、布局策略、媒体预取策略、拨号 |
+| Android 单元测试 | 80 项通过，0 失败 | `cd apps/android && ./gradlew.bat :app:testDebugUnitTest --no-daemon` | 13 个测试类：动作计数、采集门禁、组进度、准入、布局策略、媒体预取策略、拨号、离线缓存配额/淘汰/存储/下载、视频源解析 |
 | Android 构建 | `assembleDebug` 成功 | `cd apps/android && ./gradlew.bat :app:assembleDebug --no-daemon` | 生成调试 APK；未安装到真机 |
-| API 联调 | 18 个契约操作全部通过 | `python scripts/smoke-api.py --config .agent/tmp/smoke-config.json` | 契约共 20 个操作；脚本未覆盖两个科研聚合端点，末尾覆盖断言以退出码 1 结束。已执行的 18 个操作均通过 |
+| API 联调 | 23 个契约操作全部通过（20 个路径） | `python scripts/smoke-api.py --config .agent/tmp/smoke-config.json` | 覆盖全部契约操作，含科研聚合端点与媒体上传/上架；退出码 0 |
 | 联调脚本回归 | 2 项通过 | `python -m unittest discover -s scripts -p "test_*.py"` | 覆盖联调脚本自身行为 |
 | 本地容器与 PostgreSQL | 见 `docs/deployment/README.md` 的「容器与真实 PostgreSQL 验证（2026-11-05）」表 | 该记录由部署轮次在 WSL2 内实跑 | 该证据对应迁移 `0001` 且当时契约为 18 个操作；当前 head 为 `0002`、契约为 20 个操作，未在容器内复跑 |
 | 全量校验脚本 | 后端、部署自检、管理端构建、管理端 E2E、小程序各步通过；Android 步骤在 Windows 上因 `gradlew.bat` 解析失败中断 | `python scripts/verify_all.py` | Android 分项单独执行通过，见上 |

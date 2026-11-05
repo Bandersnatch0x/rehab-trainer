@@ -24,19 +24,19 @@ App 与小程序功能清单一致;差异只在姿态识别的实现方式与实
 
 | 部分 | 状态 |
 | --- | --- |
-| 后端 `services/api` | FastAPI + SQLAlchemy,Alembic 初始迁移覆盖 16 张表;41 项测试通过 |
-| Web 后台 `apps/admin-web` | 7 个页面已接真实 API(患者、详情、分期、处方、预警、随访台账);Playwright E2E 14 条全部通过 |
+| 后端 `services/api` | FastAPI + SQLAlchemy,Alembic 初始迁移覆盖 16 张表;97 项测试通过 |
+| Web 后台 `apps/admin-web` | 8 个业务页已接真实 API(患者、详情、分期、处方、预警、随访台账、科研、视频管理);Playwright E2E 17 条全部通过 |
 | 微信小程序 / Android | 契约客户端已生成,配置指向本地后端;小程序 async 云端 CV 与 App 端上实时推理按 D3 分级实现 |
 | 部署 | `services/api/Dockerfile` + `docker-compose.yml` + `deploy/`(Alembic、健康检查、自检);手册见 `docs/deployment/README.md` |
-| 联调 | `scripts/smoke-api.py` 覆盖 18 项契约操作,含批量幂等与重放 |
+| 联调 | `scripts/smoke-api.py` 覆盖 23 项契约操作(20 个路径),含科研聚合与媒体上传/上架 |
 
 演示版对未裁决与待临床签核内容使用 mock 并标注(D21);步态指标在完成标定前不进训练成绩(D23)。
 
 ## 验证
 
 ```powershell
-# 后端
-services/api/.venv/Scripts/python.exe -m pytest services/api/tests
+# 一把跑完所有本地门禁(失败即停)
+services/api/.venv/Scripts/python.exe scripts/verify_all.py
 # 管理端 E2E(自动起后端与预览服务;优先用 services/api/.venv 的 python)
 # 默认端口 18765/4173,被占用时用 E2E_BACKEND_PORT / E2E_PREVIEW_PORT 覆盖
 cd apps/admin-web; npx playwright test
