@@ -1,5 +1,6 @@
 package com.rehabtrainer.app.core.training
 
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -7,6 +8,12 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class InstructionalVideoSourceTest {
+
+    @After
+    fun 重置缓存钩子() {
+        CachedMediaPlayback.resolveLocalUrl = { null }
+        CachedMediaPlayback.onPlaybackMiss = {}
+    }
 
     @Test
     fun 缺少地址时回退内置演示视频() {
@@ -35,6 +42,27 @@ class InstructionalVideoSourceTest {
         val source = InstructionalVideoSource(remoteUrl = "https://media.example/v.mp4")
 
         assertNull(source.urlAfterFailure(remoteFailed = true))
+    }
+
+    @Test
+    fun 命中缓存时改用本地文件() {
+        CachedMediaPlayback.resolveLocalUrl = { "/data/media-cache/abc.mp4" }
+
+        val source = InstructionalVideoSource(remoteUrl = "https://media.example/v.mp4")
+
+        assertEquals("/data/media-cache/abc.mp4", source.resolvedRemoteUrl)
+        assertEquals("/data/media-cache/abc.mp4", source.urlAfterFailure(remoteFailed = false))
+    }
+
+    @Test
+    fun 未命中缓存时保留远端并触发后台补缓存() {
+        var requested: String? = null
+        CachedMediaPlayback.onPlaybackMiss = { requested = it }
+
+        val source = InstructionalVideoSource(remoteUrl = " https://media.example/v.mp4 ")
+
+        assertEquals("https://media.example/v.mp4", source.resolvedRemoteUrl)
+        assertEquals("https://media.example/v.mp4", requested)
     }
 
     @Test
