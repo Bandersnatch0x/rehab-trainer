@@ -48,7 +48,7 @@
 - Vite + React + TypeScript,react-router 路由 + 自建鉴权上下文,无第三方 UI 库。
 - `src/api/` 由 `openapi-typescript` 生成 `schema.d.ts`,业务调用集中在 `operations.ts`。
 - 8 个业务页已接真实 API(患者列表/详情/分期/处方/预警/随访台账/科研/视频管理);患者端 D20 文案约束只管患者端,管理端保留临床信息。
-- `npx tsc --noEmit` 与 `vite build` 通过;Playwright E2E 19 条全部通过。
+- `npx tsc --noEmit` 与 `vite build` 通过;Playwright E2E 20 条全部通过。
 
 ## 契约工作流
 
@@ -75,7 +75,7 @@
 | 项 | 结果 |
 | --- | --- |
 | 后端测试 | `pytest` 97 项通过(含处方读取、机构隔离与契约一致性) |
-| 管理端 E2E | `npx playwright test` **19 passed / 0 failed**(真实后端 + 每例独立机构数据) |
+| 管理端 E2E | `npx playwright test` **20 passed / 0 failed**(真实后端 + 每例独立机构数据) |
 | 管理端构建 | `tsc --noEmit` 退出 0;`vite build` 通过 |
 | 小程序 | 行为测试 17 项、静态一致性检查 0 问题、`tsc --noEmit` 退出 0;微信开发者工具 `open` 与 `preview` 编译通过(62.4 KB);**真机渲染与交互未验证** |
 | 联调脚本 | `scripts/smoke-api.py` 自管理模式 **24/24 契约操作**,含批量幂等、重放、科研聚合与媒体上传/上架 |

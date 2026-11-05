@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router";
-import { listPatients } from "../api/operations";
+import { createPatient, listPatients } from "../api/operations";
 import type { Patient } from "../api/types";
 import { useAuth } from "../auth/AuthProvider";
 
@@ -19,6 +19,7 @@ const RISK_CLASS: Record<string, string> = {
 export default function PatientsPage() {
   const { can } = useAuth();
   const isTherapist = can("rehab_therapist");
+  const canCreate = can("care_admin") || isTherapist;
 
   const [stage, setStage] = useState("");
   const [confirmation, setConfirmation] = useState("");
@@ -26,6 +27,13 @@ export default function PatientsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [capped, setCapped] = useState(false);
+
+  const [showCreate, setShowCreate] = useState(false);
+  const [createName, setCreateName] = useState("");
+  const [createBirthYear, setCreateBirthYear] = useState("");
+  const [createNote, setCreateNote] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -78,6 +86,40 @@ export default function PatientsPage() {
     };
   }, [stage]);
 
+  async function onCreate(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setCreateError(null);
+    const name = createName.trim();
+    if (!name) {
+      setCreateError("请填写患者姓名。");
+      return;
+    }
+    let birthYear: number | undefined;
+    if (createBirthYear.trim()) {
+      birthYear = Number(createBirthYear);
+      if (!Number.isInteger(birthYear) || birthYear < 1900 || birthYear > 2100) {
+        setCreateError("出生年份需为 1900 至 2100 之间的整数。");
+        return;
+      }
+    }
+    setCreating(true);
+    const result = await createPatient({
+      displayName: name,
+      ...(birthYear ? { birthYear } : {}),
+      ...(createNote.trim() ? { note: createNote.trim() } : {}),
+    });
+    setCreating(false);
+    if (!result.ok) {
+      setCreateError(result.error.message);
+      return;
+    }
+    setPatients((prev) => [result.data, ...prev]);
+    setShowCreate(false);
+    setCreateName("");
+    setCreateBirthYear("");
+    setCreateNote("");
+  }
+
   const visible = patients.filter((p) =>
     confirmation === "" ? true : p.stageConfirmationStatus === confirmation,
   );
@@ -89,6 +131,14 @@ export default function PatientsPage() {
           <h1>患者工作台</h1>
           <p className="page-description">机构名下帕金森患者档案、H-Y 分期确认与安全状态管理。</p>
         </div>
+        {canCreate ? (
+          <button
+            className={showCreate ? "btn-secondary" : "btn-primary"}
+            onClick={() => setShowCreate((value) => !value)}
+          >
+            {showCreate ? "取消新建" : "新建患者"}
+          </button>
+        ) : null}
       </div>
 
       <div className="notice">
@@ -97,6 +147,53 @@ export default function PatientsPage() {
           系统严格按当前登录机构隔离患者数据，不提供跨机构切换或检索。
         </div>
       </div>
+
+      {showCreate && canCreate ? (
+        <div className="card">
+          <div className="card-title">新建患者档案</div>
+          <p className="hint" style={{ margin: "0 0 12px" }}>
+            建档后 H-Y 分期为「疑似 1 期」，需康复治疗师完成分期确认（D11）。
+          </p>
+          <form
+            onSubmit={onCreate}
+            style={{ display: "flex", gap: 16, alignItems: "flex-end", flexWrap: "wrap" }}
+          >
+            <label>
+              患者姓名
+              <input
+                value={createName}
+                onChange={(event) => setCreateName(event.target.value)}
+                maxLength={128}
+                required
+              />
+            </label>
+            <label>
+              出生年份（可选）
+              <input
+                value={createBirthYear}
+                onChange={(event) => setCreateBirthYear(event.target.value)}
+                inputMode="numeric"
+                placeholder="1950"
+              />
+            </label>
+            <label>
+              建档备注（可选）
+              <input
+                value={createNote}
+                onChange={(event) => setCreateNote(event.target.value)}
+              />
+            </label>
+            <button className="btn-primary" type="submit" disabled={creating}>
+              {creating ? "正在建档…" : "创建档案"}
+            </button>
+          </form>
+          {createError ? (
+            <p role="alert" className="notice notice--danger" style={{ marginTop: 12 }}>
+              {createError}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="card" style={{ padding: "16px 20px", display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
         <label style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>

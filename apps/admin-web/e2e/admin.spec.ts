@@ -52,6 +52,22 @@ test('患者详情展示每日身体感受记录', async ({ page, data }) => {
   await expect(page.getByText('今天散步很轻松，练习后休息了一会儿。')).toBeVisible();
 });
 
+test('照护管理员可新建患者且刷新后仍在列表', async ({ page, data }) => {
+  await login(page, data, 'care_admin');
+  const name = `新建患者-${Date.now()}`;
+  await page.getByRole('button', { name: '新建患者' }).click();
+  await page.getByLabel('患者姓名').fill(name);
+  await page.getByLabel('出生年份（可选）').fill('1952');
+  await page.getByRole('button', { name: '创建档案' }).click();
+
+  const row = page.getByRole('row').filter({ hasText: name });
+  await expect(row).toHaveCount(1);
+  await expect(row).toContainText('疑似待确认');
+
+  await page.reload();
+  await expect(page.getByRole('row').filter({ hasText: name })).toHaveCount(1);
+});
+
 test('康复治疗师可见并进入分期确认', async ({ page, data }) => {
   await login(page, data);
   await page.goto(`/patients/${data.patientId}`);

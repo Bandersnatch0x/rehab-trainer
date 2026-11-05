@@ -862,8 +862,12 @@ components:
       properties:
         displayName:
           type: string
+          minLength: 1
+          maxLength: 128
         birthYear:
           type: integer
+          minimum: 1900
+          maximum: 2100
         note:
           type: string
 
