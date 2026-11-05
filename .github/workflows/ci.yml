@@ -73,6 +73,9 @@ jobs:
       - run: pnpm install --no-frozen-lockfile
       - run: pnpm --filter @rehab-trainer/miniprogram typecheck
       - run: pnpm --filter @rehab-trainer/miniprogram test
+      - name: 小程序静态一致性（页面/绑定/D20）
+        working-directory: apps/miniprogram
+        run: python tests/static_check.py .
 
   admin-web:
     needs: changes
