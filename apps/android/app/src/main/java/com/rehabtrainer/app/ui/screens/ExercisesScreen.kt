@@ -59,8 +59,15 @@ fun ExercisesScreen(
         )
 
         Text(
-            text = "由康复治疗师制定处方。请在适宜体力下按顺序完成。",
+            text = "以下为演示用训练条目，实际处方由康复治疗师制定。请在适宜体力下按顺序完成。",
             style = MaterialTheme.typography.bodyLarge
+        )
+
+        // D21：训练条目、剂量、适宜性与分期标签及联系信息均为 mock；接入真实处方 API 时本声明与 mock 一并移除。
+        Text(
+            text = "演示数据：当前为演示模式，下列训练条目、推荐剂量、适宜性与分期标签及联系信息均为示例数据，不是真实处方。",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         // Category 1: 节律步态 (RAS)
@@ -219,6 +226,12 @@ private fun ContactTherapistDialog(onDismiss: () -> Unit) {
         title = { Text("联系康复治疗师") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                // 弹窗独立呈现时看不到页内声明，mock 机构与治疗师须在弹窗内再标注一次。
+                Text(
+                    "演示数据：以下机构与治疗师信息为示例，不是真实信息。",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 Text("签约机构：市康复中心第三病区", style = MaterialTheme.typography.bodyLarge)
                 Text("责任治疗师：李主任", style = MaterialTheme.typography.bodyLarge)
                 Text(
