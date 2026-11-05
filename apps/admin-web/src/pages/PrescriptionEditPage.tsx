@@ -20,17 +20,39 @@ function addDays(from: Date, days: number): string {
   return next.toISOString();
 }
 
+const DEFAULT_DOSAGE = { sets: 3, reps: 12, bpm: 64, frequency: 5 };
+
+type EditableItem = {
+  exerciseCode: string;
+  variantCode?: string;
+  sets: number;
+  reps: number;
+  bpm: number;
+  frequency: number;
+};
+
+/** 把处方条目转成可编辑行；缺失剂量用保守默认值补齐。 */
+function toEditable(
+  item: Prescription["items"][number] | undefined,
+  fallbackCode: string,
+): EditableItem {
+  return {
+    exerciseCode: item?.exerciseCode ?? fallbackCode,
+    ...(item?.variantCode ? { variantCode: item.variantCode } : {}),
+    sets: item?.dosage?.sets ?? DEFAULT_DOSAGE.sets,
+    reps: item?.dosage?.repetitions ?? DEFAULT_DOSAGE.reps,
+    bpm: item?.dosage?.bpm ?? DEFAULT_DOSAGE.bpm,
+    frequency: item?.dosage?.frequencyPerWeek ?? DEFAULT_DOSAGE.frequency,
+  };
+}
+
 export default function PrescriptionEditPage() {
   const { patientId } = useParams<{ patientId: string }>();
   const navigate = useNavigate();
 
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [current, setCurrent] = useState<Prescription | null>(null);
-  const [exerciseCode, setExerciseCode] = useState<string>("");
-  const [sets, setSets] = useState<number>(3);
-  const [reps, setReps] = useState<number>(12);
-  const [bpm, setBpm] = useState<number>(64);
-  const [frequency, setFrequency] = useState<number>(5);
+  const [items, setItems] = useState<EditableItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -40,16 +62,14 @@ export default function PrescriptionEditPage() {
   /** 把处方内容灌进表单；409 后重拉也用同一套逻辑，避免用旧值覆盖对方改动。 */
   function hydrate(prescription: Prescription | null, available: Exercise[]) {
     setCurrent(prescription);
-    const first = prescription?.items[0];
-    if (first?.exerciseCode) {
-      setExerciseCode(first.exerciseCode);
-      const dosage = first.dosage;
-      if (dosage?.sets) setSets(dosage.sets);
-      if (dosage?.repetitions) setReps(dosage.repetitions);
-      if (dosage?.bpm) setBpm(dosage.bpm);
-      if (dosage?.frequencyPerWeek) setFrequency(dosage.frequencyPerWeek);
+    if (prescription && prescription.items.length > 0) {
+      setItems(
+        prescription.items.map((item) => toEditable(item, item.exerciseCode)),
+      );
     } else if (available[0]) {
-      setExerciseCode(available[0].code);
+      setItems([toEditable(undefined, available[0].code)]);
+    } else {
+      setItems([]);
     }
   }
 
@@ -104,44 +124,62 @@ export default function PrescriptionEditPage() {
       setError("缺少患者编号，无法签发处方");
       return;
     }
-    if (!exerciseCode) {
-      setError("请选择训练条目");
+    if (items.length === 0) {
+      setError("处方至少保留一个训练条目");
+      return;
+    }
+    if (items.some((item) => !item.exerciseCode)) {
+      setError("请为每个训练条目选择动作");
       return;
     }
     // 后端不校验重复编码，整表替换会落成两个相同条目，这里先挡住。
-    const otherCodes = (current?.items ?? []).slice(1).map((item) => item.exerciseCode);
-    if (otherCodes.includes(exerciseCode)) {
-      setError(`训练条目 ${exerciseCode} 已在当前处方中，不能重复添加。`);
+    const codes = items.map((item) => item.exerciseCode);
+    if (new Set(codes).size !== codes.length) {
+      setError("同一训练条目不能重复添加。");
+      return;
+    }
+    const invalid = items.find(
+      (item) =>
+        !Number.isFinite(item.sets) ||
+        !Number.isFinite(item.reps) ||
+        !Number.isFinite(item.bpm) ||
+        !Number.isFinite(item.frequency) ||
+        item.sets < 1 ||
+        item.sets > 10 ||
+        item.reps < 1 ||
+        item.reps > 50 ||
+        item.bpm < 40 ||
+        item.bpm > 120 ||
+        item.frequency < 1 ||
+        item.frequency > 7,
+    );
+    if (invalid) {
+      setError(`训练条目 ${invalid.exerciseCode} 的剂量超出允许范围。`);
       return;
     }
 
     setSubmitting(true);
     setError(null);
 
-    const firstItem = current?.items[0];
-    const edited = {
-      exerciseCode,
+    const payloadItems = items.map((item) => ({
+      exerciseCode: item.exerciseCode,
       // 条目未换时保留原有难度变体，避免一次剂量调整把变体清掉。
-      ...(firstItem?.exerciseCode === exerciseCode && firstItem.variantCode
-        ? { variantCode: firstItem.variantCode }
-        : {}),
+      ...(item.variantCode ? { variantCode: item.variantCode } : {}),
       dosage: {
-        sets,
-        repetitions: reps,
-        bpm,
-        frequencyPerWeek: frequency,
+        sets: item.sets,
+        repetitions: item.reps,
+        bpm: item.bpm,
+        frequencyPerWeek: item.frequency,
       },
-    };
-    // 后端 PATCH 是整表替换：保留当前处方里除被编辑条目外的其他条目，避免误删。
-    const items = current ? [edited, ...current.items.slice(1)] : [edited];
+    }));
     const now = new Date();
 
     // 已有处方走 PATCH + If-Match；没有才新建。绝不伪造版本号。
     const result = current
-      ? await updatePrescription(current.id, { items }, current.version)
+      ? await updatePrescription(current.id, { items: payloadItems }, current.version)
       : await createPrescription({
           patientId,
-          items,
+          items: payloadItems,
           issuedAt: now.toISOString(),
           validFrom: now.toISOString(),
           validUntil: addDays(now, 30),
@@ -168,11 +206,30 @@ export default function PrescriptionEditPage() {
     setError(result.error.message);
   }
 
-  // 已被其他条目占用的编码不再出现在下拉里，避免保存出重复条目。
-  const takenCodes = new Set(
-    (current?.items ?? []).slice(1).map((item) => item.exerciseCode),
+  function updateItem(index: number, patch: Partial<EditableItem>) {
+    setItems((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, ...patch } : item)),
+    );
+  }
+
+  function addItem() {
+    const used = new Set(items.map((item) => item.exerciseCode));
+    const next = exercises.find((exercise) => !used.has(exercise.code));
+    if (!next) {
+      return;
+    }
+    setItems((prev) => [...prev, toEditable(undefined, next.code)]);
+  }
+
+  function removeItem(index: number) {
+    setItems((prev) =>
+      prev.length > 1 ? prev.filter((_, i) => i !== index) : prev,
+    );
+  }
+
+  const canAdd = exercises.some(
+    (exercise) => !items.some((item) => item.exerciseCode === exercise.code),
   );
-  const selectableExercises = exercises.filter((exercise) => !takenCodes.has(exercise.code));
 
   return (
     <div className="page" style={{ maxWidth: 960 }}>
@@ -218,93 +275,147 @@ export default function PrescriptionEditPage() {
       ) : (
         <form onSubmit={handleSubmit}>
           <div className="card">
-            <div className="card-title">1. 选择训练条目</div>
-            <label>
-              <span>训练条目：</span>
-              <select
-                value={exerciseCode}
-                onChange={(event) => setExerciseCode(event.target.value)}
+            <div className="card-title">1. 训练条目与剂量（逐条可调）</div>
+            {items.map((item, index) => {
+              const usedElsewhere = new Set(
+                items
+                  .filter((_, row) => row !== index)
+                  .map((row) => row.exerciseCode),
+              );
+              const options = exercises.filter(
+                (exercise) =>
+                  exercise.code === item.exerciseCode ||
+                  !usedElsewhere.has(exercise.code),
+              );
+              return (
+                <div
+                  key={index}
+                  role="group"
+                  aria-label={`训练条目 ${index + 1}`}
+                  style={{
+                    borderTop: index > 0 ? "1px solid var(--color-border)" : undefined,
+                    paddingTop: index > 0 ? 16 : 0,
+                    marginTop: index > 0 ? 16 : 0,
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 12,
+                      alignItems: "flex-end",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <label style={{ flex: "2 1 240px" }}>
+                      <span>训练条目：</span>
+                      <select
+                        value={item.exerciseCode}
+                        onChange={(event) =>
+                          updateItem(index, {
+                            exerciseCode: event.target.value,
+                            variantCode: undefined,
+                          })
+                        }
+                      >
+                        {options.length === 0 ? (
+                          <option value="">（训练条目加载中或为空）</option>
+                        ) : (
+                          options.map((exercise) => (
+                            <option key={exercise.code} value={exercise.code}>
+                              {exercise.label}（
+                              {CATEGORY_LABEL[exercise.category] ?? exercise.category}）
+                            </option>
+                          ))
+                        )}
+                      </select>
+                    </label>
+
+                    <label>
+                      <span>组数 (Sets)：</span>
+                      <input
+                        type="number"
+                        min={1}
+                        max={10}
+                        value={item.sets}
+                        onChange={(event) =>
+                          updateItem(index, { sets: Number(event.target.value) })
+                        }
+                        required
+                      />
+                    </label>
+
+                    <label>
+                      <span>每组次数 (Reps)：</span>
+                      <input
+                        type="number"
+                        min={1}
+                        max={50}
+                        value={item.reps}
+                        onChange={(event) =>
+                          updateItem(index, { reps: Number(event.target.value) })
+                        }
+                        required
+                      />
+                    </label>
+
+                    <label>
+                      <span>听觉刺激 (BPM)：</span>
+                      <input
+                        type="number"
+                        min={40}
+                        max={120}
+                        value={item.bpm}
+                        onChange={(event) =>
+                          updateItem(index, { bpm: Number(event.target.value) })
+                        }
+                        required
+                      />
+                    </label>
+
+                    <label>
+                      <span>每周频次 (天)：</span>
+                      <input
+                        type="number"
+                        min={1}
+                        max={7}
+                        value={item.frequency}
+                        onChange={(event) =>
+                          updateItem(index, { frequency: Number(event.target.value) })
+                        }
+                        required
+                      />
+                    </label>
+
+                    <button
+                      type="button"
+                      className="btn-secondary"
+                      onClick={() => removeItem(index)}
+                      disabled={items.length === 1}
+                    >
+                      移除
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+
+            <div style={{ marginTop: 16, display: "flex", gap: 12, alignItems: "center" }}>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={addItem}
+                disabled={!canAdd}
               >
-                {selectableExercises.length === 0 ? (
-                  <option value="">（训练条目加载中或为空）</option>
-                ) : (
-                  selectableExercises.map((exercise) => (
-                    <option key={exercise.code} value={exercise.code}>
-                      {exercise.label}（{CATEGORY_LABEL[exercise.category] ?? exercise.category}）
-                    </option>
-                  ))
-                )}
-              </select>
-            </label>
-          </div>
-
-          <div className="card">
-            <div className="card-title">2. 训练剂量（Dosage）设定</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 16 }}>
-              <label>
-                <span>组数 (Sets)：</span>
-                <input
-                  type="number"
-                  min={1}
-                  max={10}
-                  value={sets}
-                  onChange={(event) => setSets(Number(event.target.value))}
-                  required
-                />
-              </label>
-
-              <label>
-                <span>每组次数 (Reps)：</span>
-                <input
-                  type="number"
-                  min={1}
-                  max={50}
-                  value={reps}
-                  onChange={(event) => setReps(Number(event.target.value))}
-                  required
-                />
-              </label>
-
-              <label>
-                <span>听觉刺激 (BPM)：</span>
-                <input
-                  type="number"
-                  min={40}
-                  max={120}
-                  value={bpm}
-                  onChange={(event) => setBpm(Number(event.target.value))}
-                  required
-                />
-              </label>
-
-              <label>
-                <span>每周频次 (天)：</span>
-                <input
-                  type="number"
-                  min={1}
-                  max={7}
-                  value={frequency}
-                  onChange={(event) => setFrequency(Number(event.target.value))}
-                  required
-                />
-              </label>
+                ＋ 添加训练条目
+              </button>
+              <span className="hint">
+                {canAdd ? `当前 ${items.length} 条` : "训练条目库已全部加入"}
+              </span>
             </div>
           </div>
-
-          {current && current.items.length > 1 ? (
-            <div className="notice">
-              <div>
-                <strong>其余 {current.items.length - 1} 个训练条目将保持不变：</strong>
-                {current.items
-                  .slice(1)
-                  .map((item) => item.exerciseCode)
-                  .join("、")}
-              </div>
-            </div>
-          ) : null}
 
           <div className="card" style={{ borderLeft: "6px solid var(--color-warning)" }}>
-            <div className="card-title">3. 禁忌症与危险信号核验</div>
+            <div className="card-title">2. 禁忌症与危险信号核验</div>
             <p className="hint">
               条目禁忌与危险信号以服务端训练条目库为准（本页不再硬编码分期结论）。
               出现头晕或胸闷时立即停止训练。

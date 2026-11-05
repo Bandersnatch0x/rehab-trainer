@@ -226,7 +226,7 @@ npx tsc --noEmit
 npx playwright test
 ```
 
-预期：类型检查退出 0；E2E 20 项全部通过。
+预期：类型检查退出 0；E2E 21 项全部通过。
 
 ### 9.4 小程序
 

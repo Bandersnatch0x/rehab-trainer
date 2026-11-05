@@ -180,6 +180,33 @@ test('调整处方不会删除同一处方里的其他训练条目', async ({ pa
   expect(codes).toEqual(['ex-strength-01', 'ex-stretch-01']);
 });
 
+test('可调整处方中第二个训练条目的剂量', async ({ page, data, request }) => {
+  const signedIn = await login(page, data);
+  const { accessToken } = await signedIn.json();
+  await page.goto(`/patients/${data.patientId}/prescription`);
+
+  const second = page.getByRole('group', { name: '训练条目 2' });
+  await expect(second.locator('select')).toHaveValue('ex-strength-01');
+  await second.getByLabel('组数 (Sets)：').fill('5');
+
+  const saved = page.waitForResponse(
+    (response) =>
+      response.url().endsWith(`/prescriptions/${data.prescriptionId}`) &&
+      response.request().method() === 'PATCH',
+  );
+  await page.getByRole('button', { name: /签发并同步处方/ }).click();
+  expect((await saved).status()).toBe(200);
+
+  const listed = await request.get(`/v1/prescriptions?patientId=${data.patientId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  const { items } = await listed.json();
+  const rows = items[0].items as { exerciseCode: string; dosage?: { sets?: number } }[];
+  expect(rows.find((row) => row.exerciseCode === 'ex-strength-01')?.dosage?.sets).toBe(5);
+  // 编辑第二条不应连带改写第一条的剂量。
+  expect(rows.find((row) => row.exerciseCode === 'ex-stretch-01')?.dosage?.sets).toBe(3);
+});
+
 test('随访台账只显示已处置的预警', async ({ page, data, request }) => {
   const signedIn = await login(page, data, 'care_admin');
   const { accessToken, profile } = await signedIn.json();
