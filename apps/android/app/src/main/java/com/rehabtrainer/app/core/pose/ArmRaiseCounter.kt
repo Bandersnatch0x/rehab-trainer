@@ -18,9 +18,11 @@ class ArmRaiseCounter(
 ) {
     private var isRaised = false
 
+    @Volatile
     var count: Int = 0
         private set
 
+    @Synchronized
     fun update(normalizedWristOffset: Float): Int {
         if (!isRaised && normalizedWristOffset < raiseThreshold) {
             isRaised = true
@@ -31,6 +33,7 @@ class ArmRaiseCounter(
         return count
     }
 
+    @Synchronized
     fun reset() {
         isRaised = false
         count = 0

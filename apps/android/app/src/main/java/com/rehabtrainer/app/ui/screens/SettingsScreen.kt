@@ -21,7 +21,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.rehabtrainer.app.data.local.AppPreferences
 import com.rehabtrainer.app.ui.components.ElderlyButton
 import com.rehabtrainer.app.ui.components.ElderlyButtonVariant
 import com.rehabtrainer.app.ui.theme.LocalElderlyDimens
@@ -32,8 +34,11 @@ import com.rehabtrainer.app.ui.theme.LocalElderlyDimens
 @Composable
 fun SettingsScreen(modifier: Modifier = Modifier) {
     val dimens = LocalElderlyDimens.current
+    val context = LocalContext.current
 
-    var voicePromptEnabled by remember { mutableStateOf(true) }
+    var audioGuidanceEnabled by remember {
+        mutableStateOf(AppPreferences.isAudioGuidanceEnabled(context))
+    }
     var hapticFeedbackEnabled by remember { mutableStateOf(true) }
     var highContrastEnabled by remember { mutableStateOf(true) }
 
@@ -75,9 +80,15 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(text = "RAS 节拍语音与蜂鸣引导", style = MaterialTheme.typography.titleMedium)
-                        Text(text = "训练中播放固定节拍声音，辅助步态节律", style = MaterialTheme.typography.bodyMedium)
+                        Text(text = "训练中播放固定节拍声音与动作语音提示，辅助步态节律", style = MaterialTheme.typography.bodyMedium)
                     }
-                    Switch(checked = voicePromptEnabled, onCheckedChange = { voicePromptEnabled = it })
+                    Switch(
+                        checked = audioGuidanceEnabled,
+                        onCheckedChange = { enabled ->
+                            audioGuidanceEnabled = enabled
+                            AppPreferences.setAudioGuidanceEnabled(context, enabled)
+                        }
+                    )
                 }
 
                 Row(

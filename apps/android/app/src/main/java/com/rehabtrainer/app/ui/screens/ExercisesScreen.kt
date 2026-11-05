@@ -3,35 +3,48 @@ package com.rehabtrainer.app.ui.screens
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.rehabtrainer.app.core.training.TrainingAccessPolicy
 import com.rehabtrainer.app.ui.components.ElderlyButton
 import com.rehabtrainer.app.ui.components.ElderlyButtonVariant
 import com.rehabtrainer.app.ui.theme.LocalElderlyDimens
 
 /**
- * 训练条目列表：按 4 大固定训练大类（牵伸放松、肌力维持、节律步态、姿势矫正）展示，
- * 5 级仅宣教与转诊，不提供训练条目。
+ * 训练条目列表：按 4 大固定训练大类展示。
+ *
+ * D11：需要治疗师确认分期的条目在确认前禁用开始按钮；演示版没有分期数据来源，
+ * 调用方默认传 `stageConfirmed = false`，按最保守处理。
  */
 @Composable
 fun ExercisesScreen(
     onSelectExercise: (String) -> Unit = {},
+    stageConfirmed: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val dimens = LocalElderlyDimens.current
+    var showContactDialog by remember { mutableStateOf(false) }
+
+    if (showContactDialog) {
+        ContactTherapistDialog(onDismiss = { showContactDialog = false })
+    }
 
     Column(
         modifier = modifier
@@ -80,14 +93,17 @@ fun ExercisesScreen(
             onStart = { onSelectExercise("EX-STRENGTH-01") }
         )
 
-        // Category 4: 姿势矫正
+        // Category 4: 姿势矫正（D11 高风险准入）
         ExerciseCategoryCard(
             categoryTitle = "姿势矫正训练",
             categoryDesc = "根据实时动作指引，保持挺拔舒展的站立姿态。",
             exerciseName = "站立位脊柱对齐矫正",
             parameters = "推荐剂量：3 组 × 10 次 · 端上实时姿态比对",
-            suitabilityTag = "动作规范 · 实时矫正",
-            onStart = { onSelectExercise("EX-POSTURE-01") }
+            suitabilityTag = "疑似 · 需分期确认准入",
+            onStart = { onSelectExercise("EX-POSTURE-01") },
+            requiresStageConfirmation = true,
+            stageConfirmed = stageConfirmed,
+            onContactTherapist = { showContactDialog = true }
         )
     }
 }
@@ -99,9 +115,13 @@ private fun ExerciseCategoryCard(
     exerciseName: String,
     parameters: String,
     suitabilityTag: String,
-    onStart: () -> Unit
+    onStart: () -> Unit,
+    requiresStageConfirmation: Boolean = false,
+    stageConfirmed: Boolean = false,
+    onContactTherapist: () -> Unit = {}
 ) {
     val dimens = LocalElderlyDimens.current
+    val canStart = TrainingAccessPolicy.canStart(requiresStageConfirmation, stageConfirmed)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -161,11 +181,56 @@ private fun ExerciseCategoryCard(
                 )
             }
 
+            if (requiresStageConfirmation && !stageConfirmed) {
+                Text(
+                    text = "分期状态：疑似（尚未经治疗师确认）",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+
             ElderlyButton(
-                text = "开始此项训练",
+                text = if (canStart) "开始此项训练" else "需治疗师确认分期",
                 onClick = onStart,
-                variant = ElderlyButtonVariant.Primary
+                variant = ElderlyButtonVariant.Primary,
+                enabled = canStart
             )
+
+            if (!canStart) {
+                Text(
+                    text = "该训练属于需治疗师评估的高风险条目。为保证安全，分期确认前不能开始。",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                ElderlyButton(
+                    text = "查看联系治疗师方式",
+                    onClick = onContactTherapist,
+                    variant = ElderlyButtonVariant.Secondary
+                )
+            }
         }
     }
+}
+
+@Composable
+private fun ContactTherapistDialog(onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("联系康复治疗师") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("签约机构：市康复中心第三病区", style = MaterialTheme.typography.bodyLarge)
+                Text("责任治疗师：李主任", style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    "请治疗师确认分期后，再开始「姿势矫正训练」。",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("知道了")
+            }
+        }
+    )
 }
