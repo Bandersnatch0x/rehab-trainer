@@ -79,7 +79,7 @@ class ExerciseAnalyzersTest {
         analyzer.update(leaned(raisedArm()))
         val update = analyzer.update(leaned(stand()))
 
-        assertTrue(update.lastRep!!.issues.contains(RepIssue.TRUNK_LEAN))
+        assertTrue(update.lastRep!!.issues.contains(RepIssue.LATERAL_LEAN))
     }
 
     // ---------- 原地踏步 ----------
@@ -95,6 +95,7 @@ class ExerciseAnalyzersTest {
     @Test
     fun marchCountsAlternatingSteps() {
         val analyzer = MarchAnalyzer()
+        analyzer.update(stand(), timestampMs = 0)
         analyzer.update(liftedLeg(left = true, ankleY = 0.70f))
         assertEquals(1, analyzer.update(stand()).count)
 
@@ -108,6 +109,7 @@ class ExerciseAnalyzersTest {
     @Test
     fun shallowMarchIsFlagged() {
         val analyzer = MarchAnalyzer()
+        analyzer.update(stand(), timestampMs = 0)
         analyzer.update(liftedLeg(left = true, ankleY = 0.90f))
         val update = analyzer.update(stand())
 
@@ -118,10 +120,11 @@ class ExerciseAnalyzersTest {
     @Test
     fun marchTrunkLeanIsFlagged() {
         val analyzer = MarchAnalyzer()
+        analyzer.update(stand(), timestampMs = 0)
         analyzer.update(leaned(liftedLeg(left = true, ankleY = 0.70f)))
         val update = analyzer.update(leaned(stand()))
 
-        assertTrue(update.lastRep!!.issues.contains(RepIssue.TRUNK_LEAN))
+        assertTrue(update.lastRep!!.issues.contains(RepIssue.LATERAL_LEAN))
     }
 
     // ---------- 靠墙微蹲 ----------
@@ -147,6 +150,7 @@ class ExerciseAnalyzersTest {
     @Test
     fun squatCountsAfterStandingBackUp() {
         val analyzer = SquatAnalyzer()
+        analyzer.update(stand(), timestampMs = 0)
         analyzer.update(squat())
         assertEquals(0, analyzer.count)
 
@@ -158,7 +162,8 @@ class ExerciseAnalyzersTest {
     @Test
     fun shallowSquatIsFlagged() {
         val analyzer = SquatAnalyzer()
-        analyzer.update(squat(hipY = 0.63f))
+        analyzer.update(stand(), timestampMs = 0)
+        analyzer.update(squat(hipY = 0.61f))
         val update = analyzer.update(stand())
 
         assertEquals(1, update.count)
@@ -168,6 +173,7 @@ class ExerciseAnalyzersTest {
     @Test
     fun excessiveSquatDepthIsFlagged() {
         val analyzer = SquatAnalyzer()
+        analyzer.update(stand(), timestampMs = 0)
         analyzer.update(squat(hipY = 0.72f))
         val update = analyzer.update(stand())
 
@@ -178,6 +184,7 @@ class ExerciseAnalyzersTest {
     @Test
     fun kneeValgusIsFlagged() {
         val analyzer = SquatAnalyzer()
+        analyzer.update(stand(), timestampMs = 0)
         analyzer.update(squat(leftKneeX = 0.50f, rightKneeX = 0.50f))
         val update = analyzer.update(stand())
 
@@ -187,6 +194,7 @@ class ExerciseAnalyzersTest {
     @Test
     fun hipAsymmetryIsFlagged() {
         val analyzer = SquatAnalyzer()
+        analyzer.update(stand(), timestampMs = 0)
         analyzer.update(squat(leftHipY = 0.64f, rightHipY = 0.68f))
         val update = analyzer.update(stand())
 
@@ -196,10 +204,11 @@ class ExerciseAnalyzersTest {
     @Test
     fun squatTrunkLeanIsFlagged() {
         val analyzer = SquatAnalyzer()
+        analyzer.update(stand(), timestampMs = 0)
         analyzer.update(leaned(squat()))
         val update = analyzer.update(leaned(stand()))
 
-        assertTrue(update.lastRep!!.issues.contains(RepIssue.TRUNK_LEAN))
+        assertTrue(update.lastRep!!.issues.contains(RepIssue.LATERAL_LEAN))
     }
 
     // ---------- 通用 ----------
@@ -207,6 +216,7 @@ class ExerciseAnalyzersTest {
     @Test
     fun resetClearsCountAndPendingState() {
         val analyzer = SquatAnalyzer()
+        analyzer.update(stand(), timestampMs = 0)
         analyzer.update(squat())
         analyzer.update(stand())
         assertEquals(1, analyzer.count)
@@ -215,6 +225,7 @@ class ExerciseAnalyzersTest {
 
         assertEquals(0, analyzer.count)
         assertNull(analyzer.lastRep)
+        analyzer.update(stand(), timestampMs = 1_000)
         analyzer.update(squat())
         assertEquals(1, analyzer.update(stand()).count)
     }
@@ -468,7 +479,7 @@ class ExerciseAnalyzersTest {
         analyzer.update(leaned(seatedLeg(leftAnkleY = 0.55f)), timestampMs = 500)
         val update = analyzer.update(leaned(seatedLeg()), timestampMs = 1_000)
 
-        assertTrue(update.lastRep!!.issues.contains(RepIssue.TRUNK_LEAN))
+        assertTrue(update.lastRep!!.issues.contains(RepIssue.LATERAL_LEAN))
     }
 
     @Test
@@ -491,5 +502,57 @@ class ExerciseAnalyzersTest {
         assertTrue(
             createExerciseAnalyzer(ExerciseKind.SEATED_LEG_RAISE) is SeatedLegRaiseAnalyzer
         )
+    }
+
+    @Test
+    fun postureToleratesBriefKeypointLossDuringHold() {
+        val analyzer = PostureAnalyzer()
+        analyzer.update(stand(), timestampMs = 0)
+        analyzer.update(stand(), timestampMs = 2_500)
+        val hidden = stand().apply {
+            set(PoseIndex.LEFT_HIP, PosePoint(0.45f, 0.60f, visibility = 0.05f))
+        }
+        analyzer.update(hidden, timestampMs = 2_600)
+        analyzer.update(stand(), timestampMs = 2_800)
+        val update = analyzer.update(stand(), timestampMs = 3_100)
+
+        assertEquals(1, update.count)
+    }
+
+    @Test
+    fun marchDoesNotDoubleCountWhenBothLegsLiftTogether() {
+        val analyzer = MarchAnalyzer()
+        analyzer.update(stand(), timestampMs = 0)
+        analyzer.update(seatedLeg(leftAnkleY = 0.70f, rightAnkleY = 0.70f), timestampMs = 500)
+        val update = analyzer.update(stand(), timestampMs = 1_000)
+
+        // 双腿同时抬落只算一步，避免把下蹲/并腿当成两次踏步。
+        assertEquals(1, update.count)
+    }
+
+    @Test
+    fun stretchJustAboveVisibilityThresholdIsNotKeypointIncomplete() {
+        val analyzer = StretchAnalyzer()
+        val frame = stretch().apply {
+            set(PoseIndex.LEFT_WRIST, PosePoint(0.45f, 0.05f, visibility = 0.21f))
+        }
+        val update = analyzer.update(frame, timestampMs = 0)
+
+        assertTrue(!update.currentIssues.contains(RepIssue.POSE_INCOMPLETE))
+    }
+
+    @Test
+    fun squatUsesStandingBaselineNotAbsoluteRatio() {
+        // 不同身高比例：把整体骨架纵向压缩后，基线跟随变化，仍能完成一次计数。
+        val short = stand().map { point ->
+            PosePoint(point.x, 0.5f + (point.y - 0.5f) * 0.8f, point.z, point.visibility)
+        }
+        val analyzer = SquatAnalyzer()
+        analyzer.update(short, timestampMs = 0)
+        val squatted = short.map { point ->
+            PosePoint(point.x, if (point.y > 0.55f) 0.5f + (point.y - 0.5f) * 0.72f else point.y, point.z, point.visibility)
+        }
+        analyzer.update(squatted, timestampMs = 500)
+        assertEquals(1, analyzer.update(short, timestampMs = 1_000).count)
     }
 }

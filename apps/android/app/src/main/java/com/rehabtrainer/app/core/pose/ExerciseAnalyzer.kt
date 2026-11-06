@@ -14,7 +14,6 @@ enum class ExerciseKind {
 enum class RepIssue {
     INSUFFICIENT_RANGE,
     EXCESSIVE_DEPTH,
-    TRUNK_LEAN,
     KNEE_VALGUS,
     ASYMMETRY,
     SHOULDER_UNEVEN,

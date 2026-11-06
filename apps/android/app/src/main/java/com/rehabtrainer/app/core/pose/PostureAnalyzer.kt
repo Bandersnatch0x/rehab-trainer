@@ -42,11 +42,10 @@ class PostureAnalyzer(
                 PoseIndex.RIGHT_SHOULDER,
                 PoseIndex.LEFT_HIP,
                 PoseIndex.RIGHT_HIP,
-                threshold = 0.5f
+                threshold = 0.20f
             )
         ) {
-            holdStartMs = null
-            countedForCurrentHold = false
+            onInvalidFrame(timestampMs)
             return AnalysisUpdate(count, lastRep, setOf(RepIssue.POSE_INCOMPLETE))
         }
         val torso = PoseGeometry.torsoHeight(points)
@@ -75,10 +74,11 @@ class PostureAnalyzer(
         }
 
         if (issues.isNotEmpty()) {
-            holdStartMs = null
-            countedForCurrentHold = false
+            // 真正偏离（肩/髋不平、侧倾、头偏）立即结束保持；只有关键点丢失才走容错。
+            resetHold()
             return AnalysisUpdate(count, lastRep, issues)
         }
+        lastValidMs = timestampMs
 
         if (holdStartMs == null) {
             holdStartMs = timestampMs
@@ -93,9 +93,21 @@ class PostureAnalyzer(
         return AnalysisUpdate(count, lastRep, emptySet())
     }
 
-    override fun reset() {
+    private fun onInvalidFrame(timestampMs: Long) {
+        if (holdStartMs != null && timestampMs - lastValidMs <= gapToleranceMs) {
+            return
+        }
+        resetHold()
+    }
+
+    private fun resetHold() {
         holdStartMs = null
+        lastValidMs = 0L
         countedForCurrentHold = false
+    }
+
+    override fun reset() {
+        resetHold()
         repIndex = 0
         count = 0
         lastRep = null

@@ -67,8 +67,8 @@ internal object PoseGeometry {
         return if (height > 1e-4f) height else null
     }
 
-    /** 肩中点相对髋中点的前倾角（度），0 表示躯干垂直。 */
-    fun trunkLeanDegrees(points: List<PosePoint>): Float? {
+    /** 肩中点相对髋中点的侧向倾斜角（度），0 表示躯干垂直；正面 2D 无法测真正的前后倾。 */
+    fun lateralLeanDegrees(points: List<PosePoint>): Float? {
         val dx = midX(points, PoseIndex.LEFT_SHOULDER, PoseIndex.RIGHT_SHOULDER) -
             midX(points, PoseIndex.LEFT_HIP, PoseIndex.RIGHT_HIP)
         val dy = midY(points, PoseIndex.LEFT_SHOULDER, PoseIndex.RIGHT_SHOULDER) -

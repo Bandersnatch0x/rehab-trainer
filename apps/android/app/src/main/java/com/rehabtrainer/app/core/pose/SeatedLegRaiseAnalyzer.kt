@@ -18,7 +18,7 @@ class SeatedLegRaiseAnalyzer(
     private val liftEnterRatio: Float = 0.15f,
     private val liftExitRatio: Float = 0.08f,
     private val minLiftRatio: Float = 0.22f,
-    private val maxTrunkLean: Float = 15f
+    private val maxLateralLean: Float = 15f
 ) : ExerciseAnalyzer {
 
     private class LegState {
@@ -43,14 +43,14 @@ class SeatedLegRaiseAnalyzer(
                 PoseIndex.RIGHT_HIP,
                 PoseIndex.LEFT_ANKLE,
                 PoseIndex.RIGHT_ANKLE,
-                threshold = 0.5f
+                threshold = 0.20f
             )
         ) {
             return AnalysisUpdate(count, lastRep, setOf(RepIssue.POSE_INCOMPLETE))
         }
         val torso = PoseGeometry.torsoHeight(points)
             ?: return AnalysisUpdate(count, lastRep, setOf(RepIssue.POSE_INCOMPLETE))
-        val lean = PoseGeometry.trunkLeanDegrees(points) ?: 0f
+        val lean = PoseGeometry.lateralLeanDegrees(points) ?: 0f
 
         updateLeg(
             0,
@@ -84,7 +84,7 @@ class SeatedLegRaiseAnalyzer(
                 val lift = baseline - leg.minSpan
                 val issues = buildSet {
                     if (lift < minLiftRatio) add(RepIssue.INSUFFICIENT_RANGE)
-                    if (lean > maxTrunkLean) add(RepIssue.TRUNK_LEAN)
+                    if (lean > maxLateralLean) add(RepIssue.LATERAL_LEAN)
                 }
                 repIndex += 1
                 count += 1
@@ -92,8 +92,8 @@ class SeatedLegRaiseAnalyzer(
             }
             return
         }
-        // 未抬腿时缓慢上修基线，适应座椅/机位变化；只在明显更高时更新。
-        leg.baseline = max(baseline, span)
+        // 未抬腿时基线缓慢双向自适应：明显更高立即上修，低一些则缓慢下修（防机位/坐姿漂移）。
+        leg.baseline = if (span > baseline) span else max(span, baseline - BASELINE_DOWN_STEP)
     }
 
     override fun reset() {

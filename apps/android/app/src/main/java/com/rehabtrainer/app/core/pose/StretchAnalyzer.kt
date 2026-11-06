@@ -43,7 +43,7 @@ class StretchAnalyzer(
                 PoseIndex.RIGHT_ELBOW,
                 PoseIndex.LEFT_WRIST,
                 PoseIndex.RIGHT_WRIST,
-                threshold = 0.5f
+                threshold = 0.20f
             )
         ) {
             onInvalidFrame(timestampMs)
@@ -90,7 +90,9 @@ class StretchAnalyzer(
         }
 
         if (issues.isNotEmpty()) {
-            onInvalidFrame(timestampMs)
+            // 双臂已明显放下（而非瞬时抖动）时立即结束本次保持，允许下一次重新计数。
+            val clearlyDown = leftRaise < 0.05f && rightRaise < 0.05f
+            if (clearlyDown) resetHold() else onInvalidFrame(timestampMs)
             return AnalysisUpdate(count, lastRep, issues)
         }
         lastValidMs = timestampMs

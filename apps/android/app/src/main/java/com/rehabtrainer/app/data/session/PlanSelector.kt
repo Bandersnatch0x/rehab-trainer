@@ -46,9 +46,9 @@ object PlanSelector {
     /** RAS 节拍只用于节律步态类条目。 */
     fun hasRas(category: String): Boolean = category == ExerciseCategory.RHYTHMIC_GAIT.wireValue
 
-    /** 除牵伸类外，其余条目需要踝/脚跟/脚尖入镜。 */
-    fun requiresFullBody(category: String): Boolean =
-        category != ExerciseCategory.STRETCHING_RELAXATION.wireValue
+    /** 只有需要看下肢的条目才要求脚部入镜；姿势保持/牵伸只看上半身。 */
+    fun requiresFullBody(category: String): Boolean = category == ExerciseCategory.RHYTHMIC_GAIT.wireValue ||
+        category == ExerciseCategory.STRENGTH_MAINTENANCE.wireValue
 
     const val DEFAULT_SETS: Int = 2
     const val DEFAULT_REPS: Int = 10

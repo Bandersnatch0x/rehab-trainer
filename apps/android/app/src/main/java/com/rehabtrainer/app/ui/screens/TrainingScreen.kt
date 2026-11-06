@@ -65,7 +65,6 @@ import java.util.concurrent.Executors
 private fun issueText(issue: RepIssue): String = when (issue) {
     RepIssue.INSUFFICIENT_RANGE -> "幅度不足"
     RepIssue.EXCESSIVE_DEPTH -> "下蹲过深"
-    RepIssue.TRUNK_LEAN -> "躯干前倾"
     RepIssue.KNEE_VALGUS -> "膝盖内扣"
     RepIssue.ASYMMETRY -> "左右不对称"
     RepIssue.SHOULDER_UNEVEN -> "肩部不平"
