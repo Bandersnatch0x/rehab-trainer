@@ -47,19 +47,30 @@ interface ExerciseAnalyzer {
     /** 校准阶段还需完成几次动作；0 表示已进入正式计数。 */
     val calibrationRemaining: Int get() = 0
 
+    /**
+     * 本次使用的个人幅度：校准完成后为实测平均值，传入已知幅度时即为该值。
+     * 调用方可把它按 患者+条目 存下来，下次直接沿用。不支持校准的分析器返回 null。
+     */
+    val calibratedAmplitude: Float? get() = null
+
     fun update(points: List<PosePoint>, timestampMs: Long = 0L): AnalysisUpdate
 
     fun reset()
 }
 
+/**
+ * @param knownAmplitude 上次存下的个人幅度；有值时跳过校准直接计数。
+ */
 fun createExerciseAnalyzer(
     kind: ExerciseKind,
-    calibrationReps: Int = 2
+    calibrationReps: Int = 2,
+    knownAmplitude: Float? = null
 ): ExerciseAnalyzer = when (kind) {
     ExerciseKind.ARM_RAISE -> ArmRaiseAnalyzer()
-    ExerciseKind.MARCH -> MarchAnalyzer(calibrationReps = calibrationReps)
-    ExerciseKind.SQUAT -> SquatAnalyzer(calibrationReps = calibrationReps)
+    ExerciseKind.MARCH -> MarchAnalyzer(calibrationReps = calibrationReps, knownAmplitude = knownAmplitude)
+    ExerciseKind.SQUAT -> SquatAnalyzer(calibrationReps = calibrationReps, knownAmplitude = knownAmplitude)
     ExerciseKind.POSTURE -> PostureAnalyzer()
     ExerciseKind.STRETCH -> StretchAnalyzer()
-    ExerciseKind.SEATED_LEG_RAISE -> SeatedLegRaiseAnalyzer(calibrationReps = calibrationReps)
+    ExerciseKind.SEATED_LEG_RAISE ->
+        SeatedLegRaiseAnalyzer(calibrationReps = calibrationReps, knownAmplitude = knownAmplitude)
 }

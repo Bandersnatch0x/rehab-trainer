@@ -64,4 +64,9 @@ compose = yaml.safe_load((root / "docker-compose.yml").read_text(encoding="utf-8
 assert set(compose["services"]) == {"api", "postgres"}
 assert compose["services"]["api"]["environment"]["REHAB_AUTO_CREATE_SCHEMA"] == "false"
 assert compose["services"]["postgres"]["volumes"]
+# 不设上限的 json-file 日志会把宿主磁盘写满；两个服务都必须声明轮转。
+for name, service in compose["services"].items():
+    options = service.get("logging", {}).get("options", {})
+    assert service.get("logging", {}).get("driver") == "json-file", f"{name} 未声明日志驱动"
+    assert options.get("max-size") and options.get("max-file"), f"{name} 未声明日志轮转上限"
 print(f"PASS: {len(Base.metadata.tables)} tables; SQLite upgrade/repeat/downgrade/upgrade; model diff empty; PostgreSQL SQL; YAML")

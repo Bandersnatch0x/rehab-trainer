@@ -111,7 +111,8 @@ class MarchAnalyzer(
     private val exitRatio: Float = 0.90f,
     private val minLiftRatio: Float = 0.65f,
     private val maxLateralLean: Float = 12f,
-    private val calibrationReps: Int = 0
+    private val calibrationReps: Int = 0,
+    knownAmplitude: Float? = null
 ) : ExerciseAnalyzer {
 
     private class LegState {
@@ -123,7 +124,7 @@ class MarchAnalyzer(
     }
 
     private val legs = listOf(LegState(), LegState())
-    private val calibration = AmplitudeCalibration(calibrationReps)
+    private val calibration = AmplitudeCalibration(calibrationReps, knownAmplitude)
     private var repIndex = 0
     private var lastStepLeg = -1
     private var lastRepAtMs = 0L
@@ -133,6 +134,7 @@ class MarchAnalyzer(
     override var lastRep: RepResult? = null
         private set
     override val calibrationRemaining: Int get() = calibration.remaining
+    override val calibratedAmplitude: Float? get() = calibration.amplitude()
 
     override fun update(points: List<PosePoint>, timestampMs: Long): AnalysisUpdate {
         if (points.size < PoseIndex.LANDMARK_COUNT ||
@@ -248,7 +250,8 @@ class SquatAnalyzer(
     private val maxLateralLean: Float = 20f,
     private val maxValgusRatio: Float = 0.12f,
     private val maxHipTiltRatio: Float = 0.10f,
-    private val calibrationReps: Int = 0
+    private val calibrationReps: Int = 0,
+    knownAmplitude: Float? = null
 ) : ExerciseAnalyzer {
 
     private var baseline: Float? = null
@@ -259,13 +262,14 @@ class SquatAnalyzer(
     private var minSpan = Float.MAX_VALUE
     private var bottomIssues: Set<RepIssue> = emptySet()
     private var repIndex = 0
-    private val calibration = AmplitudeCalibration(calibrationReps)
+    private val calibration = AmplitudeCalibration(calibrationReps, knownAmplitude)
 
     override var count: Int = 0
         private set
     override var lastRep: RepResult? = null
         private set
     override val calibrationRemaining: Int get() = calibration.remaining
+    override val calibratedAmplitude: Float? get() = calibration.amplitude()
 
     override fun update(points: List<PosePoint>, timestampMs: Long): AnalysisUpdate {
         if (points.size < PoseIndex.LANDMARK_COUNT ||

@@ -25,7 +25,9 @@ sealed interface PoseFrame {
         val currentIssues: Set<RepIssue>,
         val footVisibility: Float,
         val framingHint: String? = null,
-        val calibrationRemaining: Int = 0
+        val calibrationRemaining: Int = 0,
+        /** 校准完成后的个人幅度；调用方据此持久化，下次训练免校准。 */
+        val calibratedAmplitude: Float? = null
     ) : PoseFrame
 
     data object NoPose : PoseFrame
@@ -47,10 +49,11 @@ class PoseAnalyzer(
     modelAssetPath: String = "pose_landmarker_lite.task",
     private val requiresFullBody: Boolean = false,
     exerciseKind: ExerciseKind = ExerciseKind.ARM_RAISE,
+    knownAmplitude: Float? = null,
     private val onFrame: (PoseFrame) -> Unit
 ) : ImageAnalysis.Analyzer {
 
-    private val analyzer = createExerciseAnalyzer(exerciseKind)
+    private val analyzer = createExerciseAnalyzer(exerciseKind, knownAmplitude = knownAmplitude)
 
     @Volatile
     private var lastUpdate = AnalysisUpdate(0, null)
@@ -225,7 +228,8 @@ class PoseAnalyzer(
                 currentIssues = lastUpdate.currentIssues,
                 footVisibility = footVisibility,
                 framingHint = framingHint,
-                calibrationRemaining = analyzer.calibrationRemaining
+                calibrationRemaining = analyzer.calibrationRemaining,
+                calibratedAmplitude = analyzer.calibratedAmplitude
             )
         )
     }

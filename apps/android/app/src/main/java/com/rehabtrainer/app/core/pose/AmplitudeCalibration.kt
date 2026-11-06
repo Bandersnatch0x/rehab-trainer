@@ -3,18 +3,23 @@ package com.rehabtrainer.app.core.pose
 import kotlin.math.max
 
 /**
- * 单次训练内的动作幅度校准。
+ * 动作幅度校准。
  *
  * 前 [requiredReps] 次完成动作只测量、不计数，取平均幅度作为该患者的个人参考：
  * - 计数进入/退出阈值按平均幅度的 35%/15% 设定（带下限），幅度小的患者也能被识别；
  * - 达标阈值取平均幅度的 50%，避免用全局常数把正常动作判为「幅度不足」。
  *
- * 说明：当前为每次训练重新校准；后续可把结果按 患者+条目 持久化。
+ * [knownAmplitude] 用于传入上次训练存下的个人幅度（见 `CalibrationStore`）：
+ * 有值时直接进入正式计数，不再浪费前几次动作做校准。
+ * 幅度会随康复进展变化，因此存储侧带有效期，过期即重新校准。
  */
-internal class AmplitudeCalibration(private val requiredReps: Int) {
+internal class AmplitudeCalibration(
+    private val requiredReps: Int,
+    knownAmplitude: Float? = null
+) {
 
     private val samples = mutableListOf<Float>()
-    private var averageAmplitude: Float? = null
+    private var averageAmplitude: Float? = knownAmplitude?.takeIf { it.isFinite() && it > 0f }
 
     val isCalibrating: Boolean
         get() = requiredReps > 0 && averageAmplitude == null

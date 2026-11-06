@@ -57,11 +57,13 @@ import com.rehabtrainer.app.data.local.AppPreferences
 import com.rehabtrainer.app.data.offline.ClientRecordIds
 import com.rehabtrainer.app.data.session.SessionRecordBuilder
 import com.rehabtrainer.app.data.session.AppData
+import com.rehabtrainer.app.data.local.CalibrationStore
 import com.rehabtrainer.app.data.session.SetOutcome
 import com.rehabtrainer.app.ui.ExerciseRegistry
 import com.rehabtrainer.app.ui.audio.VoiceCoach
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.io.File
 import java.time.Instant
 import java.util.concurrent.Executors
 
@@ -201,6 +203,13 @@ fun TrainingScreen(
         onDispose { voiceCoach.release() }
     }
 
+    // 幅度校准持久化：沿用上次存下的个人幅度，第二次训练起免去「前 2 次不计数」的校准。
+    val calibrationStore = remember { CalibrationStore(File(context.filesDir, "calibration")) }
+    val knownAmplitude = remember(exerciseCode, ExerciseRegistry.patientId) {
+        ExerciseRegistry.patientId?.let { calibrationStore.amplitude(it, exerciseCode) }
+    }
+    var persistedAmplitude by remember(exerciseCode) { mutableStateOf(knownAmplitude) }
+
     val executor = remember(exerciseCode) { Executors.newSingleThreadExecutor() }
     val previewView = remember(exerciseCode) { PreviewView(context) }
     val analyzer = remember(exerciseCode) {
@@ -208,6 +217,7 @@ fun TrainingScreen(
             context = context,
             requiresFullBody = requiresFullBody,
             exerciseKind = currentExercise.kind,
+            knownAmplitude = knownAmplitude,
             onFrame = { frame ->
                 mainHandler.post {
                     if (isPaused) return@post
@@ -238,6 +248,14 @@ fun TrainingScreen(
                                     repHintUntilMs = nowMs + REP_HINT_TTL_MS
                                     if (!latestRep.valid) {
                                         setInvalidReps += 1
+                                    }
+                                }
+                                // 校准完成时记下个人幅度：同一条目下次直接沿用（每次训练只写一次）。
+                                val learned = frame.calibratedAmplitude
+                                if (learned != null && learned != persistedAmplitude) {
+                                    persistedAmplitude = learned
+                                    ExerciseRegistry.patientId?.let { patient ->
+                                        calibrationStore.save(patient, exerciseCode, learned)
                                     }
                                 }
                                 repHint = when {
@@ -369,6 +387,13 @@ fun TrainingScreen(
                 modelSha256 = ModelFingerprint.sha256(context)
             )
             scope.launch { AppData.submit(record) }
+        }
+        // 存下的幅度不合身时不能一直沿用；判据见 CalibrationStore.shouldInvalidate。
+        if (CalibrationStore.shouldInvalidate(knownAmplitude, completedReps, setValidFrames)) {
+            ExerciseRegistry.patientId?.let { patient ->
+                calibrationStore.invalidate(patient, currentExercise.code)
+            }
+            persistedAmplitude = null
         }
         setValidFrames = 0
         setTotalFrames = 0

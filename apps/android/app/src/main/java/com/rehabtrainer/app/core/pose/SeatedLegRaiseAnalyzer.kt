@@ -19,7 +19,8 @@ class SeatedLegRaiseAnalyzer(
     private val liftExitRatio: Float = 0.08f,
     private val minLiftRatio: Float = 0.22f,
     private val maxLateralLean: Float = 15f,
-    private val calibrationReps: Int = 0
+    private val calibrationReps: Int = 0,
+    knownAmplitude: Float? = null
 ) : ExerciseAnalyzer {
 
     private class LegState {
@@ -32,7 +33,7 @@ class SeatedLegRaiseAnalyzer(
     }
 
     private val legs = listOf(LegState(), LegState())
-    private val calibration = AmplitudeCalibration(calibrationReps)
+    private val calibration = AmplitudeCalibration(calibrationReps, knownAmplitude)
     private var repIndex = 0
     private var lastRepAtMs = 0L
 
@@ -41,6 +42,7 @@ class SeatedLegRaiseAnalyzer(
     override var lastRep: RepResult? = null
         private set
     override val calibrationRemaining: Int get() = calibration.remaining
+    override val calibratedAmplitude: Float? get() = calibration.amplitude()
 
     override fun update(points: List<PosePoint>, timestampMs: Long): AnalysisUpdate {
         if (points.size < PoseIndex.LANDMARK_COUNT ||

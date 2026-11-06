@@ -606,4 +606,55 @@ class ExerciseAnalyzersTest {
         )
         assertEquals(1, analyzer.update(seatedLeg(), timestampMs = 3_000).count)
     }
+
+    // ---------- 幅度持久化（下次训练免校准） ----------
+
+    @Test
+    fun storedAmplitudeFromPreviousSessionCountsFromTheFirstRep() {
+        // 先跑一次校准，取它学到的幅度——测试里不写死数值，直接用分析器自己的产出。
+        val learning = MarchAnalyzer(calibrationReps = 2)
+        learning.update(stand(), timestampMs = 0)
+        learning.update(liftedLeg(left = true, ankleY = 0.70f), timestampMs = 100)
+        learning.update(stand(), timestampMs = 500)
+        learning.update(liftedLeg(left = false, ankleY = 0.70f), timestampMs = 700)
+        learning.update(stand(), timestampMs = 1_100)
+        assertEquals(0, learning.calibrationRemaining)
+        val learned = learning.calibratedAmplitude
+        assertNotNull(learned)
+
+        // 第二次训练沿用存下的幅度：没有校准等待，第一次动作就计数。
+        val resumed = MarchAnalyzer(calibrationReps = 2, knownAmplitude = learned)
+        assertEquals(0, resumed.calibrationRemaining)
+        assertEquals(learned!!, resumed.calibratedAmplitude!!, 1e-6f)
+
+        // 仍需先给一帧站立以建立基线；免掉的是「前两次不计数」的校准，不是基线估计。
+        resumed.update(stand(), timestampMs = 1_900)
+        resumed.update(liftedLeg(left = true, ankleY = 0.70f), timestampMs = 2_000)
+        assertEquals(1, resumed.update(stand(), timestampMs = 2_500).count)
+    }
+
+    @Test
+    fun knownAmplitudeIsIgnoredWhenNonsense() {
+        // 存了脏数据就当没有：退回正常校准，而不是拿 0 或负值当阈值。
+        val analyzer = MarchAnalyzer(calibrationReps = 2, knownAmplitude = 0f)
+        assertEquals(2, analyzer.calibrationRemaining)
+        assertNull(analyzer.calibratedAmplitude)
+    }
+
+    @Test
+    fun factoryPassesKnownAmplitudeAndReportsCalibratedOne() {
+        val squat = createExerciseAnalyzer(
+            ExerciseKind.SQUAT,
+            calibrationReps = 2,
+            knownAmplitude = 0.12f
+        )
+        assertEquals(0, squat.calibrationRemaining)
+        assertEquals(0.12f, squat.calibratedAmplitude!!, 1e-6f)
+
+        // 不支持幅度校准的条目如实返回 null，调用方不会存下无意义的数值。
+        val posture = createExerciseAnalyzer(ExerciseKind.POSTURE, knownAmplitude = 0.12f)
+        assertNull(posture.calibratedAmplitude)
+        val stretch = createExerciseAnalyzer(ExerciseKind.STRETCH, knownAmplitude = 0.12f)
+        assertNull(stretch.calibratedAmplitude)
+    }
 }

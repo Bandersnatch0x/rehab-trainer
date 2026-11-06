@@ -13,6 +13,12 @@ services:
       timeout: 5s
       retries: 12
     restart: unless-stopped
+    # 默认 json-file 驱动不轮转，长期运行会把磁盘写满；上限按容器本地保留，云端再接日志采集。
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
   api:
     build:
       context: .
@@ -32,6 +38,11 @@ services:
       postgres:
         condition: service_healthy
     restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 volumes:
   postgres_data:
   media_data:
