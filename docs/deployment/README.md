@@ -121,6 +121,15 @@ git diff --check
 
 静态自检覆盖 YAML 解析、16 表 SQLite 迁移往返与重复升级、模型差异、检查约束数量以及 PostgreSQL 离线 SQL 生成。
 
+上面全部不需要数据库服务。真实 PostgreSQL 上的迁移验证另有一个脚本，它要求目标库为空（非空库会被拒绝，避免降级删除数据）：
+
+```powershell
+$env:REHAB_DATABASE_URL = "postgresql+psycopg://rehab:<密码>@127.0.0.1:55432/rehab"
+python deploy/verify_postgres.py
+```
+
+它做四件事：`upgrade head` 后逐条断言 0002–0005 引入的列、检查约束、外键、索引与 JSON 列真实存在；用 ORM 写入并读回数据；`downgrade 0001` 后再 `upgrade head`，断言既有行未被降级破坏且新列按 `server_default` 回填；`downgrade base` 后重建，证明迁移可从零重复执行。同时在真实 PostgreSQL 上跑 `compare_metadata`，比 SQLite 更容易暴露类型与约束漂移。
+
 ### 容器与真实 PostgreSQL 验证（2026-11-05）
 
 在 WSL2 的 kali-linux2 发行版内用 Docker 27.5.1 / Compose 2.32.4 实跑，使用本仓 `docker-compose.yml` 与 `.env.example` 生成的临时 env（随机密码与 JWT）：
@@ -145,9 +154,25 @@ git diff --check
 
 补充说明：该环境无法直连 Docker Hub，基础镜像经 `docker.m.daocloud.io` 镜像拉取后按原名打标签；这与镜像内容无关，但生产构建应配置可用的镜像仓库。未执行云上部署，也未做 hadolint 静态检查。
 
+### 迁移 0002–0005 与 PostgreSQL 主链路复验（2026-11-07）
+
+上表的 PostgreSQL 结果取自只有 `0001` 的时点。此后新增 `0002`（科研数据底座）、`0003`（视频资产）、`0004`（查询索引）、`0005`（TOTP 与跨副本登录限流），已在 `postgres:17-bookworm`（PostgreSQL 17.11）上重新验证：
+
+| 步骤 | 结果 |
+| --- | --- |
+| `alembic upgrade head`（空库） | 通过；`alembic current` 为 `0005 (head)` |
+| 表数 | 19（18 张业务表 + `alembic_version`） |
+| `python deploy/verify_postgres.py` | PASS：0002–0005 的列/检查约束/外键/索引/JSON 列齐备；`compare_metadata` 差异为空 |
+| 数据回读 | ORM 写入机构/账号/患者后可读回，`0005` 的 `totp_secret`、`totp_last_step` 生效 |
+| `downgrade 0001` → `upgrade head` | 通过；既有患者行保留，`patient.data_origin` 按 `server_default` 回填为 `real` |
+| `downgrade base` → `upgrade head` | 通过；迁移可从零重复执行 |
+| 迁移建库后的接口联调 | **25/25 契约操作通过**（21 条路径），含批量幂等与重放，schema 全部由迁移建立（`REHAB_AUTO_CREATE_SCHEMA=false`） |
+
+复现方式：在 WSL 内 `docker run -d --name rehab-pg -e POSTGRES_PASSWORD=... -p 55432:5432 postgres:17-bookworm`，宿主机用 `REHAB_DATABASE_URL` 指向它；先用 `python -m alembic -c deploy/alembic.ini upgrade head` 建库，再 `python -m app.seed`，最后 `python scripts/smoke-api.py --base-url ...`。登录限流自 `0005` 起改为数据库表实现，因此跨副本共享计数；`0005` 之前"进程内状态、多副本不共享"的说法已失效。
+
 2026-11-04 本地结果为部署自检通过、后端全量 36 项通过、Python 语法解析通过、`git diff --check` 通过。测试产生现有 HTTP 客户端弃用及依赖版本警告。未执行云部署，独立审查交由协调者完成。
 
-仓库内有 `.github/workflows/ci.yml`（按路径触发 Android 构建、小程序类型检查、管理端构建、后端 pytest 与契约校验），但仓库没有远端流水线，**该配置未在真实 CI 上运行过**。未做蓝绿部署，未提供云资源编排、存量 SQLite 数据搬迁及生产账号初始化。现有登录限流使用进程内状态，多副本及重启不能共享计数；扩容前应单独治理。存量 ORM 与 PostgreSQL 的完整业务兼容性已在本机容器内的 PostgreSQL 17 上跑通主链路（18/18 契约操作），但未做长时压测与并发验证。
+仓库内有 `.github/workflows/ci.yml`（按路径触发 Android 构建、小程序类型检查、管理端构建、后端 pytest 与契约校验），但仓库没有远端流水线，**该配置未在真实 CI 上运行过**。未做蓝绿部署，未提供云资源编排、存量 SQLite 数据搬迁及生产账号初始化。登录限流自 `0005` 起由 `login_failure` 表实现，多副本共享计数；清理依赖每次登录时的窗口裁剪，尚未做独立清理任务与容量上限。存量 ORM 与 PostgreSQL 的完整业务兼容性已在本机容器内的 PostgreSQL 17 上跑通主链路（25/25 契约操作，见下节），但未做长时压测与并发验证。
 
 ## 训练视频存储与静态托管
 
