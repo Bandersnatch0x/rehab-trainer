@@ -57,4 +57,16 @@ class SetProgressTest {
         assertTrue(again.isComplete)
         assertEquals(3, again.completedSets)
     }
+
+    @Test
+    fun targetReachedTriggersOnlyBeforeCompletion() {
+        val progress = SetProgress(totalSets = 2, repsPerSet = 8)
+
+        assertFalse(progress.isTargetReached(7))
+        assertTrue(progress.isTargetReached(8))
+        assertTrue(progress.isTargetReached(99))
+
+        val done = progress.finishCurrentSet().finishCurrentSet()
+        assertFalse(done.isTargetReached(8))
+    }
 }

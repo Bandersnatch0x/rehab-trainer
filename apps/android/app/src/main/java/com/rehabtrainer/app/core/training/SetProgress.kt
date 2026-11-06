@@ -25,6 +25,9 @@ data class SetProgress(
 
     fun capReps(rawCount: Int): Int = rawCount.coerceIn(0, repsPerSet)
 
+    /** 本组是否已达到目标次数、可以自动进入下一组（全部完成时为 false）。 */
+    fun isTargetReached(rawCount: Int): Boolean = !isComplete && capReps(rawCount) >= repsPerSet
+
     fun finishCurrentSet(): SetProgress =
         if (isComplete) this else copy(completedSets = completedSets + 1)
 }
