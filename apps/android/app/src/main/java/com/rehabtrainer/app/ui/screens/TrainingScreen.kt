@@ -53,7 +53,7 @@ import com.rehabtrainer.app.core.training.SetProgress
 import com.rehabtrainer.app.core.training.TrainingDisplayMode
 import com.rehabtrainer.app.core.training.TrainingDisplayPolicy
 import com.rehabtrainer.app.data.local.AppPreferences
-import com.rehabtrainer.app.ui.DEFAULT_EXERCISES
+import com.rehabtrainer.app.ui.ExerciseRegistry
 import com.rehabtrainer.app.ui.audio.VoiceCoach
 import kotlinx.coroutines.delay
 import java.util.concurrent.Executors
@@ -71,6 +71,7 @@ private fun issueText(issue: RepIssue): String = when (issue) {
     RepIssue.HIP_UNEVEN -> "髋部不平"
     RepIssue.HEAD_OFFSET -> "头部偏移"
     RepIssue.LATERAL_LEAN -> "躯干侧倾"
+    RepIssue.ELBOW_BENT -> "肘部未伸展"
     RepIssue.POSE_INCOMPLETE -> "关键点不足"
 }
 
@@ -94,8 +95,8 @@ fun TrainingScreen(
     val screenWidthDp = configuration.screenWidthDp
     val largeFont = configuration.fontScale >= 1.3f
 
-    val currentExercise = DEFAULT_EXERCISES.firstOrNull { it.code == exerciseCode }
-        ?: DEFAULT_EXERCISES.first()
+    val currentExercise = ExerciseRegistry.exercises.firstOrNull { it.code == exerciseCode }
+        ?: ExerciseRegistry.exercises.first()
     val requiresFullBody = currentExercise.requiresFullBody
     val videoSource = InstructionalVideoSource(
         remoteUrl = currentExercise.videoUri,

@@ -2,6 +2,10 @@ package com.rehabtrainer.app.core.network
 
 import com.rehabtrainer.app.data.contract.ApiError
 import com.rehabtrainer.app.data.contract.BindRequest
+import com.rehabtrainer.app.data.contract.Exercise
+import com.rehabtrainer.app.data.contract.PatientPage
+import com.rehabtrainer.app.data.contract.PrescriptionPage
+import com.rehabtrainer.app.data.contract.SessionRecordPage
 import com.rehabtrainer.app.data.contract.LoginRequest
 import com.rehabtrainer.app.data.contract.LoginResponse
 import com.rehabtrainer.app.data.contract.Me
@@ -105,6 +109,22 @@ class ApiContainer(
 
     /** GET /me；需要已有有效令牌。 */
     suspend fun me(): ApiResult<Me> = apiCall { accountApi.me() }
+
+    /** GET /patients — 当前角色可见的患者（患者角色为自己）。 */
+    suspend fun listPatients(limit: Int = 20): ApiResult<PatientPage> =
+        apiCall { patientsApi.listPatients(limit = limit) }
+
+    /** GET /prescriptions — 按患者读取训练方案。 */
+    suspend fun listPrescriptions(patientId: String, limit: Int = 20): ApiResult<PrescriptionPage> =
+        apiCall { prescriptionsApi.listPrescriptions(patientId = patientId, limit = limit) }
+
+    /** GET /exercises/{code} — 训练条目详情（含示范视频地址）。 */
+    suspend fun getExercise(code: String): ApiResult<Exercise> =
+        apiCall { exercisesApi.getExercise(code) }
+
+    /** GET /sessions — 患者的训练记录。 */
+    suspend fun listSessions(patientId: String, limit: Int = 20): ApiResult<SessionRecordPage> =
+        apiCall { sessionsApi.listSessions(patientId = patientId, limit = limit) }
 
     /** POST /auth/refresh；使用当前 refreshToken 换新令牌。 */
     suspend fun refresh(): ApiResult<TokenPair> {

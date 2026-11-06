@@ -43,3 +43,10 @@ data class Prescription(
     val validUntil: String? = null,
     val mappingTableVersion: String? = null
 )
+
+/** 契约 `PrescriptionPage`。 */
+@Serializable
+data class PrescriptionPage(
+    val items: List<Prescription>,
+    val nextCursor: String? = null
+)

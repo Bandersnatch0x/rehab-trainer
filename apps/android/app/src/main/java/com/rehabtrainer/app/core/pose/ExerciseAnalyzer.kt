@@ -5,7 +5,8 @@ enum class ExerciseKind {
     ARM_RAISE,
     MARCH,
     SQUAT,
-    POSTURE
+    POSTURE,
+    STRETCH
 }
 
 /** 单次动作未达标的原因；UI 负责翻译成患者可读文案。 */
@@ -19,6 +20,7 @@ enum class RepIssue {
     HIP_UNEVEN,
     HEAD_OFFSET,
     LATERAL_LEAN,
+    ELBOW_BENT,
     POSE_INCOMPLETE
 }
 
@@ -52,4 +54,5 @@ fun createExerciseAnalyzer(kind: ExerciseKind): ExerciseAnalyzer = when (kind) {
     ExerciseKind.MARCH -> MarchAnalyzer()
     ExerciseKind.SQUAT -> SquatAnalyzer()
     ExerciseKind.POSTURE -> PostureAnalyzer()
+    ExerciseKind.STRETCH -> StretchAnalyzer()
 }

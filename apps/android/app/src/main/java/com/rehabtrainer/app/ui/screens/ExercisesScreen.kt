@@ -22,7 +22,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.rehabtrainer.app.core.pose.ExerciseKind
 import com.rehabtrainer.app.core.training.TrainingAccessPolicy
+import com.rehabtrainer.app.ui.ExerciseRegistry
 import com.rehabtrainer.app.ui.components.ElderlyButton
 import com.rehabtrainer.app.ui.components.ElderlyButtonVariant
 import com.rehabtrainer.app.ui.theme.LocalElderlyDimens
@@ -54,60 +56,45 @@ fun ExercisesScreen(
         verticalArrangement = Arrangement.spacedBy(dimens.sectionSpacing)
     ) {
         // 页面标题由顶栏统一承担，页内不再重复大标题。
+        val exercises = ExerciseRegistry.exercises
         Text(
-            text = "以下为演示用训练条目，实际训练方案由康复治疗师制定。请在适宜体力下按顺序完成。",
+            text = if (ExerciseRegistry.isPlanLoaded) {
+                "以下训练项目由康复治疗师制定，请按顺序完成；不适时立即停止。"
+            } else {
+                "以下为演示用训练条目，实际训练方案由康复治疗师制定。请在适宜体力下按顺序完成。"
+            },
             style = MaterialTheme.typography.bodyLarge
         )
 
-        // D21：训练条目、训练量、适宜性与分级标签及联系信息均为 mock；接入真实训练方案 API 时本声明与 mock 一并移除。
-        Text(
-            text = "演示数据：当前为演示模式，下列训练条目、推荐训练量、适宜性与分级标签及联系信息均为示例数据，不是真实训练方案。",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        if (!ExerciseRegistry.isPlanLoaded) {
+            Text(
+                text = "演示数据：当前为演示模式，下列训练条目、推荐训练量、适宜性与分级标签均为示例数据。",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
 
-        // Category 1: 节律步态 (RAS)
-        ExerciseCategoryCard(
-            categoryTitle = "节律步态训练 (RAS)",
-            categoryDesc = "跟着舒适节拍踏步，帮助步伐更加连贯稳健。",
-            exerciseName = "原地节律踏步训练",
-            parameters = "推荐训练量：3 组 × 12 次 · 100 BPM 听觉节拍",
-            suitabilityTag = "适宜阶段 · 自主完成",
-            onStart = { onSelectExercise("EX-RAS-01") }
-        )
-
-        // Category 2: 牵伸放松
-        ExerciseCategoryCard(
-            categoryTitle = "牵伸放松训练",
-            categoryDesc = "轻柔拉伸身体各部位，让全身动作更加舒展轻松。",
-            exerciseName = "坐位双上肢躯干伸展",
-            parameters = "推荐训练量：2 组 × 10 次 · 自主节律无需设备",
-            suitabilityTag = "轻柔舒缓 · 自主完成",
-            onStart = { onSelectExercise("EX-STRETCH-01") }
-        )
-
-        // Category 3: 肌力维持
-        ExerciseCategoryCard(
-            categoryTitle = "肌力维持训练",
-            categoryDesc = "增强双腿站立力量，日常走路更有劲。",
-            exerciseName = "下肢靠墙微蹲训练",
-            parameters = "推荐训练量：2 组 × 8 次 · 需身旁有稳固扶手",
-            suitabilityTag = "温和强化 · 家属陪同",
-            onStart = { onSelectExercise("EX-STRENGTH-01") }
-        )
-
-        // Category 4: 姿势矫正（D11 高风险准入）
-        ExerciseCategoryCard(
-            categoryTitle = "姿势矫正训练",
-            categoryDesc = "根据实时动作指引，保持挺拔舒展的站立姿态。",
-            exerciseName = "站立位脊柱对齐矫正",
-            parameters = "推荐训练量：3 组 × 10 次 · 端上实时姿态比对",
-            suitabilityTag = "疑似 · 需分级确认准入",
-            onStart = { onSelectExercise("EX-POSTURE-01") },
-            requiresStageConfirmation = true,
-            stageConfirmed = stageConfirmed,
-            onContactTherapist = { showContactDialog = true }
-        )
+        exercises.forEach { exercise ->
+            val requiresConfirmation = exercise.riskLevel == "high"
+            ExerciseCategoryCard(
+                categoryTitle = categoryTitle(exercise.kind),
+                categoryDesc = categoryDescription(exercise.kind),
+                exerciseName = exercise.name,
+                parameters = "推荐训练量：${exercise.sets} 组 × ${exercise.repsPerSet} 次 · " +
+                    if (exercise.hasRas) "${exercise.bpm} BPM 听觉节拍" else "自主节律",
+                suitabilityTag = if (requiresConfirmation) {
+                    "需治疗师确认准入"
+                } else if (ExerciseRegistry.isPlanLoaded) {
+                    "已下发 · 按方案执行"
+                } else {
+                    "演示条目 · 自主完成"
+                },
+                onStart = { onSelectExercise(exercise.code) },
+                requiresStageConfirmation = requiresConfirmation,
+                stageConfirmed = stageConfirmed,
+                onContactTherapist = { showContactDialog = true }
+            )
+        }
     }
 }
 
@@ -242,4 +229,21 @@ private fun ContactTherapistDialog(onDismiss: () -> Unit) {
             }
         }
     )
+}
+
+
+private fun categoryTitle(kind: ExerciseKind): String = when (kind) {
+    ExerciseKind.MARCH -> "节律步态训练 (RAS)"
+    ExerciseKind.STRETCH -> "牵伸放松训练"
+    ExerciseKind.ARM_RAISE -> "牵伸放松训练"
+    ExerciseKind.SQUAT -> "肌力维持训练"
+    ExerciseKind.POSTURE -> "姿势矫正训练"
+}
+
+private fun categoryDescription(kind: ExerciseKind): String = when (kind) {
+    ExerciseKind.MARCH -> "跟着舒适节拍踏步，帮助步伐更加连贯稳健。"
+    ExerciseKind.STRETCH -> "双上肢缓慢上举并保持，让肩颈与躯干充分舒展。"
+    ExerciseKind.ARM_RAISE -> "轻柔拉伸身体各部位，让全身动作更加舒展轻松。"
+    ExerciseKind.SQUAT -> "增强双腿站立力量，日常走路更有劲。"
+    ExerciseKind.POSTURE -> "根据实时动作指引，保持挺拔舒展的站立姿态。"
 }

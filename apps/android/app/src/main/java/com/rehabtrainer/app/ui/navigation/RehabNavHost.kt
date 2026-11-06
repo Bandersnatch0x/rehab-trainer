@@ -6,7 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.rehabtrainer.app.ui.TODAY_TRAINING_CODE
+import com.rehabtrainer.app.ui.ExerciseRegistry
 import com.rehabtrainer.app.ui.screens.AlertsScreen
 import com.rehabtrainer.app.ui.screens.ExercisesScreen
 import com.rehabtrainer.app.ui.screens.HomeScreen
@@ -20,10 +20,12 @@ import com.rehabtrainer.app.ui.screens.TrainingScreen
 fun RehabNavHost(
     navController: NavHostController,
     widthSizeClass: WindowWidthSizeClass,
-    selectedExerciseCode: String = TODAY_TRAINING_CODE,
+    selectedExerciseCode: String? = null,
     onSelectExercise: (String) -> Unit = {},
+    onLogout: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val trainingCode = selectedExerciseCode ?: ExerciseRegistry.exercises.first().code
     NavHost(
         navController = navController,
         startDestination = RehabDestination.HOME.route,
@@ -33,7 +35,7 @@ fun RehabNavHost(
             HomeScreen(
                 widthSizeClass = widthSizeClass,
                 onStartTraining = {
-                    onSelectExercise(TODAY_TRAINING_CODE)
+                    onSelectExercise(trainingCode)
                     navController.navigate(RehabDestination.TRAINING.route)
                 },
                 onOpenPrescription = {
@@ -56,7 +58,7 @@ fun RehabNavHost(
         }
         composable(RehabDestination.TRAINING.route) {
             TrainingScreen(
-                exerciseCode = selectedExerciseCode,
+                exerciseCode = trainingCode,
                 widthSizeClass = widthSizeClass,
                 // 紧急停止：退出训练页，回到上一个页面。
                 onEmergencyStop = { navController.popBackStack() }
@@ -69,7 +71,7 @@ fun RehabNavHost(
             AlertsScreen()
         }
         composable(RehabDestination.SETTINGS.route) {
-            SettingsScreen()
+            SettingsScreen(onLogout = onLogout)
         }
     }
 }

@@ -43,7 +43,7 @@ import com.rehabtrainer.app.ui.theme.LocalElderlyDimens
  * - 高对比度：通过 [SettingsRuntime] 通知主题切换配色。
  */
 @Composable
-fun SettingsScreen(modifier: Modifier = Modifier) {
+fun SettingsScreen(onLogout: () -> Unit = {}, modifier: Modifier = Modifier) {
     val dimens = LocalElderlyDimens.current
     val context = LocalContext.current
     val view = LocalView.current
@@ -194,6 +194,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                         showUnbindConfirm = false
                         AppPreferences.clearDeviceBinding(context)
                         isBound = false
+                        onLogout()
                     }
                 ) {
                     Text("确认解除", style = MaterialTheme.typography.labelLarge)

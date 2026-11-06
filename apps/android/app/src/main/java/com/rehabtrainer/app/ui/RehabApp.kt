@@ -15,6 +15,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,8 +27,11 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.rehabtrainer.app.core.network.ApiResult
 import com.rehabtrainer.app.core.pose.ExerciseKind
+import com.rehabtrainer.app.data.session.SessionRepository
 import com.rehabtrainer.app.ui.components.RehabTopBar
+import com.rehabtrainer.app.ui.screens.BindScreen
 import com.rehabtrainer.app.ui.navigation.RehabDestination
 import com.rehabtrainer.app.ui.navigation.RehabDrawerContent
 import com.rehabtrainer.app.ui.navigation.RehabNavHost
@@ -59,7 +63,8 @@ data class ExerciseMeta(
     // 服务端下发的示范视频；为空时回退 APK 内置演示视频。
     val videoUri: String? = null,
     val watermarkText: String? = null,
-    val creditLine: String? = null
+    val creditLine: String? = null,
+    val riskLevel: String? = null
 )
 
 /** 首页「开始今日训练」与训练列表共用同一训练条目代码。 */
@@ -92,8 +97,8 @@ val DEFAULT_EXERCISES = listOf(
         sets = 2,
         repsPerSet = 10,
         requiresFullBody = false,
-        counterLabel = "抬举次数",
-        kind = ExerciseKind.ARM_RAISE,
+        counterLabel = "伸展保持次数",
+        kind = ExerciseKind.STRETCH,
     ),
     ExerciseMeta(
         code = "EX-STRENGTH-01",
@@ -136,6 +141,7 @@ val DEFAULT_EXERCISES = listOf(
 @Composable
 fun RehabApp(
     windowSizeClass: WindowSizeClass,
+    sessionRepository: SessionRepository? = null,
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()
@@ -143,10 +149,98 @@ fun RehabApp(
     val currentRoute = backStackEntry?.destination?.route
     val configuration = LocalConfiguration.current
     val isTablet = configuration.smallestScreenWidthDp >= 600
+    val scope = rememberCoroutineScope()
 
-    var selectedExerciseCode by rememberSaveable { mutableStateOf(TODAY_TRAINING_CODE) }
-    val currentExercise = DEFAULT_EXERCISES.firstOrNull { it.code == selectedExerciseCode }
-        ?: DEFAULT_EXERCISES.first()
+    var snapshot by remember { mutableStateOf(sessionRepository?.cachedSnapshot()) }
+    var needBind by remember {
+        mutableStateOf(
+            sessionRepository != null &&
+                !sessionRepository.hasSession() &&
+                sessionRepository.cachedSnapshot() == null
+        )
+    }
+    var demoMode by rememberSaveable { mutableStateOf(false) }
+    var bindBusy by remember { mutableStateOf(false) }
+    var bindError by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(sessionRepository) {
+        val repo = sessionRepository ?: return@LaunchedEffect
+        if (!repo.hasSession()) return@LaunchedEffect
+        bindBusy = true
+        when (val result = repo.refresh()) {
+            is ApiResult.Success -> {
+                snapshot = result.value
+                bindError = null
+            }
+            is ApiResult.Failure -> if (snapshot == null) bindError = result.error.message
+        }
+        bindBusy = false
+    }
+
+    LaunchedEffect(snapshot) {
+        snapshot?.let { ExerciseRegistry.updateFromPlan(it.plan) }
+    }
+
+    val acceptSnapshot: (com.rehabtrainer.app.data.session.SessionSnapshot) -> Unit = {
+        snapshot = it
+        needBind = false
+        demoMode = false
+        bindError = null
+    }
+
+    if (sessionRepository != null && !demoMode && (needBind || snapshot == null)) {
+        BindScreen(
+            busy = bindBusy,
+            error = bindError,
+            onBind = { code ->
+                scope.launch {
+                    bindBusy = true
+                    bindError = null
+                    when (val result = sessionRepository.bind(code, null)) {
+                        is ApiResult.Success -> acceptSnapshot(result.value)
+                        is ApiResult.Failure -> bindError = result.error.message
+                    }
+                    bindBusy = false
+                }
+            },
+            onLogin = { username, password ->
+                scope.launch {
+                    bindBusy = true
+                    bindError = null
+                    when (val result = sessionRepository.login(username, password, null)) {
+                        is ApiResult.Success -> acceptSnapshot(result.value)
+                        is ApiResult.Failure -> bindError = result.error.message
+                    }
+                    bindBusy = false
+                }
+            },
+            onSkipDemo = {
+                demoMode = true
+                ExerciseRegistry.reset()
+            },
+            modifier = modifier
+        )
+        return
+    }
+
+    var selectedExerciseCode by rememberSaveable {
+        mutableStateOf(ExerciseRegistry.exercises.first().code)
+    }
+    LaunchedEffect(snapshot) {
+        if (ExerciseRegistry.exercises.none { it.code == selectedExerciseCode }) {
+            selectedExerciseCode = ExerciseRegistry.exercises.first().code
+        }
+    }
+    val currentExercise = ExerciseRegistry.exercises.firstOrNull { it.code == selectedExerciseCode }
+        ?: ExerciseRegistry.exercises.first()
+
+    val logout: () -> Unit = {
+        sessionRepository?.logout()
+        ExerciseRegistry.reset()
+        snapshot = null
+        demoMode = false
+        needBind = sessionRepository != null
+    }
 
     val title = when (currentRoute) {
         RehabDestination.TRAINING.route -> "训练执行 · ${currentExercise.shortName}"
@@ -161,6 +255,7 @@ fun RehabApp(
             title = title,
             selectedExerciseCode = selectedExerciseCode,
             onSelectExercise = { selectedExerciseCode = it },
+            onLogout = logout,
             modifier = modifier
         )
     } else {
@@ -171,6 +266,7 @@ fun RehabApp(
             title = title,
             selectedExerciseCode = selectedExerciseCode,
             onSelectExercise = { selectedExerciseCode = it },
+            onLogout = logout,
             modifier = modifier
         )
     }
@@ -184,6 +280,7 @@ private fun CompactShell(
     title: String,
     selectedExerciseCode: String,
     onSelectExercise: (String) -> Unit,
+    onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -197,6 +294,7 @@ private fun CompactShell(
             widthSizeClass = windowSizeClass.widthSizeClass,
             selectedExerciseCode = selectedExerciseCode,
             onSelectExercise = onSelectExercise,
+            onLogout = onLogout,
             modifier = modifier
                 .fillMaxSize()
                 .windowInsetsPadding(WindowInsets.statusBars)
@@ -246,6 +344,7 @@ private fun ExpandedShell(
     title: String,
     selectedExerciseCode: String,
     onSelectExercise: (String) -> Unit,
+    onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val isTraining = currentRoute == RehabDestination.TRAINING.route
@@ -257,6 +356,7 @@ private fun ExpandedShell(
             widthSizeClass = windowSizeClass.widthSizeClass,
             selectedExerciseCode = selectedExerciseCode,
             onSelectExercise = onSelectExercise,
+            onLogout = onLogout,
             modifier = modifier
                 .fillMaxSize()
                 .windowInsetsPadding(WindowInsets.statusBars)

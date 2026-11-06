@@ -1,7 +1,9 @@
 package com.rehabtrainer.app.core.pose
 
 import kotlin.math.abs
+import kotlin.math.acos
 import kotlin.math.atan2
+import kotlin.math.sqrt
 
 /**
  * 与平台无关的关键点快照；由 [PoseAnalyzer] 从 MediaPipe 结果转换。
@@ -19,6 +21,8 @@ object PoseIndex {
     const val NOSE = 0
     const val LEFT_SHOULDER = 11
     const val RIGHT_SHOULDER = 12
+    const val LEFT_ELBOW = 13
+    const val RIGHT_ELBOW = 14
     const val LEFT_WRIST = 15
     const val RIGHT_WRIST = 16
     const val LEFT_HIP = 23
@@ -35,6 +39,18 @@ object PoseIndex {
 }
 
 internal object PoseGeometry {
+
+    /** 以 [b] 为顶点、a-b-c 的夹角（度）；向量退化时返回 null。 */
+    fun angleDegrees(a: PosePoint, b: PosePoint, c: PosePoint): Float? {
+        val abx = a.x - b.x
+        val aby = a.y - b.y
+        val cbx = c.x - b.x
+        val cby = c.y - b.y
+        val magnitude = sqrt(abx * abx + aby * aby) * sqrt(cbx * cbx + cby * cby)
+        if (magnitude < 1e-6f) return null
+        val cosine = ((abx * cbx + aby * cby) / magnitude).coerceIn(-1f, 1f)
+        return Math.toDegrees(acos(cosine).toDouble()).toFloat()
+    }
 
     fun midY(points: List<PosePoint>, first: Int, second: Int): Float =
         (points[first].y + points[second].y) / 2f

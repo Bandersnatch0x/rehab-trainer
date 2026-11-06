@@ -328,4 +328,105 @@ class ExerciseAnalyzersTest {
     fun factoryCreatesPostureAnalyzer() {
         assertTrue(createExerciseAnalyzer(ExerciseKind.POSTURE) is PostureAnalyzer)
     }
+
+    // ---------- 双上肢伸展保持（肩颈牵伸） ----------
+
+    private fun stretch(
+        leftWrist: PosePoint = PosePoint(0.45f, 0.05f),
+        rightWrist: PosePoint = PosePoint(0.55f, 0.05f),
+        leftElbow: PosePoint = PosePoint(0.45f, 0.15f),
+        rightElbow: PosePoint = PosePoint(0.55f, 0.15f),
+        leftShoulderY: Float = 0.30f
+    ): MutableList<PosePoint> = stand().apply {
+        set(PoseIndex.LEFT_SHOULDER, PosePoint(0.45f, leftShoulderY))
+        set(PoseIndex.LEFT_ELBOW, leftElbow)
+        set(PoseIndex.RIGHT_ELBOW, rightElbow)
+        set(PoseIndex.LEFT_WRIST, leftWrist)
+        set(PoseIndex.RIGHT_WRIST, rightWrist)
+    }
+
+    @Test
+    fun stretchCountsAfterHoldingBothArmsUp() {
+        val analyzer = StretchAnalyzer()
+        analyzer.update(stretch(), timestampMs = 0)
+        analyzer.update(stretch(), timestampMs = 1_500)
+        assertEquals(0, analyzer.count)
+
+        val update = analyzer.update(stretch(), timestampMs = 3_000)
+        assertEquals(1, update.count)
+        assertTrue(update.lastRep!!.valid)
+        assertTrue(update.currentIssues.isEmpty())
+
+        analyzer.update(stretch(), timestampMs = 9_000)
+        assertEquals(1, analyzer.count)
+    }
+
+    @Test
+    fun oneArmLowIsInsufficient() {
+        val analyzer = StretchAnalyzer()
+        val update = analyzer.update(
+            stretch(rightWrist = PosePoint(0.55f, 0.32f)),
+            timestampMs = 0
+        )
+        assertTrue(update.currentIssues.contains(RepIssue.INSUFFICIENT_RANGE))
+        analyzer.update(stretch(rightWrist = PosePoint(0.55f, 0.32f)), timestampMs = 3_000)
+        assertEquals(0, analyzer.count)
+    }
+
+    @Test
+    fun bentElbowIsReported() {
+        val analyzer = StretchAnalyzer()
+        val update = analyzer.update(
+            stretch(leftWrist = PosePoint(0.55f, 0.05f)),
+            timestampMs = 0
+        )
+        assertTrue(update.currentIssues.contains(RepIssue.ELBOW_BENT))
+    }
+
+    @Test
+    fun asymmetricRaiseIsReported() {
+        val analyzer = StretchAnalyzer()
+        val update = analyzer.update(
+            stretch(rightWrist = PosePoint(0.55f, 0.12f)),
+            timestampMs = 0
+        )
+        assertTrue(update.currentIssues.contains(RepIssue.ASYMMETRY))
+    }
+
+    @Test
+    fun unevenShouldersAreReported() {
+        val analyzer = StretchAnalyzer()
+        val update = analyzer.update(stretch(leftShoulderY = 0.35f), timestampMs = 0)
+        assertTrue(update.currentIssues.contains(RepIssue.SHOULDER_UNEVEN))
+    }
+
+    @Test
+    fun stretchRequiresReHoldAfterLoweringArms() {
+        val analyzer = StretchAnalyzer()
+        analyzer.update(stretch(), timestampMs = 0)
+        analyzer.update(stretch(rightWrist = PosePoint(0.55f, 0.32f)), timestampMs = 2_000)
+        analyzer.update(stretch(), timestampMs = 3_000)
+        assertEquals(0, analyzer.count)
+        assertEquals(1, analyzer.update(stretch(), timestampMs = 6_000).count)
+    }
+
+    @Test
+    fun stretchResetClearsHold() {
+        val analyzer = StretchAnalyzer()
+        analyzer.update(stretch(), timestampMs = 0)
+        analyzer.update(stretch(), timestampMs = 3_000)
+        assertEquals(1, analyzer.count)
+
+        analyzer.reset()
+
+        assertEquals(0, analyzer.count)
+        assertNull(analyzer.lastRep)
+        analyzer.update(stretch(), timestampMs = 4_000)
+        assertEquals(1, analyzer.update(stretch(), timestampMs = 7_000).count)
+    }
+
+    @Test
+    fun factoryCreatesStretchAnalyzer() {
+        assertTrue(createExerciseAnalyzer(ExerciseKind.STRETCH) is StretchAnalyzer)
+    }
 }
