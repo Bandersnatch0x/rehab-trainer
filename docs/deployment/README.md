@@ -203,6 +203,34 @@ python scripts/loadtest-api.py --config .agent/tmp/smoke-config.json `
 
 待决策（票 0026）：连接池大小应按部署形态显式配置（副本数 × 池大小必须低于 PostgreSQL `max_connections` 并留余量）；同时应把耗尽时的行为从"等 30 秒再失败"改为快速失败。后者要给契约补一个 5xx 响应，属契约变更，需先决定。
 
+### 备份恢复演练（2026-11-07）
+
+`deploy/verify_backup_restore.sh` 把「备份可用」从人工一次性动作变成可复跑的检查：转储 → 恢复到新库 → 对比结构、行数、内容摘要 → 清理恢复库（无论成败都清理）。此前只在 `0001` 时点人工做过一次，之后新增了 `0002`–`0005`。
+
+```bash
+# 在装有 PostgreSQL 客户端的主机上（容器内亦可，镜像自带 pg_dump）
+PGHOST=127.0.0.1 PGPORT=55432 PGUSER=rehab PGPASSWORD=… SOURCE_DB=rehab_drill \
+    bash deploy/verify_backup_restore.sh
+```
+
+在 head = `0005` 的库上实测（库内含种子数据，并额外插入一行带 JSON 的 `session_record` 和一行带 JSON 数组的 `media_asset`）：
+
+| 项 | 结果 |
+| --- | --- |
+| `pg_dump -Fc` | 53,730 字节 |
+| `pg_restore --exit-on-error` | 通过 |
+| `alembic_version` / 表数量 | `0005` / 19，两侧一致 |
+| 检查约束 / 索引数量 | 6 / 54，两侧一致 |
+| 逐表行数（19 张） | 全部一致，含 `media_asset=1`、`session_record=1` |
+| 逐表内容摘要（`md5` of 行文本序列） | 全部一致，含两张带 JSON 的表 |
+| 恢复库清理 | 已删除，转储文件已删除 |
+
+摘要这一项不是装饰：它证明 JSON 列真的走了 dump/restore 往返。为确认这个比较**能失败**（不会永远 PASS 的比较等于没有比较），单独做过敏感性验证——改 `session_record.completion_count` 一个字段，摘要从 `5b54ede2…` 变为 `d50b9cdd…`，改回来原值复原，且与演练中恢复库的摘要一致。
+
+注意：演练应在**停止写入**时执行。源库在转储后若继续写入，行数/摘要对比会如实报出差异——这是设计如此，不是误报。
+
+CI 与部署现状：仓库**没有配置 git remote**，因此 `.github/workflows/ci.yml` 仍未被任何真实流水线执行过（P4-3 阻塞在远端仓库与凭据）；预生产部署（P4-1）需要云资源，未开始。
+
 2026-11-04 本地结果为部署自检通过、后端全量 36 项通过、Python 语法解析通过、`git diff --check` 通过。测试产生现有 HTTP 客户端弃用及依赖版本警告。未执行云部署，独立审查交由协调者完成。
 
 仓库内有 `.github/workflows/ci.yml`（按路径触发 Android 构建、小程序类型检查、管理端构建、后端 pytest 与契约校验），但仓库没有远端流水线，**该配置未在真实 CI 上运行过**。未做蓝绿部署，未提供云资源编排、存量 SQLite 数据搬迁及生产账号初始化。登录限流自 `0005` 起由 `login_failure` 表实现，多副本共享计数；清理依赖每次登录时的窗口裁剪，尚未做独立清理任务与容量上限。存量 ORM 与 PostgreSQL 的完整业务兼容性已在本机容器内的 PostgreSQL 17 上跑通主链路（25/25 契约操作，见下节），但未做长时压测与并发验证。
