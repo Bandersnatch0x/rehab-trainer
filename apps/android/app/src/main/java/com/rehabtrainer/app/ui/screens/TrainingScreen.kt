@@ -57,6 +57,8 @@ import com.rehabtrainer.app.ui.audio.VoiceCoach
 import kotlinx.coroutines.delay
 import java.util.concurrent.Executors
 
+private const val REP_HINT_TTL_MS = 2_500L
+
 /**
  * 训练执行页：双播放 / 纯拍摄+语音两种模式，D17 采集门禁，组状态机与适老化自适应。
  */
@@ -149,6 +151,8 @@ fun TrainingScreen(
 
     var repCount by remember { mutableIntStateOf(0) }
     var repHint by remember { mutableStateOf<String?>(null) }
+    var lastRepIndex by remember { mutableIntStateOf(0) }
+    var repHintUntilMs by remember { mutableStateOf(0L) }
     var setProgress by remember(exerciseCode) {
         mutableStateOf(SetProgress(currentExercise.sets, currentExercise.repsPerSet))
     }
@@ -210,10 +214,16 @@ fun TrainingScreen(
                                 if (!setProgress.isComplete) {
                                     repCount = setProgress.capReps(frame.repCount)
                                 }
+                                val nowMs = System.currentTimeMillis()
+                                val latestRep = frame.lastRep
+                                if (latestRep != null && latestRep.index != lastRepIndex) {
+                                    lastRepIndex = latestRep.index
+                                    repHintUntilMs = nowMs + REP_HINT_TTL_MS
+                                }
                                 repHint = when {
                                     frame.currentIssues.isNotEmpty() ->
                                         "调整：" + frame.currentIssues.joinToString("；") { issueText(it) }
-                                    frame.lastRep != null -> describeRep(frame.lastRep!!)
+                                    latestRep != null && nowMs <= repHintUntilMs -> describeRep(latestRep)
                                     currentExercise.kind == ExerciseKind.POSTURE ||
                                         currentExercise.kind == ExerciseKind.STRETCH -> "保持中…"
                                     else -> null
@@ -331,6 +341,13 @@ fun TrainingScreen(
                     voiceCoach.speak("第 $finishedSet 组完成，休息 ${currentExercise.restSeconds} 秒")
                 }
             }
+        }
+    }
+
+    // 达到本组目标次数后自动进入下一组，避免患者还要点一次「完成本组」。
+    LaunchedEffect(repCount, setProgress.currentSet, setProgress.isComplete) {
+        if (setProgress.isTargetReached(repCount)) {
+            finishCurrentSet()
         }
     }
 
