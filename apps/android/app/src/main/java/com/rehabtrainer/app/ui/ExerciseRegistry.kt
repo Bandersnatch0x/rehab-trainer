@@ -64,6 +64,9 @@ internal fun toExerciseMeta(plan: PlanExercise): ExerciseMeta = ExerciseMeta(
  * 优先按条目标签识别动作模式，识别不了再回退到分类。
  */
 internal fun kindFor(category: String, label: String = ""): ExerciseKind = when {
+    label.contains("坐位") && (label.contains("抬腿") || label.contains("伸膝")) ->
+        ExerciseKind.SEATED_LEG_RAISE
+    label.contains("站立") && label.contains("抬腿") -> ExerciseKind.MARCH
     label.contains("抬腿") || label.contains("伸膝") -> ExerciseKind.SEATED_LEG_RAISE
     label.contains("微蹲") || label.contains("下蹲") -> ExerciseKind.SQUAT
     label.contains("牵伸") || label.contains("伸展") -> ExerciseKind.STRETCH

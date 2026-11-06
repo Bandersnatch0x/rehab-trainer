@@ -38,6 +38,10 @@ class ExerciseRegistryTest {
             kindFor("strength-maintenance", "坐位抬腿")
         )
         assertEquals(ExerciseKind.SQUAT, kindFor("strength-maintenance", "靠墙微蹲"))
+        assertEquals(
+            ExerciseKind.MARCH,
+            kindFor("rhythmic-gait", "站立位抬腿步行")
+        )
     }
 
     @Test
