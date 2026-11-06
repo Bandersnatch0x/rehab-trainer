@@ -34,7 +34,7 @@
 
 | 项目 | 结果 | 证据 | 备注 |
 | --- | --- | --- | --- |
-| 后端测试 | 120 项通过，0 失败 | `python -m pytest -q services/api/tests` | 覆盖契约操作集、参数与响应字段、机构隔离、分页、训练方案乐观锁、记录幂等、科研抑制、分级准入、登录限流跨副本持久化、TOTP 校验与重放拒绝、专业预设完整性与关闭开关 |
+| 后端测试 | 124 项通过，0 失败 | `python -m pytest -q services/api/tests` | 覆盖契约操作集、参数与响应字段、机构隔离、分页、训练方案乐观锁、记录幂等、科研抑制、分级准入、登录限流跨副本持久化、TOTP 校验与重放拒绝、专业预设完整性与关闭开关 |
 | 契约一致性 | 21 个路径、25 个操作；实现与契约的操作集、参数、成功响应字段一致 | `services/api/tests/test_contract.py` 4 项；契约 `servers[0]` 前缀 `/v1` | 实现多一个或少一个操作都会失败 |
 | 部署自检 | 18 张业务表；SQLite 升级、重复升级、降级、再升级；模型差异为空；PostgreSQL 离线 SQL；YAML | `python deploy/verify.py` | 输出 `PASS: 18 tables; ...`；当前迁移 head 为 `0005` |
 | 管理端类型检查 | 通过 | `cd apps/admin-web && npx tsc --noEmit` | 退出码 0 |
@@ -42,7 +42,7 @@
 | 小程序类型检查 | 通过 | `cd apps/miniprogram && npx --no-install tsc --noEmit` | 退出码 0 |
 | 小程序行为测试 | 17 项通过，0 失败 | `cd apps/miniprogram && node --test tests/patient-data.cjs` | 以 `wx` 桩驱动请求层与五个页面 |
 | 小程序静态检查 | 通过 | `cd apps/miniprogram && python tests/static_check.py .` | 页面与绑定一致性、事件处理函数存在性、患者端禁用词、WCAG AA 对比度 |
-| Android 单元测试 | 120 项通过，0 失败 | `cd apps/android && ./gradlew.bat :app:testDebugUnitTest --no-daemon` | 15 个测试类：多动作分析器（抬举/踏步/微蹲/姿势保持/双上肢伸展/坐位抬腿）、会话快照与方案选择、采集门禁、组进度、准入、布局策略、媒体预取策略、拨号、离线缓存配额/淘汰/存储/下载、视频源解析 |
+| Android 单元测试 | 124 项通过，0 失败 | `cd apps/android && ./gradlew.bat :app:testDebugUnitTest --no-daemon` | 15 个测试类：多动作分析器（抬举/踏步/微蹲/姿势保持/双上肢伸展/坐位抬腿）、会话快照与方案选择、采集门禁、组进度、准入、布局策略、媒体预取策略、拨号、离线缓存配额/淘汰/存储/下载、视频源解析 |
 | Android 构建 | `assembleDebug` 成功 | `cd apps/android && ./gradlew.bat :app:assembleDebug --no-daemon` | 生成调试 APK；未安装到真机 |
 | API 联调 | 25 个契约操作全部通过（21 个路径） | `python scripts/smoke-api.py --config .agent/tmp/smoke-config.json` | 覆盖全部契约操作，含科研聚合端点与媒体上传/上架；退出码 0 |
 | 联调脚本回归 | 2 项通过 | `python -m unittest discover -s scripts -p "test_*.py"` | 覆盖联调脚本自身行为 |
@@ -85,7 +85,7 @@
 | 小程序演示登录 | `DEMO_LOGIN_ENABLED = true` 时包含演示账号凭据 | 生产构建必须关闭该开关并移除演示账号 |
 | Android 登录与绑定 | 没有登录与绑定界面；按已绑定演示设备运行 | 不能多患者、多机构使用 |
 | Android 数据接入 | 首页、记录、提醒、患者档案为演示数据；训练记录不上传 | 机构端看不到 Android 训练结果 |
-| Android 离线视频 | 真实下载（OkHttp 流式 + `.part` 原子改名）、JSON 索引、pinned + LRU 双上限、跨版本存活与 D27 分档配额已落地，120 项 JVM 单测通过；无设备，断网播放未实测；训练页仍用静态条目（`videoUri` 为空），预取触发入口已就绪但无调用方 | 断网可播放尚缺运行证据与实际下发数据；接真实训练方案数据后触发预取，并在设备上做断网播放实测 |
+| Android 离线视频 | 真实下载（OkHttp 流式 + `.part` 原子改名）、JSON 索引、pinned + LRU 双上限、跨版本存活与 D27 分档配额已落地，124 项 JVM 单测通过；无设备，断网播放未实测；训练页仍用静态条目（`videoUri` 为空），预取触发入口已就绪但无调用方 | 断网可播放尚缺运行证据与实际下发数据；接真实训练方案数据后触发预取，并在设备上做断网播放实测 |
 | Android 姿态动作 | 训练页实现的是抬臂计数；不同训练条目共用该计数 | 动作类型与康复动作不完全对应 |
 | Android 分级准入 | 训练列表没有真实患者分级来源，姿势矫正条目默认锁定 | 治疗师确认后仍需接入真实分级数据才能开放 |
 | Android 联系治疗师 | 电话来自构建配置，默认空 | 未配置时只能提示联系机构 |

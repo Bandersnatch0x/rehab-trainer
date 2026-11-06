@@ -274,7 +274,7 @@
 
 ### 8.2 离线与弱网
 
-- Android 媒体缓存代码已实现真实下载（OkHttp 流式 + `.part` 原子改名）、JSON 索引、pinned + LRU 双上限、跨版本存活与分档配额；120 项 JVM 单测通过。
+- Android 媒体缓存代码已实现真实下载（OkHttp 流式 + `.part` 原子改名）、JSON 索引、pinned + LRU 双上限、跨版本存活与分档配额；124 项 JVM 单测通过。
 - 当前训练页仍使用静态条目（`videoUri` 为空），无真实下发数据；断网播放未在设备上实测。
 - 小程序无离线训练能力；提醒只读，处理需机构端完成。
 
@@ -356,7 +356,7 @@
 | 小程序类型检查 | 通过 | `cd apps/miniprogram && npx --no-install tsc --noEmit` |
 | 小程序行为测试 | 17 项通过，0 失败 | `node --test tests/patient-data.cjs` |
 | 小程序静态检查 | 通过 | `python tests/static_check.py .` |
-| Android 单元测试 | 120 项通过，0 失败 | `./gradlew.bat :app:testDebugUnitTest --no-daemon` |
+| Android 单元测试 | 124 项通过，0 失败 | `./gradlew.bat :app:testDebugUnitTest --no-daemon` |
 | Android 构建 | `assembleDebug` 成功 | 生成调试 APK；未安装真机 |
 | API 联调 | 25/25 契约操作通过（21 个路径） | `python scripts/smoke-api.py` |
 | 全量校验 | 后端、部署自检、管理端构建、E2E、小程序、Android 全部通过 | `python scripts/verify_all.py` |
