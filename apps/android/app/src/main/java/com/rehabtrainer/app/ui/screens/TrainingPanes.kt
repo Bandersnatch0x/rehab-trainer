@@ -36,6 +36,8 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -64,6 +66,8 @@ internal fun TrainingHeaderBar(
     forcedCameraOnly: Boolean,
     onModeSelect: (TrainingDisplayMode) -> Unit,
     isPhoneLandscape: Boolean,
+    compactLabels: Boolean,
+    showModeSelector: Boolean = true,
     showVoiceToggle: Boolean,
     voiceEnabled: Boolean,
     ttsFailed: Boolean,
@@ -90,6 +94,7 @@ internal fun TrainingHeaderBar(
                         currentSet = currentSet,
                         totalSets = totalSets,
                         isPhoneLandscape = true,
+                        compact = compactLabels,
                         modifier = Modifier.weight(1f, fill = false)
                     )
 
@@ -104,28 +109,41 @@ internal fun TrainingHeaderBar(
                         Spacer(Modifier.width(8.dp))
                     }
 
-                    TrainingModeSelector(
-                        currentMode = currentMode,
-                        onModeSelect = onModeSelect,
-                        isPhoneLandscape = true
-                    )
+                    if (showModeSelector) {
+                        TrainingModeSelector(
+                            currentMode = currentMode,
+                            onModeSelect = onModeSelect,
+                            isPhoneLandscape = true,
+                            compactLabels = compactLabels
+                        )
+                    }
                 }
             } else {
                 // 竖屏宽度不足以并排显示动作名与两个模式胶囊，标题独占一行避免被挤成省略号。
-                ExerciseTitle(
-                    exercise = exercise,
-                    currentSet = currentSet,
-                    totalSets = totalSets,
-                    isPhoneLandscape = false,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(Modifier.height(6.dp))
-                TrainingModeSelector(
-                    currentMode = currentMode,
-                    onModeSelect = onModeSelect,
-                    isPhoneLandscape = false,
-                    modifier = Modifier.align(Alignment.End)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ExerciseTitle(
+                        exercise = exercise,
+                        currentSet = currentSet,
+                        totalSets = totalSets,
+                        isPhoneLandscape = false,
+                        compact = compactLabels,
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (showModeSelector) {
+                        Spacer(Modifier.width(8.dp))
+                        TrainingModeSelector(
+                            currentMode = currentMode,
+                            onModeSelect = onModeSelect,
+                            isPhoneLandscape = false,
+                            compactLabels = true,
+                            iconOnly = true
+                        )
+                    }
+                }
             }
 
             if (forcedCameraOnly) {
@@ -147,24 +165,31 @@ private fun ExerciseTitle(
     currentSet: Int,
     totalSets: Int,
     isPhoneLandscape: Boolean,
+    compact: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
         Text(
-            text = exercise.name,
-            style = if (isPhoneLandscape) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleLarge,
+            text = if (compact) {
+                "${exercise.shortName} · 第 $currentSet/$totalSets 组"
+            } else {
+                exercise.name
+            },
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-        Text(
-            text = "第 $currentSet/$totalSets 组 · ${exercise.target} 【演示数据】",
-            fontSize = 18.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+        if (!compact) {
+            Text(
+                text = "第 $currentSet/$totalSets 组 · ${exercise.repsPerSet} 次",
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }
 
@@ -212,6 +237,8 @@ private fun TrainingModeSelector(
     currentMode: TrainingDisplayMode,
     onModeSelect: (TrainingDisplayMode) -> Unit,
     isPhoneLandscape: Boolean,
+    compactLabels: Boolean = false,
+    iconOnly: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -233,6 +260,7 @@ private fun TrainingModeSelector(
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
                         .clickable { onModeSelect(mode) }
+                        .semantics { contentDescription = mode.label }
                 ) {
                     Row(
                         modifier = Modifier.padding(
@@ -242,12 +270,16 @@ private fun TrainingModeSelector(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Text(text = mode.icon, fontSize = 18.sp)
-                        Text(
-                            text = mode.label,
-                            fontSize = 18.sp,
-                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
-                        )
+                        Text(text = mode.icon, fontSize = if (iconOnly) 22.sp else 18.sp)
+                        if (!iconOnly) {
+                            Text(
+                                text = if (compactLabels) mode.shortLabel else mode.label,
+                                fontSize = 18.sp,
+                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                                maxLines = 1,
+                                softWrap = false
+                            )
+                        }
                     }
                 }
             }
@@ -434,28 +466,13 @@ internal fun InstructionalVideoPane(
                         shape = RoundedCornerShape(6.dp)
                     ) {
                         Text(
-                            text = "🎬 教学示范",
-                            fontSize = 18.sp,
+                            text = "🎬 教学示范 · 演示",
+                            fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                         )
                     }
-                    Text(
-                        text = videoTitle,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = "动作幅度与节拍指引 【演示数据】",
-                        fontSize = 18.sp,
-                        color = Color(0xFF94A3B8),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
                 }
 
                 if (videoSource.hasOverlay) {
@@ -534,6 +551,7 @@ internal fun PatientRealtimeCameraPane(
     // 计数在数什么由条目决定（踏步/抬举/蹲起），标签必须如实标注（P1-16）。
     counterLabel: String,
     repHint: String? = null,
+    largeFont: Boolean = false,
     largeCount: Boolean = false,
     statusText: String,
     footVisible: Boolean,
@@ -560,86 +578,40 @@ internal fun PatientRealtimeCameraPane(
                 modifier = Modifier.fillMaxSize()
             )
 
-            Surface(
-                color = Color(0x990F172A),
-                shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, Color(0xFF38BDF8)),
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(8.dp)
-            ) {
+            if (largeFont) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "$repCount",
-                        fontSize = if (largeCount) 36.sp else 28.sp,
-                        fontWeight = FontWeight.Black,
-                        fontFamily = FontFamily.Monospace,
-                        color = Color(0xFF38BDF8)
+                    CounterBadge(
+                        repCount, repsPerSet, counterLabel, repHint, largeCount,
+                        compact = true
                     )
-                    Column {
-                        Text(
-                            text = "/ $repsPerSet 次",
-                            fontSize = if (largeCount) 20.sp else 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
+                    if (hasRas) {
+                        MetronomeBadge(
+                            bpm, metronomeEnabled, onToggleMetronome, compact = true
                         )
-                        Text(
-                            text = counterLabel,
-                            fontSize = 14.sp,
-                            color = Color(0xFFCBD5E1)
-                        )
-                        if (repHint != null) {
-                            Text(
-                                text = repHint,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = if (repHint == "本次达标") Color(0xFF4ADE80) else Color(0xFFFBBF24)
-                            )
-                        }
                     }
                 }
-            }
-
-            if (hasRas) {
-                Surface(
-                    color = Color(0x990F172A),
-                    shape = RoundedCornerShape(16.dp),
-                    border = BorderStroke(1.dp, Color(0xFF80D5CB)),
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Text(
-                            text = "🎵 $bpm BPM",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF80D5CB)
-                        )
-                        Surface(
-                            color = if (metronomeEnabled) Color(0xFF006A63) else Color(0xFF334155),
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .clickable { onToggleMetronome(!metronomeEnabled) }
-                        ) {
-                            Text(
-                                text = if (metronomeEnabled) "节拍 开" else "节拍 关",
-                                fontSize = 18.sp,
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                            )
-                        }
-                    }
+            } else {
+                CounterBadge(
+                    repCount = repCount,
+                    repsPerSet = repsPerSet,
+                    counterLabel = counterLabel,
+                    repHint = repHint,
+                    largeCount = largeCount,
+                    modifier = Modifier.align(Alignment.TopStart).padding(8.dp)
+                )
+                if (hasRas) {
+                    MetronomeBadge(
+                        bpm = bpm,
+                        enabled = metronomeEnabled,
+                        onToggle = onToggleMetronome,
+                        modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)
+                    )
                 }
             }
 
@@ -663,6 +635,7 @@ internal fun PatientRealtimeCameraPane(
                 }
             }
 
+            if (statusText.isNotBlank()) {
             Surface(
                 color = if (gateBlocked) Color(0xEEBA1A1A) else Color(0x990F172A),
                 shape = RoundedCornerShape(14.dp),
@@ -706,6 +679,7 @@ internal fun PatientRealtimeCameraPane(
                     }
                 }
             }
+            }
         }
     }
 }
@@ -718,15 +692,16 @@ internal fun PatientRealtimeCameraPane(
 internal fun PersistentControlFooter(
     isPhoneLandscape: Boolean,
     isPaused: Boolean,
+    largeFont: Boolean,
     setProgress: SetProgress,
     onTogglePause: () -> Unit,
     onFinishSet: () -> Unit,
     onEmergencyStop: () -> Unit
 ) {
     val finishText = when {
-        setProgress.isComplete -> if (isPhoneLandscape) "已完成" else "训练完成 · 共 ${setProgress.totalSets} 组"
+        setProgress.isComplete -> "训练完成"
         isPhoneLandscape -> "完成 ${setProgress.currentSet}/${setProgress.totalSets}"
-        else -> "完成本组 · 第 ${setProgress.currentSet}/${setProgress.totalSets} 组"
+        else -> "完成本组"
     }
     val minHeight = 80.dp
 
@@ -735,7 +710,7 @@ internal fun PersistentControlFooter(
         shadowElevation = 8.dp,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
-        if (isPhoneLandscape) {
+        if (isPhoneLandscape || !largeFont) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -761,7 +736,7 @@ internal fun PersistentControlFooter(
                     modifier = Modifier.weight(1.2f)
                 )
                 ElderlyButton(
-                    text = "🛑 紧急停止",
+                    text = if (isPhoneLandscape) "🛑 紧急停止" else "紧急停止",
                     onClick = onEmergencyStop,
                     variant = ElderlyButtonVariant.Danger,
                     minHeight = minHeight,
@@ -802,6 +777,131 @@ internal fun PersistentControlFooter(
                     enabled = !setProgress.isComplete,
                     variant = ElderlyButtonVariant.Primary,
                     minHeight = minHeight
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun CounterBadge(
+    repCount: Int,
+    repsPerSet: Int,
+    counterLabel: String,
+    repHint: String?,
+    largeCount: Boolean,
+    compact: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        color = Color(0x990F172A),
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, Color(0xFF38BDF8)),
+        modifier = modifier
+    ) {
+        if (compact) {
+            Row(
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = "$repCount",
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Black,
+                    fontFamily = FontFamily.Monospace,
+                    color = Color(0xFF38BDF8)
+                )
+                Text(
+                    text = "次",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
+        } else {
+            Row(
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = "$repCount",
+                    fontSize = if (largeCount) 36.sp else 28.sp,
+                    fontWeight = FontWeight.Black,
+                    fontFamily = FontFamily.Monospace,
+                    color = Color(0xFF38BDF8)
+                )
+                Column {
+                    Text(
+                        text = "/ $repsPerSet 次",
+                        fontSize = if (largeCount) 20.sp else 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Text(
+                        text = counterLabel,
+                        fontSize = 14.sp,
+                        color = Color(0xFFCBD5E1)
+                    )
+                    if (repHint != null) {
+                        Text(
+                            text = repHint,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = if (repHint == "本次达标") Color(0xFF4ADE80) else Color(0xFFFBBF24)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MetronomeBadge(
+    bpm: Int,
+    enabled: Boolean,
+    onToggle: (Boolean) -> Unit,
+    compact: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        color = Color(0x990F172A),
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, Color(0xFF80D5CB)),
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                text = if (compact) "🎵 $bpm" else "🎵 $bpm BPM",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF80D5CB)
+            )
+            Surface(
+                color = if (enabled) Color(0xFF006A63) else Color(0xFF334155),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { onToggle(!enabled) }
+            ) {
+                Text(
+                    text = when {
+                        compact && enabled -> "开"
+                        compact -> "关"
+                        enabled -> "节拍 开"
+                        else -> "节拍 关"
+                    },
+                    fontSize = 18.sp,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                 )
             }
         }

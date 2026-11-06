@@ -4,7 +4,8 @@ package com.rehabtrainer.app.core.pose
 enum class ExerciseKind {
     ARM_RAISE,
     MARCH,
-    SQUAT
+    SQUAT,
+    POSTURE
 }
 
 /** 单次动作未达标的原因；UI 负责翻译成患者可读文案。 */
@@ -14,6 +15,10 @@ enum class RepIssue {
     TRUNK_LEAN,
     KNEE_VALGUS,
     ASYMMETRY,
+    SHOULDER_UNEVEN,
+    HIP_UNEVEN,
+    HEAD_OFFSET,
+    LATERAL_LEAN,
     POSE_INCOMPLETE
 }
 
@@ -25,7 +30,8 @@ data class RepResult(
 
 data class AnalysisUpdate(
     val count: Int,
-    val lastRep: RepResult?
+    val lastRep: RepResult?,
+    val currentIssues: Set<RepIssue> = emptySet()
 )
 
 /**
@@ -36,7 +42,7 @@ interface ExerciseAnalyzer {
     val count: Int
     val lastRep: RepResult?
 
-    fun update(points: List<PosePoint>): AnalysisUpdate
+    fun update(points: List<PosePoint>, timestampMs: Long = 0L): AnalysisUpdate
 
     fun reset()
 }
@@ -45,4 +51,5 @@ fun createExerciseAnalyzer(kind: ExerciseKind): ExerciseAnalyzer = when (kind) {
     ExerciseKind.ARM_RAISE -> ArmRaiseAnalyzer()
     ExerciseKind.MARCH -> MarchAnalyzer()
     ExerciseKind.SQUAT -> SquatAnalyzer()
+    ExerciseKind.POSTURE -> PostureAnalyzer()
 }

@@ -235,4 +235,97 @@ class ExerciseAnalyzersTest {
         assertTrue(createExerciseAnalyzer(ExerciseKind.MARCH) is MarchAnalyzer)
         assertTrue(createExerciseAnalyzer(ExerciseKind.SQUAT) is SquatAnalyzer)
     }
+
+    // ---------- 姿势矫正 ----------
+
+    @Test
+    fun postureCountsAfterHoldingAlignedForThreeSeconds() {
+        val analyzer = PostureAnalyzer()
+        val aligned = stand()
+
+        analyzer.update(aligned, timestampMs = 0)
+        analyzer.update(aligned, timestampMs = 1_500)
+        assertEquals(0, analyzer.count)
+
+        val update = analyzer.update(aligned, timestampMs = 3_000)
+        assertEquals(1, update.count)
+        assertTrue(update.lastRep!!.valid)
+        assertTrue(update.currentIssues.isEmpty())
+
+        // 持续保持不重复计数。
+        analyzer.update(aligned, timestampMs = 9_000)
+        assertEquals(1, analyzer.count)
+    }
+
+    @Test
+    fun postureShoulderTiltPreventsCountAndIsReportedLive() {
+        val analyzer = PostureAnalyzer()
+        val uneven = stand().apply {
+            set(PoseIndex.LEFT_SHOULDER, PosePoint(0.45f, 0.36f))
+        }
+
+        val update = analyzer.update(uneven, timestampMs = 0)
+        analyzer.update(uneven, timestampMs = 3_000)
+
+        assertEquals(0, analyzer.count)
+        assertTrue(update.currentIssues.contains(RepIssue.SHOULDER_UNEVEN))
+    }
+
+    @Test
+    fun postureRequiresReAlignAfterBreakingTheHold() {
+        val analyzer = PostureAnalyzer()
+        val aligned = stand()
+        val uneven = stand().apply {
+            set(PoseIndex.LEFT_SHOULDER, PosePoint(0.45f, 0.36f))
+        }
+
+        analyzer.update(aligned, timestampMs = 0)
+        analyzer.update(aligned, timestampMs = 2_000)
+        analyzer.update(uneven, timestampMs = 2_500)
+        analyzer.update(aligned, timestampMs = 3_000)
+        assertEquals(0, analyzer.count)
+
+        assertEquals(1, analyzer.update(aligned, timestampMs = 6_000).count)
+    }
+
+    @Test
+    fun postureHeadOffsetAndLateralLeanAreReported() {
+        val analyzer = PostureAnalyzer()
+        val headOff = stand().apply {
+            set(PoseIndex.NOSE, PosePoint(0.70f, 0.20f))
+        }
+        assertTrue(
+            analyzer.update(headOff, timestampMs = 0).currentIssues
+                .contains(RepIssue.HEAD_OFFSET)
+        )
+
+        val leaned = stand().apply {
+            set(PoseIndex.LEFT_SHOULDER, PosePoint(0.55f, 0.30f))
+            set(PoseIndex.RIGHT_SHOULDER, PosePoint(0.65f, 0.30f))
+        }
+        assertTrue(
+            analyzer.update(leaned, timestampMs = 10).currentIssues
+                .contains(RepIssue.LATERAL_LEAN)
+        )
+    }
+
+    @Test
+    fun postureResetClearsHoldAndCount() {
+        val analyzer = PostureAnalyzer()
+        analyzer.update(stand(), timestampMs = 0)
+        analyzer.update(stand(), timestampMs = 3_000)
+        assertEquals(1, analyzer.count)
+
+        analyzer.reset()
+
+        assertEquals(0, analyzer.count)
+        assertNull(analyzer.lastRep)
+        analyzer.update(stand(), timestampMs = 4_000)
+        assertEquals(1, analyzer.update(stand(), timestampMs = 7_000).count)
+    }
+
+    @Test
+    fun factoryCreatesPostureAnalyzer() {
+        assertTrue(createExerciseAnalyzer(ExerciseKind.POSTURE) is PostureAnalyzer)
+    }
 }

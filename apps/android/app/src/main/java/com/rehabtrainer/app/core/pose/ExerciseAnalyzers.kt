@@ -33,7 +33,7 @@ class ArmRaiseAnalyzer(
     override var lastRep: RepResult? = null
         private set
 
-    override fun update(points: List<PosePoint>): AnalysisUpdate {
+    override fun update(points: List<PosePoint>, timestampMs: Long): AnalysisUpdate {
         if (points.size < PoseIndex.LANDMARK_COUNT ||
             !PoseGeometry.visible(
                 points,
@@ -104,7 +104,7 @@ class MarchAnalyzer(
     override var lastRep: RepResult? = null
         private set
 
-    override fun update(points: List<PosePoint>): AnalysisUpdate {
+    override fun update(points: List<PosePoint>, timestampMs: Long): AnalysisUpdate {
         if (points.size < PoseIndex.LANDMARK_COUNT ||
             !PoseGeometry.visible(
                 points,
@@ -183,7 +183,7 @@ class SquatAnalyzer(
     override var lastRep: RepResult? = null
         private set
 
-    override fun update(points: List<PosePoint>): AnalysisUpdate {
+    override fun update(points: List<PosePoint>, timestampMs: Long): AnalysisUpdate {
         if (points.size < PoseIndex.LANDMARK_COUNT ||
             !PoseGeometry.visible(
                 points,

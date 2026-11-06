@@ -3,6 +3,7 @@ package com.rehabtrainer.app.core.pose
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Matrix
+import android.os.SystemClock
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import com.google.mediapipe.framework.image.BitmapImageBuilder
@@ -16,6 +17,7 @@ sealed interface PoseFrame {
     data class Detected(
         val repCount: Int,
         val lastRep: RepResult?,
+        val currentIssues: Set<RepIssue>,
         val footVisibility: Float
     ) : PoseFrame
 
@@ -45,6 +47,9 @@ class PoseAnalyzer(
 
     @Volatile
     private var lastUpdate = AnalysisUpdate(0, null)
+
+    @Volatile
+    private var lastFrameTimestampMs = 0L
 
     @Volatile
     private var isPaused = false
@@ -84,6 +89,7 @@ class PoseAnalyzer(
     }
 
     override fun analyze(imageProxy: ImageProxy) {
+        lastFrameTimestampMs = SystemClock.elapsedRealtime()
         try {
             val bitmap = imageProxy.toBitmap()
             val upright = rotateIfNeeded(bitmap, imageProxy.imageInfo.rotationDegrees)
@@ -126,22 +132,30 @@ class PoseAnalyzer(
         ).minOf { index -> points[index].visibility }
 
         if (isPaused) {
-            onFrame(PoseFrame.Detected(lastUpdate.count, lastUpdate.lastRep, footVisibility))
+            onFrame(
+                PoseFrame.Detected(
+                    lastUpdate.count,
+                    lastUpdate.lastRep,
+                    lastUpdate.currentIssues,
+                    footVisibility
+                )
+            )
             return
         }
 
         if (!CaptureGate.shouldCount(requiresFullBody, footVisibility)) {
             analyzer.reset()
             lastUpdate = AnalysisUpdate(0, null)
-            onFrame(PoseFrame.Detected(0, null, footVisibility))
+            onFrame(PoseFrame.Detected(0, null, emptySet(), footVisibility))
             return
         }
 
-        lastUpdate = analyzer.update(points)
+        lastUpdate = analyzer.update(points, lastFrameTimestampMs)
         onFrame(
             PoseFrame.Detected(
                 repCount = lastUpdate.count,
                 lastRep = lastUpdate.lastRep,
+                currentIssues = lastUpdate.currentIssues,
                 footVisibility = footVisibility
             )
         )

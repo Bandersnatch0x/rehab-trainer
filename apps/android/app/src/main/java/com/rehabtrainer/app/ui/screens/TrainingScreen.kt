@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.rehabtrainer.app.core.pose.CaptureGate
+import com.rehabtrainer.app.core.pose.ExerciseKind
 import com.rehabtrainer.app.core.pose.PoseAnalyzer
 import com.rehabtrainer.app.core.pose.PoseFrame
 import com.rehabtrainer.app.core.pose.RepIssue
@@ -60,21 +61,21 @@ import java.util.concurrent.Executors
 /**
  * 训练执行页：双播放 / 纯拍摄+语音两种模式，D17 采集门禁，组状态机与适老化自适应。
  */
-private fun describeRep(result: RepResult): String {
-    if (result.valid) {
-        return "本次达标"
-    }
-    return result.issues.joinToString("；") { issue ->
-        when (issue) {
-            RepIssue.INSUFFICIENT_RANGE -> "幅度不足"
-            RepIssue.EXCESSIVE_DEPTH -> "下蹲过深"
-            RepIssue.TRUNK_LEAN -> "躯干前倾"
-            RepIssue.KNEE_VALGUS -> "膝盖内扣"
-            RepIssue.ASYMMETRY -> "左右不对称"
-            RepIssue.POSE_INCOMPLETE -> "关键点不足"
-        }
-    }
+private fun issueText(issue: RepIssue): String = when (issue) {
+    RepIssue.INSUFFICIENT_RANGE -> "幅度不足"
+    RepIssue.EXCESSIVE_DEPTH -> "下蹲过深"
+    RepIssue.TRUNK_LEAN -> "躯干前倾"
+    RepIssue.KNEE_VALGUS -> "膝盖内扣"
+    RepIssue.ASYMMETRY -> "左右不对称"
+    RepIssue.SHOULDER_UNEVEN -> "肩部不平"
+    RepIssue.HIP_UNEVEN -> "髋部不平"
+    RepIssue.HEAD_OFFSET -> "头部偏移"
+    RepIssue.LATERAL_LEAN -> "躯干侧倾"
+    RepIssue.POSE_INCOMPLETE -> "关键点不足"
 }
+
+private fun describeRep(result: RepResult): String =
+    if (result.valid) "本次达标" else result.issues.joinToString("；") { issueText(it) }
 
 @Composable
 fun TrainingScreen(
@@ -91,6 +92,7 @@ fun TrainingScreen(
     val isTablet = configuration.smallestScreenWidthDp >= 600
     val isPhoneLandscape = isLandscape && !isTablet
     val screenWidthDp = configuration.screenWidthDp
+    val largeFont = configuration.fontScale >= 1.3f
 
     val currentExercise = DEFAULT_EXERCISES.firstOrNull { it.code == exerciseCode }
         ?: DEFAULT_EXERCISES.first()
@@ -153,8 +155,10 @@ fun TrainingScreen(
     var gateBlocked by remember { mutableStateOf(false) }
     var previousGateBlocked by remember { mutableStateOf(false) }
 
+    // 大字号下优先实景 + 语音：示范视频会挤占摄像头高度，导致叠加信息重叠。
+    val layoutMode = if (largeFont) TrainingDisplayMode.CAMERA_ONLY else displayMode
     val displayPolicy = TrainingDisplayPolicy(
-        mode = displayMode,
+        mode = layoutMode,
         isPhoneLandscape = isPhoneLandscape,
         availableWidthDp = screenWidthDp,
         isVoiceEnabled = voiceEnabled
@@ -188,16 +192,25 @@ fun TrainingScreen(
                             gateBlocked = requiresFullBody && !feetVisible
                             if (gateBlocked) {
                                 // D17：门禁期间冻结计数，姿态检测继续以等待自动恢复。
-                                statusText = "脚部不在画面内"
+                                statusText = if (largeFont) "请调整站位" else "脚部不在画面内"
                             } else {
-                                statusText = if (requiresFullBody) "全身姿态识别正常" else "上半身姿态识别正常"
+                                statusText = when {
+                                    largeFont -> "识别正常"
+                                    else -> ""
+                                }
                                 if (!setProgress.isComplete) {
                                     repCount = setProgress.capReps(frame.repCount)
                                 }
-                                repHint = frame.lastRep?.let(::describeRep)
+                                repHint = when {
+                                    frame.currentIssues.isNotEmpty() ->
+                                        "调整：" + frame.currentIssues.joinToString("；") { issueText(it) }
+                                    frame.lastRep != null -> describeRep(frame.lastRep!!)
+                                    currentExercise.kind == ExerciseKind.POSTURE -> "保持中…"
+                                    else -> null
+                                }
                             }
                         }
-                        PoseFrame.NoPose -> statusText = "未检测到人体，请站入画面中央"
+                        PoseFrame.NoPose -> statusText = if (largeFont) "请站入画面中央" else "未检测到人体，请站入画面中央"
                         is PoseFrame.Failure -> statusText = frame.message
                     }
                 }
@@ -322,6 +335,8 @@ fun TrainingScreen(
             forcedCameraOnly = displayPolicy.isForcedCameraOnly,
             onModeSelect = { displayMode = it },
             isPhoneLandscape = isPhoneLandscape,
+            compactLabels = largeFont,
+            showModeSelector = !largeFont,
             showVoiceToggle = displayPolicy.effectiveMode == TrainingDisplayMode.CAMERA_ONLY && isPhoneLandscape,
             voiceEnabled = voiceEnabled,
             ttsFailed = ttsFailed,
@@ -341,8 +356,8 @@ fun TrainingScreen(
                             .padding(horizontal = if (isPhoneLandscape) 10.dp else 12.dp, vertical = 4.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        // 手机横屏高度有限，语音开关收进头部，把纵向空间全部留给摄像头。
-                        if (!isPhoneLandscape) {
+                        // 手机横屏或大字模式下高度有限，语音开关收进头部，把纵向空间全部留给摄像头。
+                        if (!isPhoneLandscape && !largeFont) {
                             VoiceGuidanceBanner(
                                 prompt = currentExercise.prompt,
                                 isPaused = isPaused,
@@ -360,6 +375,7 @@ fun TrainingScreen(
                             previewView = previewView,
                             repCount = repCount,
                             repHint = repHint,
+                            largeFont = largeFont,
                             repsPerSet = setProgress.repsPerSet,
                             counterLabel = currentExercise.counterLabel,
                             largeCount = true,
@@ -397,6 +413,7 @@ fun TrainingScreen(
                             previewView = previewView,
                             repCount = repCount,
                             repHint = repHint,
+                            largeFont = largeFont,
                             repsPerSet = setProgress.repsPerSet,
                             counterLabel = currentExercise.counterLabel,
                             statusText = statusText,
@@ -433,6 +450,7 @@ fun TrainingScreen(
                             previewView = previewView,
                             repCount = repCount,
                             repHint = repHint,
+                            largeFont = largeFont,
                             repsPerSet = setProgress.repsPerSet,
                             counterLabel = currentExercise.counterLabel,
                             statusText = statusText,
@@ -469,6 +487,7 @@ fun TrainingScreen(
                             previewView = previewView,
                             repCount = repCount,
                             repHint = repHint,
+                            largeFont = largeFont,
                             repsPerSet = setProgress.repsPerSet,
                             counterLabel = currentExercise.counterLabel,
                             statusText = statusText,
@@ -487,6 +506,7 @@ fun TrainingScreen(
         PersistentControlFooter(
             isPhoneLandscape = isPhoneLandscape,
             isPaused = isPaused,
+            largeFont = largeFont,
             setProgress = setProgress,
             onTogglePause = { isPaused = !isPaused },
             onFinishSet = finishCurrentSet,

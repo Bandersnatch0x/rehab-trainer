@@ -120,8 +120,8 @@ val DEFAULT_EXERCISES = listOf(
         sets = 3,
         repsPerSet = 10,
         requiresFullBody = true,
-        counterLabel = "抬臂计数（姿势矫正待接入）",
-        kind = ExerciseKind.ARM_RAISE,
+        counterLabel = "保持次数",
+        kind = ExerciseKind.POSTURE,
     )
 )
 

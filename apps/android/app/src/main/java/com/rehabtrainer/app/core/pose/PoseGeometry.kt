@@ -16,6 +16,7 @@ data class PosePoint(
 
 /** MediaPipe Pose 的 33 点索引中本模块用到的部分。 */
 object PoseIndex {
+    const val NOSE = 0
     const val LEFT_SHOULDER = 11
     const val RIGHT_SHOULDER = 12
     const val LEFT_WRIST = 15
