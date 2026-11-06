@@ -443,18 +443,24 @@ class ExerciseAnalyzersTest {
 
     // ---------- 坐位抬腿 ----------
 
-    private fun seatedLeg(leftAnkleY: Float = 1.00f, rightAnkleY: Float = 1.00f) =
-        stand().apply {
-            set(PoseIndex.LEFT_ANKLE, PosePoint(0.45f, leftAnkleY))
-            set(PoseIndex.RIGHT_ANKLE, PosePoint(0.55f, rightAnkleY))
-        }
+    private fun seatedLeg(
+        leftAnkleY: Float = 1.00f,
+        rightAnkleY: Float = 1.00f,
+        leftKneeY: Float = 0.80f,
+        rightKneeY: Float = 0.80f
+    ) = stand().apply {
+        set(PoseIndex.LEFT_ANKLE, PosePoint(0.45f, leftAnkleY))
+        set(PoseIndex.RIGHT_ANKLE, PosePoint(0.55f, rightAnkleY))
+        set(PoseIndex.LEFT_KNEE, PosePoint(0.45f, leftKneeY))
+        set(PoseIndex.RIGHT_KNEE, PosePoint(0.55f, rightKneeY))
+    }
 
     @Test
     fun seatedLegRaiseCountsAgainstBaseline() {
         val analyzer = SeatedLegRaiseAnalyzer()
         repeat(8) { index -> analyzer.update(seatedLeg(), timestampMs = index * 33L) }
 
-        analyzer.update(seatedLeg(leftAnkleY = 0.55f), timestampMs = 500)
+        analyzer.update(seatedLeg(leftAnkleY = 0.55f, leftKneeY = 0.55f), timestampMs = 500)
         val update = analyzer.update(seatedLeg(), timestampMs = 1_000)
 
         assertEquals(1, update.count)
@@ -465,7 +471,7 @@ class ExerciseAnalyzersTest {
     fun shallowSeatedLiftIsFlagged() {
         val analyzer = SeatedLegRaiseAnalyzer()
         repeat(8) { index -> analyzer.update(seatedLeg(), timestampMs = index * 33L) }
-        analyzer.update(seatedLeg(leftAnkleY = 0.95f), timestampMs = 500)
+        analyzer.update(seatedLeg(leftAnkleY = 0.95f, leftKneeY = 0.75f), timestampMs = 500)
         val update = analyzer.update(seatedLeg(), timestampMs = 1_000)
 
         assertEquals(1, update.count)
@@ -476,7 +482,7 @@ class ExerciseAnalyzersTest {
     fun seatedLegRaiseTrunkLeanIsFlagged() {
         val analyzer = SeatedLegRaiseAnalyzer()
         repeat(8) { index -> analyzer.update(seatedLeg(), timestampMs = index * 33L) }
-        analyzer.update(leaned(seatedLeg(leftAnkleY = 0.55f)), timestampMs = 500)
+        analyzer.update(leaned(seatedLeg(leftAnkleY = 0.55f, leftKneeY = 0.55f)), timestampMs = 500)
         val update = analyzer.update(leaned(seatedLeg()), timestampMs = 1_000)
 
         assertTrue(update.lastRep!!.issues.contains(RepIssue.LATERAL_LEAN))
@@ -486,14 +492,14 @@ class ExerciseAnalyzersTest {
     fun seatedLegRaiseResetClearsBaseline() {
         val analyzer = SeatedLegRaiseAnalyzer()
         repeat(8) { index -> analyzer.update(seatedLeg(), timestampMs = index * 33L) }
-        analyzer.update(seatedLeg(leftAnkleY = 0.55f), timestampMs = 500)
+        analyzer.update(seatedLeg(leftAnkleY = 0.55f, leftKneeY = 0.55f), timestampMs = 500)
         assertEquals(1, analyzer.update(seatedLeg(), timestampMs = 1_000).count)
 
         analyzer.reset()
         assertEquals(0, analyzer.count)
         assertNull(analyzer.lastRep)
         repeat(8) { index -> analyzer.update(seatedLeg(), timestampMs = 2_000 + index * 33L) }
-        analyzer.update(seatedLeg(leftAnkleY = 0.55f), timestampMs = 2_500)
+        analyzer.update(seatedLeg(leftAnkleY = 0.55f, leftKneeY = 0.55f), timestampMs = 2_500)
         assertEquals(1, analyzer.update(seatedLeg(), timestampMs = 3_000).count)
     }
 

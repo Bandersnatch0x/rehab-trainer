@@ -114,6 +114,8 @@ class MarchAnalyzer(
         var baseline: Float? = null
         var lifted = false
         var peakSpan = Float.MAX_VALUE
+        var liftStartedMs = 0L
+        var lastExitMs = 0L
     }
 
     private val legs = listOf(LegState(), LegState())
@@ -164,14 +166,22 @@ class MarchAnalyzer(
             return
         }
         if (!leg.lifted && span < baseline * enterRatio) {
+            if (leg.lastExitMs != 0L && timestampMs - leg.lastExitMs < REARM_MS) {
+                return
+            }
             leg.lifted = true
             leg.peakSpan = span
+            leg.liftStartedMs = timestampMs
             return
         }
         if (leg.lifted) {
             leg.peakSpan = min(leg.peakSpan, span)
             if (span > baseline * exitRatio) {
                 leg.lifted = false
+                leg.lastExitMs = timestampMs
+                if (leg.liftStartedMs != 0L && timestampMs - leg.liftStartedMs < MIN_LIFT_MS) {
+                    return
+                }
                 // 交替约束：对侧腿仍在抬起时不计数，避免把双腿同时动作当成两步。
                 if (!legs[1 - index].lifted) {
                     if (lastRepAtMs != 0L && timestampMs - lastRepAtMs < MIN_REP_INTERVAL_MS) {
@@ -199,6 +209,8 @@ class MarchAnalyzer(
             it.baseline = null
             it.lifted = false
             it.peakSpan = Float.MAX_VALUE
+            it.liftStartedMs = 0L
+            it.lastExitMs = 0L
         }
         repIndex = 0
         lastStepLeg = -1
@@ -221,6 +233,8 @@ class SquatAnalyzer(
     private var baseline: Float? = null
     private var inSquat = false
     private var lastRepAtMs = 0L
+    private var squatStartedMs = 0L
+    private var lastExitMs = 0L
     private var minSpan = Float.MAX_VALUE
     private var bottomIssues: Set<RepIssue> = emptySet()
     private var repIndex = 0
@@ -259,7 +273,11 @@ class SquatAnalyzer(
         }
 
         if (!inSquat && span < base * enterRatio) {
+            if (lastExitMs != 0L && timestampMs - lastExitMs < REARM_MS) {
+                return AnalysisUpdate(count, lastRep)
+            }
             inSquat = true
+            squatStartedMs = timestampMs
             minSpan = span
             bottomIssues = bottomIssues(points, torso, lean)
         } else if (inSquat) {
@@ -269,6 +287,10 @@ class SquatAnalyzer(
             }
             if (span > base * exitRatio) {
                 inSquat = false
+                lastExitMs = timestampMs
+                if (squatStartedMs != 0L && timestampMs - squatStartedMs < MIN_LIFT_MS) {
+                    return AnalysisUpdate(count, lastRep)
+                }
                 if (lastRepAtMs != 0L && timestampMs - lastRepAtMs < MIN_REP_INTERVAL_MS) {
                     return AnalysisUpdate(count, lastRep)
                 }
@@ -308,6 +330,8 @@ class SquatAnalyzer(
         baseline = null
         inSquat = false
         lastRepAtMs = 0L
+        squatStartedMs = 0L
+        lastExitMs = 0L
         minSpan = Float.MAX_VALUE
         bottomIssues = emptySet()
         repIndex = 0
@@ -321,3 +345,7 @@ internal const val BASELINE_DOWN_STEP: Float = 0.003f
 
 /** 两次计数之间的最小间隔，过滤抖动造成的连击。 */
 internal const val MIN_REP_INTERVAL_MS: Long = 400L
+
+/** 单次动作的最短持续时间与重新武装间隔，过滤瞬时抖动。 */
+internal const val MIN_LIFT_MS: Long = 250L
+internal const val REARM_MS: Long = 200L

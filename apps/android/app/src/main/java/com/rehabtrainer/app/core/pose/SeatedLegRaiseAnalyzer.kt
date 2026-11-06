@@ -26,6 +26,8 @@ class SeatedLegRaiseAnalyzer(
         val samples = mutableListOf<Float>()
         var lifted = false
         var minSpan = Float.MAX_VALUE
+        var liftStartedMs = 0L
+        var lastExitMs = 0L
     }
 
     private val legs = listOf(LegState(), LegState())
@@ -43,8 +45,8 @@ class SeatedLegRaiseAnalyzer(
                 points,
                 PoseIndex.LEFT_HIP,
                 PoseIndex.RIGHT_HIP,
-                PoseIndex.LEFT_ANKLE,
-                PoseIndex.RIGHT_ANKLE,
+                PoseIndex.LEFT_KNEE,
+                PoseIndex.RIGHT_KNEE,
                 threshold = 0.20f
             )
         ) {
@@ -54,15 +56,16 @@ class SeatedLegRaiseAnalyzer(
             ?: return AnalysisUpdate(count, lastRep, setOf(RepIssue.POSE_INCOMPLETE))
         val lean = PoseGeometry.lateralLeanDegrees(points) ?: 0f
 
+        // 坐位抬腿时膝比踝更靠近躯干、也更容易入镜；用膝-髋垂直距离作为抬腿信号。
         updateLeg(
             0,
-            (points[PoseIndex.LEFT_ANKLE].y - points[PoseIndex.LEFT_HIP].y) / torso,
+            (points[PoseIndex.LEFT_KNEE].y - points[PoseIndex.LEFT_HIP].y) / torso,
             lean,
             timestampMs
         )
         updateLeg(
             1,
-            (points[PoseIndex.RIGHT_ANKLE].y - points[PoseIndex.RIGHT_HIP].y) / torso,
+            (points[PoseIndex.RIGHT_KNEE].y - points[PoseIndex.RIGHT_HIP].y) / torso,
             lean,
             timestampMs
         )
@@ -81,14 +84,26 @@ class SeatedLegRaiseAnalyzer(
             return
         }
         if (!leg.lifted && span < baseline - liftEnterRatio) {
+            if (leg.lastExitMs != 0L && timestampMs - leg.lastExitMs < REARM_MS) {
+                return
+            }
             leg.lifted = true
             leg.minSpan = span
+            leg.liftStartedMs = timestampMs
             return
         }
         if (leg.lifted) {
             leg.minSpan = min(leg.minSpan, span)
             if (span > baseline - liftExitRatio) {
                 leg.lifted = false
+                leg.lastExitMs = timestampMs
+                // 抬腿持续时间过短视为抖动，不计一次；需完全回到基线附近再重新开始。
+                if (leg.liftStartedMs != 0L && timestampMs - leg.liftStartedMs < MIN_LIFT_MS) {
+                    return
+                }
+                if (span < baseline - liftExitRatio) {
+                    return
+                }
                 if (lastRepAtMs != 0L && timestampMs - lastRepAtMs < MIN_REP_INTERVAL_MS) {
                     return
                 }
@@ -114,6 +129,8 @@ class SeatedLegRaiseAnalyzer(
             it.samples.clear()
             it.lifted = false
             it.minSpan = Float.MAX_VALUE
+            it.liftStartedMs = 0L
+            it.lastExitMs = 0L
         }
         repIndex = 0
         lastRepAtMs = 0L
@@ -124,5 +141,7 @@ class SeatedLegRaiseAnalyzer(
     private companion object {
         const val BASELINE_SAMPLES = 8
         const val MIN_REP_INTERVAL_MS = 500L
+        const val MIN_LIFT_MS = 250L
+        const val REARM_MS = 200L
     }
 }
