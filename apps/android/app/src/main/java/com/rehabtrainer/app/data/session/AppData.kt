@@ -3,6 +3,8 @@ package com.rehabtrainer.app.data.session
 import android.content.Context
 import com.rehabtrainer.app.core.network.ApiContainer
 import com.rehabtrainer.app.core.network.ApiResult
+import com.rehabtrainer.app.data.contract.AlertPage
+import com.rehabtrainer.app.data.contract.Patient
 import com.rehabtrainer.app.data.contract.SessionRecordCreate
 import com.rehabtrainer.app.data.contract.SessionRecordPage
 import com.rehabtrainer.app.data.offline.ApiSessionSyncService
@@ -12,11 +14,14 @@ import com.rehabtrainer.app.data.offline.SessionUploadQueue
 import java.io.File
 
 /**
- * 训练记录上传的唯一入口：入队 → 立即尝试补传 → 失败留在本地等待下次。
+ * 应用数据层入口，启动时由 `MainActivity` [install] 一次。两类职责：
  *
- * 由 `MainActivity` 在应用启动时 [install]；未安装（如测试/预览）时调用是安全的空操作。
+ * - 写：训练记录入队 → 立即尝试补传 → 失败留在本地等待下次（离线可用）。
+ * - 读：患者维度的服务端数据（训练记录 / 预警 / 患者详情）。
+ *
+ * 未安装（如测试、Compose 预览）时所有调用都是安全的空操作（读返回 null，写返回 false）。
  */
-object SessionUploads {
+object AppData {
 
     @Volatile
     private var queue: SessionUploadQueue? = null
@@ -54,6 +59,11 @@ object SessionUploads {
 
     suspend fun listSessions(patientId: String, limit: Int = 20): ApiResult<SessionRecordPage>? =
         api?.listSessions(patientId, limit)
+
+    suspend fun listAlerts(patientId: String, limit: Int = 20): ApiResult<AlertPage>? =
+        api?.listAlerts(patientId, limit = limit)
+
+    suspend fun getPatient(patientId: String): ApiResult<Patient>? = api?.getPatient(patientId)
 
     private const val DIR_NAME = "session-uploads"
 }

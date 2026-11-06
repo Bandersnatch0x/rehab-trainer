@@ -56,7 +56,7 @@ import com.rehabtrainer.app.core.training.TrainingDisplayPolicy
 import com.rehabtrainer.app.data.local.AppPreferences
 import com.rehabtrainer.app.data.offline.ClientRecordIds
 import com.rehabtrainer.app.data.session.SessionRecordBuilder
-import com.rehabtrainer.app.data.session.SessionUploads
+import com.rehabtrainer.app.data.session.AppData
 import com.rehabtrainer.app.data.session.SetOutcome
 import com.rehabtrainer.app.ui.ExerciseRegistry
 import com.rehabtrainer.app.ui.audio.VoiceCoach
@@ -368,7 +368,7 @@ fun TrainingScreen(
                 outcome = outcome,
                 modelSha256 = ModelFingerprint.sha256(context)
             )
-            scope.launch { SessionUploads.submit(record) }
+            scope.launch { AppData.submit(record) }
         }
         setValidFrames = 0
         setTotalFrames = 0

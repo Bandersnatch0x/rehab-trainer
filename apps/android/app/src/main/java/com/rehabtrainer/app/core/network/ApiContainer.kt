@@ -1,8 +1,11 @@
 package com.rehabtrainer.app.core.network
 
+import com.rehabtrainer.app.data.contract.AlertPage
+import com.rehabtrainer.app.data.contract.AlertStatus
 import com.rehabtrainer.app.data.contract.ApiError
 import com.rehabtrainer.app.data.contract.BindRequest
 import com.rehabtrainer.app.data.contract.Exercise
+import com.rehabtrainer.app.data.contract.Patient
 import com.rehabtrainer.app.data.contract.PatientPage
 import com.rehabtrainer.app.data.contract.PrescriptionPage
 import com.rehabtrainer.app.data.contract.SessionRecordPage
@@ -114,6 +117,10 @@ class ApiContainer(
     suspend fun listPatients(limit: Int = 20): ApiResult<PatientPage> =
         apiCall { patientsApi.listPatients(limit = limit) }
 
+    /** GET /patients/{patientId} — 患者档案详情。 */
+    suspend fun getPatient(patientId: String): ApiResult<Patient> =
+        apiCall { patientsApi.getPatient(patientId) }
+
     /** GET /prescriptions — 按患者读取训练方案。 */
     suspend fun listPrescriptions(patientId: String, limit: Int = 20): ApiResult<PrescriptionPage> =
         apiCall { prescriptionsApi.listPrescriptions(patientId = patientId, limit = limit) }
@@ -125,6 +132,14 @@ class ApiContainer(
     /** GET /sessions — 患者的训练记录。 */
     suspend fun listSessions(patientId: String, limit: Int = 20): ApiResult<SessionRecordPage> =
         apiCall { sessionsApi.listSessions(patientId = patientId, limit = limit) }
+
+    /** GET /alerts — 患者的预警事件；不传 status 时返回全部状态。 */
+    suspend fun listAlerts(
+        patientId: String,
+        status: AlertStatus? = null,
+        limit: Int = 20
+    ): ApiResult<AlertPage> =
+        apiCall { alertsApi.listAlerts(patientId = patientId, status = status, limit = limit) }
 
     /** POST /auth/refresh；使用当前 refreshToken 换新令牌。 */
     suspend fun refresh(): ApiResult<TokenPair> {

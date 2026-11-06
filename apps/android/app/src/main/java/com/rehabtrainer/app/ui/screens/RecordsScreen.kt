@@ -27,7 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rehabtrainer.app.core.network.ApiResult
 import com.rehabtrainer.app.data.contract.SessionRecord
-import com.rehabtrainer.app.data.session.SessionUploads
+import com.rehabtrainer.app.data.session.AppData
 import com.rehabtrainer.app.ui.ExerciseRegistry
 import com.rehabtrainer.app.ui.theme.LocalElderlyDimens
 
@@ -46,11 +46,11 @@ fun RecordsScreen(modifier: Modifier = Modifier) {
 
     LaunchedEffect(patientId) {
         // 进入页面先补传离线积压，再回读，使记录页成为自愈点。
-        SessionUploads.flushPending()
-        pendingUploads = SessionUploads.pendingCount()
+        AppData.flushPending()
+        pendingUploads = AppData.pendingCount()
         state = when {
             patientId == null -> RecordsUiState.Unbound
-            else -> when (val result = SessionUploads.listSessions(patientId)) {
+            else -> when (val result = AppData.listSessions(patientId)) {
                 null -> RecordsUiState.Unbound
                 is ApiResult.Success -> RecordsUiState.Loaded(result.value.items)
                 is ApiResult.Failure -> RecordsUiState.Failed(result.error.message)
@@ -148,7 +148,7 @@ private fun RecordCard(record: SessionRecord) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = formatRecordedAt(record.recordedAt),
+                    text = formatIsoTimestamp(record.recordedAt),
                     style = MaterialTheme.typography.titleMedium
                 )
                 DoubtBadge(record.isDoubtful)

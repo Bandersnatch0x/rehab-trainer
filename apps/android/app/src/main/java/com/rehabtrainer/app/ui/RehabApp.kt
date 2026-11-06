@@ -30,6 +30,7 @@ import androidx.navigation.compose.rememberNavController
 import com.rehabtrainer.app.core.network.ApiResult
 import com.rehabtrainer.app.core.pose.ExerciseKind
 import com.rehabtrainer.app.data.session.SessionRepository
+import com.rehabtrainer.app.data.session.SessionSnapshot
 import com.rehabtrainer.app.ui.components.RehabTopBar
 import com.rehabtrainer.app.ui.screens.BindScreen
 import com.rehabtrainer.app.ui.navigation.RehabDestination
@@ -255,6 +256,7 @@ fun RehabApp(
             windowSizeClass = windowSizeClass,
             currentRoute = currentRoute,
             title = title,
+            snapshot = snapshot,
             selectedExerciseCode = selectedExerciseCode,
             onSelectExercise = { selectedExerciseCode = it },
             onLogout = logout,
@@ -266,6 +268,7 @@ fun RehabApp(
             windowSizeClass = windowSizeClass,
             currentRoute = currentRoute,
             title = title,
+            snapshot = snapshot,
             selectedExerciseCode = selectedExerciseCode,
             onSelectExercise = { selectedExerciseCode = it },
             onLogout = logout,
@@ -280,6 +283,7 @@ private fun CompactShell(
     windowSizeClass: WindowSizeClass,
     currentRoute: String?,
     title: String,
+    snapshot: SessionSnapshot?,
     selectedExerciseCode: String,
     onSelectExercise: (String) -> Unit,
     onLogout: () -> Unit,
@@ -295,6 +299,7 @@ private fun CompactShell(
             navController = navController,
             widthSizeClass = windowSizeClass.widthSizeClass,
             selectedExerciseCode = selectedExerciseCode,
+            snapshot = snapshot,
             onSelectExercise = onSelectExercise,
             onLogout = onLogout,
             modifier = modifier
@@ -329,6 +334,7 @@ private fun CompactShell(
                 navController = navController,
                 widthSizeClass = windowSizeClass.widthSizeClass,
                 selectedExerciseCode = selectedExerciseCode,
+                snapshot = snapshot,
                 onSelectExercise = onSelectExercise,
                 modifier = Modifier
                     .fillMaxSize()
@@ -344,6 +350,7 @@ private fun ExpandedShell(
     windowSizeClass: WindowSizeClass,
     currentRoute: String?,
     title: String,
+    snapshot: SessionSnapshot?,
     selectedExerciseCode: String,
     onSelectExercise: (String) -> Unit,
     onLogout: () -> Unit,
@@ -357,6 +364,7 @@ private fun ExpandedShell(
             navController = navController,
             widthSizeClass = windowSizeClass.widthSizeClass,
             selectedExerciseCode = selectedExerciseCode,
+            snapshot = snapshot,
             onSelectExercise = onSelectExercise,
             onLogout = onLogout,
             modifier = modifier
@@ -383,6 +391,7 @@ private fun ExpandedShell(
                 navController = navController,
                 widthSizeClass = windowSizeClass.widthSizeClass,
                 selectedExerciseCode = selectedExerciseCode,
+                snapshot = snapshot,
                 onSelectExercise = onSelectExercise,
                 modifier = Modifier
                     .weight(1f)

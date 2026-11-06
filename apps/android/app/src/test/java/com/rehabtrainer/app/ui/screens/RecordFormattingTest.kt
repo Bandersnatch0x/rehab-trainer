@@ -12,25 +12,25 @@ class RecordFormattingTest {
     @Test
     fun `naive utc from server is shown in local time`() {
         // 服务端 to_utc_naive 后回传的就是这种无偏移形式（UTC 02:00 → 本地 10:00）。
-        assertEquals("11-07 10:00", formatRecordedAt("2026-11-07T02:00:00", shanghai))
+        assertEquals("11-07 10:00", formatIsoTimestamp("2026-11-07T02:00:00", shanghai))
     }
 
     @Test
     fun `offset and Z forms are accepted`() {
-        assertEquals("11-07 10:00", formatRecordedAt("2026-11-07T02:00:00Z", shanghai))
-        assertEquals("11-07 10:00", formatRecordedAt("2026-11-07T10:00:00+08:00", shanghai))
+        assertEquals("11-07 10:00", formatIsoTimestamp("2026-11-07T02:00:00Z", shanghai))
+        assertEquals("11-07 10:00", formatIsoTimestamp("2026-11-07T10:00:00+08:00", shanghai))
     }
 
     @Test
     fun `fractional seconds do not break parsing`() {
-        assertEquals("11-07 10:00", formatRecordedAt("2026-11-07T02:00:00.123456", shanghai))
+        assertEquals("11-07 10:00", formatIsoTimestamp("2026-11-07T02:00:00.123456", shanghai))
     }
 
     @Test
     fun `missing or unparsable time degrades without dropping the field`() {
-        assertEquals("时间未知", formatRecordedAt(null, shanghai))
-        assertEquals("时间未知", formatRecordedAt("   ", shanghai))
-        assertEquals("昨天", formatRecordedAt("昨天", shanghai))
+        assertEquals("时间未知", formatIsoTimestamp(null, shanghai))
+        assertEquals("时间未知", formatIsoTimestamp("   ", shanghai))
+        assertEquals("昨天", formatIsoTimestamp("昨天", shanghai))
     }
 
     @Test

@@ -11,7 +11,7 @@ import com.rehabtrainer.app.core.network.SharedPreferencesTokenStore
 import com.rehabtrainer.app.data.offline.MediaCache
 import com.rehabtrainer.app.core.training.ModelFingerprint
 import com.rehabtrainer.app.data.session.SessionRepository
-import com.rehabtrainer.app.data.session.SessionUploads
+import com.rehabtrainer.app.data.session.AppData
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,10 +28,10 @@ class MainActivity : ComponentActivity() {
         val tokenStore = SharedPreferencesTokenStore(applicationContext)
         val api = ApiContainer(tokenStore = tokenStore)
         val sessionRepository = SessionRepository(api = api, context = applicationContext)
-        SessionUploads.install(applicationContext, api)
+        AppData.install(applicationContext, api)
         lifecycleScope.launch {
             withContext(Dispatchers.IO) { ModelFingerprint.sha256(applicationContext) }
-            SessionUploads.flushPending()
+            AppData.flushPending()
         }
         enableEdgeToEdge()
         setContent {

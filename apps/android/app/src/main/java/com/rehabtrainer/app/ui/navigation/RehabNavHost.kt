@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.rehabtrainer.app.data.session.SessionSnapshot
 import com.rehabtrainer.app.ui.ExerciseRegistry
 import com.rehabtrainer.app.ui.screens.AlertsScreen
 import com.rehabtrainer.app.ui.screens.ExercisesScreen
@@ -21,6 +22,7 @@ fun RehabNavHost(
     navController: NavHostController,
     widthSizeClass: WindowWidthSizeClass,
     selectedExerciseCode: String? = null,
+    snapshot: SessionSnapshot? = null,
     onSelectExercise: (String) -> Unit = {},
     onLogout: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -34,6 +36,7 @@ fun RehabNavHost(
         composable(RehabDestination.HOME.route) {
             HomeScreen(
                 widthSizeClass = widthSizeClass,
+                snapshot = snapshot,
                 onStartTraining = {
                     onSelectExercise(trainingCode)
                     navController.navigate(RehabDestination.TRAINING.route)
@@ -54,7 +57,7 @@ fun RehabNavHost(
             )
         }
         composable(RehabDestination.PATIENTS.route) {
-            PatientsScreen()
+            PatientsScreen(orgName = snapshot?.orgName)
         }
         composable(RehabDestination.TRAINING.route) {
             TrainingScreen(
@@ -68,7 +71,7 @@ fun RehabNavHost(
             RecordsScreen()
         }
         composable(RehabDestination.ALERTS.route) {
-            AlertsScreen()
+            AlertsScreen(patientId = snapshot?.patientId)
         }
         composable(RehabDestination.SETTINGS.route) {
             SettingsScreen(onLogout = onLogout)
