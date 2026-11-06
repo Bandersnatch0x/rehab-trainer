@@ -201,7 +201,7 @@ private fun HomeTodayPrescription() {
                             style = MaterialTheme.typography.bodyLarge
                         )
                         Text(
-                            text = "64 BPM",
+                            text = "100 BPM",
                             style = MaterialTheme.typography.titleLarge,
                             color = MaterialTheme.colorScheme.primary
                         )

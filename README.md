@@ -24,7 +24,7 @@ App 与小程序功能清单一致;差异只在姿态识别的实现方式与实
 
 | 部分 | 状态 |
 | --- | --- |
-| 后端 `services/api` | FastAPI + SQLAlchemy,Alembic 迁移 head `0005`,覆盖 18 张表;117 项测试通过 |
+| 后端 `services/api` | FastAPI + SQLAlchemy,Alembic 迁移 head `0005`,覆盖 18 张表;120 项测试通过 |
 | Web 后台 `apps/admin-web` | 9 个业务页已接真实 API(患者、详情、分期、处方、预警、随访台账、审计、科研、视频管理);Playwright E2E 23 条全部通过 |
 | 微信小程序 / Android | 契约客户端已生成,配置指向本地后端;App 端上实时推理已用于训练页动作计数;小程序云端异步 CV 未实现(占位见 `services/cv-worker`,D26) |
 | 部署 | `services/api/Dockerfile` + `docker-compose.yml` + `deploy/`(Alembic、健康检查、自检);手册见 `docs/deployment/README.md` |
@@ -67,4 +67,5 @@ docker compose --env-file .agent/tmp/deployment.env up --build -d --wait
 | `services/` | 服务:API(FastAPI)、云端 CV 推理(占位) |
 | `packages/` | API 契约与生成客户端 |
 | `docs/architecture/` | 架构与仓库结构说明 |
+| `docs/clinical/` | 临床阈值文献预设与签核清单（待签核） |
 | `docs/delivery/` | 交付文档:用户操作手册、部署与运维手册、验收与合规说明 |

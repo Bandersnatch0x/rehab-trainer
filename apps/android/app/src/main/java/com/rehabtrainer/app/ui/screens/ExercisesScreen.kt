@@ -71,7 +71,7 @@ fun ExercisesScreen(
             categoryTitle = "节律步态训练 (RAS)",
             categoryDesc = "跟着舒适节拍踏步，帮助步伐更加连贯稳健。",
             exerciseName = "原地节律踏步训练",
-            parameters = "推荐剂量：3 组 × 12 次 · 64 BPM 听觉节拍",
+            parameters = "推荐剂量：3 组 × 12 次 · 100 BPM 听觉节拍",
             suitabilityTag = "适宜阶段 · 自主完成",
             onStart = { onSelectExercise("EX-RAS-01") }
         )
