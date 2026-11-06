@@ -2,7 +2,7 @@ from datetime import timedelta
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, func, or_, select, update
 from sqlalchemy.orm import Session
 
 from app.core import totp
@@ -123,7 +123,21 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
         if step is None:
             _record_login_failure(db, payload.username)
             raise api_error(401, "UNAUTHORIZED", "二次验证码错误或已失效")
-        account.totp_last_step = step
+        # 条件更新保证同一时间步只能成功一次；并发重放在这里被拦下。
+        consumed = db.execute(
+            update(Account)
+            .where(
+                Account.account_id == account.account_id,
+                or_(
+                    Account.totp_last_step.is_(None),
+                    Account.totp_last_step < step,
+                ),
+            )
+            .values(totp_last_step=step)
+        )
+        if consumed.rowcount != 1:
+            _record_login_failure(db, payload.username)
+            raise api_error(401, "UNAUTHORIZED", "二次验证码已使用，请等待下一个验证码")
 
     _clear_login_failures(db, payload.username)
     principal = build_principal(db, account)
