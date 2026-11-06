@@ -42,3 +42,23 @@ created: 2026-11-07
 ## 本次未做
 
 未改动任何运行时行为：只测量并记录。凭据仍缺，未在真实多副本或生产规格机器上验证。
+
+## Log
+
+### 2026-11-07 压测中发现的第二个同源问题：连接池不探活
+
+现象：数据库容器重启（等价于生产里的数据库重启/主从切换）后，API 未重启的情况下继续返回
+HTTP 500，或在客户端侧表现为挂起。服务端日志为：
+
+```
+sqlalchemy.exc.OperationalError: (psycopg.OperationalError) consuming input failed:
+could not receive data from server: Software caused connection abort (0x00002745/10053)
+[SQL: SELECT count(*) FROM login_failure WHERE username = ...]
+```
+
+根因与上面同出一处：`create_engine()` 未启用 `pool_pre_ping`，池里被对端关闭的连接会被原样取出使用，
+第一次读写在死连接上失败并抛到路由层，直接变成 500；重试一次即可恢复，但当前没有重试与错误映射。
+
+建议（与上面两项一起决策）：`pool_pre_ping=True`（代价是每次取连接多一次轻量往返），
+并把「连接层瞬时故障」与「业务错误」区分开——前者可重试一次，后者不可。
+这同样牵涉到把什么样的状态码交给客户端，与上面第 2 项是同一个契约决定。

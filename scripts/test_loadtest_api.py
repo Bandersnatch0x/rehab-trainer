@@ -77,6 +77,20 @@ class CommandTests(unittest.TestCase):
         self.assertNotEqual(0, result.returncode)
         self.assertNotIn("合计", result.stdout)
 
+    def test_recorded_errors_force_a_nonzero_exit(self):
+        # 统计里出现错误时不得返回 0，否则一次失败的压测会被当成基线。
+        clean = loadtest.Stats()
+        clean.record("GET /patients", 0.01)
+        self.assertEqual(0, loadtest.exit_code(clean, clean.errors))
+
+        failing = loadtest.Stats()
+        failing.record("GET /patients", 0.01, "TimeoutError")
+        self.assertEqual(1, loadtest.exit_code(failing, failing.errors))
+
+        aborted = loadtest.Stats()
+        aborted.worker_aborted = 2
+        self.assertEqual(1, loadtest.exit_code(aborted, aborted.errors))
+
 
 if __name__ == "__main__":
     unittest.main()

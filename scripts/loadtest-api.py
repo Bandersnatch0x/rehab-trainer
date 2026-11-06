@@ -69,6 +69,12 @@ class Api:
         self.conn.close()
 
 
+def exit_code(stats, errors):
+    """有错误或有线程提前退出即非零，避免把一次失败的压测当成基线。"""
+    failures = sum(len(samples) for samples in errors.values())
+    return 1 if failures or stats.worker_aborted else 0
+
+
 def percentile(sorted_values, fraction):
     """nearest-rank 分位；样本少时也不做插值，避免给出虚假精度。"""
     if not sorted_values:
@@ -111,6 +117,7 @@ class Stats:
         self.lock = threading.Lock()
         self.latencies = {}
         self.errors = {}
+        self.worker_aborted = 0
 
     def record(self, operation, seconds, error=None):
         with self.lock:
@@ -134,6 +141,7 @@ def worker(args, config, prefix, patient_id, prescription_id, stats, stop_at, mi
     )
     if status != 200:
         stats.record("POST /auth/login", 0.0, f"HTTP {status}")
+        stats.worker_aborted += 1
         return
     api.token = body["accessToken"]
 
@@ -175,15 +183,20 @@ def worker(args, config, prefix, patient_id, prescription_id, stats, stop_at, mi
                     )
                 elapsed = time.perf_counter() - started
                 stats.record(operation, elapsed, None if ok else f"HTTP {status}")
-            except Exception as error:  # 连接被服务端关闭等：记一次错误并继续，不中断整轮
+            except Exception as error:  # 连接被服务端关闭或读写超时：记一次错误并尝试续连
                 stats.record(operation, time.perf_counter() - started, type(error).__name__)
                 try:
                     api.conn.close()
+                    api.conn = http.client.HTTPConnection(
+                        urlparse(args.base_url).hostname,
+                        urlparse(args.base_url).port,
+                        timeout=30,
+                    )
                 except Exception:
-                    pass
-                api.conn = http.client.HTTPConnection(
-                    urlparse(args.base_url).hostname, urlparse(args.base_url).port, timeout=30
-                )
+                    # 连不上就别静默退出：记一笔并让本轮统计少一个线程，汇总处会点明。
+                    stats.record(operation, 0.0, "worker-aborted")
+                    stats.worker_aborted += 1
+                    break
     finally:
         api.close()
 
@@ -246,15 +259,18 @@ def main():
             f"{percentile(samples, 0.99) * 1000:>10.1f}"
             f"{samples[-1] * 1000:>10.1f}"
         )
-    print(f"\n合计 {total} 次请求，{wall:.1f}s，{total / wall:.1f} RPS，"
-          f"错误 {sum(len(v) for v in errors.values())} 次")
-    if any(errors.values()):
+    failures = sum(len(samples) for samples in errors.values())
+    print(f"\n合计 {total} 次请求，{wall:.1f}s，{total / wall:.1f} RPS，错误 {failures} 次")
+    if errors:
         for operation, samples in errors.items():
             kinds = {}
             for sample in samples:
                 kinds[sample] = kinds.get(sample, 0) + 1
             print(f"  错误明细 {operation}: {kinds}")
-    return 0
+    if stats.worker_aborted:
+        print(f"  {stats.worker_aborted}/{args.concurrency} 个工作线程无法续连而提前退出，"
+              f"本轮吞吐被低估")
+    return exit_code(stats, errors)
 
 
 if __name__ == "__main__":
