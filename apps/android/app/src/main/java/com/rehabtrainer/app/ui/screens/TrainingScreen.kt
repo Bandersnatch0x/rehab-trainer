@@ -45,6 +45,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.rehabtrainer.app.core.pose.CaptureGate
 import com.rehabtrainer.app.core.pose.PoseAnalyzer
 import com.rehabtrainer.app.core.pose.PoseFrame
+import com.rehabtrainer.app.core.pose.RepIssue
+import com.rehabtrainer.app.core.pose.RepResult
 import com.rehabtrainer.app.core.training.InstructionalVideoSource
 import com.rehabtrainer.app.core.training.SetProgress
 import com.rehabtrainer.app.core.training.TrainingDisplayMode
@@ -58,6 +60,22 @@ import java.util.concurrent.Executors
 /**
  * 训练执行页：双播放 / 纯拍摄+语音两种模式，D17 采集门禁，组状态机与适老化自适应。
  */
+private fun describeRep(result: RepResult): String {
+    if (result.valid) {
+        return "本次达标"
+    }
+    return result.issues.joinToString("；") { issue ->
+        when (issue) {
+            RepIssue.INSUFFICIENT_RANGE -> "幅度不足"
+            RepIssue.EXCESSIVE_DEPTH -> "下蹲过深"
+            RepIssue.TRUNK_LEAN -> "躯干前倾"
+            RepIssue.KNEE_VALGUS -> "膝盖内扣"
+            RepIssue.ASYMMETRY -> "左右不对称"
+            RepIssue.POSE_INCOMPLETE -> "关键点不足"
+        }
+    }
+}
+
 @Composable
 fun TrainingScreen(
     exerciseCode: String = "EX-RAS-01",
@@ -125,7 +143,8 @@ fun TrainingScreen(
     var ttsReady by remember { mutableStateOf(false) }
     var ttsFailed by remember { mutableStateOf(false) }
 
-    var armRaiseCount by remember { mutableIntStateOf(0) }
+    var repCount by remember { mutableIntStateOf(0) }
+    var repHint by remember { mutableStateOf<String?>(null) }
     var setProgress by remember(exerciseCode) {
         mutableStateOf(SetProgress(currentExercise.sets, currentExercise.repsPerSet))
     }
@@ -158,6 +177,7 @@ fun TrainingScreen(
         PoseAnalyzer(
             context = context,
             requiresFullBody = requiresFullBody,
+            exerciseKind = currentExercise.kind,
             onFrame = { frame ->
                 mainHandler.post {
                     if (isPaused) return@post
@@ -172,8 +192,9 @@ fun TrainingScreen(
                             } else {
                                 statusText = if (requiresFullBody) "全身姿态识别正常" else "上半身姿态识别正常"
                                 if (!setProgress.isComplete) {
-                                    armRaiseCount = setProgress.capReps(frame.armRaiseCount)
+                                    repCount = setProgress.capReps(frame.repCount)
                                 }
+                                repHint = frame.lastRep?.let(::describeRep)
                             }
                         }
                         PoseFrame.NoPose -> statusText = "未检测到人体，请站入画面中央"
@@ -277,7 +298,8 @@ fun TrainingScreen(
                     voiceCoach.speak("全部 ${next.totalSets} 组已完成，训练结束")
                 }
             } else {
-                armRaiseCount = 0
+                repCount = 0
+                repHint = null
                 analyzer.resetCounter()
                 statusText = "第 ${next.currentSet} 组准备开始"
                 if (shouldSpeak && ttsReady) {
@@ -336,7 +358,8 @@ fun TrainingScreen(
                                 .weight(1f)
                                 .fillMaxWidth(),
                             previewView = previewView,
-                            armRaiseCount = armRaiseCount,
+                            repCount = repCount,
+                            repHint = repHint,
                             repsPerSet = setProgress.repsPerSet,
                             counterLabel = currentExercise.counterLabel,
                             largeCount = true,
@@ -372,7 +395,8 @@ fun TrainingScreen(
                                 .weight(0.62f)
                                 .fillMaxWidth(),
                             previewView = previewView,
-                            armRaiseCount = armRaiseCount,
+                            repCount = repCount,
+                            repHint = repHint,
                             repsPerSet = setProgress.repsPerSet,
                             counterLabel = currentExercise.counterLabel,
                             statusText = statusText,
@@ -407,7 +431,8 @@ fun TrainingScreen(
                                 .weight(1f)
                                 .fillMaxHeight(),
                             previewView = previewView,
-                            armRaiseCount = armRaiseCount,
+                            repCount = repCount,
+                            repHint = repHint,
                             repsPerSet = setProgress.repsPerSet,
                             counterLabel = currentExercise.counterLabel,
                             statusText = statusText,
@@ -442,7 +467,8 @@ fun TrainingScreen(
                                 .weight(0.60f)
                                 .fillMaxHeight(),
                             previewView = previewView,
-                            armRaiseCount = armRaiseCount,
+                            repCount = repCount,
+                            repHint = repHint,
                             repsPerSet = setProgress.repsPerSet,
                             counterLabel = currentExercise.counterLabel,
                             statusText = statusText,

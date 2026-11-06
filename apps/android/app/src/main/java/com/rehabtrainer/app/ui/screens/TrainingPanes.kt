@@ -529,10 +529,11 @@ internal fun InstructionalVideoPane(
 internal fun PatientRealtimeCameraPane(
     modifier: Modifier = Modifier,
     previewView: PreviewView,
-    armRaiseCount: Int,
+    repCount: Int,
     repsPerSet: Int,
-    // 计数在数什么：当前只有右臂抬举计数器，必须如实标注（P1-16）。
-    counterLabel: String = "右臂抬举",
+    // 计数在数什么由条目决定（踏步/抬举/蹲起），标签必须如实标注（P1-16）。
+    counterLabel: String,
+    repHint: String? = null,
     largeCount: Boolean = false,
     statusText: String,
     footVisible: Boolean,
@@ -573,7 +574,7 @@ internal fun PatientRealtimeCameraPane(
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        text = "$armRaiseCount",
+                        text = "$repCount",
                         fontSize = if (largeCount) 36.sp else 28.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,
@@ -591,6 +592,14 @@ internal fun PatientRealtimeCameraPane(
                             fontSize = 14.sp,
                             color = Color(0xFFCBD5E1)
                         )
+                        if (repHint != null) {
+                            Text(
+                                text = repHint,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (repHint == "本次达标") Color(0xFF4ADE80) else Color(0xFFFBBF24)
+                            )
+                        }
                     }
                 }
             }

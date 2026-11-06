@@ -256,7 +256,7 @@ $env:JAVA_HOME = 'E:\jdk\microsoft-jdk-21.0.10-windows-x64\jdk-21.0.10+7'
 ./gradlew.bat :app:testDebugUnitTest :app:assembleDebug --no-daemon
 ```
 
-预期：80 项单元测试全部通过，`assembleDebug` 成功。以上路径是本次验证环境；现场按实际 JDK 与 SDK 安装位置替换。`scripts/verify_all.py` 在 Windows 上会用绝对路径直接调用 `gradlew.bat`，无需先跑 `--skip-android`。
+预期：90 项单元测试全部通过，`assembleDebug` 成功。以上路径是本次验证环境；现场按实际 JDK 与 SDK 安装位置替换。`scripts/verify_all.py` 在 Windows 上会用绝对路径直接调用 `gradlew.bat`，无需先跑 `--skip-android`。
 
 ### 9.6 API 联调
 

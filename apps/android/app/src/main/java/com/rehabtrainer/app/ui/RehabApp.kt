@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.rehabtrainer.app.core.pose.ExerciseKind
 import com.rehabtrainer.app.ui.components.RehabTopBar
 import com.rehabtrainer.app.ui.navigation.RehabDestination
 import com.rehabtrainer.app.ui.navigation.RehabDrawerContent
@@ -51,9 +52,10 @@ data class ExerciseMeta(
     val repsPerSet: Int,
     val requiresFullBody: Boolean,
     val restSeconds: Int = 30,
-    // 计数语义：当前只有「右臂抬举」一个计数器，标签必须如实说明在数什么（P1-16）。
-    // 接入按动作类型分派的计数后，改由条目指标类型决定。
-    val counterLabel: String = "右臂抬举",
+    // 计数标签必须如实说明在数什么；姿势矫正尚未接入分析器（P1-16）。
+    val counterLabel: String = "抬举次数",
+    // 规则法动作分析器类型（踏步 / 微蹲 / 抬举）。
+    val kind: ExerciseKind = ExerciseKind.ARM_RAISE,
     // 服务端下发的示范视频；为空时回退 APK 内置演示视频。
     val videoUri: String? = null,
     val watermarkText: String? = null,
@@ -76,7 +78,8 @@ val DEFAULT_EXERCISES = listOf(
         sets = 3,
         repsPerSet = 12,
         requiresFullBody = true,
-        counterLabel = "右臂抬举（踏步计数待接入）",
+        counterLabel = "踏步次数",
+        kind = ExerciseKind.MARCH,
     ),
     ExerciseMeta(
         code = "EX-STRETCH-01",
@@ -89,7 +92,8 @@ val DEFAULT_EXERCISES = listOf(
         sets = 2,
         repsPerSet = 10,
         requiresFullBody = false,
-        counterLabel = "右臂抬举（上肢伸展计数待接入）",
+        counterLabel = "抬举次数",
+        kind = ExerciseKind.ARM_RAISE,
     ),
     ExerciseMeta(
         code = "EX-STRENGTH-01",
@@ -102,7 +106,8 @@ val DEFAULT_EXERCISES = listOf(
         sets = 2,
         repsPerSet = 8,
         requiresFullBody = true,
-        counterLabel = "右臂抬举（蹲起计数待接入）",
+        counterLabel = "蹲起次数",
+        kind = ExerciseKind.SQUAT,
     ),
     ExerciseMeta(
         code = "EX-POSTURE-01",
@@ -115,7 +120,8 @@ val DEFAULT_EXERCISES = listOf(
         sets = 3,
         repsPerSet = 10,
         requiresFullBody = true,
-        counterLabel = "右臂抬举（姿势矫正计数待接入）",
+        counterLabel = "抬臂计数（姿势矫正待接入）",
+        kind = ExerciseKind.ARM_RAISE,
     )
 )
 
