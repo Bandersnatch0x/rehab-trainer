@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.os.SystemClock
+import android.util.Log
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import com.google.mediapipe.framework.image.BitmapImageBuilder
@@ -12,13 +13,17 @@ import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarker
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
 
+private const val TAG = "PoseAnalyzer"
+private const val LOG_INTERVAL_MS = 1_000L
+
 /** 一帧姿态识别的输出。 */
 sealed interface PoseFrame {
     data class Detected(
         val repCount: Int,
         val lastRep: RepResult?,
         val currentIssues: Set<RepIssue>,
-        val footVisibility: Float
+        val footVisibility: Float,
+        val framingHint: String? = null
     ) : PoseFrame
 
     data object NoPose : PoseFrame
@@ -51,6 +56,9 @@ class PoseAnalyzer(
     @Volatile
     private var lastFrameTimestampMs = 0L
 
+    private var lastDetectTimestampMs = 0L
+    private var lastLogAtMs = 0L
+
     @Volatile
     private var isPaused = false
 
@@ -77,9 +85,10 @@ class PoseAnalyzer(
             .setBaseOptions(baseOptions)
             .setRunningMode(RunningMode.LIVE_STREAM)
             .setNumPoses(1)
-            .setMinPoseDetectionConfidence(0.5f)
-            .setMinPosePresenceConfidence(0.5f)
-            .setMinTrackingConfidence(0.5f)
+            // 适老化场景光线/机位不理想，放宽阈值提高检出率；误检由动作状态机与可见度门槛兜底。
+            .setMinPoseDetectionConfidence(0.35f)
+            .setMinPosePresenceConfidence(0.35f)
+            .setMinTrackingConfidence(0.35f)
             .setResultListener { result, _ -> handleResult(result) }
             .setErrorListener { error ->
                 onFrame(PoseFrame.Failure(error.message ?: "姿态识别失败"))
@@ -89,12 +98,16 @@ class PoseAnalyzer(
     }
 
     override fun analyze(imageProxy: ImageProxy) {
-        lastFrameTimestampMs = SystemClock.elapsedRealtime()
+        // MediaPipe 要求 timestamp 为单调递增毫秒；用 elapsedRealtime 而不是 imageProxy 的微秒值。
+        val now = SystemClock.elapsedRealtime()
+        lastDetectTimestampMs =
+            if (now > lastDetectTimestampMs) now else lastDetectTimestampMs + 1
+        lastFrameTimestampMs = lastDetectTimestampMs
         try {
             val bitmap = imageProxy.toBitmap()
             val upright = rotateIfNeeded(bitmap, imageProxy.imageInfo.rotationDegrees)
             val mpImage = BitmapImageBuilder(upright).build()
-            landmarker.detectAsync(mpImage, imageProxy.imageInfo.timestamp / 1_000)
+            landmarker.detectAsync(mpImage, lastDetectTimestampMs)
         } catch (error: RuntimeException) {
             onFrame(PoseFrame.Failure(error.message ?: "姿态识别失败"))
         } finally {
@@ -109,6 +122,7 @@ class PoseAnalyzer(
     private fun handleResult(result: PoseLandmarkerResult) {
         val landmarks = result.landmarks().firstOrNull()
         if (landmarks == null || landmarks.size < PoseIndex.LANDMARK_COUNT) {
+            logThrottled("no pose detected")
             onFrame(PoseFrame.NoPose)
             return
         }
@@ -118,8 +132,8 @@ class PoseAnalyzer(
                 x = it.x(),
                 y = it.y(),
                 z = it.z(),
-                // visibility() 是 Optional<Float>：模型未给出可见度时按不可见处理（D17 门槛 fail-closed）。
-                visibility = it.visibility().orElse(0f)
+                // 取 visibility 与 presence 的较大值：遮挡但仍在画面内的关键点常表现为 visibility 低、presence 高。
+                visibility = maxOf(it.visibility().orElse(0f), it.presence().orElse(0f))
             )
         }
         val footVisibility = listOf(
@@ -150,15 +164,40 @@ class PoseAnalyzer(
             return
         }
 
+        val shoulderWidth = kotlin.math.abs(
+            points[PoseIndex.LEFT_SHOULDER].x - points[PoseIndex.RIGHT_SHOULDER].x
+        )
+        val framingHint = when {
+            shoulderWidth > 0.55f -> "距离太近：请后退，让上半身与手臂都在画面内"
+            shoulderWidth < 0.08f -> "距离太远：请靠近一些或把手机放近一点"
+            else -> null
+        }
+        logThrottled(
+            "pose: shoulder=%.2f wrist=%.2f hip=%.2f ankle=%.2f width=%.2f".format(
+                minOf(points[PoseIndex.LEFT_SHOULDER].visibility, points[PoseIndex.RIGHT_SHOULDER].visibility),
+                minOf(points[PoseIndex.LEFT_WRIST].visibility, points[PoseIndex.RIGHT_WRIST].visibility),
+                minOf(points[PoseIndex.LEFT_HIP].visibility, points[PoseIndex.RIGHT_HIP].visibility),
+                minOf(points[PoseIndex.LEFT_ANKLE].visibility, points[PoseIndex.RIGHT_ANKLE].visibility),
+                shoulderWidth
+            )
+        )
         lastUpdate = analyzer.update(points, lastFrameTimestampMs)
         onFrame(
             PoseFrame.Detected(
                 repCount = lastUpdate.count,
                 lastRep = lastUpdate.lastRep,
                 currentIssues = lastUpdate.currentIssues,
-                footVisibility = footVisibility
+                footVisibility = footVisibility,
+                framingHint = framingHint
             )
         )
+    }
+
+    private fun logThrottled(message: String) {
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastLogAtMs < LOG_INTERVAL_MS) return
+        lastLogAtMs = now
+        Log.d(TAG, message)
     }
 
     private fun rotateIfNeeded(bitmap: Bitmap, degrees: Int): Bitmap {

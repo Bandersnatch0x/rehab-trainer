@@ -13,14 +13,18 @@ import kotlin.math.abs
  * 阈值是工程/文献预设，待专业签核；单测覆盖幅度、肘屈、左右不对称与保持计时。
  */
 class StretchAnalyzer(
-    private val minRaiseRatio: Float = 0.60f,
-    private val minElbowAngle: Float = 145f,
-    private val maxShoulderTiltRatio: Float = 0.15f,
-    private val maxRaiseAsymmetry: Float = 0.35f,
-    private val holdMs: Long = 3_000L
+    private val minRaiseRatio: Float = 0.45f,
+    // 2D 投影下肘角会被前伸/后收压小；放宽到 110° 仍能识别明显屈肘，避免正常牵伸被判失败。
+    private val minElbowAngle: Float = 110f,
+    private val maxShoulderTiltRatio: Float = 0.25f,
+    private val maxRaiseAsymmetry: Float = 0.75f,
+    private val holdMs: Long = 3_000L,
+    // 抬手/调整过程中偶发丢帧不立刻清零，避免保持计时被瞬时抖动打断。
+    private val gapToleranceMs: Long = 700L
 ) : ExerciseAnalyzer {
 
     private var holdStartMs: Long? = null
+    private var lastValidMs = 0L
     private var countedForCurrentHold = false
     private var repIndex = 0
 
@@ -42,7 +46,7 @@ class StretchAnalyzer(
                 threshold = 0.5f
             )
         ) {
-            resetHold()
+            onInvalidFrame(timestampMs)
             return AnalysisUpdate(count, lastRep, setOf(RepIssue.POSE_INCOMPLETE))
         }
 
@@ -86,9 +90,10 @@ class StretchAnalyzer(
         }
 
         if (issues.isNotEmpty()) {
-            resetHold()
+            onInvalidFrame(timestampMs)
             return AnalysisUpdate(count, lastRep, issues)
         }
+        lastValidMs = timestampMs
 
         if (holdStartMs == null) {
             holdStartMs = timestampMs
@@ -103,8 +108,16 @@ class StretchAnalyzer(
         return AnalysisUpdate(count, lastRep, emptySet())
     }
 
+    private fun onInvalidFrame(timestampMs: Long) {
+        if (holdStartMs != null && timestampMs - lastValidMs <= gapToleranceMs) {
+            return
+        }
+        resetHold()
+    }
+
     private fun resetHold() {
         holdStartMs = null
+        lastValidMs = 0L
         countedForCurrentHold = false
     }
 

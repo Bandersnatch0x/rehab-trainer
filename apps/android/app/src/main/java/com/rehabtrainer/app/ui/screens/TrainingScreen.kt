@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Handler
 import android.os.Looper
+import android.util.Size
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -72,7 +73,7 @@ private fun issueText(issue: RepIssue): String = when (issue) {
     RepIssue.HEAD_OFFSET -> "头部偏移"
     RepIssue.LATERAL_LEAN -> "躯干侧倾"
     RepIssue.ELBOW_BENT -> "肘部未伸展"
-    RepIssue.POSE_INCOMPLETE -> "关键点不足"
+    RepIssue.POSE_INCOMPLETE -> "关键点不足，请调整机位"
 }
 
 private fun describeRep(result: RepResult): String =
@@ -195,7 +196,7 @@ fun TrainingScreen(
                                 // D17：门禁期间冻结计数，姿态检测继续以等待自动恢复。
                                 statusText = if (largeFont) "请调整站位" else "脚部不在画面内"
                             } else {
-                                statusText = when {
+                                statusText = frame.framingHint ?: when {
                                     largeFont -> "识别正常"
                                     else -> ""
                                 }
@@ -206,12 +207,13 @@ fun TrainingScreen(
                                     frame.currentIssues.isNotEmpty() ->
                                         "调整：" + frame.currentIssues.joinToString("；") { issueText(it) }
                                     frame.lastRep != null -> describeRep(frame.lastRep!!)
-                                    currentExercise.kind == ExerciseKind.POSTURE -> "保持中…"
+                                    currentExercise.kind == ExerciseKind.POSTURE ||
+                                        currentExercise.kind == ExerciseKind.STRETCH -> "保持中…"
                                     else -> null
                                 }
                             }
                         }
-                        PoseFrame.NoPose -> statusText = if (largeFont) "请站入画面中央" else "未检测到人体，请站入画面中央"
+                        PoseFrame.NoPose -> statusText = if (largeFont) "请站入画面中央" else "未检测到人体：请让上半身完整入镜并避免背光"
                         is PoseFrame.Failure -> statusText = frame.message
                     }
                 }
@@ -232,6 +234,8 @@ fun TrainingScreen(
             }
             val analysis = ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                // 720p 提升远距离/小目标的人体检出率；Lite 模型在此分辨率下仍可实时。
+                .setTargetResolution(Size(1280, 720))
                 .build()
             analysis.setAnalyzer(executor, analyzer)
             provider.unbindAll()

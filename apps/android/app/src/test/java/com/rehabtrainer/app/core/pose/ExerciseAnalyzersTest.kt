@@ -377,7 +377,7 @@ class ExerciseAnalyzersTest {
     fun bentElbowIsReported() {
         val analyzer = StretchAnalyzer()
         val update = analyzer.update(
-            stretch(leftWrist = PosePoint(0.55f, 0.05f)),
+            stretch(leftWrist = PosePoint(0.60f, 0.15f)),
             timestampMs = 0
         )
         assertTrue(update.currentIssues.contains(RepIssue.ELBOW_BENT))
@@ -387,7 +387,7 @@ class ExerciseAnalyzersTest {
     fun asymmetricRaiseIsReported() {
         val analyzer = StretchAnalyzer()
         val update = analyzer.update(
-            stretch(rightWrist = PosePoint(0.55f, 0.12f)),
+            stretch(rightWrist = PosePoint(0.55f, 0.22f)),
             timestampMs = 0
         )
         assertTrue(update.currentIssues.contains(RepIssue.ASYMMETRY))

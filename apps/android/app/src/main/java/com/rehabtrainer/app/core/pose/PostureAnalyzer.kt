@@ -18,10 +18,13 @@ class PostureAnalyzer(
     private val maxHipTiltRatio: Float = 0.06f,
     private val maxLateralLeanRatio: Float = 0.08f,
     private val maxHeadOffsetRatio: Float = 0.10f,
-    private val holdMs: Long = 3_000L
+    private val holdMs: Long = 3_000L,
+    // 抬手/调整过程中偶发丢帧不立刻清零，避免保持计时被瞬时抖动打断。
+    private val gapToleranceMs: Long = 700L
 ) : ExerciseAnalyzer {
 
     private var holdStartMs: Long? = null
+    private var lastValidMs = 0L
     private var countedForCurrentHold = false
     private var repIndex = 0
 
