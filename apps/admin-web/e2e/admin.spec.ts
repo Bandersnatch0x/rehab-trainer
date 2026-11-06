@@ -250,6 +250,16 @@ test('处方可添加与移除训练条目', async ({ page, data }) => {
   await third.getByRole('button', { name: '移除' }).click();
   await expect(third).toHaveCount(0);
   await expect(page.getByRole('group', { name: '训练条目 2' })).toBeVisible();
+
+  // 只剩一条时不能再移除，避免提交空处方。
+  await page
+    .getByRole('group', { name: '训练条目 2' })
+    .getByRole('button', { name: '移除' })
+    .click();
+  await expect(page.getByRole('group', { name: '训练条目 2' })).toHaveCount(0);
+  await expect(
+    page.getByRole('group', { name: '训练条目 1' }).getByRole('button', { name: '移除' }),
+  ).toBeDisabled();
 });
 
 test('随访台账只显示已处置的预警', async ({ page, data, request }) => {

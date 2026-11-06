@@ -24,7 +24,7 @@ App 与小程序功能清单一致;差异只在姿态识别的实现方式与实
 
 | 部分 | 状态 |
 | --- | --- |
-| 后端 `services/api` | FastAPI + SQLAlchemy,Alembic 迁移 head `0004`,覆盖 17 张表;110 项测试通过 |
+| 后端 `services/api` | FastAPI + SQLAlchemy,Alembic 迁移 head `0005`,覆盖 18 张表;117 项测试通过 |
 | Web 后台 `apps/admin-web` | 9 个业务页已接真实 API(患者、详情、分期、处方、预警、随访台账、审计、科研、视频管理);Playwright E2E 23 条全部通过 |
 | 微信小程序 / Android | 契约客户端已生成,配置指向本地后端;App 端上实时推理已用于训练页动作计数;小程序云端异步 CV 未实现(占位见 `services/cv-worker`,D26) |
 | 部署 | `services/api/Dockerfile` + `docker-compose.yml` + `deploy/`(Alembic、健康检查、自检);手册见 `docs/deployment/README.md` |

@@ -1,3 +1,8 @@
+from sqlalchemy import func, select
+
+from app.core import totp
+from app.core.config import get_settings
+from app.models.identity import Account, LoginFailure
 from tests.helpers import API, auth_headers, login
 
 
@@ -74,3 +79,76 @@ def test_refresh_token_issues_new_pair(client, seed):
         f"{API}/auth/refresh", json={"refreshToken": "not-a-token"}
     )
     assert invalid.status_code == 401
+
+
+def test_login_rate_limit_is_shared_via_database(client, seed, db_session):
+    settings = get_settings()
+    for _ in range(settings.login_max_failures):
+        failed = client.post(
+            f"{API}/auth/login",
+            json={"username": "therapist-a", "password": "wrong-password"},
+        )
+        assert failed.status_code == 401
+
+    blocked = client.post(
+        f"{API}/auth/login",
+        json={"username": "therapist-a", "password": "secret123"},
+    )
+    assert blocked.status_code == 429
+    assert blocked.json()["code"] == "RATE_LIMITED"
+
+    # 失败计数在数据库中，多副本与重启都不会清零。
+    db_session.expire_all()
+    stored = db_session.scalar(select(func.count()).select_from(LoginFailure))
+    assert stored == settings.login_max_failures
+
+
+def test_successful_login_clears_failure_counter(client, seed, db_session):
+    client.post(
+        f"{API}/auth/login",
+        json={"username": "therapist-a", "password": "wrong-password"},
+    )
+    assert db_session.scalar(select(func.count()).select_from(LoginFailure)) == 1
+
+    ok = client.post(
+        f"{API}/auth/login",
+        json={"username": "therapist-a", "password": "secret123"},
+    )
+    assert ok.status_code == 200, ok.text
+    db_session.expire_all()
+    assert db_session.scalar(select(func.count()).select_from(LoginFailure)) == 0
+
+
+def test_totp_required_after_enrollment_and_cannot_be_replayed(client, seed, db_session):
+    account = db_session.get(Account, "admin-a")
+    secret = totp.generate_secret()
+    account.totp_secret = secret
+    account.totp_last_step = None
+    db_session.commit()
+
+    missing = client.post(
+        f"{API}/auth/login",
+        json={"username": "admin-a", "password": "secret123"},
+    )
+    assert missing.status_code == 401
+    assert "二次验证" in missing.json()["message"]
+
+    wrong = client.post(
+        f"{API}/auth/login",
+        json={"username": "admin-a", "password": "secret123", "totp": "000000"},
+    )
+    assert wrong.status_code == 401
+
+    code = totp.generate_code(secret)
+    ok = client.post(
+        f"{API}/auth/login",
+        json={"username": "admin-a", "password": "secret123", "totp": code},
+    )
+    assert ok.status_code == 200, ok.text
+
+    replay = client.post(
+        f"{API}/auth/login",
+        json={"username": "admin-a", "password": "secret123", "totp": code},
+    )
+    assert replay.status_code == 401
+    assert "二次验证" in replay.json()["message"]

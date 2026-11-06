@@ -1,10 +1,11 @@
-import time
-from collections import defaultdict
+from datetime import timedelta
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends
-from sqlalchemy import select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
+from app.core import totp
 from app.core.auth import Principal, build_principal, get_principal
 from app.core.config import get_settings
 from app.core.database import get_db
@@ -16,7 +17,7 @@ from app.core.security import (
     verify_password,
 )
 from app.core.timeutils import utcnow
-from app.models.identity import Account, BindingToken
+from app.models.identity import Account, BindingToken, LoginFailure
 from app.schemas.auth import (
     BindRequest,
     LoginRequest,
@@ -28,8 +29,41 @@ from app.schemas.auth import (
 
 router = APIRouter(tags=["auth"])
 
-# 进程内登录失败计数；生产多副本部署时应换 Redis 等共享存储。
-_login_failures: dict[str, list[float]] = defaultdict(list)
+
+def _check_login_rate_limit(db: Session, username: str) -> None:
+    settings = get_settings()
+    cutoff = utcnow() - timedelta(seconds=settings.login_window_seconds)
+    recent = db.scalar(
+        select(func.count())
+        .select_from(LoginFailure)
+        .where(
+            LoginFailure.username == username,
+            LoginFailure.created_at >= cutoff,
+        )
+    )
+    if (recent or 0) >= settings.login_max_failures:
+        raise api_error(429, "RATE_LIMITED", "尝试次数过多，请稍后再试")
+
+
+def _record_login_failure(db: Session, username: str) -> None:
+    """失败记录落库：多副本共享计数，重启不清零。"""
+    settings = get_settings()
+    cutoff = utcnow() - timedelta(seconds=settings.login_window_seconds)
+    db.execute(
+        delete(LoginFailure).where(
+            LoginFailure.username == username,
+            LoginFailure.created_at < cutoff,
+        )
+    )
+    db.add(
+        LoginFailure(id=uuid4().hex, username=username, created_at=utcnow())
+    )
+    db.commit()
+
+
+def _clear_login_failures(db: Session, username: str) -> None:
+    db.execute(delete(LoginFailure).where(LoginFailure.username == username))
+    db.commit()
 
 
 def _me(principal: Principal) -> Me:
@@ -47,19 +81,6 @@ def _token_pair_for(db: Session, account: Account) -> dict:
     return create_token_pair(
         account.account_id, account.org_id, list(principal.roles)
     )
-
-
-def _check_login_rate_limit(username: str) -> None:
-    settings = get_settings()
-    cutoff = time.time() - settings.login_window_seconds
-    recent = [ts for ts in _login_failures[username] if ts >= cutoff]
-    _login_failures[username] = recent
-    if len(recent) >= settings.login_max_failures:
-        raise api_error(429, "RATE_LIMITED", "尝试次数过多，请稍后再试")
-
-
-def _record_login_failure(username: str) -> None:
-    _login_failures[username].append(time.time())
 
 
 @router.post("/auth/bind", response_model=TokenPair)
@@ -81,7 +102,7 @@ def bind(payload: BindRequest, db: Session = Depends(get_db)):
 
 @router.post("/auth/login", response_model=LoginResponse)
 def login(payload: LoginRequest, db: Session = Depends(get_db)):
-    _check_login_rate_limit(payload.username)
+    _check_login_rate_limit(db, payload.username)
 
     account = db.scalar(select(Account).where(Account.username == payload.username))
     if (
@@ -89,11 +110,22 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
         or account.status != "active"
         or not verify_password(payload.password, account.password_hash)
     ):
-        _record_login_failure(payload.username)
+        _record_login_failure(db, payload.username)
         raise api_error(401, "UNAUTHORIZED", "用户名或密码错误")
 
-    # TODO: 待实现 TOTP 二次验证；当前契约字段仅接收，不校验。
-    _login_failures.pop(payload.username, None)
+    # 启用二次验证的账号必须提交有效 TOTP；同一时间步不可重放。
+    if account.totp_secret:
+        step = totp.verify(
+            account.totp_secret,
+            payload.totp or "",
+            last_step=account.totp_last_step,
+        )
+        if step is None:
+            _record_login_failure(db, payload.username)
+            raise api_error(401, "UNAUTHORIZED", "二次验证码错误或已失效")
+        account.totp_last_step = step
+
+    _clear_login_failures(db, payload.username)
     principal = build_principal(db, account)
     pair = _token_pair_for(db, account)
     return LoginResponse(

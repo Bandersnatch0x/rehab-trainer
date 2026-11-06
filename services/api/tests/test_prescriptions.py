@@ -188,3 +188,31 @@ def test_patch_rejects_duplicate_items(client, seed):
         headers={**headers, "If-Match": prescription["version"]},
     )
     assert response.status_code == 422, response.text
+
+
+def test_patch_rejects_empty_or_too_many_items(client, seed):
+    token = login(client, "therapist-a")
+    headers = auth_headers(token)
+    created = client.post(f"{API}/prescriptions", json=_create_body(seed), headers=headers)
+    assert created.status_code == 201, created.text
+    prescription = created.json()
+    if_match = {**headers, "If-Match": prescription["version"]}
+
+    empty = client.patch(
+        f"{API}/prescriptions/{prescription['id']}",
+        json={"items": []},
+        headers=if_match,
+    )
+    assert empty.status_code == 422, empty.text
+
+    too_many = client.patch(
+        f"{API}/prescriptions/{prescription['id']}",
+        json={
+            "items": [
+                {"exerciseCode": f"ex-{index}", "dosage": {"sets": 1}}
+                for index in range(21)
+            ]
+        },
+        headers=if_match,
+    )
+    assert too_many.status_code == 422, too_many.text

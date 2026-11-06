@@ -6,6 +6,7 @@ from app.models.identity import (
     Account,
     BindingToken,
     ExternalIdentity,
+    LoginFailure,
     Org,
     RoleBinding,
 )
@@ -22,6 +23,7 @@ __all__ = [
     "Exercise",
     "ExerciseVariant",
     "ExternalIdentity",
+    "LoginFailure",
     "MediaAsset",
     "NotificationDelivery",
     "Org",

@@ -180,6 +180,10 @@ export default function PatientDetailPage() {
               <p className="hint" style={{ margin: 0 }}>
                 正在读取处方…
               </p>
+            ) : patientFailed ? (
+              <p role="alert" className="hint" style={{ margin: 0, color: "var(--color-danger)" }}>
+                患者档案读取失败，无法加载处方。
+              </p>
             ) : prescriptionError ? (
               <p role="alert" className="hint" style={{ margin: 0, color: "var(--color-danger)" }}>
                 处方读取失败：{prescriptionError}
@@ -213,9 +217,11 @@ export default function PatientDetailPage() {
               <strong>
                 {loading
                   ? "加载中…"
-                  : sessionsError
+                  : patientFailed
                     ? "读取失败"
-                    : `${sessions.length} 条${sessions.length >= 100 ? "（仅显示最近 100 条）" : ""}`}
+                    : sessionsError
+                      ? "读取失败"
+                      : `${sessions.length} 条${sessions.length >= 100 ? "（仅显示最近 100 条）" : ""}`}
               </strong>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -247,6 +253,10 @@ export default function PatientDetailPage() {
               {loading ? (
                 <tr>
                   <td colSpan={7}>正在读取训练记录…</td>
+                </tr>
+              ) : patientFailed ? (
+                <tr>
+                  <td colSpan={7}>患者档案读取失败，无法加载训练记录。</td>
                 </tr>
               ) : sessionsError ? (
                 <tr>

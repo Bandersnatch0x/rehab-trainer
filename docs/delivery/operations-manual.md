@@ -96,6 +96,14 @@
 
 仅在演示或本地联调时，从 `services/api` 目录执行 `python -m app.seed` 写入演示数据。seed 会创建演示账号与演示患者，生产环境不得执行。
 
+二次验证（TOTP，可选）：从仓库根目录执行
+
+```powershell
+services/api/.venv/Scripts/python.exe scripts/set-totp.py --username <账号>
+```
+
+脚本会写入密钥并打印认证器 URI；该账号下次登录必须提交 6 位验证码，同一时间步不可重放。关闭用 `--clear`。此操作直接改数据库，生产环境须先备份并遵守密钥交付流程。登录失败计数存储于 `login_failure` 表，多副本共享，重启不清零。
+
 管理端本地开发从仓库根目录执行 `pnpm dev:admin-web`，Vite 开发服务器会把 `/v1` 代理到 `http://127.0.0.1:8000`。生产托管方式不在本次交付范围。
 
 ### 4.3 云上生产部署
@@ -190,7 +198,6 @@ python -m alembic -c deploy/alembic.ini check
 | Playwright 报缺少浏览器 | 未安装 Chromium | 在 `apps/admin-web` 执行 `npx playwright install chromium` |
 | Android 构建报 SDK location not found | 未设置 `ANDROID_HOME` 或 `ANDROID_SDK_ROOT` | 设置 SDK 路径，或在 `apps/android/local.properties` 写入 `sdk.dir` |
 | 迁移后 API 在新表上返回权限错误 | 运行账号没有新表权限 | 配置 `ALTER DEFAULT PRIVILEGES`，或在每次迁移后重新授权 |
-| 多副本登录限流不准确 | 失败计数保存在进程内 | 扩容前改用共享存储；当前版本按单实例部署 |
 
 ## 9. 本地校验与验收命令
 
@@ -214,8 +221,8 @@ python -m unittest discover -s scripts -p "test_*.py"
 
 预期：
 
-- 后端测试 110 项全部通过。
-- 部署自检输出 `PASS: 17 tables; SQLite upgrade/repeat/downgrade/upgrade; model diff empty; PostgreSQL SQL; YAML`。
+- 后端测试 117 项全部通过。
+- 部署自检输出 `PASS: 18 tables; SQLite upgrade/repeat/downgrade/upgrade; model diff empty; PostgreSQL SQL; YAML`。
 - 联调脚本回归测试 2 项通过。
 
 ### 9.3 管理端
@@ -280,10 +287,9 @@ git diff --check
 ## 10. 已知运维限制
 
 - API 只提供 `/v1` 业务接口，没有独立的健康检查端点；健康检查脚本组合 `/openapi.json` 与数据库版本表。
-- 登录失败计数保存在单进程内存，多副本不共享，重启后清零。
 - 没有内置日志轮转、指标、链路追踪或告警配置，需要容器平台补齐。
 - 没有通知投递与兜底通道；预警只持久化到数据库，不会自动发送短信、电话或推送。
 - 没有管理端静态站点托管、账号初始化与生产 seed 流程。
 - 没有对象存储上传集成；相关环境变量是预留项。
-- 当前 Docker/PostgreSQL 容器验证记录对应迁移 `0001` 且当时契约为 18 个操作；`0002`/`0003` 的 SQLite 往返与模型差异由部署自检覆盖，但未在容器内复跑。
+- 当前 Docker/PostgreSQL 容器验证记录对应迁移 `0001` 且当时契约为 18 个操作；`0002`–`0005` 的 SQLite 往返与模型差异由部署自检覆盖，但未在容器内复跑。
 - CI 配置文件存在，但仓库没有远端流水线，未在真实 CI 上运行。

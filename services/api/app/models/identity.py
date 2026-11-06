@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, String, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, Index, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -29,7 +29,23 @@ class Account(Base):
     display_name: Mapped[str] = mapped_column(String(128), nullable=False)
     password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
     status: Mapped[str] = mapped_column(String(16), default="active", nullable=False)
+    # 二次验证：密钥仅在启用的账号上存在；last_step 用于拒绝同一时间窗的重放。
+    totp_secret: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    totp_last_step: Mapped[int | None] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+
+
+class LoginFailure(Base):
+    """跨副本共享的登录失败记录；按窗口计数实现登录限流。"""
+
+    __tablename__ = "login_failure"
+    __table_args__ = (
+        Index("ix_login_failure_username_created", "username", "created_at"),
+    )
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    username: Mapped[str] = mapped_column(String(128), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
 
 class RoleBinding(Base):

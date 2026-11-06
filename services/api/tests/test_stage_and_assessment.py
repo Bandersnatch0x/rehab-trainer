@@ -197,6 +197,18 @@ def test_assessment_list_paginates_without_repeats(client, seed):
     page1 = first.json()
     assert len(page1["items"]) == 1 and page1["nextCursor"]
 
+    # 翻页期间插入更新的评估：第二页应继续返回下一页旧记录，而不是新记录。
+    inserted = client.post(
+        f"{API}/patients/{seed['patient_unconfirmed']}/assessments",
+        json={
+            "instrument": "DAILY_FEELING",
+            "answers": {"feeling": "第 2 天"},
+            "assessedAt": "2026-11-05T10:00:00Z",
+        },
+        headers=headers,
+    )
+    assert inserted.status_code == 201, inserted.text
+
     second = client.get(
         f"{API}/patients/{seed['patient_unconfirmed']}/assessments?limit=1&cursor={page1['nextCursor']}",
         headers=headers,
@@ -205,3 +217,4 @@ def test_assessment_list_paginates_without_repeats(client, seed):
     page2 = second.json()
     assert len(page2["items"]) == 1
     assert page1["items"][0]["id"] != page2["items"][0]["id"]
+    assert page2["items"][0]["answers"]["feeling"] == "第 0 天"
