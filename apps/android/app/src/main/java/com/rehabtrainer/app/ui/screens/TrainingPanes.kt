@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,7 +33,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,8 +46,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.camera.view.PreviewView
 import com.rehabtrainer.app.R
@@ -71,7 +77,10 @@ internal fun TrainingHeaderBar(
     showVoiceToggle: Boolean,
     voiceEnabled: Boolean,
     ttsFailed: Boolean,
-    onToggleVoice: (Boolean) -> Unit
+    onToggleVoice: (Boolean) -> Unit,
+    // DUAL 画中画下提供一个明确的「切换画面」入口，避免只靠点按小浮窗难被发现。
+    showSwapButton: Boolean = false,
+    onSwapMain: () -> Unit = {}
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surface,
@@ -109,6 +118,11 @@ internal fun TrainingHeaderBar(
                         Spacer(Modifier.width(8.dp))
                     }
 
+                    if (showSwapButton) {
+                        SwapMainChip(onSwapMain = onSwapMain, isPhoneLandscape = true)
+                        Spacer(Modifier.width(8.dp))
+                    }
+
                     if (showModeSelector) {
                         TrainingModeSelector(
                             currentMode = currentMode,
@@ -133,6 +147,10 @@ internal fun TrainingHeaderBar(
                         compact = compactLabels,
                         modifier = Modifier.weight(1f)
                     )
+                    if (showSwapButton) {
+                        Spacer(Modifier.width(8.dp))
+                        SwapMainChip(onSwapMain = onSwapMain, isPhoneLandscape = false)
+                    }
                     if (showModeSelector) {
                         Spacer(Modifier.width(8.dp))
                         TrainingModeSelector(
@@ -190,6 +208,33 @@ private fun ExerciseTitle(
                 overflow = TextOverflow.Ellipsis
             )
         }
+    }
+}
+
+/** 画中画主/小切换入口；点按小浮窗同样可切换，这里给一个明确可见的按钮。 */
+@Composable
+private fun SwapMainChip(
+    onSwapMain: () -> Unit,
+    isPhoneLandscape: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        color = Color(0xFF1E293B),
+        shape = RoundedCornerShape(12.dp),
+        border = BorderStroke(1.dp, Color(0xFF38BDF8)),
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onSwapMain() }
+            .semantics { contentDescription = "切换主画面与小窗" }
+    ) {
+        Text(
+            text = if (isPhoneLandscape) "⇄ 切换画面" else "⇄ 切换",
+            fontSize = if (isPhoneLandscape) 18.sp else 16.sp,
+            color = Color.White,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+        )
     }
 }
 
@@ -399,22 +444,42 @@ private fun demoVideoUri(context: android.content.Context): String =
  */
 private const val VIDEO_AUDIO_VOLUME = 0.8f
 
+/** 通用演示片段的醒目底色：琥珀色不易与错误红混淆，又足够抢眼。 */
+private val GENERIC_DEMO_BG = Color(0xFFF59E0B)
+private val GENERIC_DEMO_FG = Color(0xFF3B1D00)
+
 /**
  * 教学视频播放区。离开组合（切到纯拍摄模式）时通过 onRelease 停止并释放播放器。
  *
  * 视频优先播放服务端下发的地址；地址缺失或播放失败时回退到 APK 内置演示视频，
  * 训练不中断。水印与署名由客户端叠加（见 [InstructionalVideoSource]），不烧录进文件。
+ *
+ * 播放器在 onPrepared 读取真实宽高，用 [aspectRatio] 让画面按比例居中显示，不同宽高比
+ * 的素材都不会被拉伸留黑边。回退到内置通用演示片段时如实标注，避免被误认作本条动作示范。
+ *
+ * @param isGenericDemo 服务端未下发本条动作视频（`videoUri` 为空），播放的是通用演示片段。
+ * @param compact 小浮窗形态：只保留缩小的来源标注与署名，隐藏播放状态条与进度条。
  */
 @Composable
 internal fun InstructionalVideoPane(
     videoTitle: String,
-    modifier: Modifier = Modifier,
     isPaused: Boolean,
-    videoSource: InstructionalVideoSource = InstructionalVideoSource()
+    isGenericDemo: Boolean,
+    exerciseName: String,
+    modifier: Modifier = Modifier,
+    videoSource: InstructionalVideoSource = InstructionalVideoSource(),
+    compact: Boolean = false
 ) {
     // factory 的闭包只捕获创建时的值；用 rememberUpdatedState 让 onPrepared 读到最新暂停状态，
     // 否则「准备完成」瞬间会用旧值覆盖用户的暂停/继续操作。
     val pausedNow by rememberUpdatedState(isPaused)
+    val remoteUrl = videoSource.resolvedRemoteUrl
+    // 远端地址播放失败会回退到内置通用演示片段，此时同样要如实标注，不能仍标「教学示范」。
+    var fellBackToDemo by remember(remoteUrl) { mutableStateOf(false) }
+    // 播放器真实宽高比；准备完成前铺满容器，准备完成后按比例居中，避免拉伸。
+    var videoAspect by remember(remoteUrl) { mutableStateOf<Float?>(null) }
+
+    val showsGenericDemo = isGenericDemo || fellBackToDemo
 
     Card(
         modifier = modifier,
@@ -425,13 +490,16 @@ internal fun InstructionalVideoPane(
         ),
         border = BorderStroke(1.5.dp, Color(0xFF334155))
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
             // 地址变化时重建播放器，避免在同一个 VideoView 上反复 setVideoURI。
-            key(videoSource.resolvedRemoteUrl) {
+            key(remoteUrl) {
                 AndroidView(
                     factory = { context ->
                         val demoUri = demoVideoUri(context)
-                        val initialUri = videoSource.resolvedRemoteUrl ?: demoUri
+                        val initialUri = remoteUrl ?: demoUri
                         VideoView(context).apply {
                             tag = initialUri
                             setVideoURI(Uri.parse(initialUri))
@@ -439,12 +507,18 @@ internal fun InstructionalVideoPane(
                                 player.isLooping = true
                                 // 演示视频带占位音轨，不再静音；低音量避免惊吓患者与盖住语音。
                                 player.setVolume(VIDEO_AUDIO_VOLUME, VIDEO_AUDIO_VOLUME)
+                                val width = player.videoWidth
+                                val height = player.videoHeight
+                                if (width > 0 && height > 0) {
+                                    videoAspect = width.toFloat() / height.toFloat()
+                                }
                                 if (!pausedNow) start()
                             }
                             setOnErrorListener { _, _, _ ->
                                 // 远端不可用时回退内置演示视频；内置视频再失败就停止重试。
                                 if (tag != demoUri) {
                                     tag = demoUri
+                                    fellBackToDemo = true
                                     setVideoURI(Uri.parse(demoUri))
                                     true
                                 } else {
@@ -457,92 +531,167 @@ internal fun InstructionalVideoPane(
                         if (isPaused) view.pause() else if (!view.isPlaying) view.start()
                     },
                     onRelease = { view -> view.stopPlayback() },
-                    modifier = Modifier.fillMaxSize()
+                    // 按素材真实宽高比约束播放器，短边留边由外框承担，播放器本身不拉伸。
+                    modifier = videoAspect
+                        ?.takeIf { it > 0f }
+                        ?.let { Modifier.aspectRatio(it) }
+                        ?: Modifier.fillMaxSize()
                 )
             }
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                    .padding(
+                        horizontal = if (compact) 6.dp else 12.dp,
+                        vertical = if (compact) 4.dp else 8.dp
+                    ),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (showsGenericDemo) {
+                    Surface(
+                        color = GENERIC_DEMO_BG,
+                        shape = RoundedCornerShape(6.dp)
+                    ) {
+                        Text(
+                            text = if (compact) {
+                                "🎬 通用演示 · 非本条动作"
+                            } else {
+                                "🎬 通用演示片段 · 非本条动作：$exerciseName"
+                            },
+                            fontSize = if (compact) 11.sp else 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = GENERIC_DEMO_FG,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(
+                                horizontal = if (compact) 6.dp else 8.dp,
+                                vertical = 2.dp
+                            )
+                        )
+                    }
+                } else {
                     Surface(
                         color = MaterialTheme.colorScheme.primaryContainer,
                         shape = RoundedCornerShape(6.dp)
                     ) {
                         Text(
                             text = "🎬 教学示范 · 演示",
-                            fontSize = 14.sp,
+                            fontSize = if (compact) 11.sp else 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                            modifier = Modifier.padding(
+                                horizontal = if (compact) 6.dp else 8.dp,
+                                vertical = 2.dp
+                            )
                         )
                     }
                 }
 
-                if (videoSource.hasOverlay) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // 署名左下、水印右下，模拟播放器叠加，兼顾版权标注可读性。
-                        Text(
-                            text = videoSource.creditLabel.orEmpty(),
-                            fontSize = 12.sp,
-                            color = Color(0xB3FFFFFF),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f, fill = false)
-                        )
-                        if (videoSource.watermarkLabel != null) {
-                            Surface(
-                                color = Color(0x73000000),
-                                shape = RoundedCornerShape(4.dp)
-                            ) {
-                                Text(
-                                    text = videoSource.watermarkLabel.orEmpty(),
-                                    fontSize = 12.sp,
-                                    color = Color(0xE0FFFFFF),
-                                    maxLines = 1,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
-                                )
+                // 底部统一收拢：署名/水印 + 播放状态 + 进度条，避免大画面下状态条浮在画面中间。
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    if (videoSource.hasOverlay) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // 署名左下、水印右下，模拟播放器叠加，兼顾版权标注可读性。
+                            Text(
+                                text = videoSource.creditLabel.orEmpty(),
+                                fontSize = if (compact) 10.sp else 12.sp,
+                                color = Color(0xB3FFFFFF),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f, fill = false)
+                            )
+                            if (videoSource.watermarkLabel != null) {
+                                Surface(
+                                    color = Color(0x73000000),
+                                    shape = RoundedCornerShape(4.dp)
+                                ) {
+                                    Text(
+                                        text = videoSource.watermarkLabel.orEmpty(),
+                                        fontSize = if (compact) 10.sp else 12.sp,
+                                        color = Color(0xE0FFFFFF),
+                                        maxLines = 1,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
+                                    )
+                                }
                             }
                         }
                     }
-                }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = if (isPaused) "已暂停" else "循环示范中",
-                        fontSize = 18.sp,
-                        color = if (isPaused) Color(0xFFFFB4AB) else Color(0xFF80D5CB),
-                        fontWeight = FontWeight.Medium
-                    )
-                    Text(
-                        text = "01:24 / 03:00",
-                        fontSize = 18.sp,
-                        color = Color(0xFF94A3B8)
-                    )
-                }
+                    if (!compact) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = if (isPaused) "已暂停" else "循环示范中",
+                                fontSize = 18.sp,
+                                color = if (isPaused) Color(0xFFFFB4AB) else Color(0xFF80D5CB),
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = "01:24 / 03:00",
+                                fontSize = 18.sp,
+                                color = Color(0xFF94A3B8)
+                            )
+                        }
 
-                LinearProgressIndicator(
-                    progress = { 0.46f },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(6.dp)
-                        .clip(RoundedCornerShape(3.dp)),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = Color(0xFF334155),
-                )
+                        LinearProgressIndicator(
+                            progress = { 0.46f },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(6.dp)
+                                .clip(RoundedCornerShape(3.dp)),
+                            color = MaterialTheme.colorScheme.primary,
+                            trackColor = Color(0xFF334155),
+                        )
+                    }
+                }
             }
         }
+    }
+}
+
+/**
+ * 「视频通话」式训练画面布局：一个大画面铺满，另一个缩成右下角圆角小浮窗。
+ *
+ * [videoIsMain] 决定谁大谁小；点按小浮窗或头部「切换画面」都会调用 [onSwap]。
+ * 两个 slot 的调用点固定，切换只换 Modifier，不会重建摄像头预览或播放器。
+ */
+@Composable
+internal fun TrainingPipLayout(
+    videoIsMain: Boolean,
+    onSwap: () -> Unit,
+    pipWidth: Dp,
+    videoSlot: @Composable (modifier: Modifier, compact: Boolean) -> Unit,
+    cameraSlot: @Composable (modifier: Modifier, compact: Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier.fillMaxSize()) {
+        // 小浮窗固定右下角，zIndex 保证始终绘制在主画面之上。
+        val pipModifier = Modifier
+            .align(Alignment.BottomEnd)
+            .padding(10.dp)
+            .width(pipWidth)
+            .aspectRatio(16f / 9f)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable { onSwap() }
+            .semantics { contentDescription = "切换主画面与小窗" }
+            .zIndex(2f)
+
+        cameraSlot(
+            if (videoIsMain) pipModifier else Modifier.fillMaxSize(),
+            videoIsMain
+        )
+        videoSlot(
+            if (videoIsMain) Modifier.fillMaxSize() else pipModifier,
+            !videoIsMain
+        )
     }
 }
 
@@ -566,7 +715,9 @@ internal fun PatientRealtimeCameraPane(
     hasRas: Boolean,
     bpm: Int,
     metronomeEnabled: Boolean,
-    onToggleMetronome: (Boolean) -> Unit
+    onToggleMetronome: (Boolean) -> Unit,
+    // 小浮窗形态：小窗只保留实时画面与必要的站位告警，计数/节拍/状态条留给主画面。
+    compact: Boolean = false
 ) {
     val gateBlocked = requiresFullBody && !footVisible
 
@@ -585,7 +736,7 @@ internal fun PatientRealtimeCameraPane(
                 modifier = Modifier.fillMaxSize()
             )
 
-            if (largeFont) {
+            if (largeFont && !compact) {
                 Row(
                     modifier = Modifier
                         .align(Alignment.TopStart)
@@ -603,7 +754,7 @@ internal fun PatientRealtimeCameraPane(
                         )
                     }
                 }
-            } else {
+            } else if (!compact) {
                 CounterBadge(
                     repCount = repCount,
                     repsPerSet = repsPerSet,
@@ -628,21 +779,25 @@ internal fun PatientRealtimeCameraPane(
                         .align(Alignment.Center)
                         .background(Color(0xE60F172A), RoundedCornerShape(16.dp))
                         .border(2.dp, Color(0xFFFFB4AB), RoundedCornerShape(16.dp))
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                        .padding(
+                            horizontal = if (compact) 8.dp else 16.dp,
+                            vertical = if (compact) 6.dp else 12.dp
+                        ),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text("🧍", fontSize = 42.sp)
+                    Text("🧍", fontSize = if (compact) 22.sp else 42.sp)
                     Text(
                         text = "请后退站入全身框",
                         color = Color.White,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
+                        fontSize = if (compact) 13.sp else 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1
                     )
                 }
             }
 
-            if (statusText.isNotBlank()) {
+            if (statusText.isNotBlank() && !compact) {
             Surface(
                 color = if (gateBlocked) Color(0xEEBA1A1A) else Color(0x990F172A),
                 shape = RoundedCornerShape(14.dp),

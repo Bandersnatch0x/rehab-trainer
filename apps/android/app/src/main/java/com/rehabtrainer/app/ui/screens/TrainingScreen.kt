@@ -18,8 +18,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -143,6 +141,9 @@ fun TrainingScreen(
     }
     // 暂停状态须跨 Activity 重建保存：旋转后仍保持暂停，视频不得自动续播。
     var isPaused by rememberSaveable { mutableStateOf(false) }
+    // 画中画主/小：默认主画面是实时拍摄、小浮窗是教学视频；点按小浮窗或「切换画面」交换。
+    // 用 rememberSaveable 让旋转后保持用户选择。
+    var videoIsMain by rememberSaveable { mutableStateOf(false) }
     var ttsReady by remember { mutableStateOf(false) }
     var ttsFailed by remember { mutableStateOf(false) }
 
@@ -164,6 +165,13 @@ fun TrainingScreen(
         availableWidthDp = screenWidthDp,
         isVoiceEnabled = voiceEnabled
     )
+
+    // 小浮窗宽度：手机约半屏，平板限制上限，避免小窗过大盖住主画面。
+    val pipWidth = (screenWidthDp * 0.52f)
+        .coerceIn(140f, if (isTablet) 280f else 200f)
+        .dp
+    // 服务端未下发本条动作视频时，播放的是通用演示片段，界面须如实标注。
+    val usesGenericDemoVideo = currentExercise.videoUri.isNullOrBlank()
 
     val mainHandler = remember { Handler(Looper.getMainLooper()) }
     val voiceCoach = remember {
@@ -344,7 +352,9 @@ fun TrainingScreen(
             showVoiceToggle = displayPolicy.effectiveMode == TrainingDisplayMode.CAMERA_ONLY && isPhoneLandscape,
             voiceEnabled = voiceEnabled,
             ttsFailed = ttsFailed,
-            onToggleVoice = { voiceEnabled = it }
+            onToggleVoice = { voiceEnabled = it },
+            showSwapButton = displayPolicy.showVideo,
+            onSwapMain = { videoIsMain = !videoIsMain }
         )
 
         Box(
@@ -394,115 +404,46 @@ fun TrainingScreen(
                     }
                 }
 
-                !isLandscape && !isTablet -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        InstructionalVideoPane(
-                            videoTitle = currentExercise.videoTitle,
-                            modifier = Modifier
-                                .weight(0.38f)
-                                .fillMaxWidth(),
-                            isPaused = isPaused,
-                            videoSource = videoSource
-                        )
-
-                        PatientRealtimeCameraPane(
-                            modifier = Modifier
-                                .weight(0.62f)
-                                .fillMaxWidth(),
-                            previewView = previewView,
-                            repCount = repCount,
-                            repHint = repHint,
-                            largeFont = largeFont,
-                            repsPerSet = setProgress.repsPerSet,
-                            counterLabel = currentExercise.counterLabel,
-                            statusText = statusText,
-                            footVisible = footVisible,
-                            requiresFullBody = requiresFullBody,
-                            hasRas = currentExercise.hasRas,
-                            bpm = currentExercise.bpm,
-                            metronomeEnabled = metronomeEnabled,
-                            onToggleMetronome = { metronomeEnabled = it }
-                        )
-                    }
-                }
-
-                isTablet -> {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        InstructionalVideoPane(
-                            videoTitle = currentExercise.videoTitle,
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight(),
-                            isPaused = isPaused,
-                            videoSource = videoSource
-                        )
-
-                        PatientRealtimeCameraPane(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight(),
-                            previewView = previewView,
-                            repCount = repCount,
-                            repHint = repHint,
-                            largeFont = largeFont,
-                            repsPerSet = setProgress.repsPerSet,
-                            counterLabel = currentExercise.counterLabel,
-                            statusText = statusText,
-                            footVisible = footVisible,
-                            requiresFullBody = requiresFullBody,
-                            hasRas = currentExercise.hasRas,
-                            bpm = currentExercise.bpm,
-                            metronomeEnabled = metronomeEnabled,
-                            onToggleMetronome = { metronomeEnabled = it }
-                        )
-                    }
-                }
-
                 else -> {
-                    Row(
+                    // DUAL：一个主画面铺满 + 右下角圆角小浮窗，点按小窗或头部「切换画面」交换主/小。
+                    TrainingPipLayout(
+                        videoIsMain = videoIsMain,
+                        onSwap = { videoIsMain = !videoIsMain },
+                        pipWidth = pipWidth,
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = 10.dp, vertical = 4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        InstructionalVideoPane(
-                            videoTitle = currentExercise.videoTitle,
-                            modifier = Modifier
-                                .weight(0.40f)
-                                .fillMaxHeight(),
-                            isPaused = isPaused,
-                            videoSource = videoSource
-                        )
-
-                        PatientRealtimeCameraPane(
-                            modifier = Modifier
-                                .weight(0.60f)
-                                .fillMaxHeight(),
-                            previewView = previewView,
-                            repCount = repCount,
-                            repHint = repHint,
-                            largeFont = largeFont,
-                            repsPerSet = setProgress.repsPerSet,
-                            counterLabel = currentExercise.counterLabel,
-                            statusText = statusText,
-                            footVisible = footVisible,
-                            requiresFullBody = requiresFullBody,
-                            hasRas = currentExercise.hasRas,
-                            bpm = currentExercise.bpm,
-                            metronomeEnabled = metronomeEnabled,
-                            onToggleMetronome = { metronomeEnabled = it }
-                        )
-                    }
+                            .padding(6.dp),
+                        videoSlot = { slotModifier, compact ->
+                            InstructionalVideoPane(
+                                videoTitle = currentExercise.videoTitle,
+                                isPaused = isPaused,
+                                isGenericDemo = usesGenericDemoVideo,
+                                exerciseName = currentExercise.name,
+                                modifier = slotModifier,
+                                videoSource = videoSource,
+                                compact = compact
+                            )
+                        },
+                        cameraSlot = { slotModifier, compact ->
+                            PatientRealtimeCameraPane(
+                                modifier = slotModifier,
+                                previewView = previewView,
+                                repCount = repCount,
+                                repHint = repHint,
+                                largeFont = largeFont,
+                                repsPerSet = setProgress.repsPerSet,
+                                counterLabel = currentExercise.counterLabel,
+                                statusText = statusText,
+                                footVisible = footVisible,
+                                requiresFullBody = requiresFullBody,
+                                hasRas = currentExercise.hasRas,
+                                bpm = currentExercise.bpm,
+                                metronomeEnabled = metronomeEnabled,
+                                onToggleMetronome = { metronomeEnabled = it },
+                                compact = compact
+                            )
+                        }
+                    )
                 }
             }
         }
