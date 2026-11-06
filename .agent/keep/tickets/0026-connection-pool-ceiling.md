@@ -1,8 +1,8 @@
 ---
 id: "0026"
 type: "infra"
-status: "open"
-assignee: null
+status: "closed"
+assignee: "claude"
 part-of: null
 created: 2026-11-07
 ---
@@ -62,3 +62,41 @@ could not receive data from server: Software caused connection abort (0x00002745
 建议（与上面两项一起决策）：`pool_pre_ping=True`（代价是每次取连接多一次轻量往返），
 并把「连接层瞬时故障」与「业务错误」区分开——前者可重试一次，后者不可。
 这同样牵涉到把什么样的状态码交给客户端，与上面第 2 项是同一个契约决定。
+
+### 2026-11-07 实施与验证
+
+用户指示"做 0026"，两项决策按下列取值落地：
+
+1. **池大小显式化、环境变量可调**（默认值维持原状，避免上线即改行为）：
+   `REHAB_DB_POOL_SIZE=5`、`REHAB_DB_MAX_OVERFLOW=10`、`REHAB_DB_POOL_TIMEOUT_SECONDS=5`（原默认 30）、
+   `REHAB_DB_POOL_PRE_PING=true`、`REHAB_DB_POOL_RECYCLE_SECONDS=1800`。SQLite 分支不动。
+2. **过载与连接层故障都走 503**：`{"code":"SERVICE_UNAVAILABLE","detail":{"retryable":true}}`，
+   错误原文只进日志。**未加自动请求重试**——`POST /patients` 之类非幂等端点若被中间件重试会重复写入；
+   重试交给客户端，用 `retryable` 标记与 `Retry-After` 语义提示。
+3. **契约**：新增 `components.responses.ServiceUnavailable`，25 个 operation 全部声明 `503`。
+
+验证（同一 Windows 11 / 20 核 / PostgreSQL 17.11 / 单进程 uvicorn 环境）：
+
+| 并发 | 修复前 | 修复后 |
+| --- | --- | --- |
+| 8 | 111 RPS，p50 59–79 ms | 102 RPS，p50 59–78 ms |
+| 32 | 133 RPS，p50 218–251 ms | 84 RPS，p50 309–370 ms |
+| 64 | 1.6 RPS，p50 约 29 s，近乎停摆 | 73 RPS，p99 ≤ 5.0 s，20 次快速 503 |
+
+- 线上形态：1 条连接的池 + 200 并发 → 165 个 401 + **35 个 503**，响应体为上述契约形状；
+  35 次失败对应 35 行 `连接池等待超时` 错误日志。
+- 该实验同时证明环境变量真的生效（池被压到 1 条连接，行为随之改变）。
+- 探活：数据库被整实例替换后，未重启的 API 下一个请求仍返回 200（257 ms）。
+  这一步只证明"恢复可用"，未单独隔离 `pool_pre_ping` 的贡献，因此不把它当作探活的独立证据。
+- 后端 pytest 120 → 127 项（新增 7 项：池参数来源、SQLite 不配池、`create_engine` 接受参数、
+  两种异常都映射 503、响应不泄漏连接串/池内部信息、业务 401 不被误映射为 503）。
+
+### 关闭说明
+
+高并发吞吐低于修复前是**有意的取舍**：原先靠让调用方排队 30 秒换来一点吞吐，代价是分不清"慢"与"死"。
+现在最坏等待被钉在 `pool_timeout`，超出立即返回可重试的 503。
+
+仍未做，留给 P4-1/P4-5：
+
+- 多副本下的池总量核算（需确定副本数与数据库 `max_connections`）。
+- 客户端对 503 的统一退避重试；Android 训练记录已有本地队列重试，其余读取路径目前只提示失败。

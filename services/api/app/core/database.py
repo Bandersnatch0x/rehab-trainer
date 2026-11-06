@@ -3,17 +3,31 @@ from collections.abc import Iterator
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-from app.core.config import get_settings
+from app.core.config import Settings, get_settings
 
 settings = get_settings()
 
-_connect_args = (
-    {"check_same_thread": False}
-    if settings.database_url.startswith("sqlite")
-    else {}
-)
 
-engine = create_engine(settings.database_url, connect_args=_connect_args, future=True)
+def engine_options(database_url: str, config: Settings | None = None) -> dict:
+    """create_engine 的参数。
+
+    PostgreSQL 显式配置连接池：默认值（pool_size=5、max_overflow=10、pool_timeout=30）会让
+    并发超过 15 的请求排队到 30 秒后才失败，见 docs/deployment/README.md 的性能基线。
+    SQLite 保持默认，避免影响本地开发与单测的既有行为。
+    """
+    settings_for_pool = config or settings
+    if database_url.startswith("sqlite"):
+        return {"connect_args": {"check_same_thread": False}}
+    return {
+        "pool_size": settings_for_pool.db_pool_size,
+        "max_overflow": settings_for_pool.db_max_overflow,
+        "pool_timeout": settings_for_pool.db_pool_timeout_seconds,
+        "pool_pre_ping": settings_for_pool.db_pool_pre_ping,
+        "pool_recycle": settings_for_pool.db_pool_recycle_seconds,
+    }
+
+
+engine = create_engine(settings.database_url, future=True, **engine_options(settings.database_url))
 SessionLocal = sessionmaker(
     bind=engine,
     class_=Session,

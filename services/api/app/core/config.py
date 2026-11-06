@@ -20,6 +20,20 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./rehab_trainer.db"
     auto_create_schema: bool = True
 
+    # 连接池（仅 PostgreSQL 生效；SQLite 保持默认，避免影响本地与单测）。
+    #
+    # 并发上限 = 副本数 × (pool_size + max_overflow)，必须低于数据库 max_connections 并留余量。
+    # 基线压测见 docs/deployment/README.md：默认值下实测瓶颈正是这里的 15 条连接。
+    db_pool_size: int = 5
+    db_max_overflow: int = 10
+    # 池耗尽时等待上限。宁可快速失败（503）也不要让客户端挂 30 秒：
+    # 排队等待期间连接与线程都被占住，对调用方而言与宕机无异。
+    db_pool_timeout_seconds: float = 5.0
+    # 取连接前探活：数据库重启或主从切换后，不会把已被对端关闭的连接当活的用。
+    db_pool_pre_ping: bool = True
+    # 主动回收，避开服务端 idle 超时留下的半死连接。
+    db_pool_recycle_seconds: int = 1800
+
     jwt_secret: str = "dev-only-secret-change-in-production"
     jwt_algorithm: str = "HS256"
     access_token_ttl_seconds: int = 3600

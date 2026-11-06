@@ -69,6 +69,8 @@ paths:
         "409":
           description: 绑定码已使用或已过期
 
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /auth/login:
     post:
       tags: [auth]
@@ -95,6 +97,8 @@ paths:
         "429":
           description: 尝试次数过多，已限流
 
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /me:
     get:
       tags: [auth]
@@ -112,6 +116,8 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
 
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /auth/refresh:
     post:
       tags: [auth]
@@ -137,6 +143,8 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
 
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /patients:
     get:
       tags: [patients]
@@ -164,6 +172,8 @@ paths:
                 $ref: "#/components/schemas/PatientPage"
         "403":
           $ref: "#/components/responses/Forbidden"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
     post:
       tags: [patients]
       summary: 新建患者档案
@@ -186,6 +196,8 @@ paths:
         "422":
           $ref: "#/components/responses/ValidationError"
 
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /patients/{patientId}:
     get:
       tags: [patients]
@@ -204,6 +216,8 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /patients/{patientId}/stage-confirmations:
     post:
       tags: [assessments]
@@ -238,6 +252,8 @@ paths:
         "403":
           $ref: "#/components/responses/Forbidden"
 
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /patients/{patientId}/assessments:
     get:
       tags: [assessments]
@@ -256,6 +272,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AssessmentPage"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
     post:
       tags: [assessments]
       summary: 提交一次评估
@@ -280,6 +298,8 @@ paths:
         "422":
           $ref: "#/components/responses/ValidationError"
 
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /exercises:
     get:
       tags: [exercises]
@@ -305,6 +325,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/ExercisePage"
 
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /exercises/{code}:
     get:
       tags: [exercises]
@@ -325,6 +347,8 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /prescriptions:
     get:
       tags: [prescriptions]
@@ -347,6 +371,8 @@ paths:
                 $ref: "#/components/schemas/PrescriptionPage"
         "403":
           $ref: "#/components/responses/Forbidden"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
     post:
       tags: [prescriptions]
       summary: 开具处方
@@ -369,6 +395,8 @@ paths:
         "422":
           $ref: "#/components/responses/ValidationError"
 
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /prescriptions/{prescriptionId}:
     patch:
       tags: [prescriptions]
@@ -406,6 +434,8 @@ paths:
         "403":
           $ref: "#/components/responses/Forbidden"
 
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /sessions:
     post:
       tags: [sessions]
@@ -434,6 +464,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SessionBatchResult"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
     get:
       tags: [sessions]
       summary: 查询训练记录
@@ -463,6 +495,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/SessionRecordPage"
 
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /alerts:
     get:
       tags: [alerts]
@@ -491,6 +525,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/AlertPage"
 
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /alerts/{alertId}:
     patch:
       tags: [alerts]
@@ -526,6 +562,8 @@ paths:
         "403":
           $ref: "#/components/responses/Forbidden"
 
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /audit-events:
     get:
       tags: [audit]
@@ -568,6 +606,8 @@ paths:
         "403":
           $ref: "#/components/responses/Forbidden"
 
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /research/overview:
     get:
       tags: [research]
@@ -592,6 +632,8 @@ paths:
         "403":
           $ref: "#/components/responses/Forbidden"
 
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /research/data-quality:
     get:
       tags: [research]
@@ -612,6 +654,8 @@ paths:
         "403":
           $ref: "#/components/responses/Forbidden"
 
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /media-assets:
     get:
       tags: [media]
@@ -639,6 +683,8 @@ paths:
         "403":
           $ref: "#/components/responses/Forbidden"
 
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /media-assets/upload:
     post:
       tags: [media]
@@ -688,6 +734,8 @@ paths:
         "422":
           $ref: "#/components/responses/ValidationError"
 
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /media-assets/{assetId}:
     patch:
       tags: [media]
@@ -719,6 +767,8 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 components:
   securitySchemes:
     bearerAuth:
@@ -771,6 +821,14 @@ components:
             $ref: "#/components/schemas/Error"
     ValidationError:
       description: 请求校验失败
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    ServiceUnavailable:
+      description: >
+        服务暂时不可用：数据库连接池已满或连接中断。属可重试状态，
+        客户端应按退避重试而不是立即放弃；响应体 detail.retryable 为 true。
       content:
         application/json:
           schema:

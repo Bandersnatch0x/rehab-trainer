@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -6,6 +7,8 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import TimeoutError as PoolTimeoutError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.config import get_settings
@@ -25,6 +28,9 @@ from app.routers import (
 )
 
 settings = get_settings()
+logger = logging.getLogger(__name__)
+
+HTTP_SERVICE_UNAVAILABLE = 503
 
 
 @asynccontextmanager
@@ -59,6 +65,54 @@ async def http_exception_handler(
         }
     return JSONResponse(
         status_code=exc.status_code, content=content, headers=exc.headers
+    )
+
+
+@app.exception_handler(PoolTimeoutError)
+async def pool_timeout_handler(request: Request, exc: PoolTimeoutError) -> JSONResponse:
+    """连接池等待超时：快速失败，而不是让调用方挂到 pool_timeout 之后。
+
+    这是过载信号，不是业务错误：客户端应稍后重试（Android 端训练记录本就有本地队列重试）。
+    """
+    logger.error(
+        "连接池等待超时 %s %s：并发已超过 pool_size+max_overflow=%d",
+        request.method,
+        request.url.path,
+        settings.db_pool_size + settings.db_max_overflow,
+    )
+    return JSONResponse(
+        status_code=HTTP_SERVICE_UNAVAILABLE,
+        content={
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "服务繁忙，请稍后重试",
+            "detail": {"retryable": True},
+        },
+    )
+
+
+@app.exception_handler(OperationalError)
+async def database_unavailable_handler(
+    request: Request, exc: OperationalError
+) -> JSONResponse:
+    """数据库连接层面的故障（重启、切换、网络中断）。
+
+    `pool_pre_ping` 已挡住"取到死连接"这一大类；这里兜住请求中途断连的情况。
+    错误原文只进日志：库名、主机、连接串不能出现在响应里。
+    """
+    logger.error(
+        "数据库连接异常 %s %s：%s",
+        request.method,
+        request.url.path,
+        exc,
+        exc_info=True,
+    )
+    return JSONResponse(
+        status_code=HTTP_SERVICE_UNAVAILABLE,
+        content={
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "服务暂时不可用，请稍后重试",
+            "detail": {"retryable": True},
+        },
     )
 
 

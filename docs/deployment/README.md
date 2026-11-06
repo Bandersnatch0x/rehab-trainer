@@ -201,7 +201,42 @@ python scripts/loadtest-api.py --config .agent/tmp/smoke-config.json `
 
 限制：负载发生器与 API 同机、未做长时浸泡、未覆盖管理端与小程序、登录路径只出现在每线程一次的准备阶段。这些数字用于同环境的改动前后对比与量级判断，不构成容量承诺。
 
-待决策（票 0026）：连接池大小应按部署形态显式配置（副本数 × 池大小必须低于 PostgreSQL `max_connections` 并留余量）；同时应把耗尽时的行为从"等 30 秒再失败"改为快速失败。后者要给契约补一个 5xx 响应，属契约变更，需先决定。
+### 连接池与过载反馈（2026-11-07，票 0026）
+
+上面的"挂起而非降级"已修：
+
+- **池显式配置**（`app/core/database.py`，环境变量可调）：`REHAB_DB_POOL_SIZE`（默认 5）、
+  `REHAB_DB_MAX_OVERFLOW`（10）、`REHAB_DB_POOL_TIMEOUT_SECONDS`（**5**，原默认 30）、
+  `REHAB_DB_POOL_PRE_PING`（true）、`REHAB_DB_POOL_RECYCLE_SECONDS`（1800）。SQLite 分支保持默认。
+- **探活**：取连接前 `SELECT 1`。数据库重启或主从切换后，不会再拿已被对端关闭的连接去用。
+- **快速失败**：池等待超时与连接层故障都返回 `503` + `{"code":"SERVICE_UNAVAILABLE","detail":{"retryable":true}}`，
+  原文只进日志（`连接池等待超时 POST /v1/auth/login：并发已超过 pool_size+max_overflow=15`）。
+- **契约**：`components.responses.ServiceUnavailable` 已定义，25 个 operation 全部声明 `503`。
+
+**部署时必须核算**：副本数 × (pool_size + max_overflow) 要低于数据库 `max_connections` 并留余量。
+
+修复前后同一环境实测（方法同上）：
+
+| 并发 | 修复前 | 修复后 |
+| --- | --- | --- |
+| 8 | 111 RPS，p50 59–79 ms | 102 RPS，p50 59–78 ms |
+| 32 | 133 RPS，p50 218–251 ms | 84 RPS，p50 309–370 ms |
+| 64 | **1.6 RPS，p50 约 29 s，服务近乎停摆** | **73 RPS，p99 ≤ 5.0 s，20 次快速 503，服务继续可用** |
+
+并发 8 与修复前基本一致（未触及池上限）。并发 32/64 吞吐低于修复前，是"无界排队换成有界等待 + 快速失败"的直接结果：
+原先靠让请求排队 30 秒换来了一点吞吐，代价是调用方完全无法区分"慢"与"死"。修复后最坏等待被钉在 `pool_timeout`，
+超出部分立刻拿到可重试的 503；`pool_pre_ping` 的每次取连接探测是次要因素，未单独量化。
+
+线上形态（1 条连接的池 + 200 并发，抓到的真实响应）：
+
+```json
+{"code":"SERVICE_UNAVAILABLE","message":"服务繁忙，请稍后重试","detail":{"retryable":true}}
+```
+
+同时 35 次失败对应 35 行 `连接池等待超时` 错误日志——响应给客户端、细节给运维。
+
+**未做**：多副本下的池总量核算（需确定副本数与数据库 `max_connections`）；客户端对 503 的统一退避重试
+（Android 训练记录本就有本地队列重试，其余读取路径目前只提示失败）。
 
 ### 备份恢复演练（2026-11-07）
 
