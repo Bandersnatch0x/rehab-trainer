@@ -393,6 +393,13 @@ private fun demoVideoUri(context: android.content.Context): String =
     "android.resource://${context.packageName}/${R.raw.demo_exercise}"
 
 /**
+ * 教学视频播放音量。内置演示视频自带合成的低音量占位音轨（峰值约 -20 dBFS），
+ * 播放器保持较低音量，既让患者听得到，又不压过语音提示与节拍音。
+ * 正式讲解音轨上线后只有音量需要在这里统一调整。
+ */
+private const val VIDEO_AUDIO_VOLUME = 0.8f
+
+/**
  * 教学视频播放区。离开组合（切到纯拍摄模式）时通过 onRelease 停止并释放播放器。
  *
  * 视频优先播放服务端下发的地址；地址缺失或播放失败时回退到 APK 内置演示视频，
@@ -430,8 +437,8 @@ internal fun InstructionalVideoPane(
                             setVideoURI(Uri.parse(initialUri))
                             setOnPreparedListener { player ->
                                 player.isLooping = true
-                                // 教学视频静音，音频通道留给动作语音与节拍音。
-                                player.setVolume(0f, 0f)
+                                // 演示视频带占位音轨，不再静音；低音量避免惊吓患者与盖住语音。
+                                player.setVolume(VIDEO_AUDIO_VOLUME, VIDEO_AUDIO_VOLUME)
                                 if (!pausedNow) start()
                             }
                             setOnErrorListener { _, _, _ ->
