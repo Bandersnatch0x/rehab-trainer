@@ -2,7 +2,7 @@
 
 - 版本：v1.0
 - 日期：2026-11-06
-- 代码基线：`2dae46e`，`main` 分支
+- 代码基线：`d7f86f2`，`main` 分支
 - 依据：`docs/delivery/acceptance-report.md`、`docs/delivery/user-manual.md`、`docs/clinical/literature-presets.md`、`packages/api-contract/openapi.yaml` 与当前实现
 - 用途：让客户按“端 × 功能”核对当前演示交付版的实际能力，避免把演示数据、部分实现或范围外能力误读为已交付。
 
