@@ -125,7 +125,7 @@ git diff --check
 
 ```powershell
 $env:REHAB_DATABASE_URL = "postgresql+psycopg://rehab:<密码>@127.0.0.1:55432/rehab"
-python deploy/verify_postgres.py
+services/api/.venv/Scripts/python.exe deploy/verify_postgres.py   # 仓库 venv 已含 psycopg
 ```
 
 它做四件事：`upgrade head` 后逐条断言 0002–0005 引入的列、检查约束、外键、索引与 JSON 列真实存在；用 ORM 写入并读回数据；`downgrade 0001` 后再 `upgrade head`，断言既有行未被降级破坏且新列按 `server_default` 回填；`downgrade base` 后重建，证明迁移可从零重复执行。同时在真实 PostgreSQL 上跑 `compare_metadata`，比 SQLite 更容易暴露类型与约束漂移。
@@ -169,6 +169,37 @@ python deploy/verify_postgres.py
 | 迁移建库后的接口联调 | **25/25 契约操作通过**（21 条路径），含批量幂等与重放，schema 全部由迁移建立（`REHAB_AUTO_CREATE_SCHEMA=false`） |
 
 复现方式：在 WSL 内 `docker run -d --name rehab-pg -e POSTGRES_PASSWORD=... -p 55432:5432 postgres:17-bookworm`，宿主机用 `REHAB_DATABASE_URL` 指向它；先用 `python -m alembic -c deploy/alembic.ini upgrade head` 建库，再 `python -m app.seed`，最后 `python scripts/smoke-api.py --base-url ...`。登录限流自 `0005` 起改为数据库表实现，因此跨副本共享计数；`0005` 之前"进程内状态、多副本不共享"的说法已失效。
+
+### 单实例性能基线（2026-11-07）
+
+用 `scripts/loadtest-api.py` 对上面这套 PostgreSQL 环境压测，三条热点路径轮转：`GET /patients?limit=20`、`GET /sessions?patientId=…&limit=20`、`POST /sessions`（单条记录，唯一 `clientRecordId`）。
+
+环境：Windows 11 / 20 逻辑核；API 为 Windows Python 3.13 + 单进程 uvicorn（未配 workers）；PostgreSQL 17.11 跑在 WSL2 容器内；压测脚本与 API、数据库同机，因此负载发生器本身也在抢同一份 CPU。
+
+| 并发 | 路径 | RPS | p50 | p95 | p99 | 错误 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 8 | 三条轮转 | 111 | 59–79 ms | 86–121 ms | 107–166 ms | 0 |
+| 16 | 三条轮转 | 144 | 96–118 ms | 133–160 ms | 147–187 ms | 0 |
+| 32 | 三条轮转 | 133 | 218–251 ms | 304–334 ms | 349–373 ms | 0 |
+| 64 | 三条轮转 | 1.6 | 约 29 s | 约 29.6 s | 约 29.7 s | 客户端超时 |
+| 40 | 仅 `GET /patients` | 124 | 284 ms | 421 ms | 566 ms | 0 |
+
+**上限约 140 RPS，瓶颈是数据库连接池而不是 CPU。** 依据：并发 40 时持续采样 `pg_stat_activity`，`rehab_smoke` 库的后端连接数稳定停在 **15**，压测结束回落到 5。15 = `create_engine()` 默认 `pool_size=5` + `max_overflow=10`（`app/core/database.py` 未显式配置池）。超过 15 个并发数据库请求后请求只能排队，队列等待上限是 `pool_timeout` 默认 30 秒——这与并发 64 时 p50 恰为 29 秒的行为一致：**服务不是降级，而是挂起后再失败**。
+
+复现：
+
+```powershell
+# 前两步见上节；随后启动 API 与压测
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8011        # 环境变量同上节
+python scripts/loadtest-api.py --config .agent/tmp/smoke-config.json `
+    --base-url http://127.0.0.1:8011/v1 --concurrency 8 --seconds 20
+```
+
+压测脚本自身的输入校验与分位口径由 `scripts/test_loadtest_api.py` 覆盖（6 项，不需要数据库）。
+
+限制：负载发生器与 API 同机、未做长时浸泡、未覆盖管理端与小程序、登录路径只出现在每线程一次的准备阶段。这些数字用于同环境的改动前后对比与量级判断，不构成容量承诺。
+
+待决策（票 0026）：连接池大小应按部署形态显式配置（副本数 × 池大小必须低于 PostgreSQL `max_connections` 并留余量）；同时应把耗尽时的行为从"等 30 秒再失败"改为快速失败。后者要给契约补一个 5xx 响应，属契约变更，需先决定。
 
 2026-11-04 本地结果为部署自检通过、后端全量 36 项通过、Python 语法解析通过、`git diff --check` 通过。测试产生现有 HTTP 客户端弃用及依赖版本警告。未执行云部署，独立审查交由协调者完成。
 
