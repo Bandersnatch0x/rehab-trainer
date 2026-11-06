@@ -160,11 +160,24 @@ class PoseAnalyzer(
         }
 
         if (!CaptureGate.shouldCount(requiresFullBody, footVisibility)) {
-            analyzer.reset()
-            lastUpdate = AnalysisUpdate(0, null)
-            onFrame(PoseFrame.Detected(0, null, emptySet(), footVisibility))
+            // 门禁期间冻结而不立即清零：短暂出框不打断保持计时/基线；长时间遮挡才重置。
+            gateBlockedSinceMs =
+                if (gateBlockedSinceMs == 0L) lastFrameTimestampMs else gateBlockedSinceMs
+            if (lastFrameTimestampMs - gateBlockedSinceMs > GATE_RESET_MS) {
+                analyzer.reset()
+                lastUpdate = AnalysisUpdate(0, null)
+            }
+            onFrame(
+                PoseFrame.Detected(
+                    repCount = lastUpdate.count,
+                    lastRep = lastUpdate.lastRep,
+                    currentIssues = lastUpdate.currentIssues,
+                    footVisibility = footVisibility
+                )
+            )
             return
         }
+        gateBlockedSinceMs = 0L
 
         val shoulderWidth = kotlin.math.abs(
             points[PoseIndex.LEFT_SHOULDER].x - points[PoseIndex.RIGHT_SHOULDER].x
