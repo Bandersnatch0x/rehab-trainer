@@ -561,4 +561,49 @@ class ExerciseAnalyzersTest {
         analyzer.update(squatted, timestampMs = 500)
         assertEquals(1, analyzer.update(short, timestampMs = 1_000).count)
     }
+
+    @Test
+    fun marchCalibrationRepsAreNotCountedAndSetThresholds() {
+        val analyzer = MarchAnalyzer(calibrationReps = 2)
+        analyzer.update(stand(), timestampMs = 0)
+        assertEquals(2, analyzer.calibrationRemaining)
+
+        analyzer.update(liftedLeg(left = true, ankleY = 0.70f), timestampMs = 100)
+        assertEquals(0, analyzer.update(stand(), timestampMs = 500).count)
+        assertEquals(1, analyzer.calibrationRemaining)
+
+        analyzer.update(liftedLeg(left = false, ankleY = 0.70f), timestampMs = 700)
+        assertEquals(0, analyzer.update(stand(), timestampMs = 1_100).count)
+        assertEquals(0, analyzer.calibrationRemaining)
+
+        analyzer.update(liftedLeg(left = true, ankleY = 0.70f), timestampMs = 1_300)
+        assertEquals(1, analyzer.update(stand(), timestampMs = 1_700).count)
+    }
+
+    @Test
+    fun seatedCalibrationRepsAreNotCounted() {
+        val analyzer = SeatedLegRaiseAnalyzer(calibrationReps = 2)
+        repeat(8) { index -> analyzer.update(seatedLeg(), timestampMs = index * 33L) }
+        assertEquals(2, analyzer.calibrationRemaining)
+
+        analyzer.update(
+            seatedLeg(leftAnkleY = 0.55f, leftKneeY = 0.55f),
+            timestampMs = 500
+        )
+        assertEquals(0, analyzer.update(seatedLeg(), timestampMs = 1_000).count)
+        assertEquals(1, analyzer.calibrationRemaining)
+
+        analyzer.update(
+            seatedLeg(leftAnkleY = 0.55f, leftKneeY = 0.55f),
+            timestampMs = 1_500
+        )
+        assertEquals(0, analyzer.update(seatedLeg(), timestampMs = 2_000).count)
+        assertEquals(0, analyzer.calibrationRemaining)
+
+        analyzer.update(
+            seatedLeg(leftAnkleY = 0.55f, leftKneeY = 0.55f),
+            timestampMs = 2_500
+        )
+        assertEquals(1, analyzer.update(seatedLeg(), timestampMs = 3_000).count)
+    }
 }

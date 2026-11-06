@@ -221,6 +221,8 @@ fun TrainingScreen(
                                     repHintUntilMs = nowMs + REP_HINT_TTL_MS
                                 }
                                 repHint = when {
+                                    frame.calibrationRemaining > 0 ->
+                                        "校准中：还需完成 ${frame.calibrationRemaining} 次动作"
                                     frame.currentIssues.isNotEmpty() ->
                                         "调整：" + frame.currentIssues.joinToString("；") { issueText(it) }
                                     latestRep != null && nowMs <= repHintUntilMs -> describeRep(latestRep)

@@ -44,16 +44,22 @@ interface ExerciseAnalyzer {
     val count: Int
     val lastRep: RepResult?
 
+    /** 校准阶段还需完成几次动作；0 表示已进入正式计数。 */
+    val calibrationRemaining: Int get() = 0
+
     fun update(points: List<PosePoint>, timestampMs: Long = 0L): AnalysisUpdate
 
     fun reset()
 }
 
-fun createExerciseAnalyzer(kind: ExerciseKind): ExerciseAnalyzer = when (kind) {
+fun createExerciseAnalyzer(
+    kind: ExerciseKind,
+    calibrationReps: Int = 2
+): ExerciseAnalyzer = when (kind) {
     ExerciseKind.ARM_RAISE -> ArmRaiseAnalyzer()
-    ExerciseKind.MARCH -> MarchAnalyzer()
-    ExerciseKind.SQUAT -> SquatAnalyzer()
+    ExerciseKind.MARCH -> MarchAnalyzer(calibrationReps = calibrationReps)
+    ExerciseKind.SQUAT -> SquatAnalyzer(calibrationReps = calibrationReps)
     ExerciseKind.POSTURE -> PostureAnalyzer()
     ExerciseKind.STRETCH -> StretchAnalyzer()
-    ExerciseKind.SEATED_LEG_RAISE -> SeatedLegRaiseAnalyzer()
+    ExerciseKind.SEATED_LEG_RAISE -> SeatedLegRaiseAnalyzer(calibrationReps = calibrationReps)
 }

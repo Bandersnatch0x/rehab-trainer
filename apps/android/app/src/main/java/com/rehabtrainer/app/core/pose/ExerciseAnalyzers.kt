@@ -5,10 +5,10 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * 规则法动作分析器（文献/工程预设，待临床签核；见 docs/clinical/literature-presets.md）。
+ * 规则法动作分析器（文献/工程预设，待临床签核）。
  *
- * 坐标约定：MediaPipe 正面 2D，y 向下；x/y 归一化单位不同，跨维比较仅用于同量纲的相对判据。
- * 站立类动作的阈值以「自身站立基线」为参照，避免不同身高/腿长/机位距离导致阈值失效。
+ * 站立类动作阈值以自身站立基线为参照；可选的前几次「校准动作」只测量不计数，
+ * 用患者实际幅度设定进入/退出/达标阈值（见 [AmplitudeCalibration]）。
  */
 
 private const val MIN_VISIBILITY = 0.20f
@@ -29,6 +29,7 @@ class ArmRaiseAnalyzer(
         private set
     override var lastRep: RepResult? = null
         private set
+    override val calibrationRemaining: Int get() = 0
 
     override fun update(points: List<PosePoint>, timestampMs: Long): AnalysisUpdate {
         if (points.size < PoseIndex.LANDMARK_COUNT ||
@@ -43,7 +44,8 @@ class ArmRaiseAnalyzer(
         ) {
             return AnalysisUpdate(count, lastRep, setOf(RepIssue.POSE_INCOMPLETE))
         }
-        val torso = PoseGeometry.torsoHeight(points) ?: return AnalysisUpdate(count, lastRep, setOf(RepIssue.POSE_INCOMPLETE))
+        val torso = PoseGeometry.torsoHeight(points)
+            ?: return AnalysisUpdate(count, lastRep, setOf(RepIssue.POSE_INCOMPLETE))
         val shoulderY = PoseGeometry.midY(
             points,
             PoseIndex.LEFT_SHOULDER,
@@ -54,12 +56,13 @@ class ArmRaiseAnalyzer(
         if (!leftVisible && !rightVisible) {
             return AnalysisUpdate(count, lastRep, setOf(RepIssue.POSE_INCOMPLETE))
         }
-        val leftRaise = if (leftVisible) (shoulderY - points[PoseIndex.LEFT_WRIST].y) / torso else Float.NEGATIVE_INFINITY
-        val rightRaise = if (rightVisible) (shoulderY - points[PoseIndex.RIGHT_WRIST].y) / torso else Float.NEGATIVE_INFINITY
+        val leftRaise =
+            if (leftVisible) (shoulderY - points[PoseIndex.LEFT_WRIST].y) / torso else Float.NEGATIVE_INFINITY
+        val rightRaise =
+            if (rightVisible) (shoulderY - points[PoseIndex.RIGHT_WRIST].y) / torso else Float.NEGATIVE_INFINITY
         val lean = PoseGeometry.lateralLeanDegrees(points) ?: 0f
 
         if (!raised) {
-            // 左右任一腕上举都计数：选择当前抬起更高的一侧，后续以该侧是否放下作为结束判据。
             val side = when {
                 leftVisible && rightVisible -> if (leftRaise >= rightRaise) 1 else 2
                 leftVisible -> 1
@@ -107,7 +110,8 @@ class MarchAnalyzer(
     private val enterRatio: Float = 0.80f,
     private val exitRatio: Float = 0.90f,
     private val minLiftRatio: Float = 0.65f,
-    private val maxLateralLean: Float = 12f
+    private val maxLateralLean: Float = 12f,
+    private val calibrationReps: Int = 0
 ) : ExerciseAnalyzer {
 
     private class LegState {
@@ -119,6 +123,7 @@ class MarchAnalyzer(
     }
 
     private val legs = listOf(LegState(), LegState())
+    private val calibration = AmplitudeCalibration(calibrationReps)
     private var repIndex = 0
     private var lastStepLeg = -1
     private var lastRepAtMs = 0L
@@ -127,6 +132,7 @@ class MarchAnalyzer(
         private set
     override var lastRep: RepResult? = null
         private set
+    override val calibrationRemaining: Int get() = calibration.remaining
 
     override fun update(points: List<PosePoint>, timestampMs: Long): AnalysisUpdate {
         if (points.size < PoseIndex.LANDMARK_COUNT ||
@@ -141,7 +147,8 @@ class MarchAnalyzer(
         ) {
             return AnalysisUpdate(count, lastRep, setOf(RepIssue.POSE_INCOMPLETE))
         }
-        val torso = PoseGeometry.torsoHeight(points) ?: return AnalysisUpdate(count, lastRep, setOf(RepIssue.POSE_INCOMPLETE))
+        val torso = PoseGeometry.torsoHeight(points)
+            ?: return AnalysisUpdate(count, lastRep, setOf(RepIssue.POSE_INCOMPLETE))
         val lean = PoseGeometry.lateralLeanDegrees(points) ?: 0f
         updateLeg(
             0,
@@ -158,6 +165,15 @@ class MarchAnalyzer(
         return AnalysisUpdate(count, lastRep)
     }
 
+    private fun enterLift(baseline: Float): Float =
+        calibration.amplitude()?.let { calibration.enterLift() } ?: (baseline * (1f - enterRatio))
+
+    private fun exitLift(baseline: Float): Float =
+        calibration.amplitude()?.let { calibration.exitLift() } ?: (baseline * (1f - exitRatio))
+
+    private fun validLift(baseline: Float): Float =
+        calibration.amplitude()?.let { calibration.minValidLift() } ?: (baseline * (1f - minLiftRatio))
+
     private fun updateLeg(index: Int, span: Float, lean: Float, timestampMs: Long) {
         val leg = legs[index]
         val baseline = leg.baseline
@@ -165,7 +181,7 @@ class MarchAnalyzer(
             leg.baseline = span
             return
         }
-        if (!leg.lifted && span < baseline * enterRatio) {
+        if (!leg.lifted && span < baseline - enterLift(baseline)) {
             if (leg.lastExitMs != 0L && timestampMs - leg.lastExitMs < REARM_MS) {
                 return
             }
@@ -176,31 +192,35 @@ class MarchAnalyzer(
         }
         if (leg.lifted) {
             leg.peakSpan = min(leg.peakSpan, span)
-            if (span > baseline * exitRatio) {
+            if (span > baseline - exitLift(baseline)) {
                 leg.lifted = false
                 leg.lastExitMs = timestampMs
                 if (leg.liftStartedMs != 0L && timestampMs - leg.liftStartedMs < MIN_LIFT_MS) {
                     return
                 }
-                // 交替约束：对侧腿仍在抬起时不计数，避免把双腿同时动作当成两步。
-                if (!legs[1 - index].lifted) {
-                    if (lastRepAtMs != 0L && timestampMs - lastRepAtMs < MIN_REP_INTERVAL_MS) {
-                        return
-                    }
-                    lastRepAtMs = timestampMs
-                    val issues = buildSet {
-                        if (leg.peakSpan > baseline * minLiftRatio) add(RepIssue.INSUFFICIENT_RANGE)
-                        if (lean > maxLateralLean) add(RepIssue.LATERAL_LEAN)
-                    }
-                    repIndex += 1
-                    count += 1
-                    lastStepLeg = index
-                    lastRep = RepResult(repIndex, issues.isEmpty(), issues)
+                if (legs[1 - index].lifted) {
+                    return
                 }
+                val lift = baseline - leg.peakSpan
+                if (calibration.isCalibrating) {
+                    calibration.record(lift)
+                    return
+                }
+                if (lastRepAtMs != 0L && timestampMs - lastRepAtMs < MIN_REP_INTERVAL_MS) {
+                    return
+                }
+                lastRepAtMs = timestampMs
+                val issues = buildSet {
+                    if (lift < validLift(baseline)) add(RepIssue.INSUFFICIENT_RANGE)
+                    if (lean > maxLateralLean) add(RepIssue.LATERAL_LEAN)
+                }
+                repIndex += 1
+                count += 1
+                lastStepLeg = index
+                lastRep = RepResult(repIndex, issues.isEmpty(), issues)
             }
             return
         }
-        // 站立期缓慢下修基线（机位/姿态漂移），只朝一个方向缓慢变化，避免被抬腿抬高。
         leg.baseline = max(span, baseline - BASELINE_DOWN_STEP)
     }
 
@@ -227,7 +247,8 @@ class SquatAnalyzer(
     private val maxDepthRatio: Float = 0.82f,
     private val maxLateralLean: Float = 20f,
     private val maxValgusRatio: Float = 0.12f,
-    private val maxHipTiltRatio: Float = 0.10f
+    private val maxHipTiltRatio: Float = 0.10f,
+    private val calibrationReps: Int = 0
 ) : ExerciseAnalyzer {
 
     private var baseline: Float? = null
@@ -238,11 +259,13 @@ class SquatAnalyzer(
     private var minSpan = Float.MAX_VALUE
     private var bottomIssues: Set<RepIssue> = emptySet()
     private var repIndex = 0
+    private val calibration = AmplitudeCalibration(calibrationReps)
 
     override var count: Int = 0
         private set
     override var lastRep: RepResult? = null
         private set
+    override val calibrationRemaining: Int get() = calibration.remaining
 
     override fun update(points: List<PosePoint>, timestampMs: Long): AnalysisUpdate {
         if (points.size < PoseIndex.LANDMARK_COUNT ||
@@ -259,7 +282,8 @@ class SquatAnalyzer(
         ) {
             return AnalysisUpdate(count, lastRep, setOf(RepIssue.POSE_INCOMPLETE))
         }
-        val torso = PoseGeometry.torsoHeight(points) ?: return AnalysisUpdate(count, lastRep, setOf(RepIssue.POSE_INCOMPLETE))
+        val torso = PoseGeometry.torsoHeight(points)
+            ?: return AnalysisUpdate(count, lastRep, setOf(RepIssue.POSE_INCOMPLETE))
         val span = (
             PoseGeometry.midY(points, PoseIndex.LEFT_ANKLE, PoseIndex.RIGHT_ANKLE) -
                 PoseGeometry.midY(points, PoseIndex.LEFT_HIP, PoseIndex.RIGHT_HIP)
@@ -271,8 +295,14 @@ class SquatAnalyzer(
             baseline = span
             return AnalysisUpdate(count, lastRep)
         }
+        val enterLift = calibration.amplitude()?.let { calibration.enterLift() }
+            ?: (base * (1f - enterRatio))
+        val exitLift = calibration.amplitude()?.let { calibration.exitLift() }
+            ?: (base * (1f - exitRatio))
+        val minDepth = calibration.amplitude()?.let { calibration.minValidLift() }
+            ?: (base * (1f - validDepthRatio))
 
-        if (!inSquat && span < base * enterRatio) {
+        if (!inSquat && span < base - enterLift) {
             if (lastExitMs != 0L && timestampMs - lastExitMs < REARM_MS) {
                 return AnalysisUpdate(count, lastRep)
             }
@@ -285,10 +315,15 @@ class SquatAnalyzer(
                 minSpan = span
                 bottomIssues = bottomIssues(points, torso, lean)
             }
-            if (span > base * exitRatio) {
+            if (span > base - exitLift) {
                 inSquat = false
                 lastExitMs = timestampMs
                 if (squatStartedMs != 0L && timestampMs - squatStartedMs < MIN_LIFT_MS) {
+                    return AnalysisUpdate(count, lastRep)
+                }
+                val depth = base - minSpan
+                if (calibration.isCalibrating) {
+                    calibration.record(depth)
                     return AnalysisUpdate(count, lastRep)
                 }
                 if (lastRepAtMs != 0L && timestampMs - lastRepAtMs < MIN_REP_INTERVAL_MS) {
@@ -296,14 +331,13 @@ class SquatAnalyzer(
                 }
                 lastRepAtMs = timestampMs
                 val issues = bottomIssues.toMutableSet()
-                if (minSpan > base * validDepthRatio) issues.add(RepIssue.INSUFFICIENT_RANGE)
-                if (minSpan < base * maxDepthRatio) issues.add(RepIssue.EXCESSIVE_DEPTH)
+                if (depth < minDepth) issues.add(RepIssue.INSUFFICIENT_RANGE)
+                if (depth > base * (1f - maxDepthRatio)) issues.add(RepIssue.EXCESSIVE_DEPTH)
                 repIndex += 1
                 count += 1
                 lastRep = RepResult(repIndex, issues.isEmpty(), issues)
             }
         } else {
-            // 站立期缓慢下修基线，适应机位/姿态变化。
             baseline = max(span, base - BASELINE_DOWN_STEP)
         }
         return AnalysisUpdate(count, lastRep)

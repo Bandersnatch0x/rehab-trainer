@@ -24,7 +24,8 @@ sealed interface PoseFrame {
         val lastRep: RepResult?,
         val currentIssues: Set<RepIssue>,
         val footVisibility: Float,
-        val framingHint: String? = null
+        val framingHint: String? = null,
+        val calibrationRemaining: Int = 0
     ) : PoseFrame
 
     data object NoPose : PoseFrame
@@ -153,7 +154,8 @@ class PoseAnalyzer(
                     lastUpdate.count,
                     lastUpdate.lastRep,
                     lastUpdate.currentIssues,
-                    footVisibility
+                    footVisibility,
+                    calibrationRemaining = analyzer.calibrationRemaining
                 )
             )
             return
@@ -172,7 +174,8 @@ class PoseAnalyzer(
                     repCount = lastUpdate.count,
                     lastRep = lastUpdate.lastRep,
                     currentIssues = lastUpdate.currentIssues,
-                    footVisibility = footVisibility
+                    footVisibility = footVisibility,
+                    calibrationRemaining = analyzer.calibrationRemaining
                 )
             )
             return
@@ -221,7 +224,8 @@ class PoseAnalyzer(
                 lastRep = lastUpdate.lastRep,
                 currentIssues = lastUpdate.currentIssues,
                 footVisibility = footVisibility,
-                framingHint = framingHint
+                framingHint = framingHint,
+                calibrationRemaining = analyzer.calibrationRemaining
             )
         )
     }

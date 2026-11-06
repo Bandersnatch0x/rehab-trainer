@@ -18,7 +18,8 @@ class SeatedLegRaiseAnalyzer(
     private val liftEnterRatio: Float = 0.15f,
     private val liftExitRatio: Float = 0.08f,
     private val minLiftRatio: Float = 0.22f,
-    private val maxLateralLean: Float = 15f
+    private val maxLateralLean: Float = 15f,
+    private val calibrationReps: Int = 0
 ) : ExerciseAnalyzer {
 
     private class LegState {
@@ -31,6 +32,7 @@ class SeatedLegRaiseAnalyzer(
     }
 
     private val legs = listOf(LegState(), LegState())
+    private val calibration = AmplitudeCalibration(calibrationReps)
     private var repIndex = 0
     private var lastRepAtMs = 0L
 
@@ -38,6 +40,7 @@ class SeatedLegRaiseAnalyzer(
         private set
     override var lastRep: RepResult? = null
         private set
+    override val calibrationRemaining: Int get() = calibration.remaining
 
     override fun update(points: List<PosePoint>, timestampMs: Long): AnalysisUpdate {
         if (points.size < PoseIndex.LANDMARK_COUNT ||
@@ -83,7 +86,10 @@ class SeatedLegRaiseAnalyzer(
             }
             return
         }
-        if (!leg.lifted && span < baseline - liftEnterRatio) {
+        val enterLift = calibration.amplitude()?.let { calibration.enterLift() } ?: liftEnterRatio
+        val exitLift = calibration.amplitude()?.let { calibration.exitLift() } ?: liftExitRatio
+        val minLift = calibration.amplitude()?.let { calibration.minValidLift() } ?: minLiftRatio
+        if (!leg.lifted && span < baseline - enterLift) {
             if (leg.lastExitMs != 0L && timestampMs - leg.lastExitMs < REARM_MS) {
                 return
             }
@@ -94,14 +100,14 @@ class SeatedLegRaiseAnalyzer(
         }
         if (leg.lifted) {
             leg.minSpan = min(leg.minSpan, span)
-            if (span > baseline - liftExitRatio) {
+            if (span > baseline - exitLift) {
                 leg.lifted = false
                 leg.lastExitMs = timestampMs
                 // 抬腿持续时间过短视为抖动，不计一次；需完全回到基线附近再重新开始。
                 if (leg.liftStartedMs != 0L && timestampMs - leg.liftStartedMs < MIN_LIFT_MS) {
                     return
                 }
-                if (span < baseline - liftExitRatio) {
+                if (span < baseline - exitLift) {
                     return
                 }
                 if (lastRepAtMs != 0L && timestampMs - lastRepAtMs < MIN_REP_INTERVAL_MS) {
@@ -109,8 +115,12 @@ class SeatedLegRaiseAnalyzer(
                 }
                 lastRepAtMs = timestampMs
                 val lift = baseline - leg.minSpan
+                if (calibration.isCalibrating) {
+                    calibration.record(lift)
+                    return
+                }
                 val issues = buildSet {
-                    if (lift < minLiftRatio) add(RepIssue.INSUFFICIENT_RANGE)
+                    if (lift < minLift) add(RepIssue.INSUFFICIENT_RANGE)
                     if (lean > maxLateralLean) add(RepIssue.LATERAL_LEAN)
                 }
                 repIndex += 1
