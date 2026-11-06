@@ -6,7 +6,8 @@ enum class ExerciseKind {
     MARCH,
     SQUAT,
     POSTURE,
-    STRETCH
+    STRETCH,
+    SEATED_LEG_RAISE
 }
 
 /** 单次动作未达标的原因；UI 负责翻译成患者可读文案。 */
@@ -55,4 +56,5 @@ fun createExerciseAnalyzer(kind: ExerciseKind): ExerciseAnalyzer = when (kind) {
     ExerciseKind.SQUAT -> SquatAnalyzer()
     ExerciseKind.POSTURE -> PostureAnalyzer()
     ExerciseKind.STRETCH -> StretchAnalyzer()
+    ExerciseKind.SEATED_LEG_RAISE -> SeatedLegRaiseAnalyzer()
 }

@@ -51,26 +51,38 @@ internal fun toExerciseMeta(plan: PlanExercise): ExerciseMeta = ExerciseMeta(
     repsPerSet = plan.reps,
     requiresFullBody = PlanSelector.requiresFullBody(plan.category),
     restSeconds = plan.restSeconds,
-    counterLabel = counterLabelFor(plan.category),
-    kind = kindFor(plan.category),
+    counterLabel = counterLabelFor(plan.category, plan.label),
+    kind = kindFor(plan.category, plan.label),
     videoUri = plan.videoUri,
     watermarkText = plan.watermarkText,
     creditLine = plan.creditLine,
     riskLevel = plan.riskLevel
 )
 
-internal fun kindFor(category: String): ExerciseKind = when (category) {
-    ExerciseCategory.RHYTHMIC_GAIT.wireValue -> ExerciseKind.MARCH
-    ExerciseCategory.STRENGTH_MAINTENANCE.wireValue -> ExerciseKind.SQUAT
-    ExerciseCategory.POSTURAL_CORRECTION.wireValue -> ExerciseKind.POSTURE
-    ExerciseCategory.STRETCHING_RELAXATION.wireValue -> ExerciseKind.STRETCH
+/**
+ * 同一分类下动作可能不同（如「靠墙微蹲」与「坐位抬腿」都属于肌力维持），
+ * 优先按条目标签识别动作模式，识别不了再回退到分类。
+ */
+internal fun kindFor(category: String, label: String = ""): ExerciseKind = when {
+    label.contains("抬腿") || label.contains("伸膝") -> ExerciseKind.SEATED_LEG_RAISE
+    label.contains("微蹲") || label.contains("下蹲") -> ExerciseKind.SQUAT
+    label.contains("牵伸") || label.contains("伸展") -> ExerciseKind.STRETCH
+    label.contains("步行") || label.contains("踏步") -> ExerciseKind.MARCH
+    label.contains("站立") || label.contains("姿势") || label.contains("矫正") ->
+        ExerciseKind.POSTURE
+    category == ExerciseCategory.RHYTHMIC_GAIT.wireValue -> ExerciseKind.MARCH
+    category == ExerciseCategory.STRENGTH_MAINTENANCE.wireValue -> ExerciseKind.SQUAT
+    category == ExerciseCategory.POSTURAL_CORRECTION.wireValue -> ExerciseKind.POSTURE
+    category == ExerciseCategory.STRETCHING_RELAXATION.wireValue -> ExerciseKind.STRETCH
     else -> ExerciseKind.ARM_RAISE
 }
 
-private fun counterLabelFor(category: String): String = when (kindFor(category)) {
+private fun counterLabelFor(category: String, label: String): String =
+    when (kindFor(category, label)) {
     ExerciseKind.MARCH -> "踏步次数"
     ExerciseKind.SQUAT -> "蹲起次数"
     ExerciseKind.POSTURE -> "保持次数"
     ExerciseKind.STRETCH -> "伸展保持次数"
+    ExerciseKind.SEATED_LEG_RAISE -> "抬腿次数"
     ExerciseKind.ARM_RAISE -> "抬举次数"
 }

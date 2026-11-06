@@ -235,6 +235,7 @@ private fun ContactTherapistDialog(onDismiss: () -> Unit) {
 private fun categoryTitle(kind: ExerciseKind): String = when (kind) {
     ExerciseKind.MARCH -> "节律步态训练 (RAS)"
     ExerciseKind.STRETCH -> "牵伸放松训练"
+    ExerciseKind.SEATED_LEG_RAISE -> "肌力维持训练"
     ExerciseKind.ARM_RAISE -> "牵伸放松训练"
     ExerciseKind.SQUAT -> "肌力维持训练"
     ExerciseKind.POSTURE -> "姿势矫正训练"
@@ -243,6 +244,7 @@ private fun categoryTitle(kind: ExerciseKind): String = when (kind) {
 private fun categoryDescription(kind: ExerciseKind): String = when (kind) {
     ExerciseKind.MARCH -> "跟着舒适节拍踏步，帮助步伐更加连贯稳健。"
     ExerciseKind.STRETCH -> "双上肢缓慢上举并保持，让肩颈与躯干充分舒展。"
+    ExerciseKind.SEATED_LEG_RAISE -> "坐位缓慢抬腿，强化大腿与膝关节周围力量。"
     ExerciseKind.ARM_RAISE -> "轻柔拉伸身体各部位，让全身动作更加舒展轻松。"
     ExerciseKind.SQUAT -> "增强双腿站立力量，日常走路更有劲。"
     ExerciseKind.POSTURE -> "根据实时动作指引，保持挺拔舒展的站立姿态。"

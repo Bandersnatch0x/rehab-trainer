@@ -429,4 +429,67 @@ class ExerciseAnalyzersTest {
     fun factoryCreatesStretchAnalyzer() {
         assertTrue(createExerciseAnalyzer(ExerciseKind.STRETCH) is StretchAnalyzer)
     }
+
+    // ---------- 坐位抬腿 ----------
+
+    private fun seatedLeg(leftAnkleY: Float = 1.00f, rightAnkleY: Float = 1.00f) =
+        stand().apply {
+            set(PoseIndex.LEFT_ANKLE, PosePoint(0.45f, leftAnkleY))
+            set(PoseIndex.RIGHT_ANKLE, PosePoint(0.55f, rightAnkleY))
+        }
+
+    @Test
+    fun seatedLegRaiseCountsAgainstBaseline() {
+        val analyzer = SeatedLegRaiseAnalyzer()
+        analyzer.update(seatedLeg(), timestampMs = 0) // establish baseline
+
+        analyzer.update(seatedLeg(leftAnkleY = 0.55f), timestampMs = 500)
+        val update = analyzer.update(seatedLeg(), timestampMs = 1_000)
+
+        assertEquals(1, update.count)
+        assertTrue(update.lastRep!!.valid)
+    }
+
+    @Test
+    fun shallowSeatedLiftIsFlagged() {
+        val analyzer = SeatedLegRaiseAnalyzer()
+        analyzer.update(seatedLeg(), timestampMs = 0)
+        analyzer.update(seatedLeg(leftAnkleY = 0.95f), timestampMs = 500)
+        val update = analyzer.update(seatedLeg(), timestampMs = 1_000)
+
+        assertEquals(1, update.count)
+        assertTrue(update.lastRep!!.issues.contains(RepIssue.INSUFFICIENT_RANGE))
+    }
+
+    @Test
+    fun seatedLegRaiseTrunkLeanIsFlagged() {
+        val analyzer = SeatedLegRaiseAnalyzer()
+        analyzer.update(seatedLeg(), timestampMs = 0)
+        analyzer.update(leaned(seatedLeg(leftAnkleY = 0.55f)), timestampMs = 500)
+        val update = analyzer.update(leaned(seatedLeg()), timestampMs = 1_000)
+
+        assertTrue(update.lastRep!!.issues.contains(RepIssue.TRUNK_LEAN))
+    }
+
+    @Test
+    fun seatedLegRaiseResetClearsBaseline() {
+        val analyzer = SeatedLegRaiseAnalyzer()
+        analyzer.update(seatedLeg(), timestampMs = 0)
+        analyzer.update(seatedLeg(leftAnkleY = 0.55f), timestampMs = 500)
+        assertEquals(1, analyzer.update(seatedLeg(), timestampMs = 1_000).count)
+
+        analyzer.reset()
+        assertEquals(0, analyzer.count)
+        assertNull(analyzer.lastRep)
+        analyzer.update(seatedLeg(), timestampMs = 2_000)
+        analyzer.update(seatedLeg(leftAnkleY = 0.55f), timestampMs = 2_500)
+        assertEquals(1, analyzer.update(seatedLeg(), timestampMs = 3_000).count)
+    }
+
+    @Test
+    fun factoryCreatesSeatedLegRaiseAnalyzer() {
+        assertTrue(
+            createExerciseAnalyzer(ExerciseKind.SEATED_LEG_RAISE) is SeatedLegRaiseAnalyzer
+        )
+    }
 }

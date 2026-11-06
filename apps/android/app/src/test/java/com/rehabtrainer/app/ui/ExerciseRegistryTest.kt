@@ -12,10 +12,11 @@ class ExerciseRegistryTest {
     private fun plan(
         category: String,
         bpm: Int = 100,
-        videoUri: String? = null
+        videoUri: String? = null,
+        label: String = "原地节律踏步"
     ) = PlanExercise(
         code = "ex-1",
-        label = "原地节律踏步",
+        label = label,
         category = category,
         sets = 3,
         reps = 12,
@@ -32,6 +33,11 @@ class ExerciseRegistryTest {
         assertEquals(ExerciseKind.SQUAT, kindFor("strength-maintenance"))
         assertEquals(ExerciseKind.POSTURE, kindFor("postural-correction"))
         assertEquals(ExerciseKind.STRETCH, kindFor("stretching-relaxation"))
+        assertEquals(
+            ExerciseKind.SEATED_LEG_RAISE,
+            kindFor("strength-maintenance", "坐位抬腿")
+        )
+        assertEquals(ExerciseKind.SQUAT, kindFor("strength-maintenance", "靠墙微蹲"))
     }
 
     @Test
@@ -52,7 +58,7 @@ class ExerciseRegistryTest {
 
     @Test
     fun stretchingDoesNotRequireFullBodyOrRas() {
-        val meta = toExerciseMeta(plan("stretching-relaxation"))
+        val meta = toExerciseMeta(plan("stretching-relaxation", label = "肩颈牵伸"))
         assertFalse(meta.hasRas)
         assertFalse(meta.requiresFullBody)
         assertEquals(ExerciseKind.STRETCH, meta.kind)
