@@ -68,4 +68,4 @@ docker compose --env-file .agent/tmp/deployment.env up --build -d --wait
 | `packages/` | API 契约与生成客户端 |
 | `docs/architecture/` | 架构与仓库结构说明 |
 | `docs/clinical/` | 临床阈值文献预设与签核清单（待签核） |
-| `docs/delivery/` | 交付文档:用户操作手册、部署与运维手册、验收与合规说明、客户版需求规格/功能矩阵、客户汇报 PPT |
+| `docs/delivery/` | 交付文档:用户操作手册、部署与运维手册、验收与合规说明、客户版需求规格/功能矩阵、客户汇报 PPT、后续待办与客户交付包 |
