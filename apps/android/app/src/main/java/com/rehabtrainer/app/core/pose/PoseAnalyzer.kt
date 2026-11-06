@@ -15,6 +15,7 @@ import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
 
 private const val TAG = "PoseAnalyzer"
 private const val LOG_INTERVAL_MS = 1_000L
+private const val GATE_RESET_MS = 5_000L
 
 /** 一帧姿态识别的输出。 */
 sealed interface PoseFrame {
@@ -58,6 +59,7 @@ class PoseAnalyzer(
 
     private var lastDetectTimestampMs = 0L
     private var lastLogAtMs = 0L
+    private var gateBlockedSinceMs = 0L
 
     @Volatile
     private var isPaused = false
