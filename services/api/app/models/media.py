@@ -47,7 +47,7 @@ class MediaAsset(Base):
     watermark_text: Mapped[str | None] = mapped_column(String(128), nullable=True)
     credit_line: Mapped[str | None] = mapped_column(String(255), nullable=True)
     status: Mapped[str] = mapped_column(String(16), default="draft", nullable=False, index=True)
-    # 按 H-Y 分期下发；空数组表示未裁决，不下发给任何分期。
+    # 按 H-Y 分级下发；空数组表示未裁决，不下发给任何分级。
     applicable_stages: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
     published_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     retired_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

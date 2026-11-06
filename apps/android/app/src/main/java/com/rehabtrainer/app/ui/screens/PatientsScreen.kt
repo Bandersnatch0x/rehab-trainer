@@ -23,7 +23,7 @@ import com.rehabtrainer.app.ui.components.ElderlyButtonVariant
 import com.rehabtrainer.app.ui.theme.LocalElderlyDimens
 
 /**
- * 患者：查看患者档案、H-Y 分期与分期确认状态（遵守 D10 与 D11 裁决）。
+ * 患者：查看患者档案、H-Y 分级与分级确认状态（遵守 D10 与 D11 裁决）。
  */
 @Composable
 fun PatientsScreen(modifier: Modifier = Modifier) {

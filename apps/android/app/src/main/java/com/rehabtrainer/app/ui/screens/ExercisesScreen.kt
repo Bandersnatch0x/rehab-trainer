@@ -30,7 +30,7 @@ import com.rehabtrainer.app.ui.theme.LocalElderlyDimens
 /**
  * 训练条目列表：按 4 大固定训练大类展示。
  *
- * D11：需要治疗师确认分期的条目在确认前禁用开始按钮；演示版没有分期数据来源，
+ * D11：需要治疗师确认分级的条目在确认前禁用开始按钮；演示版没有分级数据来源，
  * 调用方默认传 `stageConfirmed = false`，按最保守处理。
  */
 @Composable
@@ -55,13 +55,13 @@ fun ExercisesScreen(
     ) {
         // 页面标题由顶栏统一承担，页内不再重复大标题。
         Text(
-            text = "以下为演示用训练条目，实际处方由康复治疗师制定。请在适宜体力下按顺序完成。",
+            text = "以下为演示用训练条目，实际训练方案由康复治疗师制定。请在适宜体力下按顺序完成。",
             style = MaterialTheme.typography.bodyLarge
         )
 
-        // D21：训练条目、剂量、适宜性与分期标签及联系信息均为 mock；接入真实处方 API 时本声明与 mock 一并移除。
+        // D21：训练条目、训练量、适宜性与分级标签及联系信息均为 mock；接入真实训练方案 API 时本声明与 mock 一并移除。
         Text(
-            text = "演示数据：当前为演示模式，下列训练条目、推荐剂量、适宜性与分期标签及联系信息均为示例数据，不是真实处方。",
+            text = "演示数据：当前为演示模式，下列训练条目、推荐训练量、适宜性与分级标签及联系信息均为示例数据，不是真实训练方案。",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -71,7 +71,7 @@ fun ExercisesScreen(
             categoryTitle = "节律步态训练 (RAS)",
             categoryDesc = "跟着舒适节拍踏步，帮助步伐更加连贯稳健。",
             exerciseName = "原地节律踏步训练",
-            parameters = "推荐剂量：3 组 × 12 次 · 100 BPM 听觉节拍",
+            parameters = "推荐训练量：3 组 × 12 次 · 100 BPM 听觉节拍",
             suitabilityTag = "适宜阶段 · 自主完成",
             onStart = { onSelectExercise("EX-RAS-01") }
         )
@@ -81,7 +81,7 @@ fun ExercisesScreen(
             categoryTitle = "牵伸放松训练",
             categoryDesc = "轻柔拉伸身体各部位，让全身动作更加舒展轻松。",
             exerciseName = "坐位双上肢躯干伸展",
-            parameters = "推荐剂量：2 组 × 10 次 · 自主节律无需设备",
+            parameters = "推荐训练量：2 组 × 10 次 · 自主节律无需设备",
             suitabilityTag = "轻柔舒缓 · 自主完成",
             onStart = { onSelectExercise("EX-STRETCH-01") }
         )
@@ -91,7 +91,7 @@ fun ExercisesScreen(
             categoryTitle = "肌力维持训练",
             categoryDesc = "增强双腿站立力量，日常走路更有劲。",
             exerciseName = "下肢靠墙微蹲训练",
-            parameters = "推荐剂量：2 组 × 8 次 · 需身旁有稳固扶手",
+            parameters = "推荐训练量：2 组 × 8 次 · 需身旁有稳固扶手",
             suitabilityTag = "温和强化 · 家属陪同",
             onStart = { onSelectExercise("EX-STRENGTH-01") }
         )
@@ -101,8 +101,8 @@ fun ExercisesScreen(
             categoryTitle = "姿势矫正训练",
             categoryDesc = "根据实时动作指引，保持挺拔舒展的站立姿态。",
             exerciseName = "站立位脊柱对齐矫正",
-            parameters = "推荐剂量：3 组 × 10 次 · 端上实时姿态比对",
-            suitabilityTag = "疑似 · 需分期确认准入",
+            parameters = "推荐训练量：3 组 × 10 次 · 端上实时姿态比对",
+            suitabilityTag = "疑似 · 需分级确认准入",
             onStart = { onSelectExercise("EX-POSTURE-01") },
             requiresStageConfirmation = true,
             stageConfirmed = stageConfirmed,
@@ -186,14 +186,14 @@ private fun ExerciseCategoryCard(
 
             if (requiresStageConfirmation && !stageConfirmed) {
                 Text(
-                    text = "分期状态：疑似（尚未经治疗师确认）",
+                    text = "分级状态：疑似（尚未经治疗师确认）",
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.error
                 )
             }
 
             ElderlyButton(
-                text = if (canStart) "开始此项训练" else "需治疗师确认分期",
+                text = if (canStart) "开始此项训练" else "需治疗师确认分级",
                 onClick = onStart,
                 variant = ElderlyButtonVariant.Primary,
                 enabled = canStart
@@ -201,7 +201,7 @@ private fun ExerciseCategoryCard(
 
             if (!canStart) {
                 Text(
-                    text = "该训练属于需治疗师评估的高风险条目。为保证安全，分期确认前不能开始。",
+                    text = "该训练属于需治疗师评估的高风险条目。为保证安全，分级确认前不能开始。",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -231,7 +231,7 @@ private fun ContactTherapistDialog(onDismiss: () -> Unit) {
                 Text("签约机构：市康复中心第三病区", style = MaterialTheme.typography.bodyLarge)
                 Text("责任治疗师：李主任", style = MaterialTheme.typography.bodyLarge)
                 Text(
-                    "请治疗师确认分期后，再开始「姿势矫正训练」。",
+                    "请治疗师确认分级后，再开始「姿势矫正训练」。",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

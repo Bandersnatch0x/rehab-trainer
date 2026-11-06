@@ -30,12 +30,12 @@ type EditableItem = {
   reps: number;
   bpm: number;
   frequency: number;
-  /** 用户是否改过该行；未改动的行按原样回传，避免把 UI 默认值写进空剂量。 */
+  /** 用户是否改过该行；未改动的行按原样回传，避免把 UI 默认值写进空训练量。 */
   touched: boolean;
   originalDosage?: Prescription["items"][number]["dosage"];
 };
 
-/** 把处方条目转成可编辑行；缺失剂量用保守默认值展示，但不代表已保存。 */
+/** 把训练方案条目转成可编辑行；缺失训练量用保守默认值展示，但不代表已保存。 */
 function toEditable(
   item: Prescription["items"][number] | undefined,
   fallbackCode: string,
@@ -69,7 +69,7 @@ export default function PrescriptionEditPage() {
   const [successVersion, setSuccessVersion] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  /** 把处方内容灌进表单；409 后重拉也用同一套逻辑，避免用旧值覆盖对方改动。 */
+  /** 把训练方案内容灌进表单；409 后重拉也用同一套逻辑，避免用旧值覆盖对方改动。 */
   function hydrate(prescription: Prescription | null, available: Exercise[]) {
     setCurrent(prescription);
     if (prescription && prescription.items.length > 0) {
@@ -109,15 +109,15 @@ export default function PrescriptionEditPage() {
         setLoading(false);
 
         if (!exerciseResult.ok) {
-          // 读不到训练条目就不能签发，避免用默认值拼出一个处方。
+          // 读不到训练条目就不能保存，避免用默认值拼出一个训练方案。
           setLoadError(`训练条目加载失败：${exerciseResult.error.message}`);
           return;
         }
         setExercises(exerciseResult.data.items);
 
         if (!prescriptionResult.ok) {
-          // 处方读取失败时绝不能落进"新建"分支，否则会凭空多一条处方。
-          setLoadError(`现有处方读取失败：${prescriptionResult.error.message}`);
+          // 训练方案读取失败时绝不能落进"新建"分支，否则会凭空多一条训练方案。
+          setLoadError(`现有训练方案读取失败：${prescriptionResult.error.message}`);
           return;
         }
 
@@ -137,11 +137,11 @@ export default function PrescriptionEditPage() {
       return;
     }
     if (!patientId) {
-      setError("缺少患者编号，无法签发处方");
+      setError("缺少患者编号，无法保存训练方案");
       return;
     }
     if (items.length === 0) {
-      setError("处方至少保留一个训练条目");
+      setError("训练方案至少保留一个训练条目");
       return;
     }
     if (items.some((item) => !item.exerciseCode)) {
@@ -170,7 +170,7 @@ export default function PrescriptionEditPage() {
         item.frequency > 7,
     );
     if (invalid) {
-      setError(`训练条目 ${invalid.exerciseCode} 的剂量超出允许范围。`);
+      setError(`训练条目 ${invalid.exerciseCode} 的训练量超出允许范围。`);
       return;
     }
 
@@ -179,9 +179,9 @@ export default function PrescriptionEditPage() {
 
     const payloadItems = items.map((item) => ({
       exerciseCode: item.exerciseCode,
-      // 条目未换时保留原有难度变体，避免一次剂量调整把变体清掉。
+      // 条目未换时保留原有难度变体，避免一次训练量调整把变体清掉。
       ...(item.variantCode ? { variantCode: item.variantCode } : {}),
-      // 未改动的行原样回传；原剂量为空时不要写入 UI 默认值。
+      // 未改动的行原样回传；原训练量为空时不要写入 UI 默认值。
       ...(item.touched
         ? {
             dosage: {
@@ -197,7 +197,7 @@ export default function PrescriptionEditPage() {
     }));
     const now = new Date();
 
-    // 已有处方走 PATCH + If-Match；没有才新建。绝不伪造版本号。
+    // 已有训练方案走 PATCH + If-Match；没有才新建。绝不伪造版本号。
     const result = current
       ? await updatePrescription(current.id, { items: payloadItems }, current.version)
       : await createPrescription({
@@ -206,7 +206,7 @@ export default function PrescriptionEditPage() {
           issuedAt: now.toISOString(),
           validFrom: now.toISOString(),
           validUntil: addDays(now, 30),
-          // 演示版映射表版本；真实版本应由分期→条目映射表提供（C2）。
+          // 演示版映射表版本；真实版本应由分级→条目映射表提供（C2）。
           mappingTableVersion: "demo.1",
         });
 
@@ -218,7 +218,7 @@ export default function PrescriptionEditPage() {
     }
 
     if (result.error.status === 409) {
-      setError("处方版本冲突：另一端已更新。已载入最新版本，请确认后重新提交。");
+      setError("训练方案版本冲突：另一端已更新。已载入最新版本，请确认后重新提交。");
       // 只更新 current 而不重灌表单，会让下一次提交用旧值覆盖对方刚改的条目。
       const latest = await findCurrentPrescription(patientId);
       if (latest.ok) {
@@ -263,36 +263,36 @@ export default function PrescriptionEditPage() {
 
   return (
     <div className="page" style={{ maxWidth: 960 }}>
-      <h1>康复训练处方开具与调整</h1>
+      <h1>康复训练方案制定与调整</h1>
       <p className="page-description">
-        患者编号：<strong>{patientId}</strong> · 康复治疗师临床专属处方权 (D12)
+        患者编号：<strong>{patientId}</strong> · 康复治疗师专属训练方案制定权限 (D12)
       </p>
 
       <div className="notice">
         <div>
-          <strong>处方版本乐观锁提示（D12 约束）：</strong>
+          <strong>训练方案版本乐观锁提示（D12 约束）：</strong>
           {loading
-            ? "正在读取现有处方…"
+            ? "正在读取现有训练方案…"
             : loadError
-              ? "现有处方读取失败，已禁用签发。"
+              ? "现有训练方案读取失败，已禁用保存。"
               : current
-                ? `当前处方版本 ${current.version}。保存时以该版本作为 If-Match；另一端先更新则返回 409 并提示冲突。`
-                : "该患者暂无有效处方，本次保存将新建 v1.0.0。"}
+                ? `当前训练方案版本 ${current.version}。保存时以该版本作为 If-Match；另一端先更新则返回 409 并提示冲突。`
+                : "该患者暂无有效训练方案，本次保存将新建 v1.0.0。"}
         </div>
       </div>
 
       {loadError ? (
         <p role="alert" className="notice notice--danger">
-          {loadError}。请刷新重试；读取成功前不会创建新处方。
+          {loadError}。请刷新重试；读取成功前不会创建新训练方案。
         </p>
       ) : null}
 
       {successVersion ? (
         <div className="card" style={{ textAlign: "center", padding: "40px 24px" }}>
           <div style={{ fontSize: 48, color: "var(--color-success)", marginBottom: 12 }}>✓</div>
-          <h2>处方签发成功（版本 {successVersion}）</h2>
+          <h2>训练方案保存成功（版本 {successVersion}）</h2>
           <p className="hint" style={{ margin: "12px 0 24px" }}>
-            患者端（Android App 与微信小程序）在下次同步时拉取新处方，训练计划随之生效。
+            患者端（Android App 与微信小程序）在下次同步时拉取新训练方案，训练计划随之生效。
           </p>
           <button
             type="button"
@@ -305,9 +305,9 @@ export default function PrescriptionEditPage() {
       ) : (
         <form onSubmit={handleSubmit}>
           <div className="card">
-            <div className="card-title">1. 训练条目与剂量（逐条可调）</div>
+            <div className="card-title">1. 训练条目与训练量（逐条可调）</div>
             <p className="hint" style={{ margin: "0 0 12px" }}>
-              未修改的条目按原剂量保存；原剂量为空时不会把页面默认值写入。
+              未修改的条目按原训练量保存；原训练量为空时不会把页面默认值写入。
             </p>
             {items.map((item, index) => {
               const usedElsewhere = new Set(
@@ -450,14 +450,14 @@ export default function PrescriptionEditPage() {
           <div className="card" style={{ borderLeft: "6px solid var(--color-warning)" }}>
             <div className="card-title">2. 禁忌症与危险信号核验</div>
             <p className="hint">
-              条目禁忌与危险信号以服务端训练条目库为准（本页不再硬编码分期结论）。
+              条目禁忌与危险信号以服务端训练条目库为准（本页不再硬编码分级结论）。
               出现头晕或胸闷时立即停止训练。
             </p>
           </div>
 
           {error ? (
             <p role="alert" className="notice notice--danger">
-              处方签发失败：{error}
+              训练方案保存失败：{error}
             </p>
           ) : null}
 
@@ -470,7 +470,7 @@ export default function PrescriptionEditPage() {
               className="btn-primary"
               disabled={submitting || loading || Boolean(loadError)}
             >
-              {submitting ? "正在签发…" : "💾 签发并同步处方"}
+              {submitting ? "正在保存…" : "💾 保存并同步训练方案"}
             </button>
           </div>
         </form>

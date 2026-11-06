@@ -31,7 +31,7 @@ VALID_FRAME_RATIO_THRESHOLDS: dict[str, float | None] = {
 
 # H-Y 5 级仅宣教与转诊，不进入训练流程（D5，已裁决）。
 TRAINING_MAX_HY_STAGE = 4
-# 未确认分期不得用于高风险训练准入（D11，已裁决）。
+# 未确认分级不得用于高风险训练准入（D11，已裁决）。
 HIGH_RISK_REQUIRES_CONFIRMED_STAGE = True
 # 高风险训练条目的风险等级标识。
 HIGH_RISK_LEVEL = "high"

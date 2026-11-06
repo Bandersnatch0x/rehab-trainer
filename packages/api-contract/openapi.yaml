@@ -11,7 +11,7 @@ info:
     - 训练记录批量上传幂等，以 clientRecordId 去重。
     - 处方更新使用版本号做乐观锁。
 
-    本版本只覆盖核心链路：患者、评估、分期确认、处方、训练条目、训练记录、预警。
+    本版本只覆盖核心链路：患者、评估、分级确认、处方、训练条目、训练记录、预警。
     以下端点留待后续版本，不在此文件中：
     - 微信绑定与代操作（未决项 3）
     - 内容清单与签名 URL（未决项 8/9/10）
@@ -167,7 +167,7 @@ paths:
     post:
       tags: [patients]
       summary: 新建患者档案
-      description: 仅 care_admin 与 rehab_therapist。新建后分期状态为 suspected。
+      description: 仅 care_admin 与 rehab_therapist。新建后分级状态为 suspected。
       requestBody:
         required: true
         content:
@@ -207,8 +207,8 @@ paths:
   /patients/{patientId}/stage-confirmations:
     post:
       tags: [assessments]
-      summary: 康复治疗师确认 H-Y 分期
-      description: 仅 rehab_therapist。确认后患者分期状态变为 confirmed，才可用于高风险训练准入。
+      summary: 康复治疗师确认 H-Y 分级
+      description: 仅 rehab_therapist。确认后患者分级状态变为 confirmed，才可用于高风险训练准入。
       parameters:
         - $ref: "#/components/parameters/PatientId"
       requestBody:
@@ -667,7 +667,7 @@ paths:
                   description: 关联训练条目；留空表示通用素材
                 applicableStages:
                   type: string
-                  description: 适用 H-Y 分期，逗号分隔，如 `1,2,3`；留空表示尚未裁决
+                  description: 适用 H-Y 分级，逗号分隔，如 `1,2,3`；留空表示尚未裁决
                 watermarkText:
                   type: string
                   description: 水印文字（客户端叠加显示，不烧录进文件）
@@ -691,9 +691,9 @@ paths:
   /media-assets/{assetId}:
     patch:
       tags: [media]
-      summary: 修改水印、署名、适用分期或上下架状态
+      summary: 修改水印、署名、适用分级或上下架状态
       description: |
-        状态置为 `published` 时要求已设置适用分期，否则返回 422；
+        状态置为 `published` 时要求已设置适用分级，否则返回 422；
         `published` / `retired` 变更写审计 `media.published` / `media.retired`。
       parameters:
         - name: assetId
@@ -1102,7 +1102,7 @@ components:
         videoUri:
           type: string
           format: uri
-          description: 服务端按患者 H-Y 分期挑选的已上架视频；无匹配时不下发。
+          description: 服务端按患者 H-Y 分级挑选的已上架视频；无匹配时不下发。
         audioUri:
           type: string
           format: uri
@@ -1172,7 +1172,7 @@ components:
           $ref: "#/components/schemas/MediaAssetStatus"
         applicableStages:
           type: array
-          description: 适用 H-Y 分期；空数组表示尚未裁决，不下发。
+          description: 适用 H-Y 分级；空数组表示尚未裁决，不下发。
           items:
             type: integer
             minimum: 1
@@ -1261,7 +1261,7 @@ components:
           format: date-time
         mappingTableVersion:
           type: string
-          description: 分期→条目映射表版本，用于回溯
+          description: 分级→条目映射表版本，用于回溯
 
     PrescriptionPatch:
       type: object

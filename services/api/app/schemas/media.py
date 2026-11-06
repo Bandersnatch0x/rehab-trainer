@@ -43,5 +43,5 @@ class MediaAssetPatch(APIModel):
             return None
         stages = sorted(set(value))
         if any(stage < 1 or stage > 5 for stage in stages):
-            raise ValueError("适用分期必须在 1–5 之间")
+            raise ValueError("适用分级必须在 1–5 之间")
         return stages

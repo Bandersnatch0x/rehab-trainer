@@ -48,7 +48,7 @@ class PrescriptionPatch(APIModel):
     def _check_items(self) -> "PrescriptionPatch":
         if self.items is not None:
             if not self.items:
-                raise ValueError("处方至少保留一个训练条目")
+                raise ValueError("训练方案至少保留一个训练项目")
             _reject_duplicate_codes(self.items)
         return self
 

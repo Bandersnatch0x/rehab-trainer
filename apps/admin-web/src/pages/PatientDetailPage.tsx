@@ -111,10 +111,10 @@ export default function PatientDetailPage() {
         {isTherapist && (
           <div style={{ display: "flex", gap: 12 }}>
             <Link to={`/patients/${encodedId}/stage-confirmation`} className="btn-secondary">
-              重新确认分期 (D11)
+              重新确认分级 (D11)
             </Link>
             <Link to={`/patients/${encodedId}/prescription`} className="btn-primary">
-              调整处方 (D12)
+              调整训练方案 (D12)
             </Link>
           </div>
         )}
@@ -128,7 +128,7 @@ export default function PatientDetailPage() {
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 24 }}>
         <div className="card">
-          <div className="card-title">基本生理与临床分期</div>
+          <div className="card-title">基本生理与康复分级</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span className="hint">患者姓名</span>
@@ -145,13 +145,13 @@ export default function PatientDetailPage() {
               </strong>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span className="hint">H-Y 临床分级</span>
+              <span className="hint">H-Y 康复分级</span>
               <span className="badge badge--info">
                 {patient ? `H-Y ${patient.hyStage}期` : "—"}
               </span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span className="hint">分期确认状态</span>
+              <span className="hint">分级确认状态</span>
               {patient ? (
                 confirmed ? (
                   <span className="badge badge--success">✓ 康复治疗师已确认</span>
@@ -173,20 +173,20 @@ export default function PatientDetailPage() {
 
         <div className="card">
           <div className="card-title">
-            当前有效处方{prescription ? `（版本 ${prescription.version}）` : ""}
+            当前有效训练方案{prescription ? `（版本 ${prescription.version}）` : ""}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {loading ? (
               <p className="hint" style={{ margin: 0 }}>
-                正在读取处方…
+                正在读取训练方案…
               </p>
             ) : patientFailed ? (
               <p role="alert" className="hint" style={{ margin: 0, color: "var(--color-danger)" }}>
-                患者档案读取失败，无法加载处方。
+                患者档案读取失败，无法加载训练方案。
               </p>
             ) : prescriptionError ? (
               <p role="alert" className="hint" style={{ margin: 0, color: "var(--color-danger)" }}>
-                处方读取失败：{prescriptionError}
+                训练方案读取失败：{prescriptionError}
               </p>
             ) : prescription ? (
               <>
@@ -203,13 +203,13 @@ export default function PatientDetailPage() {
                   <span>{formatServerTime(prescription.validUntil).slice(0, 10)}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span className="hint">签发治疗师</span>
+                  <span className="hint">制定治疗师</span>
                   <span>{prescription.prescribedBy}</span>
                 </div>
               </>
             ) : (
               <p className="hint" style={{ margin: 0 }}>
-                该患者暂无处方记录。
+                该患者暂无训练方案记录。
               </p>
             )}
             <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -225,7 +225,7 @@ export default function PatientDetailPage() {
               </strong>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span className="hint">处方调整</span>
+              <span className="hint">训练方案调整</span>
               <Link to={`/patients/${encodedId}/prescription`} className="btn-secondary">
                 前往调整
               </Link>
@@ -308,7 +308,7 @@ export default function PatientDetailPage() {
       <div className="card">
         <div className="card-title">身体感受与评估记录</div>
         <p className="hint" style={{ margin: "0 0 12px" }}>
-          量表分界值待临床签核，本页只展示患者提交的记录，不输出风险分级。
+          量表分界值待康复签核，本页只展示患者提交的记录，不输出风险分级。
           {assessmentsCapped ? " 仅显示最近 100 条。" : ""}
         </p>
         <div className="table-container">

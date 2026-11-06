@@ -24,6 +24,11 @@ ADMIN_DIR = ROOT / "apps/admin-web"
 MP_DIR = ROOT / "apps/miniprogram"
 ANDROID_DIR = ROOT / "apps/android"
 
+# Windows 控制台常为 GBK；失败输出里可能含 › 等字符，避免打印时二次崩溃。
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 # 仓库自带 venv 优先；CI 上通常直接是 python。
 VENV_PYTHON = API_DIR / ".venv" / "Scripts" / "python.exe"
 PYTHON = VENV_PYTHON if VENV_PYTHON.exists() else Path(sys.executable)

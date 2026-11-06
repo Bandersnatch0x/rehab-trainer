@@ -1,4 +1,4 @@
-"""训练视频资产：上传、登记、上下架与按分期下发。"""
+"""训练视频资产：上传、登记、上下架与按分级下发。"""
 
 from datetime import datetime
 from typing import Annotated
@@ -56,7 +56,7 @@ def _get_asset(db: Session, principal: Principal, asset_id: str) -> MediaAsset:
 
 
 def _parse_stages(raw: str | None) -> list[int]:
-    """表单里的适用分期用逗号分隔；空串表示「尚未裁决」。"""
+    """表单里的适用分级用逗号分隔；空串表示「尚未裁决」。"""
     if not raw or not raw.strip():
         return []
     try:
@@ -64,7 +64,7 @@ def _parse_stages(raw: str | None) -> list[int]:
     except ValueError:
         raise api_error(422, "VALIDATION_FAILED", "applicableStages 必须是 1–5 的整数")
     if any(stage < 1 or stage > 5 for stage in stages):
-        raise api_error(422, "VALIDATION_FAILED", "适用分期必须在 1–5 之间")
+        raise api_error(422, "VALIDATION_FAILED", "适用分级必须在 1–5 之间")
     return stages
 
 
@@ -172,7 +172,7 @@ def update_media_asset(
     principal: Principal = Depends(require_roles(*CLINICIAN_ROLES)),
     db: Session = Depends(get_db),
 ):
-    """修改水印、署名、适用分期与上下架状态；状态变更写审计。"""
+    """修改水印、署名、适用分级与上下架状态；状态变更写审计。"""
     asset = _get_asset(db, principal, asset_id)
     previous_status = asset.status
 
@@ -192,7 +192,7 @@ def update_media_asset(
                 raise api_error(
                     422,
                     "VALIDATION_FAILED",
-                    "未设置适用分期，上架后不会下发任何患者",
+                    "未设置适用分级，上架后不会下发任何患者",
                 )
             asset.status = "published"
             asset.published_at = now
@@ -245,9 +245,9 @@ def latest_published_for_stage(
     exercise_code: str,
     stage: int | None,
 ) -> MediaAsset | None:
-    """取该条目在指定分期下已上架的最新一条；stage 为 None 时按「不限分期」挑选。
+    """取该条目在指定分级下已上架的最新一条；stage 为 None 时按「不限分级」挑选。
 
-    分期匹配只在服务端做，返回给患者端的响应里不含分期字段（D20）。
+    分级匹配只在服务端做，返回给患者端的响应里不含分级字段（D20）。
     """
     stmt = select(MediaAsset).where(
         MediaAsset.org_id == org_id,
@@ -260,7 +260,7 @@ def latest_published_for_stage(
     for asset in assets:
         stages = list(asset.applicable_stages or [])
         if not stages:
-            # 空数组表示未裁决，不匹配任何分期。
+            # 空数组表示未裁决，不匹配任何分级。
             continue
         if stage is None or stage in stages:
             return asset

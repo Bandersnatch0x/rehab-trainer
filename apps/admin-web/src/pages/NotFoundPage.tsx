@@ -7,7 +7,7 @@ export default function NotFoundPage() {
         <div style={{ fontSize: 56, color: "var(--color-primary)", marginBottom: 16 }}>🔍</div>
         <h1>404 · 页面未找到</h1>
         <p className="page-description" style={{ margin: "16px 0 24px" }}>
-          请求的临床功能或档案页面不存在，请检查访问路径或返回工作台。
+          请求的康复功能或档案页面不存在，请检查访问路径或返回工作台。
         </p>
         <Link to="/patients" className="btn-primary" style={{ display: "inline-flex" }}>
           返回患者工作台

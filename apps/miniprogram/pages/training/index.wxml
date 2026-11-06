@@ -55,7 +55,7 @@
 
   <view wx:if="{{demoData}}" class="card">
     <view class="card-title">演示选项</view>
-    <view class="muted">演示行为：开启后会跳过治疗师确认与处方校验，仅用于演示，请勿用于真实训练。</view>
+    <view class="muted">演示行为：开启后会跳过治疗师确认与训练方案校验，仅用于演示，请勿用于真实训练。</view>
     <view class="switch-row">
       <text class="switch-row__label">演示：解锁全部条目</text>
       <switch checked="{{demoUnlocked}}" bindchange="onDemoUnlockChange" color="#1a4fa0" />
@@ -63,7 +63,7 @@
   </view>
 
   <view class="notice notice--warning">
-    需治疗师确认的条目，将在治疗师确认适合并开具方案后开放；如入口不可用，请联系治疗师。
+    需治疗师确认的条目，将在治疗师确认适合并制定训练方案后开放；如入口不可用，请联系治疗师。
   </view>
-  <view class="hint">{{demoData ? '本页为演示数据，条目与剂量仅用于演示。' : '条目与剂量以治疗师开具的方案为准。'}}</view>
+  <view class="hint">{{demoData ? '本页为演示数据，条目与训练量仅用于演示。' : '条目与训练量以治疗师制定的训练方案为准。'}}</view>
 </view>

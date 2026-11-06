@@ -190,7 +190,7 @@ export default function MediaAssetsPage() {
   const changeStatus = async (asset: MediaAsset, next: MediaAssetStatus) => {
     const prompt =
       next === "published"
-        ? `确认上架「${exerciseLabel.get(asset.exerciseCode ?? "") ?? asset.exerciseCode ?? "通用素材"}」？上架后符合分期的患者会立即看到该视频。`
+        ? `确认上架「${exerciseLabel.get(asset.exerciseCode ?? "") ?? asset.exerciseCode ?? "通用素材"}」？上架后符合分级的患者会立即看到该视频。`
         : next === "retired"
           ? "确认下架？下架后患者端不再下发该视频，文件与记录保留。"
           : "确认退回草稿？患者端将不再下发该视频。";
@@ -234,7 +234,7 @@ export default function MediaAssetsPage() {
       <div>
         <h1>训练视频管理</h1>
         <p className="page-description">
-          上传训练视频、设置适用 H-Y 分期与版权标注；只有「已上架」且分期匹配的视频才会下发给患者。
+          上传训练视频、设置适用 H-Y 分级与版权标注；只有「已上架」且分级匹配的视频才会下发给患者。
           水印与署名由客户端叠加显示，不烧录进视频文件。
         </p>
       </div>
@@ -304,7 +304,7 @@ export default function MediaAssetsPage() {
           </label>
 
           <fieldset className="media-field media-field--wide">
-            <legend>适用 H-Y 分期</legend>
+            <legend>适用 H-Y 分级</legend>
             <div className="media-stage-options">
               {[1, 2, 3, 4, 5].map((stage) => (
                 <label key={stage}>
@@ -319,7 +319,7 @@ export default function MediaAssetsPage() {
             </div>
             {formStages.length === 0 ? (
               <small className="media-warn">
-                未选择分期时上架会被拒绝：空集合表示尚未裁决，不会下发给任何患者。
+                未选择分级时上架会被拒绝：空集合表示尚未裁决，不会下发给任何患者。
               </small>
             ) : null}
           </fieldset>
@@ -437,7 +437,7 @@ export default function MediaAssetsPage() {
                   </div>
                   <dl className="media-meta">
                     <div>
-                      <dt>适用分期</dt>
+                      <dt>适用分级</dt>
                       <dd>{stagesText(asset.applicableStages)}</dd>
                     </div>
                     <div>

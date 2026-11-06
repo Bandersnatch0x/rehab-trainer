@@ -16,7 +16,7 @@ const MOCK_ACCOUNTS: AccountRoleBinding[] = [
     displayName: "李副主任医师",
     username: "therapist_dr_li",
     role: "rehab_therapist",
-    roleLabel: "康复治疗师 (处方与分期签发权)",
+    roleLabel: "康复治疗师 (训练方案与分级确认权)",
     status: "active",
     lastLogin: "今日 08:30",
   },
@@ -52,7 +52,7 @@ export default function PermissionsPage() {
         <div>
           <strong>职责矩阵权限边界（D4 约束）：</strong>
           <ul>
-            <li><strong>康复治疗师</strong>：独占 H-Y 分期确认权（D11）、运动康复处方开具与调整权（D12）。</li>
+            <li><strong>康复治疗师</strong>：独占 H-Y 分级确认权（D11）、运动康复训练方案制定与调整权（D12）。</li>
             <li><strong>照护管理员</strong>：负责患者日常建档、风险预警跟踪、电话随访登记（D6）。</li>
           </ul>
         </div>

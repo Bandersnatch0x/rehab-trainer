@@ -74,7 +74,7 @@ def _validate_items(
                 f"训练条目不适用于当前 H-Y 分级：{exercise.code}",
                 {"exerciseCode": exercise.code, "hyStage": patient.hy_stage},
             )
-        # D11：未确认分期不得用于高风险训练准入。
+        # D11：未确认分级不得用于高风险训练准入。
         if (
             HIGH_RISK_REQUIRES_CONFIRMED_STAGE
             and exercise.risk_level == HIGH_RISK_LEVEL
@@ -83,7 +83,7 @@ def _validate_items(
             raise api_error(
                 422,
                 "HIGH_RISK_NOT_ALLOWED",
-                "分期未经康复治疗师确认，高风险训练条目不可用",
+                "分级未经康复治疗师确认，高风险训练条目不可用",
                 {"exerciseCode": exercise.code},
             )
 
@@ -211,7 +211,7 @@ def update_prescription(
 ):
     prescription = db.get(Prescription, prescription_id)
     if prescription is None:
-        raise api_error(404, "NOT_FOUND", "处方不存在")
+        raise api_error(404, "NOT_FOUND", "训练方案不存在")
     if prescription.org_id != principal.org_id:
         record_audit(
             db,
@@ -234,7 +234,7 @@ def update_prescription(
         raise api_error(
             409,
             "VERSION_CONFLICT",
-            "处方版本冲突，请基于最新版本重试",
+            "训练方案版本冲突，请基于最新版本重试",
             {"currentVersion": prescription.version},
         )
 
@@ -244,7 +244,7 @@ def update_prescription(
 
     if payload.items is not None:
         if not payload.items:
-            raise api_error(422, "VALIDATION_FAILED", "处方至少保留一个训练条目")
+            raise api_error(422, "VALIDATION_FAILED", "训练方案至少保留一个训练项目")
         if patient.hy_stage > TRAINING_MAX_HY_STAGE:
             raise api_error(
                 422,
@@ -281,7 +281,7 @@ def update_prescription(
         raise api_error(
             409,
             "VERSION_CONFLICT",
-            "处方版本冲突，请基于最新版本重试",
+            "训练方案版本冲突，请基于最新版本重试",
             {"currentVersion": previous_version},
         )
 

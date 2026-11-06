@@ -10,7 +10,7 @@ import retrofit2.http.Path
 
 interface AssessmentsApi {
 
-    /** POST /patients/{patientId}/stage-confirmations — 康复治疗师确认 H-Y 分期。 */
+    /** POST /patients/{patientId}/stage-confirmations — 康复治疗师确认 H-Y 分级。 */
     @POST("patients/{patientId}/stage-confirmations")
     suspend fun confirmStage(
         @Path("patientId") patientId: String,

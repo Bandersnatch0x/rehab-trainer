@@ -35,7 +35,7 @@ import com.rehabtrainer.app.ui.theme.LocalElderlyDimens
  *
  * 布局策略：
  * - Compact / Medium 手机端：单列纵向大卡片流，防误触大间距。
- * - Expanded（大屏平板）：左右双列自适应（左操作与主行动点，右处方与安全状态）。
+ * - Expanded（大屏平板）：左右双列自适应（左操作与主行动点，右训练方案与安全状态）。
  */
 @Composable
 fun HomeScreen(
@@ -150,7 +150,7 @@ private fun HomeQuickActions(
             variant = ElderlyButtonVariant.Primary
         )
         ElderlyButton(
-            text = "查看完整处方条目",
+            text = "查看完整训练项目",
             onClick = onOpenPrescription,
             icon = Icons.Filled.List,
             variant = ElderlyButtonVariant.Secondary
@@ -175,7 +175,7 @@ private fun HomeTodayPrescription() {
             verticalArrangement = Arrangement.spacedBy(dimens.itemSpacing)
         ) {
             Text(
-                text = "今日处方条目",
+                text = "今日训练项目",
                 style = MaterialTheme.typography.titleLarge
             )
             Text(
@@ -212,7 +212,7 @@ private fun HomeTodayPrescription() {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "训练剂量设定 【演示数据】",
+                            text = "训练量设定 【演示数据】",
                             style = MaterialTheme.typography.bodyLarge
                         )
                         Text(

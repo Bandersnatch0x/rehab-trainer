@@ -114,7 +114,7 @@ def _accept_record(
         return _reject(
             record.client_record_id,
             "VALIDATION_FAILED",
-            "处方不存在或不属于该患者",
+            "训练方案不存在或不属于该患者",
         )
 
     # 幂等：以 clientRecordId 去重，重复提交返回已存在记录（契约约定）。

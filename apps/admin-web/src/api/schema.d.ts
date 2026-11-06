@@ -241,7 +241,7 @@ export interface paths {
         put?: never;
         /**
          * 新建患者档案
-         * @description 仅 care_admin 与 rehab_therapist。新建后分期状态为 suspected。
+         * @description 仅 care_admin 与 rehab_therapist。新建后分级状态为 suspected。
          */
         post: {
             parameters: {
@@ -325,8 +325,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * 康复治疗师确认 H-Y 分期
-         * @description 仅 rehab_therapist。确认后患者分期状态变为 confirmed，才可用于高风险训练准入。
+         * 康复治疗师确认 H-Y 分级
+         * @description 仅 rehab_therapist。确认后患者分级状态变为 confirmed，才可用于高风险训练准入。
          */
         post: {
             parameters: {
@@ -1064,7 +1064,7 @@ export interface paths {
                         file: string;
                         /** @description 关联训练条目；留空表示通用素材 */
                         exerciseCode?: string;
-                        /** @description 适用 H-Y 分期，逗号分隔，如 `1,2,3`；留空表示尚未裁决 */
+                        /** @description 适用 H-Y 分级，逗号分隔，如 `1,2,3`；留空表示尚未裁决 */
                         applicableStages?: string;
                         /** @description 水印文字（客户端叠加显示，不烧录进文件） */
                         watermarkText?: string;
@@ -1108,8 +1108,8 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * 修改水印、署名、适用分期或上下架状态
-         * @description 状态置为 `published` 时要求已设置适用分期，否则返回 422；
+         * 修改水印、署名、适用分级或上下架状态
+         * @description 状态置为 `published` 时要求已设置适用分级，否则返回 422；
          *     `published` / `retired` 变更写审计 `media.published` / `media.retired`。
          */
         patch: {
@@ -1292,7 +1292,7 @@ export interface components {
             defaultDosage?: components["schemas"]["Dosage"];
             /**
              * Format: uri
-             * @description 服务端按患者 H-Y 分期挑选的已上架视频；无匹配时不下发。
+             * @description 服务端按患者 H-Y 分级挑选的已上架视频；无匹配时不下发。
              */
             videoUri?: string;
             /** Format: uri */
@@ -1327,7 +1327,7 @@ export interface components {
             /** @description 来源署名。 */
             creditLine?: string | null;
             status: components["schemas"]["MediaAssetStatus"];
-            /** @description 适用 H-Y 分期；空数组表示尚未裁决，不下发。 */
+            /** @description 适用 H-Y 分级；空数组表示尚未裁决，不下发。 */
             applicableStages: number[];
             /** Format: date-time */
             publishedAt?: string | null;
@@ -1364,7 +1364,7 @@ export interface components {
             validFrom: string;
             /** Format: date-time */
             validUntil: string;
-            /** @description 分期→条目映射表版本，用于回溯 */
+            /** @description 分级→条目映射表版本，用于回溯 */
             mappingTableVersion: string;
         };
         PrescriptionPatch: {

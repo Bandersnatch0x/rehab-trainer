@@ -131,7 +131,7 @@ export default function PatientsPage() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
         <div>
           <h1>患者工作台</h1>
-          <p className="page-description">机构名下帕金森患者档案、H-Y 分期确认与安全状态管理。</p>
+          <p className="page-description">机构名下帕金森患者档案、H-Y 分级确认与安全状态管理。</p>
         </div>
         {canCreate ? (
           <button
@@ -154,7 +154,7 @@ export default function PatientsPage() {
         <div className="card">
           <div className="card-title">新建患者档案</div>
           <p className="hint" style={{ margin: "0 0 12px" }}>
-            建档后 H-Y 分期为「疑似 1 期」，需康复治疗师完成分期确认（D11）。
+            建档后 H-Y 分级为「疑似 1 期」，需康复治疗师完成分级确认（D11）。
           </p>
           <form
             onSubmit={onCreate}
@@ -222,7 +222,7 @@ export default function PatientsPage() {
             onChange={(event) => setConfirmation(event.target.value)}
           >
             <option value="">全部</option>
-            <option value="confirmed">已确认（治疗师已签发）</option>
+            <option value="confirmed">已确认（治疗师已确认）</option>
             <option value="suspected">疑似（待确认）</option>
           </select>
         </label>
@@ -250,10 +250,10 @@ export default function PatientsPage() {
               <th>姓名</th>
               <th>年龄</th>
               <th>H-Y 分级</th>
-              <th>分期确认状态</th>
+              <th>分级确认状态</th>
               <th>跌倒风险</th>
               <th>建档时间</th>
-              <th>临床操作</th>
+              <th>康复操作</th>
             </tr>
           </thead>
           <tbody>
@@ -304,7 +304,7 @@ export default function PatientsPage() {
                             className="btn-primary"
                             style={{ padding: "4px 10px", fontSize: 13, minHeight: 32 }}
                           >
-                            分期确认
+                            分级确认
                           </Link>
                         )}
                         {isTherapist && confirmed && (
@@ -313,7 +313,7 @@ export default function PatientsPage() {
                             className="btn-secondary"
                             style={{ padding: "4px 10px", fontSize: 13, minHeight: 32 }}
                           >
-                            调处方
+                            调训练方案
                           </Link>
                         )}
                       </div>

@@ -105,7 +105,7 @@ export function getPatient(patientId: string): Promise<ApiResult<Patient>> {
 
 // ---------- assessments ----------
 
-/** 6. POST /patients/{patientId}/stage-confirmations — 治疗师确认 H-Y 分期 */
+/** 6. POST /patients/{patientId}/stage-confirmations — 治疗师确认 H-Y 分级 */
 export function confirmStage(
   patientId: string,
   body: StageConfirmationCreate,
@@ -350,7 +350,7 @@ export function uploadMediaAsset(
   });
 }
 
-/** 20. PATCH /media-assets/{assetId} — 修改水印、署名、适用分期或上下架状态 */
+/** 20. PATCH /media-assets/{assetId} — 修改水印、署名、适用分级或上下架状态 */
 export function updateMediaAsset(
   assetId: string,
   body: MediaAssetPatch,

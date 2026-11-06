@@ -20,7 +20,7 @@ export default function StageConfirmationPage() {
       return;
     }
     if (!patientId) {
-      setError("缺少患者编号，无法签发分期");
+      setError("缺少患者编号，无法保存分级");
       return;
     }
     setSubmitting(true);
@@ -42,22 +42,22 @@ export default function StageConfirmationPage() {
 
   return (
     <div className="page" style={{ maxWidth: 880 }}>
-      <h1>H-Y 临床分期确认</h1>
+      <h1>H-Y 分级确认</h1>
       <p className="page-description">
-        患者编号：<strong>{patientId ?? "PT-2026-085"}</strong> · 康复治疗师临床权威判定
+        患者编号：<strong>{patientId ?? "PT-2026-085"}</strong> · 康复治疗师康复权威判定
       </p>
 
       <div className="notice notice--warning">
         <div>
-          <strong>临床分期硬约束（D11）：</strong>
-          未经治疗师确认为合法分期的患者，系统一律标记为「疑似」，高风险训练条目与站立位高负荷方案不得准入。
+          <strong>分级确认硬约束（D11）：</strong>
+          未经治疗师确认为合法分级的患者，系统一律标记为「疑似」，高风险训练条目与站立位高负荷方案不得准入。
         </div>
       </div>
 
       {success ? (
         <div className="card" style={{ textAlign: "center", padding: "40px 24px" }}>
           <div style={{ fontSize: 48, color: "var(--color-success)", marginBottom: 12 }}>✓</div>
-          <h2>H-Y 分期确认成功已签发</h2>
+          <h2>H-Y 分级确认已保存</h2>
           <p className="hint" style={{ margin: "12px 0 24px" }}>
             系统已更新该患者档案为「已确认（H-Y {stageValue}期）」，并自动匹配推荐训练方案。
           </p>
@@ -87,7 +87,7 @@ export default function StageConfirmationPage() {
           </label>
 
           <label>
-            <span>临床查体与步态症状评定意见：</span>
+            <span>康复查体与步态症状评定意见：</span>
             <textarea
               rows={4}
               value={clinicalNotes}
@@ -105,7 +105,7 @@ export default function StageConfirmationPage() {
 
           {error ? (
             <p role="alert" className="notice notice--danger">
-              分期签发失败：{error}
+              分级保存失败：{error}
             </p>
           ) : null}
 
@@ -118,7 +118,7 @@ export default function StageConfirmationPage() {
               取消
             </button>
             <button type="submit" className="btn-primary" disabled={submitting}>
-              {submitting ? "提交中…" : "✓ 签发分期确认 (StageConfirmation)"}
+              {submitting ? "提交中…" : "✓ 确认 H-Y 分级 (StageConfirmation)"}
             </button>
           </div>
         </form>

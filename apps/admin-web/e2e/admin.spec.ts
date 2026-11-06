@@ -22,7 +22,7 @@ test('无管理端权限账号登录后显示403页', async ({ page, data }) => 
   await expect(page.getByRole('heading', { name: /403/ })).toBeVisible();
 });
 
-test('H-Y筛选只保留所选分期且可恢复全部', async ({ page, data }) => {
+test('H-Y筛选只保留所选分级且可恢复全部', async ({ page, data }) => {
   await login(page, data);
   const rows = page.locator('tbody tr');
   await expect(rows).toHaveCount(2);
@@ -34,13 +34,13 @@ test('H-Y筛选只保留所选分期且可恢复全部', async ({ page, data }) 
   await expect(rows).toHaveCount(2);
 });
 
-test('患者详情展示真实分期和当前处方', async ({ page, data }) => {
+test('患者详情展示真实分级和当前训练方案', async ({ page, data }) => {
   await login(page, data);
   await page.goto(`/patients/${data.patientId}`);
   await expect(page.getByRole('heading', { name: '患者详情档案' })).toBeVisible();
   await expect(page.getByText('测试三期患者', { exact: false })).toBeVisible();
   await expect(page.getByText(/H-Y\s*3/)).toBeVisible();
-  await expect(page.getByText(/当前有效处方/)).toContainText('1.0.0');
+  await expect(page.getByText(/当前有效训练方案/)).toContainText('1.0.0');
   await expect(page.getByText(/肩颈牵伸|ex-stretch-01/)).toBeVisible();
 });
 
@@ -96,29 +96,29 @@ test('审计日志显示本机构操作并可导出 CSV', async ({ page, data })
   expect(download.suggestedFilename()).toMatch(/^audit-log-.*\.csv$/);
 });
 
-test('康复治疗师可见并进入分期确认', async ({ page, data }) => {
+test('康复治疗师可见并进入分级确认', async ({ page, data }) => {
   await login(page, data);
   await page.goto(`/patients/${data.patientId}`);
-  await page.getByRole('link', { name: /重新确认分期/ }).click();
+  await page.getByRole('link', { name: /重新确认分级/ }).click();
   await expect(page).toHaveURL(new RegExp(`/patients/${data.patientId}/stage-confirmation$`));
-  await expect(page.getByRole('heading', { name: 'H-Y 临床分期确认' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'H-Y 分级确认' })).toBeVisible();
 });
 
-test('照护管理员看不到分期入口且直接访问被拒绝', async ({ page, data }) => {
+test('照护管理员看不到分级入口且直接访问被拒绝', async ({ page, data }) => {
   await login(page, data, 'care_admin');
-  await expect(page.getByRole('link', { name: /分期确认/ })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: /分级确认/ })).toHaveCount(0);
   await page.goto(`/patients/${data.patientId}`);
-  await expect(page.getByRole('link', { name: /确认分期/ })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: /确认分级/ })).toHaveCount(0);
   await page.goto(`/patients/${data.patientId}/stage-confirmation`);
   await expect(page).toHaveURL(/\/forbidden$/);
   await expect(page.getByRole('heading', { name: /403/ })).toBeVisible();
 });
 
-test('另一端更新处方后旧版本保存显示冲突', async ({ page, data, request }) => {
+test('另一端更新训练方案后旧版本保存显示冲突', async ({ page, data, request }) => {
   const signedIn = await login(page, data);
   const { accessToken } = await signedIn.json();
   await page.goto(`/patients/${data.patientId}/prescription`);
-  await expect(page.getByRole('heading', { name: '康复训练处方开具与调整' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '康复训练方案制定与调整' })).toBeVisible();
   const updated = await request.patch(`/v1/prescriptions/${data.prescriptionId}`, {
     headers: { Authorization: `Bearer ${accessToken}`, 'If-Match': '1.0.0' },
     data: { note: '另一端先完成更新' },
@@ -129,11 +129,11 @@ test('另一端更新处方后旧版本保存显示冲突', async ({ page, data,
     page.waitForResponse(response =>
       response.url().endsWith(`/prescriptions/${data.prescriptionId}`) && response.request().method() === 'PATCH',
     { timeout: 10_000 }),
-    page.getByRole('button', { name: /签发并同步处方/ }).click(),
+    page.getByRole('button', { name: /保存并同步训练方案/ }).click(),
   ]);
   expect(conflict.status()).toBe(409);
   await expect(page.getByRole('alert')).toContainText(/版本冲突/);
-  await expect(page.getByText(/签发成功/)).toHaveCount(0);
+  await expect(page.getByText(/保存成功/)).toHaveCount(0);
 });
 
 test('预警处理结果保存后刷新仍然有效', async ({ page, data, request }) => {
@@ -184,18 +184,18 @@ test('预警可先确认再关闭，状态保存后刷新仍然有效', async ({
   expect(items).toEqual(expect.arrayContaining([expect.objectContaining({ id: data.alertId, status: 'closed' })]));
 });
 
-test('调整处方不会删除同一处方里的其他训练条目', async ({ page, data, request }) => {
+test('调整训练方案不会删除同一训练方案里的其他训练条目', async ({ page, data, request }) => {
   const signedIn = await login(page, data);
   const { accessToken } = await signedIn.json();
   await page.goto(`/patients/${data.patientId}/prescription`);
-  await expect(page.getByText(/当前处方版本 1\.0\.0/)).toBeVisible();
+  await expect(page.getByText(/当前训练方案版本 1\.0\.0/)).toBeVisible();
 
   const saved = page.waitForResponse(
     (response) =>
       response.url().endsWith(`/prescriptions/${data.prescriptionId}`) &&
       response.request().method() === 'PATCH',
   );
-  await page.getByRole('button', { name: /签发并同步处方/ }).click();
+  await page.getByRole('button', { name: /保存并同步训练方案/ }).click();
   expect((await saved).status()).toBe(200);
 
   const listed = await request.get(`/v1/prescriptions?patientId=${data.patientId}`, {
@@ -208,7 +208,7 @@ test('调整处方不会删除同一处方里的其他训练条目', async ({ pa
   expect(codes).toEqual(['ex-strength-01', 'ex-stretch-01']);
 });
 
-test('可调整处方中第二个训练条目的剂量', async ({ page, data, request }) => {
+test('可调整训练方案中第二个训练条目的训练量', async ({ page, data, request }) => {
   const signedIn = await login(page, data);
   const { accessToken } = await signedIn.json();
   await page.goto(`/patients/${data.patientId}/prescription`);
@@ -222,7 +222,7 @@ test('可调整处方中第二个训练条目的剂量', async ({ page, data, re
       response.url().endsWith(`/prescriptions/${data.prescriptionId}`) &&
       response.request().method() === 'PATCH',
   );
-  await page.getByRole('button', { name: /签发并同步处方/ }).click();
+  await page.getByRole('button', { name: /保存并同步训练方案/ }).click();
   expect((await saved).status()).toBe(200);
 
   const listed = await request.get(`/v1/prescriptions?patientId=${data.patientId}`, {
@@ -231,11 +231,11 @@ test('可调整处方中第二个训练条目的剂量', async ({ page, data, re
   const { items } = await listed.json();
   const rows = items[0].items as { exerciseCode: string; dosage?: { sets?: number } }[];
   expect(rows.find((row) => row.exerciseCode === 'ex-strength-01')?.dosage?.sets).toBe(5);
-  // 未编辑的第一条原剂量为空，不应被页面默认值写脏。
+  // 未编辑的第一条原训练量为空，不应被页面默认值写脏。
   expect(rows.find((row) => row.exerciseCode === 'ex-stretch-01')?.dosage ?? null).toBeNull();
 });
 
-test('处方可添加与移除训练条目', async ({ page, data }) => {
+test('训练方案可添加与移除训练条目', async ({ page, data }) => {
   await login(page, data);
   await page.goto(`/patients/${data.patientId}/prescription`);
 
@@ -251,7 +251,7 @@ test('处方可添加与移除训练条目', async ({ page, data }) => {
   await expect(third).toHaveCount(0);
   await expect(page.getByRole('group', { name: '训练条目 2' })).toBeVisible();
 
-  // 只剩一条时不能再移除，避免提交空处方。
+  // 只剩一条时不能再移除，避免提交空训练方案。
   await page
     .getByRole('group', { name: '训练条目 2' })
     .getByRole('button', { name: '移除' })
@@ -306,7 +306,7 @@ test('患者超过单页上限时列表仍完整显示', async ({ page }) => {
   expect(requests.filter((url) => url.includes('cursor=')).length).toBeGreaterThan(0);
 });
 
-test('处方读取失败时禁止签发且不创建新处方', async ({ page, data }) => {
+test('训练方案读取失败时禁止保存且不创建新训练方案', async ({ page, data }) => {
   const signedIn = await login(page, data);
   const { accessToken } = await signedIn.json();
   expect(accessToken).toBeTruthy();
@@ -324,13 +324,13 @@ test('处方读取失败时禁止签发且不创建新处方', async ({ page, da
     return route.fulfill({
       status: 500,
       contentType: 'application/json',
-      body: JSON.stringify({ code: 'INTERNAL_ERROR', message: '模拟处方读取故障' }),
+      body: JSON.stringify({ code: 'INTERNAL_ERROR', message: '模拟训练方案读取故障' }),
     });
   });
 
   await page.goto(`/patients/${data.patientId}/prescription`);
-  await expect(page.getByRole('alert')).toContainText('现有处方读取失败');
-  await expect(page.getByRole('button', { name: /签发并同步处方/ })).toBeDisabled();
+  await expect(page.getByRole('alert')).toContainText('现有训练方案读取失败');
+  await expect(page.getByRole('button', { name: /保存并同步训练方案/ })).toBeDisabled();
   expect(created).toBe(0);
 });
 
@@ -402,7 +402,7 @@ test('上传视频为草稿，上架后才下发', async ({ page, data }) => {
   await expect(card.getByText('上架时间').locator('..')).not.toContainText('—');
 });
 
-test('未设置适用分期的视频不能上架', async ({ page, data }) => {
+test('未设置适用分级的视频不能上架', async ({ page, data }) => {
   await login(page, data);
   await page.goto('/media-assets');
   const form = page.locator('form.media-upload');
@@ -414,13 +414,13 @@ test('未设置适用分期的视频不能上架', async ({ page, data }) => {
   for (const stage of ['H-Y 1 期', 'H-Y 2 期', 'H-Y 3 期', 'H-Y 4 期']) {
     await form.getByLabel(stage, { exact: true }).uncheck();
   }
-  await expect(form.getByText(/未选择分期时上架会被拒绝/)).toBeVisible();
+  await expect(form.getByText(/未选择分级时上架会被拒绝/)).toBeVisible();
   await form.getByRole('button', { name: '上传为草稿' }).click();
   await expect(page.getByText(/已上传草稿资产/)).toBeVisible();
 
   page.on('dialog', (dialog) => void dialog.accept());
   const card = page.locator('.media-card').first();
   await card.getByRole('button', { name: '上架' }).click();
-  await expect(page.getByText('未设置适用分期，上架后不会下发任何患者')).toBeVisible();
+  await expect(page.getByText('未设置适用分级，上架后不会下发任何患者')).toBeVisible();
   await expect(card.locator('.media-badge')).toHaveText('草稿');
 });

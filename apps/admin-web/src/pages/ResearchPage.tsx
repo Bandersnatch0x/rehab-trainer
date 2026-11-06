@@ -191,7 +191,7 @@ export default function ResearchPage() {
                 </div>
                 <h3>H-Y 分布</h3>
                 <BarList rows={overview.hyStageDistribution} labels={HY_LABEL} />
-                <h3>分期确认状态</h3>
+                <h3>分级确认状态</h3>
                 <BarList
                   rows={overview.stageConfirmationDistribution}
                   labels={CONFIRMATION_LABEL}

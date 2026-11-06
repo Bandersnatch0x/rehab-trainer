@@ -34,7 +34,7 @@ class Patient(Base):
     )
     display_name: Mapped[str] = mapped_column(String(128), nullable=False)
     birth_year: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    # 建档先占位为 1；权威分期以治疗师分期确认为准（D11）。
+    # 建档先占位为 1；权威分级以治疗师分级确认为准（D11）。
     hy_stage: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     stage_confirmation_status: Mapped[str] = mapped_column(
         String(16), default="suspected", nullable=False

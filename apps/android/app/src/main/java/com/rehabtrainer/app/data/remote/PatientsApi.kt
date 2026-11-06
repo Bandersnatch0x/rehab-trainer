@@ -21,7 +21,7 @@ interface PatientsApi {
         @Query("status") status: PatientStatus? = null
     ): PatientPage
 
-    /** POST /patients — 新建患者档案；新建后分期状态为 suspected。 */
+    /** POST /patients — 新建患者档案；新建后分级状态为 suspected。 */
     @POST("patients")
     suspend fun createPatient(@Body body: PatientCreate): Patient
 

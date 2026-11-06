@@ -305,7 +305,7 @@ def seed() -> None:
     with SessionLocal() as db:
         _ensure_org(db)
         db.flush()
-        # 患者先落库，角色绑定与分期确认才能引用。
+        # 患者先落库，角色绑定与分级确认才能引用。
         _seed_patient(db)
         _seed_identities(db)
         _seed_stage_confirmation(db)

@@ -72,8 +72,8 @@ def _with_media(
 ) -> list[ExerciseOut]:
     """把服务端挑选的视频字段注入响应。
 
-    患者上下文按本人 H-Y 分期挑选；临床角色按查询里的 stage 挑选，
-    两者都没有时取不限分期的已上架资产。分期本身不回传（D20）。
+    患者上下文按本人 H-Y 分级挑选；临床角色按查询里的 stage 挑选，
+    两者都没有时取不限分级的已上架资产。分级本身不回传（D20）。
     """
     if patient is not None:
         stage = patient.hy_stage

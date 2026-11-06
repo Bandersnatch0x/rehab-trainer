@@ -88,7 +88,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 const RISK_LEVELS = ['low', 'medium', 'high'];
 const PUBLICATION_STATUSES = ['draft', 'published', 'retired'];
-const NEEDS_THERAPIST = '需治疗师确认分期并开具处方后开放';
+const NEEDS_THERAPIST = '需治疗师确认分级并制定训练方案后开放';
 
 /** 患者端训练条目视图。分级只在内部用于可用性判断，不进入文案。 */
 export interface ExerciseView {
@@ -141,7 +141,7 @@ function dosageLine(dosage: Exercise['defaultDosage']): string {
 
 /**
  * 训练条目准入。只有低风险条目可直接进入；中/高风险与缺失分级一律按
- * 「需治疗师确认」处理。患者分期不下发给小程序，因此这里不臆测分期。
+ * 「需治疗师确认」处理。患者分级不下发给小程序，因此这里不臆测分级。
  * `demoUnlocked` 仅用于演示，页面必须显式标注。
  */
 export function exerciseView(exercise: Exercise, demoUnlocked = false): ExerciseView {

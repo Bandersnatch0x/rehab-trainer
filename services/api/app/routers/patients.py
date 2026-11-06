@@ -100,7 +100,7 @@ def create_patient(
         org_id=principal.org_id,
         display_name=payload.display_name,
         birth_year=payload.birth_year,
-        # 建档占位为 1 级；权威分期由治疗师分期确认（D11）。
+        # 建档占位为 1 级；权威分级由治疗师分级确认（D11）。
         hy_stage=1,
         stage_confirmation_status="suspected",
         status="active",
