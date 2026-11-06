@@ -23,12 +23,14 @@ class SeatedLegRaiseAnalyzer(
 
     private class LegState {
         var baseline: Float? = null
+        val samples = mutableListOf<Float>()
         var lifted = false
         var minSpan = Float.MAX_VALUE
     }
 
     private val legs = listOf(LegState(), LegState())
     private var repIndex = 0
+    private var lastRepAtMs = 0L
 
     override var count: Int = 0
         private set
@@ -55,21 +57,27 @@ class SeatedLegRaiseAnalyzer(
         updateLeg(
             0,
             (points[PoseIndex.LEFT_ANKLE].y - points[PoseIndex.LEFT_HIP].y) / torso,
-            lean
+            lean,
+            timestampMs
         )
         updateLeg(
             1,
             (points[PoseIndex.RIGHT_ANKLE].y - points[PoseIndex.RIGHT_HIP].y) / torso,
-            lean
+            lean,
+            timestampMs
         )
         return AnalysisUpdate(count, lastRep, emptySet())
     }
 
-    private fun updateLeg(index: Int, span: Float, lean: Float) {
+    private fun updateLeg(index: Int, span: Float, lean: Float, timestampMs: Long) {
         val leg = legs[index]
         val baseline = leg.baseline
         if (baseline == null) {
-            leg.baseline = span
+            // 前 8 帧取中位作为基线，避免用单帧噪声/抬腿中的帧初始化。
+            leg.samples.add(span)
+            if (leg.samples.size >= BASELINE_SAMPLES) {
+                leg.baseline = leg.samples.sorted()[leg.samples.size / 2]
+            }
             return
         }
         if (!leg.lifted && span < baseline - liftEnterRatio) {
@@ -81,6 +89,10 @@ class SeatedLegRaiseAnalyzer(
             leg.minSpan = min(leg.minSpan, span)
             if (span > baseline - liftExitRatio) {
                 leg.lifted = false
+                if (lastRepAtMs != 0L && timestampMs - lastRepAtMs < MIN_REP_INTERVAL_MS) {
+                    return
+                }
+                lastRepAtMs = timestampMs
                 val lift = baseline - leg.minSpan
                 val issues = buildSet {
                     if (lift < minLiftRatio) add(RepIssue.INSUFFICIENT_RANGE)
@@ -99,11 +111,18 @@ class SeatedLegRaiseAnalyzer(
     override fun reset() {
         legs.forEach {
             it.baseline = null
+            it.samples.clear()
             it.lifted = false
             it.minSpan = Float.MAX_VALUE
         }
         repIndex = 0
+        lastRepAtMs = 0L
         count = 0
         lastRep = null
+    }
+
+    private companion object {
+        const val BASELINE_SAMPLES = 8
+        const val MIN_REP_INTERVAL_MS = 500L
     }
 }

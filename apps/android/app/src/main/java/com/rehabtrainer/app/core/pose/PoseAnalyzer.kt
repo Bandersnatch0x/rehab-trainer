@@ -187,13 +187,31 @@ class PoseAnalyzer(
             shoulderWidth < 0.08f -> "距离太远：请靠近一些或把手机放近一点"
             else -> null
         }
+        val torsoForLog = PoseGeometry.torsoHeight(points)
+        val wristRaise = if (torsoForLog != null) {
+            val shoulderY = PoseGeometry.midY(points, PoseIndex.LEFT_SHOULDER, PoseIndex.RIGHT_SHOULDER)
+            maxOf(
+                (shoulderY - points[PoseIndex.LEFT_WRIST].y) / torsoForLog,
+                (shoulderY - points[PoseIndex.RIGHT_WRIST].y) / torsoForLog
+            )
+        } else {
+            0f
+        }
+        val hipAnkle = if (torsoForLog != null) {
+            (PoseGeometry.midY(points, PoseIndex.LEFT_ANKLE, PoseIndex.RIGHT_ANKLE) -
+                PoseGeometry.midY(points, PoseIndex.LEFT_HIP, PoseIndex.RIGHT_HIP)) / torsoForLog
+        } else {
+            0f
+        }
         logThrottled(
-            "pose: shoulder=%.2f wrist=%.2f hip=%.2f ankle=%.2f width=%.2f".format(
+            "pose: shoulder=%.2f wrist=%.2f hip=%.2f ankle=%.2f width=%.2f wristRaise=%.2f hipAnkle=%.2f".format(
                 minOf(points[PoseIndex.LEFT_SHOULDER].visibility, points[PoseIndex.RIGHT_SHOULDER].visibility),
                 minOf(points[PoseIndex.LEFT_WRIST].visibility, points[PoseIndex.RIGHT_WRIST].visibility),
                 minOf(points[PoseIndex.LEFT_HIP].visibility, points[PoseIndex.RIGHT_HIP].visibility),
                 minOf(points[PoseIndex.LEFT_ANKLE].visibility, points[PoseIndex.RIGHT_ANKLE].visibility),
-                shoulderWidth
+                shoulderWidth,
+                wristRaise,
+                hipAnkle
             )
         )
         lastUpdate = analyzer.update(points, lastFrameTimestampMs)

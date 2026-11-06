@@ -119,6 +119,7 @@ class MarchAnalyzer(
     private val legs = listOf(LegState(), LegState())
     private var repIndex = 0
     private var lastStepLeg = -1
+    private var lastRepAtMs = 0L
 
     override var count: Int = 0
         private set
@@ -143,17 +144,19 @@ class MarchAnalyzer(
         updateLeg(
             0,
             (points[PoseIndex.LEFT_ANKLE].y - points[PoseIndex.LEFT_HIP].y) / torso,
-            lean
+            lean,
+            timestampMs
         )
         updateLeg(
             1,
             (points[PoseIndex.RIGHT_ANKLE].y - points[PoseIndex.RIGHT_HIP].y) / torso,
-            lean
+            lean,
+            timestampMs
         )
         return AnalysisUpdate(count, lastRep)
     }
 
-    private fun updateLeg(index: Int, span: Float, lean: Float) {
+    private fun updateLeg(index: Int, span: Float, lean: Float, timestampMs: Long) {
         val leg = legs[index]
         val baseline = leg.baseline
         if (baseline == null) {
@@ -171,6 +174,10 @@ class MarchAnalyzer(
                 leg.lifted = false
                 // 交替约束：对侧腿仍在抬起时不计数，避免把双腿同时动作当成两步。
                 if (!legs[1 - index].lifted) {
+                    if (lastRepAtMs != 0L && timestampMs - lastRepAtMs < MIN_REP_INTERVAL_MS) {
+                        return
+                    }
+                    lastRepAtMs = timestampMs
                     val issues = buildSet {
                         if (leg.peakSpan > baseline * minLiftRatio) add(RepIssue.INSUFFICIENT_RANGE)
                         if (lean > maxLateralLean) add(RepIssue.LATERAL_LEAN)
@@ -195,6 +202,7 @@ class MarchAnalyzer(
         }
         repIndex = 0
         lastStepLeg = -1
+        lastRepAtMs = 0L
         count = 0
         lastRep = null
     }
@@ -212,6 +220,7 @@ class SquatAnalyzer(
 
     private var baseline: Float? = null
     private var inSquat = false
+    private var lastRepAtMs = 0L
     private var minSpan = Float.MAX_VALUE
     private var bottomIssues: Set<RepIssue> = emptySet()
     private var repIndex = 0
@@ -260,6 +269,10 @@ class SquatAnalyzer(
             }
             if (span > base * exitRatio) {
                 inSquat = false
+                if (lastRepAtMs != 0L && timestampMs - lastRepAtMs < MIN_REP_INTERVAL_MS) {
+                    return AnalysisUpdate(count, lastRep)
+                }
+                lastRepAtMs = timestampMs
                 val issues = bottomIssues.toMutableSet()
                 if (minSpan > base * validDepthRatio) issues.add(RepIssue.INSUFFICIENT_RANGE)
                 if (minSpan < base * maxDepthRatio) issues.add(RepIssue.EXCESSIVE_DEPTH)
@@ -294,6 +307,7 @@ class SquatAnalyzer(
     override fun reset() {
         baseline = null
         inSquat = false
+        lastRepAtMs = 0L
         minSpan = Float.MAX_VALUE
         bottomIssues = emptySet()
         repIndex = 0
@@ -304,3 +318,6 @@ class SquatAnalyzer(
 
 /** 站立基线每帧允许的最大下修量；过大基线会被抬腿本身拉低。 */
 internal const val BASELINE_DOWN_STEP: Float = 0.003f
+
+/** 两次计数之间的最小间隔，过滤抖动造成的连击。 */
+internal const val MIN_REP_INTERVAL_MS: Long = 400L

@@ -452,7 +452,7 @@ class ExerciseAnalyzersTest {
     @Test
     fun seatedLegRaiseCountsAgainstBaseline() {
         val analyzer = SeatedLegRaiseAnalyzer()
-        analyzer.update(seatedLeg(), timestampMs = 0) // establish baseline
+        repeat(8) { index -> analyzer.update(seatedLeg(), timestampMs = index * 33L) }
 
         analyzer.update(seatedLeg(leftAnkleY = 0.55f), timestampMs = 500)
         val update = analyzer.update(seatedLeg(), timestampMs = 1_000)
@@ -464,7 +464,7 @@ class ExerciseAnalyzersTest {
     @Test
     fun shallowSeatedLiftIsFlagged() {
         val analyzer = SeatedLegRaiseAnalyzer()
-        analyzer.update(seatedLeg(), timestampMs = 0)
+        repeat(8) { index -> analyzer.update(seatedLeg(), timestampMs = index * 33L) }
         analyzer.update(seatedLeg(leftAnkleY = 0.95f), timestampMs = 500)
         val update = analyzer.update(seatedLeg(), timestampMs = 1_000)
 
@@ -475,7 +475,7 @@ class ExerciseAnalyzersTest {
     @Test
     fun seatedLegRaiseTrunkLeanIsFlagged() {
         val analyzer = SeatedLegRaiseAnalyzer()
-        analyzer.update(seatedLeg(), timestampMs = 0)
+        repeat(8) { index -> analyzer.update(seatedLeg(), timestampMs = index * 33L) }
         analyzer.update(leaned(seatedLeg(leftAnkleY = 0.55f)), timestampMs = 500)
         val update = analyzer.update(leaned(seatedLeg()), timestampMs = 1_000)
 
@@ -485,14 +485,14 @@ class ExerciseAnalyzersTest {
     @Test
     fun seatedLegRaiseResetClearsBaseline() {
         val analyzer = SeatedLegRaiseAnalyzer()
-        analyzer.update(seatedLeg(), timestampMs = 0)
+        repeat(8) { index -> analyzer.update(seatedLeg(), timestampMs = index * 33L) }
         analyzer.update(seatedLeg(leftAnkleY = 0.55f), timestampMs = 500)
         assertEquals(1, analyzer.update(seatedLeg(), timestampMs = 1_000).count)
 
         analyzer.reset()
         assertEquals(0, analyzer.count)
         assertNull(analyzer.lastRep)
-        analyzer.update(seatedLeg(), timestampMs = 2_000)
+        repeat(8) { index -> analyzer.update(seatedLeg(), timestampMs = 2_000 + index * 33L) }
         analyzer.update(seatedLeg(leftAnkleY = 0.55f), timestampMs = 2_500)
         assertEquals(1, analyzer.update(seatedLeg(), timestampMs = 3_000).count)
     }
