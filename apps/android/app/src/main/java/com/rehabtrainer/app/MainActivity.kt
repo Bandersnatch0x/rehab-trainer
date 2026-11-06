@@ -9,7 +9,13 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import com.rehabtrainer.app.core.network.ApiContainer
 import com.rehabtrainer.app.core.network.SharedPreferencesTokenStore
 import com.rehabtrainer.app.data.offline.MediaCache
+import com.rehabtrainer.app.core.training.ModelFingerprint
 import com.rehabtrainer.app.data.session.SessionRepository
+import com.rehabtrainer.app.data.session.SessionUploads
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import com.rehabtrainer.app.ui.RehabApp
 import com.rehabtrainer.app.ui.theme.RehabTheme
 
@@ -20,10 +26,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         MediaCache.install(applicationContext)
         val tokenStore = SharedPreferencesTokenStore(applicationContext)
-        val sessionRepository = SessionRepository(
-            api = ApiContainer(tokenStore = tokenStore),
-            context = applicationContext
-        )
+        val api = ApiContainer(tokenStore = tokenStore)
+        val sessionRepository = SessionRepository(api = api, context = applicationContext)
+        SessionUploads.install(applicationContext, api)
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) { ModelFingerprint.sha256(applicationContext) }
+            SessionUploads.flushPending()
+        }
         enableEdgeToEdge()
         setContent {
             RehabTheme {

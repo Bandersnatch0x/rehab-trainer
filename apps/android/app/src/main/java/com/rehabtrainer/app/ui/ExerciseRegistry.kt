@@ -20,16 +20,29 @@ object ExerciseRegistry {
     var isPlanLoaded: Boolean = false
         private set
 
+    /** 当前绑定患者与处方；用于训练记录上传，未绑定时为 null。 */
+    @Volatile
+    var patientId: String? = null
+        private set
+
+    @Volatile
+    var prescriptionId: String? = null
+        private set
+
     val exercises: List<ExerciseMeta>
         get() = current
 
-    fun updateFromPlan(plan: List<PlanExercise>) {
+    fun updateFromPlan(plan: List<PlanExercise>, patientId: String?, prescriptionId: String?) {
         isPlanLoaded = plan.isNotEmpty()
+        this.patientId = patientId
+        this.prescriptionId = prescriptionId
         current = if (plan.isEmpty()) DEFAULT_EXERCISES else plan.map(::toExerciseMeta)
     }
 
     fun reset() {
         isPlanLoaded = false
+        patientId = null
+        prescriptionId = null
         current = DEFAULT_EXERCISES
     }
 }

@@ -70,7 +70,7 @@ class ExerciseRegistryTest {
 
     @Test
     fun emptyPlanFallsBackToDemoExercises() {
-        ExerciseRegistry.updateFromPlan(emptyList())
+        ExerciseRegistry.updateFromPlan(emptyList(), null, null)
         assertEquals(DEFAULT_EXERCISES, ExerciseRegistry.exercises)
         ExerciseRegistry.reset()
     }

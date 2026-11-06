@@ -11,23 +11,52 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.rehabtrainer.app.core.network.ApiResult
+import com.rehabtrainer.app.data.contract.SessionRecord
+import com.rehabtrainer.app.data.session.SessionUploads
+import com.rehabtrainer.app.ui.ExerciseRegistry
 import com.rehabtrainer.app.ui.theme.LocalElderlyDimens
 
 /**
- * 记录：训练记录卡片流。
- * 遵循 D14 与 T7：展示动作错误次数、有效帧占比、算法版本与存疑标记。
+ * 记录：真实训练记录卡片流。
+ *
+ * 数据来源为 `GET /sessions`（服务端回读视图），契约只回传时间与客观计数，
+ * 不含动作名称与 `metrics`，因此卡片只展示确实存在的字段。
  */
 @Composable
 fun RecordsScreen(modifier: Modifier = Modifier) {
     val dimens = LocalElderlyDimens.current
+    val patientId = ExerciseRegistry.patientId
+    var state by remember { mutableStateOf<RecordsUiState>(RecordsUiState.Loading) }
+    var pendingUploads by remember { mutableStateOf(0) }
+
+    LaunchedEffect(patientId) {
+        // 进入页面先补传离线积压，再回读，使记录页成为自愈点。
+        SessionUploads.flushPending()
+        pendingUploads = SessionUploads.pendingCount()
+        state = when {
+            patientId == null -> RecordsUiState.Unbound
+            else -> when (val result = SessionUploads.listSessions(patientId)) {
+                null -> RecordsUiState.Unbound
+                is ApiResult.Success -> RecordsUiState.Loaded(result.value.items)
+                is ApiResult.Failure -> RecordsUiState.Failed(result.error.message)
+            }
+        }
+    }
 
     Column(
         modifier = modifier
@@ -37,54 +66,65 @@ fun RecordsScreen(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(dimens.sectionSpacing)
     ) {
         // 页面标题由顶栏统一承担，页内不再重复大标题。
-        // D21：记录、指标与模型版本均为 mock；接入真实训练记录 API 时本声明与 mock 一并移除。
-        Text(
-            text = "演示数据：当前为演示模式，下列训练记录、指标与模型版本均为示例数据，不是真实患者记录。",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        when (val current = state) {
+            RecordsUiState.Loading -> Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator()
+            }
 
-        // Valid Record 1
-        RecordCard(
-            dateText = "今日 10:15",
-            exerciseTitle = "节律性听觉刺激踏步训练",
-            completedCount = 36,
-            errorCount = 1,
-            interruptionCount = 0,
-            effectiveFrameRate = 98.4f,
-            isSuspicious = false,
-            modelVersion = "MediaPipe-Lite-v1.2",
-            algorithmVersion = "Metric-Gait-v2.0"
-        )
+            RecordsUiState.Unbound -> Notice(
+                "未绑定患者，暂无训练记录。绑定后可查看已上传的记录。"
+            )
 
-        // Suspicious Record 2
-        RecordCard(
-            dateText = "昨日 15:30",
-            exerciseTitle = "坐位上肢躯干伸展",
-            completedCount = 20,
-            errorCount = 4,
-            interruptionCount = 2,
-            effectiveFrameRate = 71.2f,
-            isSuspicious = true,
-            modelVersion = "MediaPipe-Lite-v1.2",
-            algorithmVersion = "Metric-Gait-v2.0"
-        )
+            is RecordsUiState.Failed -> Notice("训练记录读取失败：${current.message}")
+
+            is RecordsUiState.Loaded -> {
+                if (current.records.isEmpty()) {
+                    Notice("暂无训练记录。完成一组训练后，记录会显示在这里。")
+                } else {
+                    current.records.forEach { record -> RecordCard(record) }
+                }
+            }
+        }
+
+        PendingUploadNotice(pendingUploads)
     }
 }
 
+private sealed interface RecordsUiState {
+    data object Loading : RecordsUiState
+    data object Unbound : RecordsUiState
+    data class Failed(val message: String) : RecordsUiState
+    data class Loaded(val records: List<SessionRecord>) : RecordsUiState
+}
+
 @Composable
-private fun RecordCard(
-    dateText: String,
-    exerciseTitle: String,
-    completedCount: Int,
-    errorCount: Int,
-    interruptionCount: Int,
-    effectiveFrameRate: Float,
-    isSuspicious: Boolean,
-    modelVersion: String,
-    algorithmVersion: String
-) {
+private fun Notice(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+}
+
+/** 离线积压提示：有未上传记录时明确告知，避免患者以为记录丢失。 */
+@Composable
+private fun PendingUploadNotice(pending: Int) {
+    if (pending <= 0) return
+    Text(
+        text = "本机还有 $pending 条记录待上传，联网后会自动补传。",
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onTertiaryContainer
+    )
+}
+
+@Composable
+private fun RecordCard(record: SessionRecord) {
     val dimens = LocalElderlyDimens.current
+    val isSuspicious = record.isDoubtful == true
+    val ratio = record.validFrameRatio
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -108,26 +148,11 @@ private fun RecordCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = dateText,
+                    text = formatRecordedAt(record.recordedAt),
                     style = MaterialTheme.typography.titleMedium
                 )
-                Surface(
-                    color = if (isSuspicious) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.secondaryContainer,
-                    shape = MaterialTheme.shapes.extraSmall
-                ) {
-                    Text(
-                        text = if (isSuspicious) "已存疑（质检未过）" else "无存疑（质检合格）",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = if (isSuspicious) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSecondaryContainer,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
-                }
+                DoubtBadge(record.isDoubtful)
             }
-
-            Text(
-                text = exerciseTitle,
-                style = MaterialTheme.typography.titleLarge
-            )
 
             // Metrics Grid (结构化单行指标，解决 P1-4 标签粘连与颜色串项)
             Surface(
@@ -139,24 +164,60 @@ private fun RecordCard(
                     modifier = Modifier.padding(14.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    RecordMetricRow(label = "完成次数", value = "$completedCount 次")
-                    RecordMetricRow(label = "动作错误", value = "$errorCount 次")
-                    RecordMetricRow(label = "中断次数", value = "$interruptionCount 次")
+                    RecordMetricRow(label = "完成次数", value = "${record.completionCount ?: 0} 次")
+                    RecordMetricRow(label = "动作错误", value = "${record.movementErrorCount ?: 0} 次")
+                    RecordMetricRow(label = "中断次数", value = "${record.interruptionCount ?: 0} 次")
+                    // 无有效帧时契约回传 null；不得把它渲染成 0% 造成误读。
+                    val ratioValue = ratio?.let { "${formatPercent(it)}%" } ?: "—"
                     RecordMetricRow(
                         label = "有效帧占比",
-                        value = "${effectiveFrameRate}%",
-                        valueColor = if (effectiveFrameRate < 80f) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                        value = ratioValue,
+                        valueColor = if (ratio != null && ratio < VALID_FRAME_WARN_RATIO) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.primary
+                        }
                     )
                 }
             }
 
             // Version Metadata (使用 onSurfaceVariant 满足 P1-12 对比度 >= 4.5:1)
             Text(
-                text = "模型: $modelVersion · 指标: $algorithmVersion",
+                text = "模型: ${record.modelVersion ?: "—"} · 指标: ${record.metricAlgorithmVersion ?: "—"}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+}
+
+/** 三态展示：合格 / 存疑 / 未知；`null` 时不得冒充合格。 */
+@Composable
+private fun DoubtBadge(isDoubtful: Boolean?) {
+    val (label, container, content) = when (isDoubtful) {
+        true -> Triple(
+            "已存疑（质检未过）",
+            MaterialTheme.colorScheme.tertiaryContainer,
+            MaterialTheme.colorScheme.onTertiaryContainer
+        )
+        false -> Triple(
+            "无存疑（质检合格）",
+            MaterialTheme.colorScheme.secondaryContainer,
+            MaterialTheme.colorScheme.onSecondaryContainer
+        )
+        null -> Triple(
+            "存疑状态未知",
+            MaterialTheme.colorScheme.surfaceVariant,
+            MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+    Surface(color = container, shape = MaterialTheme.shapes.extraSmall) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = content,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+        )
     }
 }
 
@@ -184,3 +245,5 @@ private fun RecordMetricRow(
         )
     }
 }
+
+private const val VALID_FRAME_WARN_RATIO = 0.8

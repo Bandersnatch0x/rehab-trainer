@@ -32,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -48,13 +49,20 @@ import com.rehabtrainer.app.core.pose.PoseFrame
 import com.rehabtrainer.app.core.pose.RepIssue
 import com.rehabtrainer.app.core.pose.RepResult
 import com.rehabtrainer.app.core.training.InstructionalVideoSource
+import com.rehabtrainer.app.core.training.ModelFingerprint
 import com.rehabtrainer.app.core.training.SetProgress
 import com.rehabtrainer.app.core.training.TrainingDisplayMode
 import com.rehabtrainer.app.core.training.TrainingDisplayPolicy
 import com.rehabtrainer.app.data.local.AppPreferences
+import com.rehabtrainer.app.data.offline.ClientRecordIds
+import com.rehabtrainer.app.data.session.SessionRecordBuilder
+import com.rehabtrainer.app.data.session.SessionUploads
+import com.rehabtrainer.app.data.session.SetOutcome
 import com.rehabtrainer.app.ui.ExerciseRegistry
 import com.rehabtrainer.app.ui.audio.VoiceCoach
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.time.Instant
 import java.util.concurrent.Executors
 
 private const val REP_HINT_TTL_MS = 2_500L
@@ -149,8 +157,13 @@ fun TrainingScreen(
     var ttsReady by remember { mutableStateOf(false) }
     var ttsFailed by remember { mutableStateOf(false) }
 
+    val scope = rememberCoroutineScope()
     var repCount by remember { mutableIntStateOf(0) }
     var repHint by remember { mutableStateOf<String?>(null) }
+    var setValidFrames by remember { mutableIntStateOf(0) }
+    var setTotalFrames by remember { mutableIntStateOf(0) }
+    var setInvalidReps by remember { mutableIntStateOf(0) }
+    var setInterruptions by remember { mutableIntStateOf(0) }
     var lastRepIndex by remember { mutableIntStateOf(0) }
     var repHintUntilMs by remember { mutableStateOf(0L) }
     var setProgress by remember(exerciseCode) {
@@ -211,6 +224,10 @@ fun TrainingScreen(
                                     largeFont -> "识别正常"
                                     else -> ""
                                 }
+                                setTotalFrames += 1
+                                if (feetVisible && !gateBlocked) {
+                                    setValidFrames += 1
+                                }
                                 if (!setProgress.isComplete) {
                                     repCount = setProgress.capReps(frame.repCount)
                                 }
@@ -219,6 +236,9 @@ fun TrainingScreen(
                                 if (latestRep != null && latestRep.index != lastRepIndex) {
                                     lastRepIndex = latestRep.index
                                     repHintUntilMs = nowMs + REP_HINT_TTL_MS
+                                    if (!latestRep.valid) {
+                                        setInvalidReps += 1
+                                    }
                                 }
                                 repHint = when {
                                     frame.calibrationRemaining > 0 ->
@@ -287,7 +307,10 @@ fun TrainingScreen(
 
     LaunchedEffect(isPaused) {
         analyzer.setPaused(isPaused)
-        if (isPaused) voiceCoach.stop()
+        if (isPaused) {
+            setInterruptions += 1
+            voiceCoach.stop()
+        }
     }
 
     LaunchedEffect(
@@ -324,9 +347,39 @@ fun TrainingScreen(
         onEmergencyStop()
     }
 
+    val submitSetRecord: (Int) -> Unit = { completedReps ->
+        val patientId = ExerciseRegistry.patientId
+        val prescriptionId = ExerciseRegistry.prescriptionId
+        if (patientId != null && prescriptionId != null) {
+            val outcome = SetOutcome(
+                exerciseCode = currentExercise.code,
+                setIndex = setProgress.currentSet,
+                totalSets = setProgress.totalSets,
+                completionCount = completedReps,
+                movementErrorCount = setInvalidReps,
+                interruptionCount = setInterruptions,
+                validFrameRatio = SessionRecordBuilder.validFrameRatio(setValidFrames, setTotalFrames),
+                recordedAtIso = Instant.now().toString(),
+                clientRecordId = ClientRecordIds.newId()
+            )
+            val record = SessionRecordBuilder.build(
+                patientId = patientId,
+                prescriptionId = prescriptionId,
+                outcome = outcome,
+                modelSha256 = ModelFingerprint.sha256(context)
+            )
+            scope.launch { SessionUploads.submit(record) }
+        }
+        setValidFrames = 0
+        setTotalFrames = 0
+        setInvalidReps = 0
+        setInterruptions = 0
+    }
+
     val finishCurrentSet: () -> Unit = {
         if (!setProgress.isComplete) {
             val finishedSet = setProgress.currentSet
+            submitSetRecord(repCount)
             val next = setProgress.finishCurrentSet()
             setProgress = next
             if (next.isComplete) {

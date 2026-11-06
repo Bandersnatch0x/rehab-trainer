@@ -178,7 +178,9 @@ fun RehabApp(
     }
 
     LaunchedEffect(snapshot) {
-        snapshot?.let { ExerciseRegistry.updateFromPlan(it.plan) }
+        snapshot?.let {
+            ExerciseRegistry.updateFromPlan(it.plan, it.patientId, it.prescriptionId)
+        }
     }
 
     val acceptSnapshot: (com.rehabtrainer.app.data.session.SessionSnapshot) -> Unit = {
