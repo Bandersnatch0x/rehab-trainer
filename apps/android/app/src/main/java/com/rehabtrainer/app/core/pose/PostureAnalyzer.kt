@@ -33,7 +33,11 @@ class PostureAnalyzer(
     override var lastRep: RepResult? = null
         private set
 
-    override fun update(points: List<PosePoint>, timestampMs: Long): AnalysisUpdate {
+    override fun update(
+        points: List<PosePoint>,
+        timestampMs: Long,
+        aspectRatio: Float
+    ): AnalysisUpdate {
         if (points.size < PoseIndex.LANDMARK_COUNT ||
             !PoseGeometry.visible(
                 points,
@@ -63,8 +67,10 @@ class PostureAnalyzer(
             PoseIndex.RIGHT_SHOULDER
         )
         val hipMidX = PoseGeometry.midX(points, PoseIndex.LEFT_HIP, PoseIndex.RIGHT_HIP)
-        val lateralLean = abs(shoulderMidX - hipMidX) / torso
-        val headOffset = abs(points[PoseIndex.NOSE].x - shoulderMidX) / torso
+        // x 与 y 的归一化单位不同（x 除以宽、y 除以高），乘宽高比才能和躯干高度同尺度；
+        // 否则同一姿势在竖屏/横屏下差 1.78 倍，阈值实际随手机方向漂移。
+        val lateralLean = abs(shoulderMidX - hipMidX) * aspectRatio / torso
+        val headOffset = abs(points[PoseIndex.NOSE].x - shoulderMidX) * aspectRatio / torso
 
         val issues = buildSet {
             if (shoulderTilt > maxShoulderTiltRatio) add(RepIssue.SHOULDER_UNEVEN)

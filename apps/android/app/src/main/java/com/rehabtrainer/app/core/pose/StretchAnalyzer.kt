@@ -33,7 +33,11 @@ class StretchAnalyzer(
     override var lastRep: RepResult? = null
         private set
 
-    override fun update(points: List<PosePoint>, timestampMs: Long): AnalysisUpdate {
+    override fun update(
+        points: List<PosePoint>,
+        timestampMs: Long,
+        aspectRatio: Float
+    ): AnalysisUpdate {
         if (points.size < PoseIndex.LANDMARK_COUNT ||
             !PoseGeometry.visible(
                 points,
@@ -67,12 +71,14 @@ class StretchAnalyzer(
         val leftElbow = PoseGeometry.angleDegrees(
             points[PoseIndex.LEFT_SHOULDER],
             points[PoseIndex.LEFT_ELBOW],
-            points[PoseIndex.LEFT_WRIST]
+            points[PoseIndex.LEFT_WRIST],
+            aspectRatio
         ) ?: 0f
         val rightElbow = PoseGeometry.angleDegrees(
             points[PoseIndex.RIGHT_SHOULDER],
             points[PoseIndex.RIGHT_ELBOW],
-            points[PoseIndex.RIGHT_WRIST]
+            points[PoseIndex.RIGHT_WRIST],
+            aspectRatio
         ) ?: 0f
         val shoulderTilt = abs(
             points[PoseIndex.LEFT_SHOULDER].y - points[PoseIndex.RIGHT_SHOULDER].y

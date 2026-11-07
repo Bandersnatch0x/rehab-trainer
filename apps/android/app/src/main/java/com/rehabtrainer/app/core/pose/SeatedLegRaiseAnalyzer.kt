@@ -44,7 +44,11 @@ class SeatedLegRaiseAnalyzer(
     override val calibrationRemaining: Int get() = calibration.remaining
     override val calibratedAmplitude: Float? get() = calibration.amplitude()
 
-    override fun update(points: List<PosePoint>, timestampMs: Long): AnalysisUpdate {
+    override fun update(
+        points: List<PosePoint>,
+        timestampMs: Long,
+        aspectRatio: Float
+    ): AnalysisUpdate {
         if (points.size < PoseIndex.LANDMARK_COUNT ||
             !PoseGeometry.visible(
                 points,
@@ -59,7 +63,7 @@ class SeatedLegRaiseAnalyzer(
         }
         val torso = PoseGeometry.torsoHeight(points)
             ?: return AnalysisUpdate(count, lastRep, setOf(RepIssue.POSE_INCOMPLETE))
-        val lean = PoseGeometry.lateralLeanDegrees(points) ?: 0f
+        val lean = PoseGeometry.lateralLeanDegrees(points, aspectRatio) ?: 0f
 
         // 坐位抬腿时膝比踝更靠近躯干、也更容易入镜；用膝-髋垂直距离作为抬腿信号。
         updateLeg(

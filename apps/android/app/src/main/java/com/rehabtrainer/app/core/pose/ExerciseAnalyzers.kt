@@ -31,7 +31,11 @@ class ArmRaiseAnalyzer(
         private set
     override val calibrationRemaining: Int get() = 0
 
-    override fun update(points: List<PosePoint>, timestampMs: Long): AnalysisUpdate {
+    override fun update(
+        points: List<PosePoint>,
+        timestampMs: Long,
+        aspectRatio: Float
+    ): AnalysisUpdate {
         if (points.size < PoseIndex.LANDMARK_COUNT ||
             !PoseGeometry.visible(
                 points,
@@ -60,7 +64,7 @@ class ArmRaiseAnalyzer(
             if (leftVisible) (shoulderY - points[PoseIndex.LEFT_WRIST].y) / torso else Float.NEGATIVE_INFINITY
         val rightRaise =
             if (rightVisible) (shoulderY - points[PoseIndex.RIGHT_WRIST].y) / torso else Float.NEGATIVE_INFINITY
-        val lean = PoseGeometry.lateralLeanDegrees(points) ?: 0f
+        val lean = PoseGeometry.lateralLeanDegrees(points, aspectRatio) ?: 0f
 
         if (!raised) {
             val side = when {
@@ -136,7 +140,11 @@ class MarchAnalyzer(
     override val calibrationRemaining: Int get() = calibration.remaining
     override val calibratedAmplitude: Float? get() = calibration.amplitude()
 
-    override fun update(points: List<PosePoint>, timestampMs: Long): AnalysisUpdate {
+    override fun update(
+        points: List<PosePoint>,
+        timestampMs: Long,
+        aspectRatio: Float
+    ): AnalysisUpdate {
         if (points.size < PoseIndex.LANDMARK_COUNT ||
             !PoseGeometry.visible(
                 points,
@@ -151,7 +159,7 @@ class MarchAnalyzer(
         }
         val torso = PoseGeometry.torsoHeight(points)
             ?: return AnalysisUpdate(count, lastRep, setOf(RepIssue.POSE_INCOMPLETE))
-        val lean = PoseGeometry.lateralLeanDegrees(points) ?: 0f
+        val lean = PoseGeometry.lateralLeanDegrees(points, aspectRatio) ?: 0f
         updateLeg(
             0,
             (points[PoseIndex.LEFT_ANKLE].y - points[PoseIndex.LEFT_HIP].y) / torso,
@@ -271,7 +279,11 @@ class SquatAnalyzer(
     override val calibrationRemaining: Int get() = calibration.remaining
     override val calibratedAmplitude: Float? get() = calibration.amplitude()
 
-    override fun update(points: List<PosePoint>, timestampMs: Long): AnalysisUpdate {
+    override fun update(
+        points: List<PosePoint>,
+        timestampMs: Long,
+        aspectRatio: Float
+    ): AnalysisUpdate {
         if (points.size < PoseIndex.LANDMARK_COUNT ||
             !PoseGeometry.visible(
                 points,
@@ -292,7 +304,7 @@ class SquatAnalyzer(
             PoseGeometry.midY(points, PoseIndex.LEFT_ANKLE, PoseIndex.RIGHT_ANKLE) -
                 PoseGeometry.midY(points, PoseIndex.LEFT_HIP, PoseIndex.RIGHT_HIP)
             ) / torso
-        val lean = PoseGeometry.lateralLeanDegrees(points) ?: 0f
+        val lean = PoseGeometry.lateralLeanDegrees(points, aspectRatio) ?: 0f
 
         val base = baseline
         if (base == null) {

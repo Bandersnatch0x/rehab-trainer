@@ -10,6 +10,10 @@ import kotlin.math.sqrt
 /**
  * 与平台无关的关键点快照；由 [PoseAnalyzer] 从 MediaPipe 结果转换。
  * 坐标系与 MediaPipe 一致：x/y 为 0–1 归一化，y 向下。
+ *
+ * 注意：归一化是**各向异性**的（x 除以帧宽、y 除以帧高），
+ * 所以在里面算角度前必须先按 [PoseGeometry.aspectRatioOf] 把 x 还原成与 y 同一尺度，
+ * 否则只有在正方形帧上才等于物理角度。
  */
 data class PosePoint(
     val x: Float,
@@ -51,11 +55,19 @@ internal object PoseGeometry {
     private const val MIN_ROLL_RADIANS: Float = 0.5f * DEGREES_TO_RADIANS
     private const val MAX_ROLL_RADIANS: Float = 20f * DEGREES_TO_RADIANS
 
+    /**
+     * 帧宽高比（像素宽 / 像素高）。归一化坐标里 x 与 y 的单位不同（x 除以宽、y 除以高），
+     * 乘上它就把 x 还原成与 y 同尺度；角度函数全部经过它，阈值才是真正的物理角度。
+     * 非有限或非正数按正方形（1.0）处理。
+     */
+    fun aspectRatioOf(width: Int, height: Int): Float =
+        if (width > 0 && height > 0) width.toFloat() / height else 1f
+
     /** 以 [b] 为顶点、a-b-c 的夹角（度）；向量退化时返回 null。 */
-    fun angleDegrees(a: PosePoint, b: PosePoint, c: PosePoint): Float? {
-        val abx = a.x - b.x
+    fun angleDegrees(a: PosePoint, b: PosePoint, c: PosePoint, aspectRatio: Float = 1f): Float? {
+        val abx = (a.x - b.x) * aspectRatio
         val aby = a.y - b.y
-        val cbx = c.x - b.x
+        val cbx = (c.x - b.x) * aspectRatio
         val cby = c.y - b.y
         val magnitude = sqrt(abx * abx + aby * aby) * sqrt(cbx * cbx + cby * cby)
         if (magnitude < 1e-6f) return null
@@ -79,9 +91,9 @@ internal object PoseGeometry {
     }
 
     /** 肩中点相对髋中点的侧向倾斜角（度），0 表示躯干垂直；正面 2D 无法测真正的前后倾。 */
-    fun lateralLeanDegrees(points: List<PosePoint>): Float? {
-        val dx = midX(points, PoseIndex.LEFT_SHOULDER, PoseIndex.RIGHT_SHOULDER) -
-            midX(points, PoseIndex.LEFT_HIP, PoseIndex.RIGHT_HIP)
+    fun lateralLeanDegrees(points: List<PosePoint>, aspectRatio: Float = 1f): Float? {
+        val dx = (midX(points, PoseIndex.LEFT_SHOULDER, PoseIndex.RIGHT_SHOULDER) -
+            midX(points, PoseIndex.LEFT_HIP, PoseIndex.RIGHT_HIP)) * aspectRatio
         val dy = midY(points, PoseIndex.LEFT_SHOULDER, PoseIndex.RIGHT_SHOULDER) -
             midY(points, PoseIndex.LEFT_HIP, PoseIndex.RIGHT_HIP)
         if (abs(dy) < 1e-6f) {
@@ -97,13 +109,13 @@ internal object PoseGeometry {
      * 相机相对重力的横滚角（弧度）：优先双眼连线，不可见时退化为双耳连线。
      * 参考线水平时为 0；|roll| < 0.5° 视为噪声，|roll| > 20° 视为躺姿或极端机位，均返回 null。
      */
-    fun cameraRollRadians(points: List<PosePoint>): Float? {
+    fun cameraRollRadians(points: List<PosePoint>, aspectRatio: Float = 1f): Float? {
         val reference = referenceLine(points) ?: return null
         val first = points[reference.first]
         val second = points[reference.second]
         val raw = atan2(
             (second.y - first.y).toDouble(),
-            (second.x - first.x).toDouble()
+            ((second.x - first.x) * aspectRatio).toDouble()
         )
         // 左右眼/耳的索引顺序取决于成像是否镜像；把方向折到 (-90°, 90°]，水平线即 0°。
         val normalized = when {
@@ -119,8 +131,14 @@ internal object PoseGeometry {
         }
     }
 
-    /** 以参考线两点中点为轴心，把全部关键点绕 z 轴旋转 -[rollRadians]；z 与 visibility 不变。 */
-    fun derotate(points: List<PosePoint>, rollRadians: Float): List<PosePoint> {
+    /**
+     * 以参考线两点中点为轴心，把全部关键点绕 z 轴旋转 -[rollRadians]；z 与 visibility 不变。
+     *
+     * 必须在**像素尺度**上旋转：归一化空间里 x、y 单位不同，直接旋转等于剪切，
+     * 转的是"看起来的角度"而不是物理角度。这里先把 x 乘 [aspectRatio] 还原成 y 的尺度，
+     * 转完再除回去，返回的仍是 MediaPipe 的归一化坐标。
+     */
+    fun derotate(points: List<PosePoint>, rollRadians: Float, aspectRatio: Float = 1f): List<PosePoint> {
         val reference = referenceLine(points) ?: return points
         val pivotX = (points[reference.first].x + points[reference.second].x) / 2f
         val pivotY = (points[reference.first].y + points[reference.second].y) / 2f
@@ -128,11 +146,11 @@ internal object PoseGeometry {
         val cosAngle = cos(angle)
         val sinAngle = sin(angle)
         return points.map { point ->
-            val dx = point.x - pivotX
-            val dy = point.y - pivotY
+            val dxPx = (point.x - pivotX) * aspectRatio
+            val dyPx = point.y - pivotY
             point.copy(
-                x = pivotX + dx * cosAngle - dy * sinAngle,
-                y = pivotY + dx * sinAngle + dy * cosAngle
+                x = pivotX + (dxPx * cosAngle - dyPx * sinAngle) / aspectRatio,
+                y = pivotY + dxPx * sinAngle + dyPx * cosAngle
             )
         }
     }

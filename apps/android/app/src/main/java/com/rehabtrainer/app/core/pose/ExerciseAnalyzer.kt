@@ -58,7 +58,11 @@ interface ExerciseAnalyzer {
      */
     val calibratedAmplitude: Float? get() = null
 
-    fun update(points: List<PosePoint>, timestampMs: Long = 0L): AnalysisUpdate
+    /**
+     * @param aspectRatio 帧宽高比（像素宽/高）。归一化坐标各向异性，角度量必须先还原尺度；
+     * 默认 1 表示正方形帧，仅便于合成用例。
+     */
+    fun update(points: List<PosePoint>, timestampMs: Long = 0L, aspectRatio: Float = 1f): AnalysisUpdate
 
     fun reset()
 }

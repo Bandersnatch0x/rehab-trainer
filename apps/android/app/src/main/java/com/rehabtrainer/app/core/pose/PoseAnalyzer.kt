@@ -68,6 +68,13 @@ class PoseAnalyzer(
     @Volatile
     private var isPaused = false
 
+    /**
+     * MediaPipe 送进去的那张（已转正的）位图的宽高比。
+     * 归一化坐标各向异性，角度量必须按它还原；检测回调在另一个线程读，故 @Volatile。
+     */
+    @Volatile
+    private var frameAspect = 1f
+
     /** 手动暂停期间停止累计，恢复后从零开始，避免暂停时动作被补记。 */
     fun setPaused(paused: Boolean) {
         isPaused = paused
@@ -112,6 +119,7 @@ class PoseAnalyzer(
         try {
             val bitmap = imageProxy.toBitmap()
             val upright = rotateIfNeeded(bitmap, imageProxy.imageInfo.rotationDegrees)
+            frameAspect = PoseGeometry.aspectRatioOf(upright.width, upright.height)
             val mpImage = BitmapImageBuilder(upright).build()
             landmarker.detectAsync(mpImage, lastDetectTimestampMs)
         } catch (error: RuntimeException) {
@@ -142,10 +150,10 @@ class PoseAnalyzer(
                 visibility = maxOf(it.visibility().orElse(0f), it.presence().orElse(0f))
             )
         }
-        val cameraRoll = PoseGeometry.cameraRollRadians(points)
+        val cameraRoll = PoseGeometry.cameraRollRadians(points, frameAspect)
         if (cameraRoll != null) {
             // 机位横滚会让整副骨架倾斜，先按双眼/双耳参考线回正，避免下游误报侧倾。
-            points = PoseGeometry.derotate(points, cameraRoll)
+            points = PoseGeometry.derotate(points, cameraRoll, frameAspect)
         }
         val footVisibility = listOf(
             PoseIndex.LEFT_ANKLE,
@@ -225,7 +233,7 @@ class PoseAnalyzer(
                 hipAnkle
             )
         )
-        lastUpdate = analyzer.update(points, lastFrameTimestampMs)
+        lastUpdate = analyzer.update(points, lastFrameTimestampMs, frameAspect)
         onFrame(
             PoseFrame.Detected(
                 repCount = lastUpdate.count,
