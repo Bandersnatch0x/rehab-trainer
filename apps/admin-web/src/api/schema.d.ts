@@ -53,6 +53,7 @@ export interface paths {
                     };
                     content?: never;
                 };
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         delete?: never;
@@ -105,6 +106,7 @@ export interface paths {
                     };
                     content?: never;
                 };
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         delete?: never;
@@ -144,6 +146,7 @@ export interface paths {
                     };
                 };
                 401: components["responses"]["Unauthorized"];
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         put?: never;
@@ -189,6 +192,7 @@ export interface paths {
                     };
                 };
                 401: components["responses"]["Unauthorized"];
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         delete?: never;
@@ -236,6 +240,7 @@ export interface paths {
                     };
                 };
                 403: components["responses"]["Forbidden"];
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         put?: never;
@@ -267,6 +272,7 @@ export interface paths {
                 };
                 403: components["responses"]["Forbidden"];
                 422: components["responses"]["ValidationError"];
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         delete?: never;
@@ -305,6 +311,7 @@ export interface paths {
                 };
                 403: components["responses"]["Forbidden"];
                 404: components["responses"]["NotFound"];
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         put?: never;
@@ -358,6 +365,7 @@ export interface paths {
                     };
                 };
                 403: components["responses"]["Forbidden"];
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         delete?: never;
@@ -405,6 +413,7 @@ export interface paths {
                         "application/json": components["schemas"]["AssessmentPage"];
                     };
                 };
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         put?: never;
@@ -438,6 +447,7 @@ export interface paths {
                     };
                 };
                 422: components["responses"]["ValidationError"];
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         delete?: never;
@@ -481,6 +491,7 @@ export interface paths {
                         "application/json": components["schemas"]["ExercisePage"];
                     };
                 };
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         put?: never;
@@ -520,6 +531,7 @@ export interface paths {
                     };
                 };
                 404: components["responses"]["NotFound"];
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         put?: never;
@@ -568,6 +580,7 @@ export interface paths {
                     };
                 };
                 403: components["responses"]["Forbidden"];
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         put?: never;
@@ -599,6 +612,7 @@ export interface paths {
                 };
                 403: components["responses"]["Forbidden"];
                 422: components["responses"]["ValidationError"];
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         delete?: never;
@@ -659,6 +673,7 @@ export interface paths {
                     };
                     content?: never;
                 };
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         trace?: never;
@@ -699,6 +714,7 @@ export interface paths {
                         "application/json": components["schemas"]["SessionRecordPage"];
                     };
                 };
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         put?: never;
@@ -731,6 +747,7 @@ export interface paths {
                         "application/json": components["schemas"]["SessionBatchResult"];
                     };
                 };
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         delete?: never;
@@ -775,6 +792,7 @@ export interface paths {
                         "application/json": components["schemas"]["AlertPage"];
                     };
                 };
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         put?: never;
@@ -831,6 +849,7 @@ export interface paths {
                     };
                 };
                 403: components["responses"]["Forbidden"];
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         trace?: never;
@@ -878,6 +897,7 @@ export interface paths {
                     };
                 };
                 403: components["responses"]["Forbidden"];
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         put?: never;
@@ -926,6 +946,7 @@ export interface paths {
                     };
                 };
                 403: components["responses"]["Forbidden"];
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         put?: never;
@@ -970,6 +991,7 @@ export interface paths {
                     };
                 };
                 403: components["responses"]["Forbidden"];
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         put?: never;
@@ -1019,6 +1041,7 @@ export interface paths {
                     };
                 };
                 403: components["responses"]["Forbidden"];
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         put?: never;
@@ -1086,6 +1109,7 @@ export interface paths {
                 };
                 403: components["responses"]["Forbidden"];
                 422: components["responses"]["ValidationError"];
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         delete?: never;
@@ -1138,6 +1162,151 @@ export interface paths {
                 };
                 403: components["responses"]["Forbidden"];
                 404: components["responses"]["NotFound"];
+                503: components["responses"]["ServiceUnavailable"];
+            };
+        };
+        trace?: never;
+    };
+    "/accounts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 列出本机构账号
+         * @description 仅 care_admin。按机构隔离，跨机构不可见；按创建时间倒序返回。
+         */
+        get: {
+            parameters: {
+                query?: {
+                    status?: components["schemas"]["AccountStatus"];
+                    /**
+                     * @description 不透明游标，取自上一页的 `nextCursor`。服务端按排序键定位，
+                     *     翻页期间有新增或删除也不会重复或漏行。客户端不应解析其内容。
+                     */
+                    cursor?: components["parameters"]["Cursor"];
+                    limit?: components["parameters"]["Limit"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description 账号列表 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AccountPage"];
+                    };
+                };
+                403: components["responses"]["Forbidden"];
+                503: components["responses"]["ServiceUnavailable"];
+            };
+        };
+        put?: never;
+        /**
+         * 开通机构账号
+         * @description 仅 care_admin。机构取登录账号所属机构，请求体不携带机构字段；
+         *     用户名全局唯一；口令在服务端以 PBKDF2 哈希存储，响应体不含口令或哈希。
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AccountCreate"];
+                };
+            };
+            responses: {
+                /** @description 已创建 */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Account"];
+                    };
+                };
+                403: components["responses"]["Forbidden"];
+                /** @description 用户名已存在 */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationError"];
+                503: components["responses"]["ServiceUnavailable"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/accounts/{accountId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * 修改账号名称、状态或角色
+         * @description 仅 care_admin。跨机构返回 403 并写审计。不能禁用或降级自己，
+         *     也不能移除本机构最后一个 care_admin。
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    accountId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AccountPatch"];
+                };
+            };
+            responses: {
+                /** @description 已更新 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Account"];
+                    };
+                };
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                /** @description 违反机构管理员保留约束 */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationError"];
+                503: components["responses"]["ServiceUnavailable"];
             };
         };
         trace?: never;
@@ -1177,7 +1346,7 @@ export interface components {
         Me: {
             accountId: string;
             displayName: string;
-            roles: ("patient" | "caregiver" | "care_admin" | "rehab_therapist")[];
+            roles: components["schemas"]["Role"][];
             orgId: string;
             orgName?: string;
         };
@@ -1557,6 +1726,37 @@ export interface components {
             /** @description 探索性变量说明；有效性阈值尚未临床签核。 */
             note: string;
         };
+        /** @enum {string} */
+        Role: "patient" | "caregiver" | "care_admin" | "rehab_therapist";
+        /** @enum {string} */
+        AccountStatus: "active" | "disabled";
+        Account: {
+            accountId: string;
+            displayName: string;
+            username?: string | null;
+            status: components["schemas"]["AccountStatus"];
+            roles: components["schemas"]["Role"][];
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AccountPage: {
+            items: components["schemas"]["Account"][];
+            nextCursor?: string | null;
+        };
+        AccountCreate: {
+            displayName: string;
+            username: string;
+            /** Format: password */
+            password: string;
+            /** @enum {string} */
+            role: "care_admin" | "rehab_therapist";
+        };
+        AccountPatch: {
+            displayName?: string;
+            status?: components["schemas"]["AccountStatus"];
+            /** @enum {string} */
+            role?: "care_admin" | "rehab_therapist";
+        };
     };
     responses: {
         /** @description 未认证或令牌失效 */
@@ -1588,6 +1788,15 @@ export interface components {
         };
         /** @description 请求校验失败 */
         ValidationError: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Error"];
+            };
+        };
+        /** @description 服务暂时不可用：数据库连接池已满或连接中断。属可重试状态， 客户端应按退避重试而不是立即放弃；响应体 detail.retryable 为 true。 */
+        ServiceUnavailable: {
             headers: {
                 [name: string]: unknown;
             };

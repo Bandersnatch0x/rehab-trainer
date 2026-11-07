@@ -218,7 +218,7 @@ python -m unittest discover -s scripts -p "test_*.py"
 
 预期：
 
-- 后端测试 138 项全部通过。
+- 后端测试 149 项全部通过。
 - 部署自检输出 `PASS: 18 tables; SQLite upgrade/repeat/downgrade/upgrade; model diff empty; PostgreSQL SQL; YAML`。
 - 联调脚本回归测试 12 项通过。
 
@@ -263,7 +263,7 @@ $env:JAVA_HOME = 'E:\jdk\microsoft-jdk-21.0.10-windows-x64\jdk-21.0.10+7'
 python scripts/smoke-api.py --config .agent/tmp/smoke-config.json
 ```
 
-预期：脚本自建临时数据库、启动本地服务并逐项打印 `PASS`，覆盖全部 25 个契约操作（含两个科研聚合端点与媒体上传/上架），退出码 0。
+预期：脚本自建临时数据库、启动本地服务并逐项打印 `PASS`，覆盖全部 28 个契约操作（含两个科研聚合端点、机构账号与媒体上传/上架），退出码 0。
 
 ### 9.7 全量脚本
 

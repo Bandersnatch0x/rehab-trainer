@@ -22,6 +22,10 @@ API_DIR = ROOT / "services/api"
 
 LOCAL_HOSTS = {"127.0.0.1", "localhost", "::1"}
 
+# app.seed 固定写入的照护管理员；账号端点仅 care_admin 可用。
+SEED_ADMIN_USERNAME = "admin"
+SEED_ADMIN_PASSWORD = "admin123"
+
 
 def opener_for(url):
     """本机地址必须绕开 HTTP_PROXY，否则请求会打到代理上得到 502。"""
@@ -41,6 +45,7 @@ def run_smoke(base_url, username, password, binding_token):
         operation = re.sub(r"/exercises/[^/]+", "/exercises/{code}", operation)
         operation = re.sub(r"/alerts/[^/]+", "/alerts/{alertId}", operation)
         operation = re.sub(r"/media-assets/[^/]+", "/media-assets/{assetId}", operation)
+        operation = re.sub(r"/accounts/[^/]+", "/accounts/{accountId}", operation)
         request_headers = {"Content-Type": "application/json"}
         if token:
             request_headers["Authorization"] = f"Bearer {token}"
@@ -184,6 +189,28 @@ def run_smoke(base_url, username, password, binding_token):
     # 审计：本机构事件可按动作筛选，处置人来自登录账号。
     request("GET", "/audit-events?action=alert.updated",
             check=lambda b: any(item["action"] == "alert.updated" and item["actorAccountId"] for item in b["items"]))
+
+    # 机构账号：照护管理员开通、改名；响应不得回显口令或哈希。
+    admin_login = request("POST", "/auth/login",
+                          {"username": SEED_ADMIN_USERNAME, "password": SEED_ADMIN_PASSWORD},
+                          check=lambda b: valid_tokens(b) and "care_admin" in b["profile"]["roles"])
+    admin_headers = {"Authorization": f"Bearer {admin_login['accessToken']}"}
+    new_username = "smoke-account-" + secrets.token_hex(4)
+    created_account = request(
+        "POST", "/accounts",
+        {"displayName": "联调同事", "username": new_username,
+         "password": "smoke-pass-123", "role": "rehab_therapist"},
+        status=201, headers=admin_headers,
+        check=lambda b: bool(b["accountId"]) and b["status"] == "active"
+        and b["roles"] == ["rehab_therapist"]
+        and "password" not in b and "passwordHash" not in b,
+    )
+    account_id = created_account["accountId"]
+    request("GET", "/accounts?limit=100", headers=admin_headers,
+            check=lambda b: any(a["accountId"] == account_id for a in b["items"]))
+    request("PATCH", f"/accounts/{account_id}", {"displayName": "联调同事改名"},
+            headers=admin_headers,
+            check=lambda b: b["accountId"] == account_id and b["displayName"] == "联调同事改名")
 
     # 科研聚合端点：只返回聚合值，demo 数据被硬过滤，患者数应为 0。
     request("GET", "/research/overview",

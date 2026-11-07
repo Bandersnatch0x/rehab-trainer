@@ -33,6 +33,7 @@ tags:
   - name: audit
   - name: research
   - name: media
+  - name: accounts
 
 paths:
   /auth/bind:
@@ -769,6 +770,96 @@ paths:
 
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
+  /accounts:
+    get:
+      tags: [accounts]
+      summary: 列出本机构账号
+      description: |
+        仅 care_admin。按机构隔离，跨机构不可见；按创建时间倒序返回。
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/AccountStatus"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: 账号列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountPage"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+    post:
+      tags: [accounts]
+      summary: 开通机构账号
+      description: |
+        仅 care_admin。机构取登录账号所属机构，请求体不携带机构字段；
+        用户名全局唯一；口令在服务端以 PBKDF2 哈希存储，响应体不含口令或哈希。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccountCreate"
+      responses:
+        "201":
+          description: 已创建
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          description: 用户名已存在
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /accounts/{accountId}:
+    patch:
+      tags: [accounts]
+      summary: 修改账号名称、状态或角色
+      description: |
+        仅 care_admin。跨机构返回 403 并写审计。不能禁用或降级自己，
+        也不能移除本机构最后一个 care_admin。
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccountPatch"
+      responses:
+        "200":
+          description: 已更新
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: 违反机构管理员保留约束
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 components:
   securitySchemes:
     bearerAuth:
@@ -894,8 +985,7 @@ components:
           type: array
           minItems: 1
           items:
-            type: string
-            enum: [patient, caregiver, care_admin, rehab_therapist]
+            $ref: "#/components/schemas/Role"
         orgId:
           type: string
         orgName:
@@ -1728,3 +1818,70 @@ components:
         note:
           type: string
           description: 探索性变量说明；有效性阈值尚未临床签核。
+
+    Role:
+      type: string
+      enum: [patient, caregiver, care_admin, rehab_therapist]
+
+    AccountStatus:
+      type: string
+      enum: [active, disabled]
+
+    Account:
+      type: object
+      required: [accountId, displayName, status, roles, createdAt]
+      properties:
+        accountId:
+          type: string
+        displayName:
+          type: string
+        username:
+          type: string
+          nullable: true
+        status:
+          $ref: "#/components/schemas/AccountStatus"
+        roles:
+          type: array
+          items:
+            $ref: "#/components/schemas/Role"
+        createdAt:
+          type: string
+          format: date-time
+
+    AccountPage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Account"
+        nextCursor:
+          type: string
+          nullable: true
+
+    AccountCreate:
+      type: object
+      required: [displayName, username, password, role]
+      properties:
+        displayName:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+        role:
+          type: string
+          enum: [care_admin, rehab_therapist]
+
+    AccountPatch:
+      type: object
+      properties:
+        displayName:
+          type: string
+        status:
+          $ref: "#/components/schemas/AccountStatus"
+        role:
+          type: string
+          enum: [care_admin, rehab_therapist]

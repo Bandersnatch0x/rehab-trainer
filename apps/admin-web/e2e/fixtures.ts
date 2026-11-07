@@ -10,6 +10,7 @@ type CaseData = {
   prescriptionId: string;
   alertId: string;
   accounts: Record<Role, string>;
+  colleague: { accountId: string; username: string; displayName: string };
 };
 
 export const test = base.extend<{ data: CaseData }>({

@@ -16,6 +16,7 @@ from app.core.config import get_settings
 from app.core.database import engine, init_db
 from app.core.errors import DEFAULT_ERROR_CODES
 from app.routers import (
+    accounts,
     alerts,
     assessments,
     audit,
@@ -143,6 +144,7 @@ async def validation_exception_handler(
 API_PREFIX = "/v1"
 for router in (
     auth.router,
+    accounts.router,
     patients.router,
     assessments.router,
     exercises.router,

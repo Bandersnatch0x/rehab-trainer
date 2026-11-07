@@ -7,6 +7,11 @@ import {
 } from "./client";
 import { getAccessToken, notifyUnauthorized } from "../auth/session";
 import type {
+  Account,
+  AccountCreate,
+  AccountListQuery,
+  AccountPage,
+  AccountPatch,
   Alert,
   AlertListQuery,
   AlertPage,
@@ -358,6 +363,35 @@ export function updateMediaAsset(
   return toResult<MediaAsset>(
     api.PATCH("/media-assets/{assetId}", {
       params: { path: { assetId } },
+      body,
+    }),
+  );
+}
+
+// ---------- accounts ----------
+
+/** GET /accounts — 列出本机构账号（仅 care_admin） */
+export function listAccounts(
+  query: AccountListQuery = {},
+): Promise<ApiResult<AccountPage>> {
+  return toResult<AccountPage>(api.GET("/accounts", { params: { query } }));
+}
+
+/** POST /accounts — 开通机构账号（仅 care_admin） */
+export function createAccount(
+  body: AccountCreate,
+): Promise<ApiResult<Account>> {
+  return toResult<Account>(api.POST("/accounts", { body }));
+}
+
+/** PATCH /accounts/{accountId} — 改名称、状态或角色（仅 care_admin） */
+export function updateAccount(
+  accountId: string,
+  body: AccountPatch,
+): Promise<ApiResult<Account>> {
+  return toResult<Account>(
+    api.PATCH("/accounts/{accountId}", {
+      params: { path: { accountId } },
       body,
     }),
   );

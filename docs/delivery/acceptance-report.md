@@ -12,7 +12,7 @@
 | 交付形态 | 演示版：未决项与待专业签核内容使用占位或演示数据，页面明确标注 |
 | 三端 | Android App（手机与平板）、微信小程序、Web 后台 |
 | 后端 | FastAPI + SQLAlchemy；SQLite 用于开发与自检，PostgreSQL 17 用于容器与生产 |
-| 契约 | `packages/api-contract/openapi.yaml`，21 个路径、25 个操作 |
+| 契约 | `packages/api-contract/openapi.yaml`，23 个路径、28 个操作 |
 | 不在本次范围 | 云端异步 CV（T5）、iOS、在线问诊、支付、社交、冻结步态自动检测、诊断结论、维护期与商务承诺 |
 
 本轮范围与排除项依据已确认裁决（D7、D24、D26）；三份交付文档的组成与落盘位置已定，不在本文重新讨论。
@@ -34,20 +34,20 @@
 
 | 项目 | 结果 | 证据 | 备注 |
 | --- | --- | --- | --- |
-| 后端测试 | 138 项通过，0 失败 | `python -m pytest -q services/api/tests` | 覆盖契约操作集、参数与响应字段、机构隔离、分页、训练方案乐观锁、记录幂等、科研抑制、分级准入、登录限流跨副本持久化、TOTP 校验与重放拒绝、专业预设完整性与关闭开关 |
-| 契约一致性 | 21 个路径、25 个操作；实现与契约的操作集、参数、成功响应字段一致 | `services/api/tests/test_contract.py` 4 项；契约 `servers[0]` 前缀 `/v1` | 实现多一个或少一个操作都会失败 |
+| 后端测试 | 149 项通过，0 失败 | `python -m pytest -q services/api/tests` | 覆盖契约操作集、参数与响应字段、机构隔离、分页、训练方案乐观锁、记录幂等、科研抑制、分级准入、登录限流跨副本持久化、TOTP 校验与重放拒绝、专业预设完整性与关闭开关 |
+| 契约一致性 | 23 个路径、28 个操作；实现与契约的操作集、参数、成功响应字段一致 | `services/api/tests/test_contract.py` 4 项；契约 `servers[0]` 前缀 `/v1` | 实现多一个或少一个操作都会失败 |
 | 部署自检 | 18 张业务表；SQLite 升级、重复升级、降级、再升级；模型差异为空；PostgreSQL 离线 SQL；YAML | `python deploy/verify.py` | 输出 `PASS: 18 tables; ...`；当前迁移 head 为 `0005` |
 | 管理端类型检查 | 通过 | `cd apps/admin-web && npx tsc --noEmit` | 退出码 0 |
-| 管理端 E2E | 23 项通过，0 失败 | `cd apps/admin-web && npx playwright test` | 覆盖登录与 403、分级入口权限、患者筛选与详情、训练方案冲突与读取失败保护、预警确认/随访/关闭与持久化、随访台账、患者超过单页上限、科研小样本抑制、404、视频上架门禁、身体感受记录回读、新建患者持久化、多条目训练量调整、审计日志服务端筛选与 CSV 导出、训练项目添加/移除 |
+| 管理端 E2E | 26 项通过，0 失败 | `cd apps/admin-web && npx playwright test` | 覆盖登录与 403、分级入口权限、患者筛选与详情、训练方案冲突与读取失败保护、预警确认/随访/关闭与持久化、随访台账、患者超过单页上限、科研小样本抑制、404、视频上架门禁、身体感受记录回读、新建患者持久化、多条目训练量调整、审计日志服务端筛选与 CSV 导出、训练项目添加/移除、权限管理开通/改名/停用 |
 | 小程序类型检查 | 通过 | `cd apps/miniprogram && npx --no-install tsc --noEmit` | 退出码 0 |
 | 小程序行为测试 | 17 项通过，0 失败 | `cd apps/miniprogram && node --test tests/patient-data.cjs` | 以 `wx` 桩驱动请求层与五个页面 |
 | 小程序静态检查 | 通过 | `cd apps/miniprogram && python tests/static_check.py .` | 页面与绑定一致性、事件处理函数存在性、患者端禁用词、WCAG AA 对比度 |
 | Android 单元测试 | 184 项通过，0 失败 | `cd apps/android && ./gradlew.bat :app:testDebugUnitTest --no-daemon` | 24 个测试类：多动作分析器（抬举/踏步/微蹲/姿势保持/双上肢伸展/坐位抬腿）、会话快照与方案选择、采集门禁、组进度、准入、布局策略、媒体预取策略、拨号、离线缓存配额/淘汰/存储/下载、视频源解析、相机横滚补偿、第二人门禁 |
 | Android 构建 | `assembleDebug` 成功 | `cd apps/android && ./gradlew.bat :app:assembleDebug --no-daemon` | 生成调试 APK；未安装到真机 |
-| API 联调 | 25 个契约操作全部通过（21 个路径） | `python scripts/smoke-api.py --config .agent/tmp/smoke-config.json` | 覆盖全部契约操作，含科研聚合端点与媒体上传/上架；退出码 0 |
+| API 联调 | 28 个契约操作全部通过（23 个路径） | `python scripts/smoke-api.py --config .agent/tmp/smoke-config.json` | 覆盖全部契约操作，含科研聚合端点、机构账号与媒体上传/上架；退出码 0 |
 | 联调脚本回归 | 12 项通过 | `python -m unittest discover -s scripts -p "test_*.py"` | 覆盖联调脚本自身行为 |
 | 专业阈值预设 | 7 个量表 + 4 条预警规则均有数值或无分界声明、来源与置信度；`AUTO_ALERTS_ENABLED`/`RISK_LEVELS_ENABLED` 均为 False | `services/api/tests/test_clinical_presets.py` 3 项 | 文献预设待专业签核；来源见 `docs/clinical/literature-presets.md` |
-| 本地容器与 PostgreSQL | 见 `docs/deployment/README.md` 的「容器与真实 PostgreSQL 验证（2026-11-05）」表 | 该记录由部署轮次在 WSL2 内实跑 | 该证据对应迁移 `0001` 且当时契约为 18 个操作；当前 head 为 `0005`、契约为 25 个操作，未在容器内复跑 |
+| 本地容器与 PostgreSQL | 见 `docs/deployment/README.md` 的「容器与真实 PostgreSQL 验证（2026-11-05）」表 | 该记录由部署轮次在 WSL2 内实跑 | 该证据对应迁移 `0001` 且当时契约为 18 个操作；当前 head 为 `0005`、契约为 28 个操作，未在容器内复跑 |
 | 全量校验脚本 | 后端、部署自检、管理端构建、管理端 E2E、小程序、Android 各步全部通过 | `python scripts/verify_all.py` | 串行失败即停；Android 步骤已改用绝对路径调用 `gradlew.bat` |
 | 提交门禁 | `git diff --check` 通过 | 仓库根目录执行 | 仅覆盖空白与行尾错误 |
 
@@ -66,7 +66,7 @@
 | Docker/云上生产部署 | 只在本机 WSL2 容器验证过；没有创建云资源 | 云网络、托管数据库、探针、证书、权限未在真实环境确认 | 按 `docs/deployment/README.md` 在预生产环境演练 |
 | 当前迁移的容器验证 | `0001`–`0005` 均已在真实 PostgreSQL 上复验（`deploy/verify_postgres.py`：升级/降级/再升级、结构与数据回读、模型差异为空）；另在 PostgreSQL 16 上复跑通过 | 已覆盖，无遗留 | 每次新增迁移后复跑该脚本 |
 | CI 流水线 | `.github/workflows/ci.yml` 存在，但仓库没有远端流水线 | 无法证明配置在真实 CI 上可运行 | 接入远端后按路径触发各任务 |
-| 科研聚合端点的联调覆盖 | 两个科研端点已纳入 `scripts/smoke-api.py`（当前 25/25 契约操作通过），本机实测有 HTTP 证据 | 已覆盖，无遗留 | 保持每次契约变更后复跑 |
+| 科研聚合端点的联调覆盖 | 两个科研端点已纳入 `scripts/smoke-api.py`（当前 28/28 契约操作通过），本机实测有 HTTP 证据 | 已覆盖，无遗留 | 保持每次契约变更后复跑 |
 | 端上姿态识别准确度 | 未做康复场景准确度验证；未完成 T6 实测 | 计数与角度不能作为康复结论 | 按 T6 清单完成算法层与设备层实测 |
 | 小程序训练执行与视频上传 | 训练执行页已渲染选中条目的名称/分类/训练量与训练前确认；不录制、不上传，云端异步分析未实现 | 小程序没有真实训练闭环（T5 云端 CV 未启动，见 D26） | 待 T5/T6 与伦理授权具备后实现并验收 |
 
@@ -79,7 +79,7 @@
 | 后端二次验证 | 已支持 TOTP 校验、重放拒绝与跨副本失败计数；启用需运维执行 `scripts/set-totp.py`，无自助注册或二维码页面 | 账号启用二次验证依赖人工操作 |
 | 后端内容与媒体 | 没有内容清单、签名 URL、对象存储上传集成 | 训练视频与音频地址需另行提供 |
 | 管理端随访台账 | 只读；已显示处理人与处置说明，契约暂无独立的「处置结论」字段 | 不能替代正式随访记录系统 |
-| 管理端权限 | 页面为演示数据，按钮不执行账号开通或权限变更 | 不能用于真实账号管理 |
+| 管理端权限 | 权限页接真实后端：列出本机构账号、开通账号、改名、停用；口令只存哈希，响应不回显口令 | 无「最近活跃」数据源，列表显示创建时间；未做口令重置、二次验证自助注册与绑定码生成（仍走运维脚本） |
 | 小程序训练 | 训练执行页渲染选中条目的名称/分类/训练量与训练前确认清单；不录制、不上传、不做云端分析，也不生成记录 | 小程序没有真实训练闭环（T5 云端 CV 未启动，见 D26） |
 | 小程序提醒 | 只读 | 处理需在机构端完成 |
 | 小程序演示登录 | `DEMO_LOGIN_ENABLED = true` 时包含演示账号凭据 | 生产构建必须关闭该开关并移除演示账号 |

@@ -61,6 +61,15 @@ def seed_case(extra_patients: int = 0):
             db.add(RoleBinding(id=uuid4().hex, account_id=account_id, role=role,
                                org_id=case_id, patient_id=patient_id if role == "patient" else None))
         db.flush()
+        # 权限管理用例的第二个成员：同名机构下的同事，供列表与改名/停用断言。
+        colleague_id = f"colleague-{case_id}"
+        colleague_username = f"colleague-{case_id}"
+        db.add(Account(account_id=colleague_id, org_id=case_id, username=colleague_username,
+                       display_name="同事治疗师", password_hash=password_hash, status="active"))
+        db.flush()
+        db.add(RoleBinding(id=uuid4().hex, account_id=colleague_id, role="rehab_therapist",
+                           org_id=case_id, patient_id=None))
+        db.flush()
         prescription = Prescription(id=prescription_id, org_id=case_id, patient_id=patient_id,
                                     prescribed_by=therapist_id, version="1.0.0",
                                     mapping_table_version="2026.11.0", issued_at=now,
@@ -95,7 +104,9 @@ def seed_case(extra_patients: int = 0):
                                  threshold_config_version="thresholds-2026.11", metrics={}))
         db.commit()
     print(json.dumps(dict(patientId=patient_id, otherPatientId=other_id,
-                         prescriptionId=prescription_id, alertId=alert_id, accounts=accounts)))
+                         prescriptionId=prescription_id, alertId=alert_id, accounts=accounts,
+                         colleague=dict(accountId=colleague_id, username=colleague_username,
+                                        displayName="同事治疗师"))))
 
 
 if __name__ == "__main__":

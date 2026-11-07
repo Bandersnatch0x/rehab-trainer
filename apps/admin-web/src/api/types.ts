@@ -47,6 +47,12 @@ export type ResearchDataQuality = components["schemas"]["ResearchDataQuality"];
 export type ResearchBucket = components["schemas"]["ResearchBucket"];
 export type ResearchVersionBucket = components["schemas"]["ResearchVersionBucket"];
 
+export type AccountStatus = components["schemas"]["AccountStatus"];
+export type Account = components["schemas"]["Account"];
+export type AccountPage = components["schemas"]["AccountPage"];
+export type AccountCreate = components["schemas"]["AccountCreate"];
+export type AccountPatch = components["schemas"]["AccountPatch"];
+
 // ---------- 请求体 ----------
 export type PatientCreate = components["schemas"]["PatientCreate"];
 export type AssessmentCreate = components["schemas"]["AssessmentCreate"];
@@ -85,4 +91,7 @@ export type AlertListQuery = NonNullable<
 >;
 export type PrescriptionListQuery = NonNullable<
   paths["/prescriptions"]["get"]["parameters"]["query"]
+>;
+export type AccountListQuery = NonNullable<
+  paths["/accounts"]["get"]["parameters"]["query"]
 >;
