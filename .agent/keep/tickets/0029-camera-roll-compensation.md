@@ -51,3 +51,23 @@ created: 2026-11-07
 ## 待专业签核
 
 20° 上限与「完全校正」的取舍、以及头倾斜患者的例外处理，属于临床判断，当前值是工程预设。
+
+## 调研结论（2026-11 补充）
+
+**换 `world_landmarks` 解决不了这个问题**：
+`world_landmark_projection_calculator.cc` 会按 ROI 的旋转把世界坐标转回相机坐标系，
+官方也从未定义其朝向（`google-ai-edge/mediapipe` issue #3370 关闭未答）。
+世界坐标与 2D 坐标一样带着机位横滚。
+
+**专业管线的参考物是地面，不是头。** Sports2D（JOSS 2024，DOI `10.21105/joss.06849`）默认
+`--correct_segment_angles_with_floor_angle true`：用地面倾角补偿相机倾斜，零解剖学假设。
+
+**下一步（推荐）**：用 Android 重力传感器替代眼线——
+`Sensor.TYPE_GRAVITY`（官方定义：「a three dimensional vector indicating the direction and
+magnitude of gravity」，坐标系与加速度计相同）给出重力在相机坐标系的投影，
+投影到图像平面即横滚角，**与手机怎么摆、患者头怎么歪都无关**。
+眼线降级为传感器缺失时的兜底。
+
+代价：传感器有噪声与延迟，需低通；患者碰撞桌子时的瞬时抖动要抑制。
+实现要动 `TrainingScreen`（`SensorManager` 注册/注销）与 `PoseAnalyzer`（注入 roll），
+纯计算部分可用 JVM 单测钉住，但**整条链路仍需真机复验**，当前设备未连，暂不实施。
