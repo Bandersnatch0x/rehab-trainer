@@ -48,11 +48,12 @@ README_TEMPLATE = """帕金森病患者肌肉保护训练系统 · 客户交付�
 
 
 def latest_package(before: str) -> Path:
+    """取日期不晚于 [before] 的最新一版：同一天重切时以自己为原型来源，避免把补丁回滚掉。"""
     candidates = sorted(DELIVERY.glob("客户交付包-*.zip"))
-    earlier = [p for p in candidates if p.stem.split("-")[-1] < before]
-    if not earlier:
-        raise SystemExit(f"找不到 {before} 之前的交付包，无法沿用原型；请用 --prototype 指定")
-    return earlier[-1]
+    usable = [p for p in candidates if p.stem.split("-")[-1] <= before]
+    if not usable:
+        raise SystemExit(f"找不到 {before} 及之前的交付包，无法沿用原型；请用 --prototype 指定")
+    return usable[-1]
 
 
 def read_member(package: Path, suffix: str) -> bytes:
