@@ -54,4 +54,25 @@ created: 2026-11-07
 
 - 就绪探针占用一个池连接（`SELECT 1` 期间）。探针间隔 30 秒、耗时毫秒级，可忽略；
   但若把间隔调到秒级，需把探针连接排除在池预算外。
-- 真机/真库未验：JVM 侧无此问题，Python 侧是 `TestClient` + 假引擎，未连真实 PostgreSQL 跑过探针。
+
+## 真库验证（2026-11-07 补做，并发现一个缺陷）
+
+用 WSLC 容器跑 `postgres:16-alpine`（`127.0.0.1:55433`），从 Windows 侧 `alembic upgrade head` + seed 后起 API：
+
+| 场景 | 结果 |
+| --- | --- |
+| 库正常 | `/healthz` 200（17ms）、`/readyz` 200（36ms） |
+| 停掉数据库 | `/healthz` **仍 200**（10ms）、`/readyz` **503**，响应体 `{"status":"database_unavailable"}` |
+| 重启数据库 | `/readyz` 自动回到 200（178ms，无需重启 API） |
+
+### 发现并修复：建连没有超时
+
+第一次停库时 `/readyz` **挂了 15 秒以上没返回**。原因是 `pool_timeout` 只约束「排队等池」，
+**不约束建立连接本身**；WSLC 端口转发在容器停掉后仍接受 TCP 连接但不转发，
+于是 psycopg 一直等到操作系统放弃（Windows 约 20 秒）。
+
+- 新增 `REHAB_DB_CONNECT_TIMEOUT_SECONDS`（默认 5），作为 `connect_timeout` 传给驱动。
+- 修复后同一场景：`/readyz` **5.1 秒返回 503**，`/healthz` 10ms 仍 200。
+- 部署约束写入手册：**平台就绪探针超时必须 ≥ 该值 + 1 秒**，否则平台先超时、拿不到我们返回的 503。
+
+这条也覆盖票 0026：过载时快速失败，但「连不上」原本仍会挂——两处超时现在都有上界。

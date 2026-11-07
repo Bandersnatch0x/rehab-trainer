@@ -221,6 +221,10 @@ python scripts/loadtest-api.py --config .agent/tmp/smoke-config.json `
 - **池显式配置**（`app/core/database.py`，环境变量可调）：`REHAB_DB_POOL_SIZE`（默认 5）、
   `REHAB_DB_MAX_OVERFLOW`（10）、`REHAB_DB_POOL_TIMEOUT_SECONDS`（**5**，原默认 30）、
   `REHAB_DB_POOL_PRE_PING`（true）、`REHAB_DB_POOL_RECYCLE_SECONDS`（1800）。SQLite 分支保持默认。
+- **建连超时**：`REHAB_DB_CONNECT_TIMEOUT_SECONDS`（默认 5）。它与 `pool_timeout` 是两件事——
+  后者只限制排队等池，**不约束建立连接本身**。对端停服但端口仍被转发时，不设它会一直等到
+  操作系统放弃（Windows 约 20 秒），就绪探针会挂在那里、业务线程也白占。
+  **平台的就绪探针超时必须 ≥ 这个值 + 1 秒**，否则平台先超时、拿不到我们返回的 503。
 - **探活**：取连接前 `SELECT 1`。数据库重启或主从切换后，不会再拿已被对端关闭的连接去用。
 - **快速失败**：池等待超时与连接层故障都返回 `503` + `{"code":"SERVICE_UNAVAILABLE","detail":{"retryable":true}}`，
   原文只进日志（`连接池等待超时 POST /v1/auth/login：并发已超过 pool_size+max_overflow=15`）。

@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     # 池耗尽时等待上限。宁可快速失败（503）也不要让客户端挂 30 秒：
     # 排队等待期间连接与线程都被占住，对调用方而言与宕机无异。
     db_pool_timeout_seconds: float = 5.0
+    # 建立连接的超时（秒）。与 pool_timeout 不同：它约束的是 TCP 握手与认证本身。
+    # 对端停服但端口仍被转发时，不设它会一直等到操作系统放弃（Windows 约 20 秒）。
+    db_connect_timeout_seconds: int = 5
     # 取连接前探活：数据库重启或主从切换后，不会把已被对端关闭的连接当活的用。
     db_pool_pre_ping: bool = True
     # 主动回收，避开服务端 idle 超时留下的半死连接。

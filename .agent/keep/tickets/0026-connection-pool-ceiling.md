@@ -100,3 +100,17 @@ could not receive data from server: Software caused connection abort (0x00002745
 
 - 多副本下的池总量核算（需确定副本数与数据库 `max_connections`）。
 - 客户端对 503 的统一退避重试；Android 训练记录已有本地队列重试，其余读取路径目前只提示失败。
+
+## Log
+
+### 2026-11-07 补：建连本身没有上界
+
+真库验证就绪探针时发现：停掉数据库后 `/readyz` 挂了 15 秒以上没返回。
+`pool_timeout` 只约束「排队等池」，**不约束建立连接**；对端停服但端口仍被转发时，
+连接会一直等到操作系统放弃（Windows 约 20 秒）。
+
+已加 `REHAB_DB_CONNECT_TIMEOUT_SECONDS`（默认 5，传给驱动的 `connect_timeout`）。
+修复后同一场景 5.1 秒返回 503。细节见票 0032 的「真库验证」一节。
+
+教训：这个票修的是「池排队无界」，但「建连无界」是另一个洞——同一个故障场景（数据库不可用）
+有两段独立的等待，只堵住一段。

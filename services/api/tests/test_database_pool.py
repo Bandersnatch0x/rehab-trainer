@@ -33,12 +33,15 @@ def test_postgres_pool_is_configured_explicitly():
     # 探活与回收：数据库重启或闲置后不会取到已被对端关闭的连接。
     assert options["pool_pre_ping"] is True
     assert options["pool_recycle"] == 1800
+    # 建连超时与排队超时是两件事：对端停服但端口仍被转发时，不设它会一直等到系统放弃。
+    assert options["connect_args"]["connect_timeout"] == 5
 
 
 def test_pool_settings_come_from_environment(monkeypatch):
     monkeypatch.setenv("REHAB_DB_POOL_SIZE", "3")
     monkeypatch.setenv("REHAB_DB_MAX_OVERFLOW", "2")
     monkeypatch.setenv("REHAB_DB_POOL_TIMEOUT_SECONDS", "1.5")
+    monkeypatch.setenv("REHAB_DB_CONNECT_TIMEOUT_SECONDS", "2")
 
     options = engine_options(POSTGRES_URL, Settings())
 
@@ -46,6 +49,7 @@ def test_pool_settings_come_from_environment(monkeypatch):
     assert options["pool_size"] == 3
     assert options["max_overflow"] == 2
     assert options["pool_timeout"] == 1.5
+    assert options["connect_args"]["connect_timeout"] == 2
 
 
 def _add_probe_route(path: str, error: Exception) -> None:
