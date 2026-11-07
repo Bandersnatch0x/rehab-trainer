@@ -7,12 +7,13 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy.exc import OperationalError
+from sqlalchemy import text
+from sqlalchemy.exc import OperationalError, SQLAlchemyError
 from sqlalchemy.exc import TimeoutError as PoolTimeoutError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.config import get_settings
-from app.core.database import init_db
+from app.core.database import engine, init_db
 from app.core.errors import DEFAULT_ERROR_CODES
 from app.routers import (
     alerts,
@@ -152,6 +153,34 @@ for router in (
     media.router,
 ):
     app.include_router(router, prefix=API_PREFIX)
+
+
+# 运维探针：不进契约、不进 OpenAPI。它们描述进程状态，不是客户端可依赖的业务接口；
+# 写进契约会暗示调用方可以据此做业务决策。
+@app.get("/healthz", include_in_schema=False)
+def liveness() -> JSONResponse:
+    """存活：进程能响应即可，不碰数据库。数据库挂了不该让容器被反复重启。"""
+    return JSONResponse({"status": "ok"})
+
+
+@app.get("/readyz", include_in_schema=False)
+def readiness() -> JSONResponse:
+    """就绪：用**应用自己的连接池**探一次库。
+
+    刻意不复用健康检查脚本里的独立引擎——那测的是"另开一条连接能不能连上"，
+    而不是"正在服务流量的这个进程能不能拿到连接"（池耗尽时两者结论相反）。
+    """
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+    except SQLAlchemyError as error:
+        logger.error("就绪检查失败：%s", error)
+        return JSONResponse(
+            status_code=HTTP_SERVICE_UNAVAILABLE,
+            content={"status": "database_unavailable"},
+        )
+    return JSONResponse({"status": "ok"})
+
 
 # 本地开发直接由 API 托管媒体文件；生产环境由 nginx 指向同一目录
 # （见 deploy/nginx/rehab-media.conf），此时该挂载前缀不会被命中。

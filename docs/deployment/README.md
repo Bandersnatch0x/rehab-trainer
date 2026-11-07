@@ -73,14 +73,27 @@ python -m alembic -c deploy/alembic.ini check
 
 3. 将数据库 URL 与随机 JWT 密钥注入云端秘密管理服务。所有 API 副本使用相同密钥，设置 `REHAB_AUTO_CREATE_SCHEMA=false`。不要将秘密传为构建参数。微信及 COS 示例项是预留配置，当前后端不消费它们。
 4. 在发布前制作数据库备份。使用同一镜像运行一个迁移 Job，命令为 `alembic -c deploy/alembic.ini upgrade head`，注入迁移账号 URL。迁移作业必须串行，成功后才能更新 API；禁止多个副本同时执行迁移。
-5. API 容器覆盖默认启动命令为 `uvicorn app.main:app --host 0.0.0.0 --port 8000`，使用运行账号 URL。初次发布先单副本验证，配置优雅终止与至少 30 秒停止窗口。将 `/openapi.json` 作为 HTTP 存活探针，将 `python /opt/rehab/deploy/healthcheck.py` 作为执行式就绪探针。容器平台不会自动采用 Dockerfile 的健康检查时，必须显式配置探针。
+5. API 容器覆盖默认启动命令为 `uvicorn app.main:app --host 0.0.0.0 --port 8000`，使用运行账号 URL。初次发布先单副本验证，配置优雅终止与至少 30 秒停止窗口。将 `/healthz` 作为 HTTP 存活探针，将 `/readyz` 作为就绪探针（Dockerfile 的 `HEALTHCHECK` 经 `python /opt/rehab/deploy/healthcheck.py` 探它）。容器平台不会自动采用 Dockerfile 的健康检查时，必须显式配置探针。
 6. 在负载均衡器终止 HTTPS，通过安全组限制后端访问；不要将数据库暴露公网。管理端与 API 跨域配置未在本任务接入，优先通过同域网关转发 `/v1`，上线前验证客户端实际访问路径。
 7. 创建私有 COS 桶，启用服务端加密、版本控制、生命周期与访问审计。只授必要桶路径权限，优先使用短期角色凭据。公开训练素材可通过带源站鉴权的 CDN 分发，患者资料不能放入公开缓存。配置 CDN 域名、证书、回源权限并实测缓存刷新。当前 API 无 COS 上传集成，配置占位不意味着文件会自动上传。
 8. 执行容器健康检查，并以受控测试账号验证登录、处方读取、训练记录写入及重启后数据保留。通过后再开放流量。不要在生产运行开发 seed，它不是生产账号开通流程。
 
 ## 健康检查与日志
 
-镜像健康检查先访问本机 `/openapi.json`，再读取数据库 `alembic_version`。这证明 HTTP 响应及数据库版本表可读，不证明所有业务查询正常，也不验证版本等于当前 head。发布 Job 的升级成功与业务冒烟测试仍是发布条件。
+两个探针职责分开：
+
+| 探针 | 路径 | 检查内容 | 失败含义 |
+|---|---|---|---|
+| 存活 | `/healthz` | 仅进程能响应，**不碰数据库** | 进程死了，该重启 |
+| 就绪 | `/readyz` | 用**应用自己的连接池**执行 `SELECT 1` | 暂时不能接流量，摘掉即可，不必重启 |
+
+分开的理由是真实故障下的分水岭：数据库不可用时，若存活探针也探库，编排会反复重启一个本身没问题的进程，
+而重启对数据库故障毫无帮助。反过来，`/readyz` 必须走应用的连接池——此前脚本另起引擎直连数据库，
+连接池耗尽时它会报"健康"，而实际上所有业务请求都在排队等连接。
+
+两者都不进 OpenAPI：它们描述进程状态，不是客户端可依赖的业务接口（`include_in_schema=False`）。
+就绪通过只证明连接池可用，不证明所有业务查询正常，也不验证数据库版本等于当前 head；
+发布 Job 的升级成功与业务冒烟测试仍是发布条件。
 
 ```powershell
 docker compose --env-file .agent/tmp/deployment.env logs --tail 100 api postgres
