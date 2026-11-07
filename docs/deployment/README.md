@@ -102,6 +102,21 @@ docker compose --env-file .agent/tmp/deployment.env exec api alembic -c deploy/a
 
 API 与迁移错误输出到标准输出及标准错误，云端接入容器日志采集，设置保留期限和告警。不要输出环境变量、完整数据库 URL、JWT 或患者请求体。Compose 的 `config --quiet` 只校验，直接打印完整 config 会展开秘密。Docker 的 unhealthy 状态本身不保证容器重启，需配合云平台探针策略和告警。
 
+### 告警锚点
+
+平台侧按下面的锚点配告警。`event=` 是**稳定键**：日志文案可以改，键不能改（有单测拦着）。
+
+| 信号 | 锚点 | 含义与处置 |
+| --- | --- | --- |
+| 进程不可用 | `/healthz` 连续失败 | 重启 |
+| 不能接流量 | `/readyz` 连续失败 | 摘流量；先查数据库可达性与连接池 |
+| 连接池耗尽 | 日志 `event=db_pool_exhausted` | 并发已超过 副本数 ×(pool_size+max_overflow)；扩容或排查慢查询 |
+| 连接层故障 | 日志 `event=db_unavailable` | 数据库重启/切换/网络中断；跟随数据库侧告警 |
+| 就绪失败 | 日志 `event=db_readiness_failed` | 与 `/readyz` 同步，异常原文只在这里 |
+
+窗口与阈值按试点规模定，不要照抄：`db_pool_exhausted` 建议 5 分钟窗口内**持续**出现才告警
+（偶发一条是正常削峰），`/readyz` 连续 3 次失败即摘流量。
+
 ## 备份与恢复
 
 本地备份使用容器内文件，避免 Windows PowerShell 对二进制重定向进行编码转换。

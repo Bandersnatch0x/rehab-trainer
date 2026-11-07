@@ -75,8 +75,9 @@ async def pool_timeout_handler(request: Request, exc: PoolTimeoutError) -> JSONR
 
     这是过载信号，不是业务错误：客户端应稍后重试（Android 端训练记录本就有本地队列重试）。
     """
+    # `event=` 是给日志告警用的稳定锚点：文案会改，这个键不能改（见部署手册「告警」一节）。
     logger.error(
-        "连接池等待超时 %s %s：并发已超过 pool_size+max_overflow=%d",
+        "event=db_pool_exhausted method=%s path=%s pool_limit=%d 连接池等待超时",
         request.method,
         request.url.path,
         settings.db_pool_size + settings.db_max_overflow,
@@ -101,7 +102,7 @@ async def database_unavailable_handler(
     错误原文只进日志：库名、主机、连接串不能出现在响应里。
     """
     logger.error(
-        "数据库连接异常 %s %s：%s",
+        "event=db_unavailable method=%s path=%s error=%s 数据库连接异常",
         request.method,
         request.url.path,
         exc,
@@ -174,7 +175,7 @@ def readiness() -> JSONResponse:
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
     except SQLAlchemyError as error:
-        logger.error("就绪检查失败：%s", error)
+        logger.error("event=db_readiness_failed error=%s 就绪检查失败", error)
         return JSONResponse(
             status_code=HTTP_SERVICE_UNAVAILABLE,
             content={"status": "database_unavailable"},

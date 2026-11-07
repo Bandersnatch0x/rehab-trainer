@@ -4,6 +4,8 @@
 而不是让编排反复重启一个本身没问题的进程。
 """
 
+import logging
+
 import pytest
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.exc import TimeoutError as PoolTimeoutError
@@ -54,6 +56,20 @@ def test_readyz_fails_when_database_is_unreachable(client, monkeypatch):
     assert response.json() == {"status": "database_unavailable"}
     # 探针可能被匿名访问，错误细节只进日志。
     assert "db.internal" not in response.text
+
+
+def test_readyz_failure_logs_a_stable_event_key(client, monkeypatch, caplog):
+    monkeypatch.setattr(
+        main,
+        "engine",
+        _FailingEngine(OperationalError("SELECT 1", {}, Exception("connection refused"))),
+    )
+
+    with caplog.at_level(logging.ERROR):
+        client.get("/readyz")
+
+    # 平台按这个键告警「就绪失败」，与业务侧的 db_unavailable 分开。
+    assert "event=db_readiness_failed" in caplog.text
 
 
 def test_readyz_fails_when_pool_is_exhausted(client, monkeypatch):

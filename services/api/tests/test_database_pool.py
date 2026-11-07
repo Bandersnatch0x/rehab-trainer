@@ -5,6 +5,8 @@
 这里覆盖三件事：池参数确实生效、耗尽时快速返回 503、以及业务错误不会被误判成 503。
 """
 
+import logging
+
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
@@ -90,6 +92,32 @@ def test_pool_exhaustion_returns_503_without_leaking_internals(client, probe_pat
     # 连接池内部信息只进日志，不能出现在响应里。
     assert "QueuePool" not in response.text
     assert "size 5" not in response.text
+
+
+def test_pool_exhaustion_logs_a_stable_event_key(client, probe_paths, caplog):
+    # 告警规则挂在这个键上：文案可以改，键不能改。
+    path = "/__test__/pool-logged"
+    probe_paths.append(path)
+    _add_probe_route(path, PoolTimeoutError("QueuePool limit reached"))
+
+    with caplog.at_level(logging.ERROR):
+        client.get(path)
+
+    assert "event=db_pool_exhausted" in caplog.text
+    assert "pool_limit=" in caplog.text
+
+
+def test_database_failure_logs_a_stable_event_key(client, probe_paths, caplog):
+    path = "/__test__/db-logged"
+    probe_paths.append(path)
+    _add_probe_route(
+        path, OperationalError("SELECT 1", {}, Exception("connection refused"))
+    )
+
+    with caplog.at_level(logging.ERROR):
+        client.get(path)
+
+    assert "event=db_unavailable" in caplog.text
 
 
 def test_connection_failure_returns_503_without_leaking_connection_string(
