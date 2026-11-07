@@ -174,6 +174,7 @@ fun TrainingScreen(
     var statusText by remember { mutableStateOf("正在寻找人体站位…") }
     var footVisible by remember { mutableStateOf(true) }
     var gateBlocked by remember { mutableStateOf(false) }
+    var multiPersonPresent by remember { mutableStateOf(false) }
     var previousGateBlocked by remember { mutableStateOf(false) }
 
     // 大字号下优先实景 + 语音：示范视频会挤占摄像头高度，导致叠加信息重叠。
@@ -225,10 +226,18 @@ fun TrainingScreen(
                         is PoseFrame.Detected -> {
                             val feetVisible = CaptureGate.isFootVisible(frame.footVisibility)
                             footVisible = feetVisible
-                            gateBlocked = requiresFullBody && !feetVisible
+                            multiPersonPresent = frame.multiPersonPresent
+                            // 两种门禁都会冻结计数：脚部出框（D17）与画面内出现第二个人。
+                            gateBlocked =
+                                frame.multiPersonPresent || (requiresFullBody && !feetVisible)
                             if (gateBlocked) {
-                                // D17：门禁期间冻结计数，姿态检测继续以等待自动恢复。
-                                statusText = if (largeFont) "请调整站位" else "脚部不在画面内"
+                                // 门禁期间冻结计数，姿态检测继续以等待自动恢复。
+                                statusText = when {
+                                    frame.multiPersonPresent ->
+                                        if (largeFont) "画面内有多人" else "请确保只有患者入镜"
+                                    largeFont -> "请调整站位"
+                                    else -> "脚部不在画面内"
+                                }
                             } else {
                                 statusText = frame.framingHint ?: when {
                                     largeFont -> "识别正常"
@@ -492,6 +501,7 @@ fun TrainingScreen(
                             largeCount = true,
                             statusText = statusText,
                             footVisible = footVisible,
+                            multiPersonPresent = multiPersonPresent,
                             requiresFullBody = requiresFullBody,
                             hasRas = currentExercise.hasRas,
                             bpm = currentExercise.bpm,
@@ -532,6 +542,7 @@ fun TrainingScreen(
                                 counterLabel = currentExercise.counterLabel,
                                 statusText = statusText,
                                 footVisible = footVisible,
+                                multiPersonPresent = multiPersonPresent,
                                 requiresFullBody = requiresFullBody,
                                 hasRas = currentExercise.hasRas,
                                 bpm = currentExercise.bpm,

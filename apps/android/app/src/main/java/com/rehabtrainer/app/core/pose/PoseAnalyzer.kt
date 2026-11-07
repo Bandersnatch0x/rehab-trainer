@@ -17,6 +17,9 @@ private const val TAG = "PoseAnalyzer"
 private const val LOG_INTERVAL_MS = 1_000L
 private const val GATE_RESET_MS = 5_000L
 
+/** 多人同框时冻结计数的提示；与脚部门禁并列，同为「当前不可计数」的原因。 */
+private const val SECOND_PERSON_HINT = "画面内有多人：请确保只有患者入镜"
+
 /** 一帧姿态识别的输出。 */
 sealed interface PoseFrame {
     data class Detected(
@@ -24,6 +27,8 @@ sealed interface PoseFrame {
         val lastRep: RepResult?,
         val currentIssues: Set<RepIssue>,
         val footVisibility: Float,
+        /** 画面内还有第二个人：计数已被冻结。与 [framingHint] 分开，因为后者包含不冻结的提示。 */
+        val multiPersonPresent: Boolean = false,
         val framingHint: String? = null,
         val calibrationRemaining: Int = 0,
         /** 校准完成后的个人幅度；调用方据此持久化，下次训练免校准。 */
@@ -97,7 +102,9 @@ class PoseAnalyzer(
         val options = PoseLandmarker.PoseLandmarkerOptions.builder()
             .setBaseOptions(baseOptions)
             .setRunningMode(RunningMode.LIVE_STREAM)
-            .setNumPoses(1)
+            // 只要 2 副：第 2 副仅用于判定「画面内有多人」，不参与计数。
+            // 代价是每帧多跑一副骨架的关键点模型，低端机帧率需真机确认。
+            .setNumPoses(2)
             // 适老化场景光线/机位不理想，放宽阈值提高检出率；误检由动作状态机与可见度门槛兜底。
             .setMinPoseDetectionConfidence(0.35f)
             .setMinPosePresenceConfidence(0.35f)
@@ -134,22 +141,31 @@ class PoseAnalyzer(
     }
 
     private fun handleResult(result: PoseLandmarkerResult) {
-        val landmarks = result.landmarks().firstOrNull()
-        if (landmarks == null || landmarks.size < PoseIndex.LANDMARK_COUNT) {
+        // 只保留关键点齐全的骨架：缺点的骨架算不出角度，出现即当未检出。
+        val poses = result.landmarks()
+            .filter { pose -> pose.size >= PoseIndex.LANDMARK_COUNT }
+            .map { pose ->
+                pose.map { landmark ->
+                    PosePoint(
+                        x = landmark.x(),
+                        y = landmark.y(),
+                        z = landmark.z(),
+                        // 取 visibility 与 presence 的较大值：遮挡但仍在画面内的关键点常表现为 visibility 低、presence 高。
+                        visibility = maxOf(
+                            landmark.visibility().orElse(0f),
+                            landmark.presence().orElse(0f)
+                        )
+                    )
+                }
+            }
+        var points = poses.firstOrNull()
+        if (points == null) {
             logThrottled("no pose detected")
             onFrame(PoseFrame.NoPose)
             return
         }
-
-        var points = landmarks.map {
-            PosePoint(
-                x = it.x(),
-                y = it.y(),
-                z = it.z(),
-                // 取 visibility 与 presence 的较大值：遮挡但仍在画面内的关键点常表现为 visibility 低、presence 高。
-                visibility = maxOf(it.visibility().orElse(0f), it.presence().orElse(0f))
-            )
-        }
+        // 第 2 副骨架只用于门禁：护理员入镜时跟踪目标会切走，这一次计数不可信。
+        val secondPersonPresent = SecondPersonGate.isPresent(poses)
         val cameraRoll = PoseGeometry.cameraRollRadians(points, frameAspect)
         if (cameraRoll != null) {
             // 机位横滚会让整副骨架倾斜，先按双眼/双耳参考线回正，避免下游误报侧倾。
@@ -167,17 +183,18 @@ class PoseAnalyzer(
         if (isPaused) {
             onFrame(
                 PoseFrame.Detected(
-                    lastUpdate.count,
-                    lastUpdate.lastRep,
-                    lastUpdate.currentIssues,
-                    footVisibility,
+                    repCount = lastUpdate.count,
+                    lastRep = lastUpdate.lastRep,
+                    currentIssues = lastUpdate.currentIssues,
+                    footVisibility = footVisibility,
+                    multiPersonPresent = secondPersonPresent,
                     calibrationRemaining = analyzer.calibrationRemaining
                 )
             )
             return
         }
 
-        if (!CaptureGate.shouldCount(requiresFullBody, footVisibility)) {
+        if (!CaptureGate.shouldCount(requiresFullBody, footVisibility) || secondPersonPresent) {
             // 门禁期间冻结而不立即清零：短暂出框不打断保持计时/基线；长时间遮挡才重置。
             gateBlockedSinceMs =
                 if (gateBlockedSinceMs == 0L) lastFrameTimestampMs else gateBlockedSinceMs
@@ -191,6 +208,8 @@ class PoseAnalyzer(
                     lastRep = lastUpdate.lastRep,
                     currentIssues = lastUpdate.currentIssues,
                     footVisibility = footVisibility,
+                    multiPersonPresent = secondPersonPresent,
+                    framingHint = if (secondPersonPresent) SECOND_PERSON_HINT else null,
                     calibrationRemaining = analyzer.calibrationRemaining
                 )
             )
@@ -223,14 +242,15 @@ class PoseAnalyzer(
             0f
         }
         logThrottled(
-            "pose: shoulder=%.2f wrist=%.2f hip=%.2f ankle=%.2f width=%.2f wristRaise=%.2f hipAnkle=%.2f".format(
+            "pose: shoulder=%.2f wrist=%.2f hip=%.2f ankle=%.2f width=%.2f wristRaise=%.2f hipAnkle=%.2f secondPerson=%b".format(
                 minOf(points[PoseIndex.LEFT_SHOULDER].visibility, points[PoseIndex.RIGHT_SHOULDER].visibility),
                 minOf(points[PoseIndex.LEFT_WRIST].visibility, points[PoseIndex.RIGHT_WRIST].visibility),
                 minOf(points[PoseIndex.LEFT_HIP].visibility, points[PoseIndex.RIGHT_HIP].visibility),
                 minOf(points[PoseIndex.LEFT_ANKLE].visibility, points[PoseIndex.RIGHT_ANKLE].visibility),
                 shoulderWidth,
                 wristRaise,
-                hipAnkle
+                hipAnkle,
+                secondPersonPresent
             )
         )
         lastUpdate = analyzer.update(points, lastFrameTimestampMs, frameAspect)

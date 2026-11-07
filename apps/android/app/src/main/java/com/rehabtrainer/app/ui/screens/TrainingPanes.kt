@@ -711,6 +711,8 @@ internal fun PatientRealtimeCameraPane(
     largeCount: Boolean = false,
     statusText: String,
     footVisible: Boolean,
+    /** 画面内还有第二个人：与脚部门禁并列，都会冻结计数并告警。刻意不给默认值，逼调用方表态。 */
+    multiPersonPresent: Boolean,
     requiresFullBody: Boolean,
     hasRas: Boolean,
     bpm: Int,
@@ -719,7 +721,8 @@ internal fun PatientRealtimeCameraPane(
     // 小浮窗形态：小窗只保留实时画面与必要的站位告警，计数/节拍/状态条留给主画面。
     compact: Boolean = false
 ) {
-    val gateBlocked = requiresFullBody && !footVisible
+    // 两种门禁共用一套告警样式：脚部出框，或画面内出现第二个人。
+    val gateBlocked = multiPersonPresent || (requiresFullBody && !footVisible)
 
     Card(
         modifier = modifier,
@@ -788,7 +791,8 @@ internal fun PatientRealtimeCameraPane(
                 ) {
                     Text("🧍", fontSize = if (compact) 22.sp else 42.sp)
                     Text(
-                        text = "请后退站入全身框",
+                        // 两种门禁的处置动作不同：脚部出框要后退，多人要把旁人请出画面。
+                        text = if (multiPersonPresent) "请确保只有患者入镜" else "请后退站入全身框",
                         color = Color.White,
                         fontSize = if (compact) 13.sp else 20.sp,
                         fontWeight = FontWeight.Bold,
