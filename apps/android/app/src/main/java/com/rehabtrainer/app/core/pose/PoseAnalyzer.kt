@@ -12,6 +12,7 @@ import com.google.mediapipe.tasks.core.BaseOptions
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarker
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
+import java.util.concurrent.atomic.AtomicLong
 
 private const val TAG = "PoseAnalyzer"
 private const val LOG_INTERVAL_MS = 1_000L
@@ -68,7 +69,15 @@ class PoseAnalyzer(
 
     private var lastDetectTimestampMs = 0L
     private var lastLogAtMs = 0L
+    private var lastRateAtMs = 0L
     private var gateBlockedSinceMs = 0L
+
+    /**
+     * 每秒日志里的实际帧率：相机送来多少帧、MediaPipe 回了多少次结果。
+     * `setNumPoses(2)` 的代价只能这么量——分析线程与回调线程各自累加，故用原子计数。
+     */
+    private val framesReceived = AtomicLong()
+    private val resultsHandled = AtomicLong()
 
     @Volatile
     private var isPaused = false
@@ -119,6 +128,7 @@ class PoseAnalyzer(
 
     override fun analyze(imageProxy: ImageProxy) {
         // MediaPipe 要求 timestamp 为单调递增毫秒；用 elapsedRealtime 而不是 imageProxy 的微秒值。
+        framesReceived.incrementAndGet()
         val now = SystemClock.elapsedRealtime()
         lastDetectTimestampMs =
             if (now > lastDetectTimestampMs) now else lastDetectTimestampMs + 1
@@ -141,6 +151,7 @@ class PoseAnalyzer(
     }
 
     private fun handleResult(result: PoseLandmarkerResult) {
+        resultsHandled.incrementAndGet()
         // 只保留关键点齐全的骨架：缺点的骨架算不出角度，出现即当未检出。
         val poses = result.landmarks()
             .filter { pose -> pose.size >= PoseIndex.LANDMARK_COUNT }
@@ -160,7 +171,7 @@ class PoseAnalyzer(
             }
         var points = poses.firstOrNull()
         if (points == null) {
-            logThrottled("no pose detected")
+            logThrottled { "no pose detected " + rates() }
             onFrame(PoseFrame.NoPose)
             return
         }
@@ -241,8 +252,8 @@ class PoseAnalyzer(
         } else {
             0f
         }
-        logThrottled(
-            "pose: shoulder=%.2f wrist=%.2f hip=%.2f ankle=%.2f width=%.2f wristRaise=%.2f hipAnkle=%.2f secondPerson=%b".format(
+        logThrottled {
+            "pose: shoulder=%.2f wrist=%.2f hip=%.2f ankle=%.2f width=%.2f wristRaise=%.2f hipAnkle=%.2f secondPerson=%b cameraRoll=%.1f".format(
                 minOf(points[PoseIndex.LEFT_SHOULDER].visibility, points[PoseIndex.RIGHT_SHOULDER].visibility),
                 minOf(points[PoseIndex.LEFT_WRIST].visibility, points[PoseIndex.RIGHT_WRIST].visibility),
                 minOf(points[PoseIndex.LEFT_HIP].visibility, points[PoseIndex.RIGHT_HIP].visibility),
@@ -250,9 +261,10 @@ class PoseAnalyzer(
                 shoulderWidth,
                 wristRaise,
                 hipAnkle,
-                secondPersonPresent
-            )
-        )
+                secondPersonPresent,
+                Math.toDegrees((cameraRoll ?: 0f).toDouble())
+            ) + " " + rates()
+        }
         lastUpdate = analyzer.update(points, lastFrameTimestampMs, frameAspect)
         onFrame(
             PoseFrame.Detected(
@@ -267,11 +279,22 @@ class PoseAnalyzer(
         )
     }
 
-    private fun logThrottled(message: String) {
+    private fun logThrottled(message: () -> String) {
         val now = SystemClock.elapsedRealtime()
         if (now - lastLogAtMs < LOG_INTERVAL_MS) return
         lastLogAtMs = now
-        Log.d(TAG, message)
+        Log.d(TAG, message())
+    }
+
+    /** 结算上一窗口的帧率并清零；只在真的要打日志时调用，否则这段计数会被丢掉。 */
+    private fun rates(): String {
+        val now = SystemClock.elapsedRealtime()
+        val elapsed = (now - lastRateAtMs).coerceAtLeast(1) / 1000.0
+        lastRateAtMs = now
+        return "fps=%.1f detect=%.1f".format(
+            framesReceived.getAndSet(0) / elapsed,
+            resultsHandled.getAndSet(0) / elapsed
+        )
     }
 
     private fun rotateIfNeeded(bitmap: Bitmap, degrees: Int): Bitmap {
