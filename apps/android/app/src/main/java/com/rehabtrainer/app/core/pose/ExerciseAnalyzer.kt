@@ -1,13 +1,27 @@
 package com.rehabtrainer.app.core.pose
 
-/** 训练条目对应的动作分析器类型。 */
-enum class ExerciseKind {
-    ARM_RAISE,
-    MARCH,
-    SQUAT,
-    POSTURE,
-    STRETCH,
-    SEATED_LEG_RAISE
+/**
+ * 机位要求：由「这个动作怎么测」决定，不是动作的固有属性。
+ * [hint] 为 null 表示正面机位无需额外引导。
+ */
+enum class CameraView(val hint: String?) {
+    FRONTAL(null),
+    FORTY_FIVE("请侧转 45°：介于正侧之间"),
+    SAGITTAL("请侧身站立，让镜头拍到侧面")
+}
+
+/** 训练条目对应的动作分析器类型；[cameraView] 决定训练页给患者的站位引导。 */
+enum class ExerciseKind(val cameraView: CameraView) {
+    ARM_RAISE(CameraView.FRONTAL),
+
+    /** 髋屈曲在正面会被"朝向镜头"压缩，幅度测不出来。 */
+    MARCH(CameraView.SAGITTAL),
+    SQUAT(CameraView.FORTY_FIVE),
+    POSTURE(CameraView.FRONTAL),
+    STRETCH(CameraView.FRONTAL),
+
+    /** 膝屈伸在正面 2D 里不可测。 */
+    SEATED_LEG_RAISE(CameraView.SAGITTAL)
 }
 
 /** 单次动作未达标的原因；UI 负责翻译成患者可读文案。 */

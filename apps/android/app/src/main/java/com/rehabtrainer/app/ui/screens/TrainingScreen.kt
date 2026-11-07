@@ -230,10 +230,11 @@ fun TrainingScreen(
                                 // D17：门禁期间冻结计数，姿态检测继续以等待自动恢复。
                                 statusText = if (largeFont) "请调整站位" else "脚部不在画面内"
                             } else {
-                                statusText = frame.framingHint ?: when {
-                                    largeFont -> "识别正常"
-                                    else -> ""
-                                }
+                                // 机位引导只在首次计数前出现：摆好姿势做出第一个动作后自然让位。
+                                statusText = frame.framingHint
+                                    ?: currentExercise.kind.cameraView.hint
+                                        ?.takeIf { frame.repCount == 0 }
+                                    ?: if (largeFont) "识别正常" else ""
                                 setTotalFrames += 1
                                 if (feetVisible && !gateBlocked) {
                                     setValidFrames += 1
