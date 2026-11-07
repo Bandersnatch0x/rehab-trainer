@@ -3,6 +3,8 @@ package com.rehabtrainer.app.core.pose
 import kotlin.math.abs
 import kotlin.math.acos
 import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
 import kotlin.math.sqrt
 
 /**
@@ -19,6 +21,10 @@ data class PosePoint(
 /** MediaPipe Pose 的 33 点索引中本模块用到的部分。 */
 object PoseIndex {
     const val NOSE = 0
+    const val LEFT_EYE = 2
+    const val RIGHT_EYE = 5
+    const val LEFT_EAR = 7
+    const val RIGHT_EAR = 8
     const val LEFT_SHOULDER = 11
     const val RIGHT_SHOULDER = 12
     const val LEFT_ELBOW = 13
@@ -39,6 +45,11 @@ object PoseIndex {
 }
 
 internal object PoseGeometry {
+
+    private const val REFERENCE_VISIBILITY = 0.5f
+    private const val DEGREES_TO_RADIANS: Float = 0.017453292f
+    private const val MIN_ROLL_RADIANS: Float = 0.5f * DEGREES_TO_RADIANS
+    private const val MAX_ROLL_RADIANS: Float = 20f * DEGREES_TO_RADIANS
 
     /** 以 [b] 为顶点、a-b-c 的夹角（度）；向量退化时返回 null。 */
     fun angleDegrees(a: PosePoint, b: PosePoint, c: PosePoint): Float? {
@@ -81,4 +92,56 @@ internal object PoseGeometry {
 
     fun visible(points: List<PosePoint>, vararg indices: Int, threshold: Float = 0.5f): Boolean =
         indices.all { points[it].visibility >= threshold }
+
+    /**
+     * 相机相对重力的横滚角（弧度）：优先双眼连线，不可见时退化为双耳连线。
+     * 参考线水平时为 0；|roll| < 0.5° 视为噪声，|roll| > 20° 视为躺姿或极端机位，均返回 null。
+     */
+    fun cameraRollRadians(points: List<PosePoint>): Float? {
+        val reference = referenceLine(points) ?: return null
+        val first = points[reference.first]
+        val second = points[reference.second]
+        val raw = atan2(
+            (second.y - first.y).toDouble(),
+            (second.x - first.x).toDouble()
+        )
+        // 左右眼/耳的索引顺序取决于成像是否镜像；把方向折到 (-90°, 90°]，水平线即 0°。
+        val normalized = when {
+            raw > Math.PI / 2 -> raw - Math.PI
+            raw < -Math.PI / 2 -> raw + Math.PI
+            else -> raw
+        }
+        val roll = normalized.toFloat()
+        return when {
+            abs(roll) < MIN_ROLL_RADIANS -> null
+            abs(roll) > MAX_ROLL_RADIANS -> null
+            else -> roll
+        }
+    }
+
+    /** 以参考线两点中点为轴心，把全部关键点绕 z 轴旋转 -[rollRadians]；z 与 visibility 不变。 */
+    fun derotate(points: List<PosePoint>, rollRadians: Float): List<PosePoint> {
+        val reference = referenceLine(points) ?: return points
+        val pivotX = (points[reference.first].x + points[reference.second].x) / 2f
+        val pivotY = (points[reference.first].y + points[reference.second].y) / 2f
+        val angle = -rollRadians
+        val cosAngle = cos(angle)
+        val sinAngle = sin(angle)
+        return points.map { point ->
+            val dx = point.x - pivotX
+            val dy = point.y - pivotY
+            point.copy(
+                x = pivotX + dx * cosAngle - dy * sinAngle,
+                y = pivotY + dx * sinAngle + dy * cosAngle
+            )
+        }
+    }
+
+    private fun referenceLine(points: List<PosePoint>): Pair<Int, Int>? = when {
+        visible(points, PoseIndex.LEFT_EYE, PoseIndex.RIGHT_EYE, threshold = REFERENCE_VISIBILITY) ->
+            PoseIndex.LEFT_EYE to PoseIndex.RIGHT_EYE
+        visible(points, PoseIndex.LEFT_EAR, PoseIndex.RIGHT_EAR, threshold = REFERENCE_VISIBILITY) ->
+            PoseIndex.LEFT_EAR to PoseIndex.RIGHT_EAR
+        else -> null
+    }
 }

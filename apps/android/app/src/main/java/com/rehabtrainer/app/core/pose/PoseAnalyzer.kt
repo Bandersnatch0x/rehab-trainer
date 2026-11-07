@@ -133,7 +133,7 @@ class PoseAnalyzer(
             return
         }
 
-        val points = landmarks.map {
+        var points = landmarks.map {
             PosePoint(
                 x = it.x(),
                 y = it.y(),
@@ -141,6 +141,11 @@ class PoseAnalyzer(
                 // 取 visibility 与 presence 的较大值：遮挡但仍在画面内的关键点常表现为 visibility 低、presence 高。
                 visibility = maxOf(it.visibility().orElse(0f), it.presence().orElse(0f))
             )
+        }
+        val cameraRoll = PoseGeometry.cameraRollRadians(points)
+        if (cameraRoll != null) {
+            // 机位横滚会让整副骨架倾斜，先按双眼/双耳参考线回正，避免下游误报侧倾。
+            points = PoseGeometry.derotate(points, cameraRoll)
         }
         val footVisibility = listOf(
             PoseIndex.LEFT_ANKLE,
