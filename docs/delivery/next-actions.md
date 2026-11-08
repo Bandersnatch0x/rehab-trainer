@@ -56,7 +56,7 @@
 | --- | --- | --- |
 | P4-1 | 预生产/生产部署（腾讯云或客户环境） | 按 `docs/deployment/README.md` 跑通；域名、证书、探针、备份 |
 | P4-2 | 容器内复跑迁移 `0002`–`0005` | PostgreSQL 从 `0001` 升到 `0005` 并回读数据 | 已完成（2026-11-07，PostgreSQL 17.11）；见票 0025 |
-| P4-3 | 接入远端 CI | `ci.yml` 在真实流水线按路径触发并通过 | **已完成**（2026-11-08）：改投 GitHub 私有仓 `rehab-trainer`，手动全量触发 7 个 job 全绿（run 42436928731）。此前从未真跑过，首跑即暴露 5 个问题并已修：管理端 `schema.d.ts` 漂移、池测试缺 `psycopg`（CI 未装 postgres extra）、越权用例把 Windows 路径当跨平台契约、`setup-android` 请求已被移除的 legacy `tools` 包、联调脚本测试依赖 gitignored 的 `.agent/tmp`。Gitee 侧已放弃，`.workflow/ci.yml` 已删 |
+| P4-3 | 接入远端 CI | `ci.yml` 在真实流水线按路径触发并通过 | **已完成**（2026-11-08）：改投 GitHub 私有仓 `rehab-trainer`，手动全量触发 8 个 job 全绿（run 42438775646）；其中 `integration` 起真 PostgreSQL 跑迁移+种子+28 操作联调，堵住「契约联调只在本机跑过」这个洞。此前从未真跑过，首跑即暴露 5 个问题并已修：管理端 `schema.d.ts` 漂移、池测试缺 `psycopg`（CI 未装 postgres extra）、越权用例把 Windows 路径当跨平台契约、`setup-android` 请求已被移除的 legacy `tools` 包、联调脚本测试依赖 gitignored 的 `.agent/tmp`。Gitee 侧已放弃，`.workflow/ci.yml` 已删 |
 | P4-4 | 可观测性与运维 | 日志轮转、指标、告警、备份恢复演练 | 备份演练可复跑（票 0027）；探针已拆分（票 0032）；告警锚点与规则已落地（票 0034）。指标仍未做（无采集端），日志轮转只做了容器本地上限 |
 | P4-5 | 性能与容量 | 登录/列表/训练记录写入的基线压测；明确单实例上限 | 基线已测，瓶颈为连接池；池已显式配置、过载改为快速 503（见票 0026）。多副本池总量核算与客户端统一退避仍未做 |
 
