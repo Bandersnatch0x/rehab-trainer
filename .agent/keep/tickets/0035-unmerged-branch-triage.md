@@ -55,3 +55,22 @@ created: 2026-11-08
 ## 相关
 
 - 票 0036：9 个 WIP 分支的收敛（同一批 worktree 清理的产物）
+
+## 进展
+
+### 2026-11-08 待办 2、3 完成
+
+- **待办 3（`mp-functional-fix`）**：已合并进 main（`6117837`）。冲突只在票 0008 文档段
+  ——两边各写了一段 11-05 记录，按「落码与验收 → 协调者验收与关票」时间序都保留。
+  门禁：`node --test` 17/17、`static_check.py` 0 problem(s)、`tsc --noEmit` 通过。
+- **待办 2（`training-voice` 的 TTS 超时）**：已重做进 main（`1e3f26f`），未直接
+  cherry-pick——该提交还混着 D11/D17/D19/D20 等已被 main 以别的实现覆盖的改动，
+  整条挑会大面积冲突。
+  - 抽出 `TtsInitWatchdog`（纯逻辑）承接「回调与超时谁先到」的状态机，
+    `VoiceCoach` 依赖 Android 框架无法在无 Robolectric 的单测里跑，这层可测。
+  - 顺带补了一处分支里没有的：初始化失败时主动 `shutdown()` 引擎。
+    只把 `tts` 置空的话 `release()` 拿不到引用，每次进训练页漏一个原生实例。
+  - 单测 6 项（`TtsInitWatchdogTest`），Android 单测 190 项全通过（原 184）。
+  - 文案两项（`videoTitle`、训练准入提示）未改：main 已用 `isGenericDemo` 标注
+    处理了通用素材误导，措辞留给产品定，不在本次范围。
+- **待办 1（删两个已覆盖分支）**：待执行。
