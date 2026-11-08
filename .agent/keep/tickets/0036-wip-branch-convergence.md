@@ -21,7 +21,7 @@ created: 2026-11-08
 
 | 分支 | 内容 | 判定 |
 | --- | --- | --- |
-| `Bandersnatch0x/offline-cache` | `MediaCacheManager` 的 `prefetchMutex` 预取互斥 + `fitsQuota` 启动淘汰修正 + 播放路径去磁盘 stat（6 文件） | **独有，需评审** |
+| `Bandersnatch0x/offline-cache` | `MediaCacheManager` 的 `prefetchMutex` 预取互斥 + `fitsQuota` 启动淘汰修正 + 播放路径去磁盘 stat（6 文件） | **已重做进 main（`d96d4fd`）** |
 | `Bandersnatch0x/api-integration` | 管理端 `vite.config` 代理、Android `build.gradle`、小程序 `project.config`、`scripts/` | 已删（main 覆盖） |
 | `Bandersnatch0x/api-integration-claude` | 同上 + 后端 `config.py`/`main.py`、`.env.example` | 已删（main 覆盖） |
 | `Bandersnatch0x/api-integration-codex2` | 仅 `scripts/test_smoke_api.py` | 已删（main 覆盖） |
@@ -45,8 +45,9 @@ main 当前版本没有这些。
 
 ## 待办
 
-1. 评审 `offline-cache` 的 3 处改动，决定是否重做进 main（分支基线过旧，直接 merge 会冲突）。
+1. ~~评审 `offline-cache` 的 3 处改动，决定是否重做进 main~~ — 已完成：3 处全部采纳，已重做进 main（`d96d4fd`）。
 2. ~~其余 8 个分支确认后删除~~ — 已完成（2026-11-08）。
+3. `offline-cache` 本地 + origin + gitee 分支待确认后删除（代码已与 main 等价）。
 
 ## 相关
 
@@ -77,3 +78,45 @@ main 当前版本没有这些。
 
 已从本地 + origin + gitee 三处删除 9 个分支（含 `training-voice`）。
 `git branch --no-merged main` 现在只剩 `offline-cache`。
+
+### 2026-11-08 待办 1：offline-cache 评审完成，3 处改动已重做进 main
+
+评审结论：**3 处全部采纳**。未直接 merge 分支（WIP 提交信息无意义），把同一份改动
+重做为一个聚焦提交 `d96d4fd`，5 个代码/测试文件与分支逐字节一致。
+
+1. **预取轮次互斥 + 新轮取消旧轮**：main 的 `prefetch()` 可被启动预取与处方变更并发
+   触发，两个轮次会交叉执行 `applyPrescriptionPins` 与在途下载的 pinned 回写；按 URL
+   的锁只保证同一 URL 不并发写，保证不了轮次语义。`prefetchMutex` 串行轮次，
+   `prefetchJob.cancel()` 取消旧轮；配套让下载器在协程取消时 `call.cancel()` 并
+   `ensureActive()`，把取消引发的 `IOException` 翻译为 `CancellationException`，
+   旧轮不会在取消后继续写盘或回写 pinned。
+2. **`startupPlan.fitsQuota` 守卫**：与 `MediaCacheEvictionPolicy` 的文档契约
+   「pinned 自身超限只告警，不删除」一致。main 在 pinned 已超配额时仍执行淘汰计划、
+   删光全部非 pinned 文件，删完也回不到配额内，属无收益数据删除；改为仅
+   `fitsQuota` 为真时淘汰，新增 pinned 下载同理（`plan.fitsQuota == false` 时不淘汰）。
+3. **播放路径去磁盘 stat**：`InstructionalVideoSource.resolvedRemoteUrl` 是 Compose
+   组合期 getter，main 的 `localPlaybackUrl` 每次都做 `File.isFile`，属主线程磁盘 I/O
+   且会触发 StrictMode。改为只查内存索引；代价已确认可接受：外部删文件后本次进程内
+   播放失败走内置视频回退，自愈留到下次启动 `MediaCacheStore.load()` 过滤缺失文件。
+
+同一提交还采纳了分支的配套修正（与上述 3 处同源，拆开没有意义）：
+
+- **改名与淘汰删除同锁**：main 在锁外删除被淘汰文件，可能删到并发重新下载后刚改名的
+  同名文件；改为在 `synchronized(lock)` 内完成改名、登记与删除。
+- **下载前配额预判**：pinned 已占满配额时普通条目直接返回 `QUOTA_REJECTED`，不再
+  整段下载后删除。
+- **损坏索引保护**：索引读取/解析失败时返回空索引但**不** `cleanupOrphans`，避免
+  main 的「损坏即清空缓存」；下次成功写盘后孤儿自愈。
+- **索引摘要/URL 校验**：`sha256` 必须匹配 `^[0-9a-f]{64}$`、URL 必须为 http(s)，
+  阻断被篡改索引经 `fileFor` 造成的路径穿越与目录外删除，并有回归测试覆盖。
+
+验证：
+
+- `:app:testDebugUnitTest` **25 个测试类 194 项全通过 / 0 失败**（其中
+  `MediaCacheManagerTest` 18 项、`MediaCacheStoreTest` 8 项；本次新增 4 项）。
+- `:app:assembleDebug` 通过。
+- `git diff --check` 无输出。
+- `git diff Bandersnatch0x/offline-cache -- <5 个代码/测试文件>` 为空。
+
+分支处置：本地 + origin + gitee 的 `Bandersnatch0x/offline-cache` 可在确认后删除；
+本轮未执行删除。
