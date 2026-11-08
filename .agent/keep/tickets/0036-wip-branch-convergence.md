@@ -47,7 +47,7 @@ main 当前版本没有这些。
 
 1. ~~评审 `offline-cache` 的 3 处改动，决定是否重做进 main~~ — 已完成：3 处全部采纳，已重做进 main（`d96d4fd`）。
 2. ~~其余 8 个分支确认后删除~~ — 已完成（2026-11-08）。
-3. `offline-cache` 本地 + origin + gitee 分支待确认后删除（代码已与 main 等价）。
+3. ~~`offline-cache` 本地 + origin + gitee 分支删除~~ — 已完成，仓库只剩 `main`。
 
 ## 相关
 
@@ -77,7 +77,6 @@ main 当前版本没有这些。
 - **`training-voice`**：独有的 TTS 超时已重做进 main（`1e3f26f`，见票 0035），剩余只有文案差异（`videoTitle` 5 处「标准示范」→「动作演示」、`suitabilityTag`「疑似 · 需分期确认准入」→「疑似 · 需治疗师确认」），无测试断言，属产品口径，随分支一并删除，需要时按此记录重做。
 
 已从本地 + origin + gitee 三处删除 9 个分支（含 `training-voice`）。
-`git branch --no-merged main` 现在只剩 `offline-cache`。
 
 ### 2026-11-08 待办 1：offline-cache 评审完成，3 处改动已重做进 main
 
@@ -118,5 +117,11 @@ main 当前版本没有这些。
 - `git diff --check` 无输出。
 - `git diff Bandersnatch0x/offline-cache -- <5 个代码/测试文件>` 为空。
 
-分支处置：本地 + origin + gitee 的 `Bandersnatch0x/offline-cache` 可在确认后删除；
-本轮未执行删除。
+分支处置：已从本地 + origin + gitee 三处删除。删前复核过「对 HEAD 而言分支是否还有
+独有内容」——剩下的 1622 行「新增」全是 main 已删除文件的旧快照（如 `.github/workflows`、
+旧版需求文档），无独有实现。
+
+复核：删除后重跑 `:app:testDebugUnitTest`（`cleanTestDebugUnitTest` 强制重跑）
+**194 项 0 失败**，与上述一致。
+
+至此仓库只剩 `main` 一个分支（本地 + 两个远端）。
