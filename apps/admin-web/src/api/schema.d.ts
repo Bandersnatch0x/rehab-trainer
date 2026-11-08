@@ -201,6 +201,208 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/totp": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 查询当前账号的二次验证状态
+         * @description 供「账号安全」页决定显示「启用」还是「停用」。
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description 当前状态 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TotpStatus"];
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                503: components["responses"]["ServiceUnavailable"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/totp/enroll": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 开始启用二次验证
+         * @description 为当前登录账号生成一个新的 TOTP 密钥，返回给认证器录入。
+         *
+         *     **此时密钥不落库**：必须再调用 `/auth/totp/confirm` 提交认证器算出的验证码，
+         *     校验通过才写入。这样中途放弃不会把账号锁死在一个没录进认证器的密钥上。
+         *
+         *     已启用的账号返回 409——换密钥必须先停用，否则会话被盗即可静默轮换密钥。
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description 待确认的密钥 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TotpEnrollment"];
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                /** @description 二次验证已启用 */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                503: components["responses"]["ServiceUnavailable"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/totp/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 确认启用二次验证
+         * @description 校验验证码与密钥是否匹配（允许前后各一个时间步的时钟漂移），通过后写入密钥。
+         *     此后该账号登录必须携带验证码，且同一时间步不可重放。验证码不匹配返回 422。
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["TotpConfirmRequest"];
+                };
+            };
+            responses: {
+                /** @description 已启用 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TotpStatus"];
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                /** @description 二次验证已启用 */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationError"];
+                503: components["responses"]["ServiceUnavailable"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/totp/disable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 停用二次验证
+         * @description 需要同时提交**登录口令**与**当前验证码**：只凭会话不能关掉二次验证，
+         *     否则会话一旦被盗，二次验证等于不存在。两项任一不匹配都返回同一个 422，不区分是哪一项。
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["TotpDisableRequest"];
+                };
+            };
+            responses: {
+                /** @description 已停用 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TotpStatus"];
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                /** @description 二次验证尚未启用 */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationError"];
+                503: components["responses"]["ServiceUnavailable"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/patients": {
         parameters: {
             query?: never;
@@ -1353,6 +1555,24 @@ export interface components {
             roles: components["schemas"]["Role"][];
             orgId: string;
             orgName?: string;
+        };
+        TotpStatus: {
+            totpEnabled: boolean;
+        };
+        TotpEnrollment: {
+            /** @description Base32 密钥，供认证器手工录入 */
+            secret: string;
+            /** @description otpauth:// 录入 URI（含发证方与账号名） */
+            provisioningUri: string;
+        };
+        TotpConfirmRequest: {
+            secret: string;
+            code: string;
+        };
+        TotpDisableRequest: {
+            /** Format: password */
+            password: string;
+            code: string;
         };
         /** @enum {string} */
         PatientStatus: "active" | "inactive";

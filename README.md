@@ -24,11 +24,11 @@ App 与小程序功能清单一致;差异只在姿态识别的实现方式与实
 
 | 部分 | 状态 |
 | --- | --- |
-| 后端 `services/api` | FastAPI + SQLAlchemy,Alembic 迁移 head `0005`,覆盖 18 张表;149 项测试通过 |
+| 后端 `services/api` | FastAPI + SQLAlchemy,Alembic 迁移 head `0005`,覆盖 18 张表;162 项测试通过 |
 | Web 后台 `apps/admin-web` | 9 个业务页已接真实 API(患者、详情、分期、处方、预警、随访台账、审计、科研、视频管理);Playwright E2E 26 条全部通过 |
 | 微信小程序 / Android | 契约客户端已生成,配置指向本地后端;App 端上实时推理已用于训练页动作计数;小程序云端异步 CV 未实现(占位见 `services/cv-worker`,D26) |
 | 部署 | `services/api/Dockerfile` + `docker-compose.yml` + `deploy/`(Alembic、健康检查、自检);手册见 `docs/deployment/README.md` |
-| 联调 | `scripts/smoke-api.py` 覆盖 28 项契约操作(23 个路径),含审计、科研聚合与媒体上传/上架 |
+| 联调 | `scripts/smoke-api.py` 覆盖 32 项契约操作(27 个路径),含审计、科研聚合与媒体上传/上架 |
 
 演示版对未裁决与待临床签核内容使用 mock 并标注(D21);步态指标在完成标定前不进训练成绩(D23)。
 

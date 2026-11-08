@@ -11,6 +11,10 @@ export type TokenPair = components["schemas"]["TokenPair"];
 export type LoginRequest = components["schemas"]["LoginRequest"];
 export type LoginResponse = components["schemas"]["LoginResponse"];
 export type Me = components["schemas"]["Me"];
+export type TotpEnrollment = components["schemas"]["TotpEnrollment"];
+export type TotpConfirmRequest = components["schemas"]["TotpConfirmRequest"];
+export type TotpDisableRequest = components["schemas"]["TotpDisableRequest"];
+export type TotpStatus = components["schemas"]["TotpStatus"];
 
 export type PatientStatus = components["schemas"]["PatientStatus"];
 export type StageConfirmationStatus = components["schemas"]["StageConfirmationStatus"];

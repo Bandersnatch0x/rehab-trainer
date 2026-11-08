@@ -50,10 +50,14 @@ import type {
   StageConfirmation,
   StageConfirmationCreate,
   TokenPair,
+  TotpConfirmRequest,
+  TotpDisableRequest,
+  TotpEnrollment,
+  TotpStatus,
 } from "./types";
 
 /**
- * 契约 openapi.yaml 的全部操作，一一对应（当前 21 个）。
+ * 契约 openapi.yaml 的全部操作，一一对应（当前 25 个）。
  * 页面只调用本文件，不直接接触 openapi-fetch 的原始返回结构。
  */
 
@@ -83,6 +87,30 @@ export function refreshTokens(
   body: RefreshRequestBody,
 ): Promise<ApiResult<TokenPair>> {
   return toResult<TokenPair>(api.POST("/auth/refresh", { body }));
+}
+
+/** 22. GET /auth/totp — 当前账号是否已启用二次验证 */
+export function getTotpStatus(): Promise<ApiResult<TotpStatus>> {
+  return toResult<TotpStatus>(api.GET("/auth/totp"));
+}
+
+/** 23. POST /auth/totp/enroll — 生成待确认的密钥（确认前不落库） */
+export function enrollTotp(): Promise<ApiResult<TotpEnrollment>> {
+  return toResult<TotpEnrollment>(api.POST("/auth/totp/enroll"));
+}
+
+/** 24. POST /auth/totp/confirm — 用认证器验证码确认启用 */
+export function confirmTotp(
+  body: TotpConfirmRequest,
+): Promise<ApiResult<TotpStatus>> {
+  return toResult<TotpStatus>(api.POST("/auth/totp/confirm", { body }));
+}
+
+/** 25. POST /auth/totp/disable — 口令 + 当前验证码停用 */
+export function disableTotp(
+  body: TotpDisableRequest,
+): Promise<ApiResult<TotpStatus>> {
+  return toResult<TotpStatus>(api.POST("/auth/totp/disable", { body }));
 }
 
 // ---------- patients ----------

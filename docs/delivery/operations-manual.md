@@ -102,7 +102,8 @@
 services/api/.venv/Scripts/python.exe scripts/set-totp.py --username <账号>
 ```
 
-脚本会写入密钥并打印认证器 URI；该账号下次登录必须提交 6 位验证码，同一时间步不可重放。关闭用 `--clear`。此操作直接改数据库，生产环境须先备份并遵守密钥交付流程。登录失败计数存储于 `login_failure` 表，多副本共享，重启不清零。
+脚本会写入密钥并打印认证器 URI；该账号下次登录必须提交 6 位验证码，同一时间步不可重放。关闭用 `--clear`。
+账号本人也可在管理端「账号安全」页自助启用与停用（停用需口令 + 当前验证码）；认证器丢失、无法提交验证码时，用本脚本恢复。此操作直接改数据库，生产环境须先备份并遵守密钥交付流程。登录失败计数存储于 `login_failure` 表，多副本共享，重启不清零。
 
 管理端本地开发从仓库根目录执行 `pnpm dev:admin-web`，Vite 开发服务器会把 `/v1` 代理到 `http://127.0.0.1:8000`。生产托管方式不在本次交付范围。
 
@@ -218,7 +219,7 @@ python -m unittest discover -s scripts -p "test_*.py"
 
 预期：
 
-- 后端测试 149 项全部通过。
+- 后端测试 162 项全部通过。
 - 部署自检输出 `PASS: 18 tables; SQLite upgrade/repeat/downgrade/upgrade; model diff empty; PostgreSQL SQL; YAML`。
 - 联调脚本回归测试 12 项通过。
 

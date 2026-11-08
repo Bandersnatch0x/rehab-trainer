@@ -146,6 +146,103 @@ paths:
 
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
+  /auth/totp:
+    get:
+      tags: [auth]
+      summary: 查询当前账号的二次验证状态
+      description: 供「账号安全」页决定显示「启用」还是「停用」。
+      responses:
+        "200":
+          description: 当前状态
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TotpStatus"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /auth/totp/enroll:
+    post:
+      tags: [auth]
+      summary: 开始启用二次验证
+      description: |
+        为当前登录账号生成一个新的 TOTP 密钥，返回给认证器录入。
+
+        **此时密钥不落库**：必须再调用 `/auth/totp/confirm` 提交认证器算出的验证码，
+        校验通过才写入。这样中途放弃不会把账号锁死在一个没录进认证器的密钥上。
+
+        已启用的账号返回 409——换密钥必须先停用，否则会话被盗即可静默轮换密钥。
+      responses:
+        "200":
+          description: 待确认的密钥
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TotpEnrollment"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          description: 二次验证已启用
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /auth/totp/confirm:
+    post:
+      tags: [auth]
+      summary: 确认启用二次验证
+      description: |
+        校验验证码与密钥是否匹配（允许前后各一个时间步的时钟漂移），通过后写入密钥。
+        此后该账号登录必须携带验证码，且同一时间步不可重放。验证码不匹配返回 422。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TotpConfirmRequest"
+      responses:
+        "200":
+          description: 已启用
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TotpStatus"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          description: 二次验证已启用
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /auth/totp/disable:
+    post:
+      tags: [auth]
+      summary: 停用二次验证
+      description: |
+        需要同时提交**登录口令**与**当前验证码**：只凭会话不能关掉二次验证，
+        否则会话一旦被盗，二次验证等于不存在。两项任一不匹配都返回同一个 422，不区分是哪一项。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TotpDisableRequest"
+      responses:
+        "200":
+          description: 已停用
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TotpStatus"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          description: 二次验证尚未启用
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /patients:
     get:
       tags: [patients]
@@ -994,6 +1091,46 @@ components:
           type: string
         orgName:
           type: string
+
+    TotpStatus:
+      type: object
+      required: [totpEnabled]
+      properties:
+        totpEnabled:
+          type: boolean
+
+    TotpEnrollment:
+      type: object
+      required: [secret, provisioningUri]
+      properties:
+        secret:
+          type: string
+          description: Base32 密钥，供认证器手工录入
+        provisioningUri:
+          type: string
+          description: otpauth:// 录入 URI（含发证方与账号名）
+
+    TotpConfirmRequest:
+      type: object
+      required: [secret, code]
+      properties:
+        secret:
+          type: string
+          minLength: 16
+        code:
+          type: string
+          pattern: "^[0-9]{6}$"
+
+    TotpDisableRequest:
+      type: object
+      required: [password, code]
+      properties:
+        password:
+          type: string
+          format: password
+        code:
+          type: string
+          pattern: "^[0-9]{6}$"
 
     PatientStatus:
       type: string

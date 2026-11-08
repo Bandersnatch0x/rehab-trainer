@@ -36,3 +36,24 @@ class Me(APIModel):
 
 class LoginResponse(TokenPair):
     profile: Me
+
+
+class TotpStatus(APIModel):
+    totp_enabled: bool
+
+
+class TotpEnrollment(APIModel):
+    """待确认的密钥；确认成功前不落库。"""
+
+    secret: str
+    provisioning_uri: str
+
+
+class TotpConfirmRequest(APIModel):
+    secret: str = Field(min_length=16)
+    code: str = Field(pattern=r"^[0-9]{6}$")
+
+
+class TotpDisableRequest(APIModel):
+    password: str = Field(min_length=1)
+    code: str = Field(pattern=r"^[0-9]{6}$")

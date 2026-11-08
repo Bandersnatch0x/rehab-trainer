@@ -102,6 +102,10 @@ INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 | POST | `/v1/auth/login` | 公开 |
 | GET | `/v1/me` | 任意已登录账号 |
 | POST | `/v1/auth/refresh` | 公开（刷新令牌） |
+| GET | `/v1/auth/totp` | 任意已登录账号（查自己的二次验证状态） |
+| POST | `/v1/auth/totp/enroll` | 任意已登录账号（生成待确认密钥，不落库） |
+| POST | `/v1/auth/totp/confirm` | 任意已登录账号（校验验证码后写入密钥） |
+| POST | `/v1/auth/totp/disable` | 任意已登录账号（需登录口令 + 当前验证码） |
 | GET | `/v1/patients` | 临床角色看全机构；患者/照护者只看关联患者 |
 | POST | `/v1/patients` | `care_admin`、`rehab_therapist` |
 | GET | `/v1/patients/{patientId}` | 机构内 + 角色范围 |
@@ -123,6 +127,8 @@ INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 - **角色校验**：分期确认与处方仅 `rehab_therapist`；预警处理限 `care_admin` / `rehab_therapist`；
   拒绝时返回 403 并写审计。
 - **训练记录幂等**：`session_record.client_record_id` 数据库唯一；重复提交返回已存在记录的 `recordId`。
+- **二次验证**：启用后登录须提交 6 位 TOTP 验证码；`totp_last_step` 单调前进，同一时间步不可重放
+  （计数与步号都在数据库，多副本一致）。停用要求口令 + 当前验证码，只凭会话关不掉。
   每条记录必须携带 `modelVersion`、`modelSha256`、`metricAlgorithmVersion`、`thresholdConfigVersion`。
 - **处方乐观锁**：`If-Match` 与当前 `version` 不一致返回 409；更新后版本递增（如 `1.0.0` → `1.0.1`），
   旧条目写入审计事件以保留可追溯性。
@@ -139,6 +145,5 @@ INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 - 量表分界值（C4）：`app/core/clinical.py` 的 `ASSESSMENT_CUTOFFS`
 - 预警阈值与时间窗口（C5）：`app/core/clinical.py` 的 `ALERT_RULES`
 - BPM 个体化规则（C3）：`app/schemas/exercise.py` 的 `Dosage.bpm` 注释
-- TOTP 二次验证：`app/routers/auth.py` 仅接收契约字段，未校验
 - 通知投递与兜底通道（未决项 6）：仅持久化 `notification_delivery`，不做实际发送
 - 分期→条目自动匹配（C2 / 未决项 2）：当前只校验条目适用分级，不做推荐

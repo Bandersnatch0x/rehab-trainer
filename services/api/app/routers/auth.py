@@ -6,6 +6,7 @@ from sqlalchemy import delete, func, or_, select, update
 from sqlalchemy.orm import Session
 
 from app.core import totp
+from app.core.audit import record_audit
 from app.core.auth import Principal, build_principal, get_principal
 from app.core.config import get_settings
 from app.core.database import get_db
@@ -25,6 +26,10 @@ from app.schemas.auth import (
     Me,
     RefreshRequest,
     TokenPair,
+    TotpConfirmRequest,
+    TotpDisableRequest,
+    TotpEnrollment,
+    TotpStatus,
 )
 
 router = APIRouter(tags=["auth"])
@@ -153,6 +158,108 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
 @router.get("/me", response_model=Me)
 def me(principal: Principal = Depends(get_principal)):
     return _me(principal)
+
+
+def _account_for(db: Session, principal: Principal) -> Account:
+    account = db.get(Account, principal.account_id)
+    if account is None or account.status != "active":
+        raise api_error(401, "UNAUTHORIZED", "未认证或令牌失效")
+    return account
+
+
+@router.get("/auth/totp", response_model=TotpStatus)
+def get_totp_status(
+    principal: Principal = Depends(get_principal),
+    db: Session = Depends(get_db),
+):
+    account = _account_for(db, principal)
+    return TotpStatus(totp_enabled=account.totp_secret is not None)
+
+
+@router.post("/auth/totp/enroll", response_model=TotpEnrollment)
+def enroll_totp(
+    principal: Principal = Depends(get_principal),
+    db: Session = Depends(get_db),
+):
+    """生成待确认的密钥；**此时不写库**，确认成功前账号不会进入需二次验证状态。"""
+    account = _account_for(db, principal)
+    if account.totp_secret:
+        raise api_error(409, "CONFLICT", "二次验证已启用，请先停用再更换")
+    secret = totp.generate_secret()
+    return TotpEnrollment(
+        secret=secret,
+        provisioning_uri=totp.provisioning_uri(secret, account.username),
+    )
+
+
+@router.post("/auth/totp/confirm", response_model=TotpStatus)
+def confirm_totp(
+    payload: TotpConfirmRequest,
+    principal: Principal = Depends(get_principal),
+    db: Session = Depends(get_db),
+):
+    account = _account_for(db, principal)
+    if account.totp_secret:
+        raise api_error(409, "CONFLICT", "二次验证已启用，请先停用再更换")
+    step = totp.verify(payload.secret, payload.code)
+    if step is None:
+        raise api_error(422, "VALIDATION_FAILED", "验证码不正确，请确认认证器时间与密钥")
+
+    account.totp_secret = payload.secret
+    # 记下已消费的时间步：确认时用过的码不能紧接着再用于登录。
+    account.totp_last_step = step
+    record_audit(
+        db,
+        org_id=account.org_id,
+        actor_account_id=account.account_id,
+        action="account.totp_enabled",
+        resource_type="account",
+        resource_id=account.account_id,
+    )
+    db.commit()
+    return TotpStatus(totp_enabled=True)
+
+
+@router.post("/auth/totp/disable", response_model=TotpStatus)
+def disable_totp(
+    payload: TotpDisableRequest,
+    principal: Principal = Depends(get_principal),
+    db: Session = Depends(get_db),
+):
+    """停用需同时提供口令与当前验证码：只凭会话不能关掉二次验证。"""
+    account = _account_for(db, principal)
+    if not account.totp_secret:
+        raise api_error(409, "CONFLICT", "二次验证尚未启用")
+
+    # 两项都算完再判断，避免用响应快慢区分「口令错」还是「码错」。
+    # 不传 last_step：刚用某个码登录后立刻停用是常见操作，防重放已在登录路径生效。
+    password_ok = verify_password(payload.password, account.password_hash)
+    code_ok = totp.verify(account.totp_secret, payload.code) is not None
+    if not (password_ok and code_ok):
+        record_audit(
+            db,
+            org_id=account.org_id,
+            actor_account_id=account.account_id,
+            action="account.totp_disabled",
+            outcome="denied",
+            resource_type="account",
+            resource_id=account.account_id,
+        )
+        db.commit()
+        raise api_error(422, "VALIDATION_FAILED", "口令或验证码不正确")
+
+    account.totp_secret = None
+    account.totp_last_step = None
+    record_audit(
+        db,
+        org_id=account.org_id,
+        actor_account_id=account.account_id,
+        action="account.totp_disabled",
+        resource_type="account",
+        resource_id=account.account_id,
+    )
+    db.commit()
+    return TotpStatus(totp_enabled=False)
 
 
 @router.post("/auth/refresh", response_model=TokenPair)

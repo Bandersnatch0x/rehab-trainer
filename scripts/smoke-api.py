@@ -126,6 +126,23 @@ def run_smoke(base_url, username, password, binding_token):
                         check=valid_tokens)
     token = refreshed["accessToken"]
     request("GET", "/me", check=lambda b: b["accountId"] == "therapist-demo")
+
+    # 二次验证自助启用：密钥先返回、确认后才真正生效；停用需要口令 + 验证码。
+    # 脚本用服务端 venv 执行，直接复用服务端的 TOTP 实现算码，不另写一份。
+    from app.core import totp as server_totp
+
+    request("GET", "/auth/totp", check=lambda b: b["totpEnabled"] is False)
+    enrollment = request("POST", "/auth/totp/enroll", check=lambda b: (
+        len(b["secret"]) >= 16 and b["provisioningUri"].startswith("otpauth://totp/")))
+    request("GET", "/auth/totp", check=lambda b: b["totpEnabled"] is False)  # 确认前不生效
+    request("POST", "/auth/totp/confirm",
+            {"secret": enrollment["secret"],
+             "code": server_totp.generate_code(enrollment["secret"])},
+            check=lambda b: b["totpEnabled"] is True)
+    request("POST", "/auth/totp/disable",
+            {"password": password,
+             "code": server_totp.generate_code(enrollment["secret"])},
+            check=lambda b: b["totpEnabled"] is False)
     patient = request("POST", "/patients", {"displayName": "联调患者", "birthYear": 1950}, status=201,
                       check=lambda b: bool(b["id"]) and b["stageConfirmationStatus"] == "suspected")
     patient_id = patient["id"]

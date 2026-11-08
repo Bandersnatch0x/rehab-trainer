@@ -48,6 +48,11 @@ export const NAV_ITEMS: readonly NavItem[] = [
     // 两类角色都能进：治疗师只能授予/调整治疗师，服务端另有越权拦截。
     roles: ["care_admin", "rehab_therapist"],
   },
+  {
+    to: "/account/security",
+    label: "账号安全",
+    roles: ["care_admin", "rehab_therapist"],
+  },
 ];
 
 export function canAccess(role: AdminRole | null, item: NavItem): boolean {

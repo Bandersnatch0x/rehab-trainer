@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate, Outlet } from "react-router";
 import { AuthProvider } from "../auth/AuthProvider";
+import AccountSecurityPage from "../pages/AccountSecurityPage";
 import AlertsPage from "../pages/AlertsPage";
 import AuditLogPage from "../pages/AuditLogPage";
 import FollowUpsPage from "../pages/FollowUpsPage";
@@ -63,6 +64,8 @@ export const router = createBrowserRouter([
           { path: "audit-log", element: <AuditLogPage /> },
           { path: "research", element: <ResearchPage /> },
           { path: "media-assets", element: <MediaAssetsPage /> },
+          // 账号安全不设角色限制：任何登录账号都该能给自己加二次验证。
+          { path: "account/security", element: <AccountSecurityPage /> },
           {
             path: "admin/permissions",
             element: (
