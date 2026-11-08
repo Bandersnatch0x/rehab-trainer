@@ -1,5 +1,6 @@
 """训练视频资产：上传安全、上下架审计与按分期下发。"""
 
+import os
 from pathlib import Path
 
 import pytest
@@ -99,10 +100,14 @@ def test_upload_writes_inside_media_root(client, seed):
     assert written.parent.name == "videos"
 
 
-@pytest.mark.parametrize(
-    "bad_path",
-    ["../escape.mp4", "/etc/passwd", "videos/../../etc/passwd", "C:\\temp\\x.mp4"],
-)
+# 越权路径按平台分别取：Windows 绝对路径（另一个盘符）必须拒绝；
+# 在 POSIX 上同样的字符串只是含反斜杠的普通文件名，落在 root 内——拒绝它反而说明实现错了。
+TRAVERSAL_PATHS = ["../escape.mp4", "/etc/passwd", "videos/../../etc/passwd"]
+if os.name == "nt":
+    TRAVERSAL_PATHS.append("C:\\temp\\x.mp4")
+
+
+@pytest.mark.parametrize("bad_path", TRAVERSAL_PATHS)
 def test_resolve_under_root_rejects_traversal(bad_path):
     with pytest.raises(Exception):
         resolve_under_root(bad_path, Path(get_settings().media_root))

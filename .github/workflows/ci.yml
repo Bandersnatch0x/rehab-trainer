@@ -52,7 +52,11 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      # 默认 packages 含 legacy 的 `tools`，它在现代 SDK 仓库里已不存在，会让这一步 exit 1；
+      # 只留 platform-tools，需要什么再用 sdkmanager 显式装。
       - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
       - run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
       - uses: gradle/actions/setup-gradle@v4
       - run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon
@@ -130,11 +134,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-      - run: python -m pip install -e '.[dev]'
+      # postgres extra 也要装：test_database_pool 会构造 postgres 方言引擎，缺 psycopg 直接报错。
+      - run: python -m pip install -e '.[dev,postgres]'
       - run: python -m pytest -q
       - name: 联调脚本回归测试
         working-directory: .
         run: python -m unittest discover -s scripts -p 'test_*.py'
+      - name: 部署自检（表结构、迁移往返、离线 SQL）
+        working-directory: .
+        run: |
+          python -m pip install -r deploy/requirements.txt
+          python deploy/verify.py
 
   api-contract:
     needs: changes
