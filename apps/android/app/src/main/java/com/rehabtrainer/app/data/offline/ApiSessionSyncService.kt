@@ -2,6 +2,7 @@ package com.rehabtrainer.app.data.offline
 
 import com.rehabtrainer.app.core.network.ApiResult
 import com.rehabtrainer.app.core.network.apiCall
+import com.rehabtrainer.app.data.contract.ApiError
 import com.rehabtrainer.app.data.contract.SessionBatchRequest
 import com.rehabtrainer.app.data.contract.SessionBatchResult
 
@@ -23,7 +24,10 @@ class ApiSessionSyncService(
 
     override suspend fun flushPending(limit: Int): ApiResult<SessionBatchResult> {
         val now = nowMillis()
-        val pending = queue.pending(limit).filter { UploadBackoffPolicy.isDue(it, now) }
+        // 先按退避过滤再截断：队列头若全在退避中，先截断会把后面到期的记录一起挡掉。
+        val pending = queue.pending(Int.MAX_VALUE)
+            .filter { UploadBackoffPolicy.isDue(it, now) }
+            .take(limit)
         if (pending.isEmpty()) {
             // 队列为空、或全部在退避中：都不发请求。
             // 退避中返回空成功而不是失败——调用方只关心「本轮有没有传」，没有错误可提示。
@@ -41,7 +45,7 @@ class ApiSessionSyncService(
             queue.markUploaded(accepted)
         }
         body.results.filterNot { it.accepted }.forEach { item ->
-            val error = item.error ?: return@forEach
+            val error = item.error ?: ApiError("UNKNOWN_REJECTION", "服务端拒绝但未返回错误码")
             if (SessionUploadQueue.isRetryable(error.code)) {
                 queue.markFailed(listOf(item.clientRecordId), error)
             } else {

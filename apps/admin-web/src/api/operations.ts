@@ -53,11 +53,12 @@ import type {
   TotpConfirmRequest,
   TotpDisableRequest,
   TotpEnrollment,
+  TotpEnrollRequest,
   TotpStatus,
 } from "./types";
 
 /**
- * 契约 openapi.yaml 的全部操作，一一对应（当前 25 个）。
+ * 契约 openapi.yaml 的全部操作，一一对应（当前 28 个）。
  * 页面只调用本文件，不直接接触 openapi-fetch 的原始返回结构。
  */
 
@@ -94,9 +95,11 @@ export function getTotpStatus(): Promise<ApiResult<TotpStatus>> {
   return toResult<TotpStatus>(api.GET("/auth/totp"));
 }
 
-/** 23. POST /auth/totp/enroll — 生成待确认的密钥（确认前不落库） */
-export function enrollTotp(): Promise<ApiResult<TotpEnrollment>> {
-  return toResult<TotpEnrollment>(api.POST("/auth/totp/enroll"));
+/** 23. POST /auth/totp/enroll — 口令通过后生成待确认密钥（确认前不落库） */
+export function enrollTotp(
+  body: TotpEnrollRequest,
+): Promise<ApiResult<TotpEnrollment>> {
+  return toResult<TotpEnrollment>(api.POST("/auth/totp/enroll", { body }));
 }
 
 /** 24. POST /auth/totp/confirm — 用认证器验证码确认启用 */
@@ -398,21 +401,21 @@ export function updateMediaAsset(
 
 // ---------- accounts ----------
 
-/** GET /accounts — 列出本机构账号（仅 care_admin） */
+/** 26. GET /accounts — 列出本机构账号（照护管理员与康复治疗师均可，按机构隔离） */
 export function listAccounts(
   query: AccountListQuery = {},
 ): Promise<ApiResult<AccountPage>> {
   return toResult<AccountPage>(api.GET("/accounts", { params: { query } }));
 }
 
-/** POST /accounts — 开通机构账号（仅 care_admin） */
+/** 27. POST /accounts — 开通机构账号（照护管理员与康复治疗师均可，按可授角色受限） */
 export function createAccount(
   body: AccountCreate,
 ): Promise<ApiResult<Account>> {
   return toResult<Account>(api.POST("/accounts", { body }));
 }
 
-/** PATCH /accounts/{accountId} — 改名称、状态或角色（仅 care_admin） */
+/** 28. PATCH /accounts/{accountId} — 改名称、状态或角色（照护管理员与康复治疗师均可） */
 export function updateAccount(
   accountId: string,
   body: AccountPatch,

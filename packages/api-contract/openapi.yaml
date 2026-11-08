@@ -174,6 +174,13 @@ paths:
         校验通过才写入。这样中途放弃不会把账号锁死在一个没录进认证器的密钥上。
 
         已启用的账号返回 409——换密钥必须先停用，否则会话被盗即可静默轮换密钥。
+        必须再验证一次登录口令：只凭会话即可绑定时，被盗会话可绑定攻击者认证器。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TotpEnrollRequest"
       responses:
         "200":
           description: 待确认的密钥
@@ -1099,9 +1106,17 @@ components:
         totpEnabled:
           type: boolean
 
+    TotpEnrollRequest:
+      type: object
+      required: [password]
+      properties:
+        password:
+          type: string
+          format: password
+
     TotpEnrollment:
       type: object
-      required: [secret, provisioningUri]
+      required: [secret, provisioningUri, enrollmentToken]
       properties:
         secret:
           type: string
@@ -1109,12 +1124,15 @@ components:
         provisioningUri:
           type: string
           description: otpauth:// 录入 URI（含发证方与账号名）
+        enrollmentToken:
+          type: string
+          description: 短时签名凭证；confirm 必须原样带回，5 分钟内有效
 
     TotpConfirmRequest:
       type: object
-      required: [secret, code]
+      required: [enrollmentToken, code]
       properties:
-        secret:
+        enrollmentToken:
           type: string
           minLength: 16
         code:
@@ -2007,11 +2025,17 @@ components:
       properties:
         displayName:
           type: string
+          minLength: 1
+          maxLength: 128
         username:
           type: string
+          minLength: 3
+          maxLength: 128
         password:
           type: string
           format: password
+          minLength: 8
+          maxLength: 128
         role:
           type: string
           enum: [care_admin, rehab_therapist]
@@ -2021,6 +2045,8 @@ components:
       properties:
         displayName:
           type: string
+          minLength: 1
+          maxLength: 128
         status:
           $ref: "#/components/schemas/AccountStatus"
         role:

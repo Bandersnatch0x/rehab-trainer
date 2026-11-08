@@ -19,7 +19,6 @@ import http.client
 import json
 import re
 import secrets
-import statistics
 import sys
 import threading
 import time
@@ -135,15 +134,21 @@ class Stats:
 
 def worker(args, config, prefix, patient_id, prescription_id, stats, stop_at, mix):
     api = Api(urlparse(args.base_url).hostname, urlparse(args.base_url).port, prefix)
-    status, body = api.request(
-        "POST", "/auth/login",
-        {"username": config["username"], "password": config["password"]},
-    )
-    if status != 200:
-        stats.record("POST /auth/login", 0.0, f"HTTP {status}")
+    try:
+        status, body = api.request(
+            "POST", "/auth/login",
+            {"username": config["username"], "password": config["password"]},
+        )
+        if status != 200:
+            stats.record("POST /auth/login", 0.0, f"HTTP {status}")
+            stats.worker_aborted += 1
+            return
+        api.token = body["accessToken"]
+    except Exception as exc:
+        # 登录异常不能静默带走线程：既不记错误也不计中止，脚本会把死线程当干净结果。
+        stats.record("POST /auth/login", 0.0, f"{type(exc).__name__}: {exc}")
         stats.worker_aborted += 1
         return
-    api.token = body["accessToken"]
 
     index = 0
     try:

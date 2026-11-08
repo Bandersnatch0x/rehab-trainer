@@ -12,6 +12,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   changes:
     runs-on: ubuntu-latest
@@ -191,12 +195,14 @@ jobs:
       needs.changes.outputs.api == 'true' ||
       needs.changes.outputs.api_contract == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     services:
       postgres:
         image: postgres:17
         env:
           POSTGRES_USER: rehab
-          POSTGRES_PASSWORD: ci-only-password
+          # 仓库 Settings → Secrets and variables → Actions 需配置 CI_POSTGRES_PASSWORD。
+          POSTGRES_PASSWORD: ${{ secrets.CI_POSTGRES_PASSWORD }}
           POSTGRES_DB: rehab
         ports:
           - 5432:5432
@@ -206,9 +212,10 @@ jobs:
           --health-timeout 5s
           --health-retries 12
     env:
-      # 仅 CI 使用的临时口令，与生产无关。
-      REHAB_DATABASE_URL: postgresql+psycopg://rehab:ci-only-password@127.0.0.1:5432/rehab
-      REHAB_JWT_SECRET: ci-only-secret-not-for-production
+      # 凭据放在 secrets：写在 workflow 里的字面量不会被 GitHub 自动掩码，日志/PR 可见。
+      # 需配置 CI_POSTGRES_PASSWORD 与 CI_REHAB_JWT_SECRET；fork PR 拿不到 secrets 时该 job 会失败。
+      REHAB_DATABASE_URL: postgresql+psycopg://rehab:${{ secrets.CI_POSTGRES_PASSWORD }}@127.0.0.1:5432/rehab
+      REHAB_JWT_SECRET: ${{ secrets.CI_REHAB_JWT_SECRET }}
       REHAB_MEDIA_ROOT: /tmp/rehab-media
       REHAB_AUTO_CREATE_SCHEMA: "false"
       PYTHONIOENCODING: utf-8

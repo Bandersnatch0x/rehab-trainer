@@ -14,6 +14,7 @@ from app.core.errors import api_error
 from app.core.security import (
     InvalidTokenError,
     create_token_pair,
+    create_totp_enrollment_token,
     decode_token,
     verify_password,
 )
@@ -29,6 +30,7 @@ from app.schemas.auth import (
     TotpConfirmRequest,
     TotpDisableRequest,
     TotpEnrollment,
+    TotpEnrollRequest,
     TotpStatus,
 )
 
@@ -178,17 +180,31 @@ def get_totp_status(
 
 @router.post("/auth/totp/enroll", response_model=TotpEnrollment)
 def enroll_totp(
+    payload: TotpEnrollRequest,
     principal: Principal = Depends(get_principal),
     db: Session = Depends(get_db),
 ):
-    """生成待确认的密钥；**此时不写库**，确认成功前账号不会进入需二次验证状态。"""
+    """生成待确认的密钥；**此时不写库**。
+
+    只凭会话不够：必须先验证当前口令，否则被盗会话可给自己绑一个攻击者控制的
+    认证器并把真实用户锁在账号外。密钥同时签进短时凭证，confirm 只认本次结果。
+    """
     account = _account_for(db, principal)
     if account.totp_secret:
         raise api_error(409, "CONFLICT", "二次验证已启用，请先停用再更换")
+    _check_login_rate_limit(db, account.username)
+    if not verify_password(payload.password, account.password_hash):
+        _record_login_failure(db, account.username)
+        raise api_error(422, "VALIDATION_FAILED", "登录口令不正确")
     secret = totp.generate_secret()
     return TotpEnrollment(
         secret=secret,
         provisioning_uri=totp.provisioning_uri(secret, account.username),
+        enrollment_token=create_totp_enrollment_token(
+            account_id=account.account_id,
+            org_id=account.org_id,
+            secret=secret,
+        ),
     )
 
 
@@ -201,11 +217,20 @@ def confirm_totp(
     account = _account_for(db, principal)
     if account.totp_secret:
         raise api_error(409, "CONFLICT", "二次验证已启用，请先停用再更换")
-    step = totp.verify(payload.secret, payload.code)
+    try:
+        claims = decode_token(payload.enrollment_token, "totp_enroll")
+    except InvalidTokenError:
+        raise api_error(422, "VALIDATION_FAILED", "启用会话已失效，请重新生成密钥")
+    if claims.get("sub") != account.account_id:
+        raise api_error(422, "VALIDATION_FAILED", "启用会话与当前账号不匹配")
+    secret = claims.get("secret")
+    if not isinstance(secret, str):
+        raise api_error(422, "VALIDATION_FAILED", "启用会话缺少密钥，请重新生成")
+    step = totp.verify(secret, payload.code)
     if step is None:
         raise api_error(422, "VALIDATION_FAILED", "验证码不正确，请确认认证器时间与密钥")
 
-    account.totp_secret = payload.secret
+    account.totp_secret = secret
     # 记下已消费的时间步：确认时用过的码不能紧接着再用于登录。
     account.totp_last_step = step
     record_audit(
@@ -230,12 +255,18 @@ def disable_totp(
     account = _account_for(db, principal)
     if not account.totp_secret:
         raise api_error(409, "CONFLICT", "二次验证尚未启用")
+    # 停用同样校验口令+验证码，必须套用登录限流，否则 6 位码可被在线穷举。
+    _check_login_rate_limit(db, account.username)
 
     # 两项都算完再判断，避免用响应快慢区分「口令错」还是「码错」。
-    # 不传 last_step：刚用某个码登录后立刻停用是常见操作，防重放已在登录路径生效。
+    # 传 last_step 拒绝已消费的验证码：否则密码 + 单个码泄露即可登录并立即关闭二次验证。
     password_ok = verify_password(payload.password, account.password_hash)
-    code_ok = totp.verify(account.totp_secret, payload.code) is not None
+    step = totp.verify(
+        account.totp_secret, payload.code, last_step=account.totp_last_step
+    )
+    code_ok = step is not None
     if not (password_ok and code_ok):
+        _record_login_failure(db, account.username)
         record_audit(
             db,
             org_id=account.org_id,

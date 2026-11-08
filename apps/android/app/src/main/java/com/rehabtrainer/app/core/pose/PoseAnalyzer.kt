@@ -71,6 +71,7 @@ class PoseAnalyzer(
     private var lastLogAtMs = 0L
     private var lastRateAtMs = 0L
     private var gateBlockedSinceMs = 0L
+    private var noPoseSinceMs = 0L
 
     /**
      * 每秒日志里的实际帧率：相机送来多少帧、MediaPipe 回了多少次结果。
@@ -172,9 +173,17 @@ class PoseAnalyzer(
         var points = poses.firstOrNull()
         if (points == null) {
             logThrottled { "no pose detected " + rates() }
+            // 与门禁遮挡同样处理：长时间检不到人后重置，避免回来第一帧把旧 holdStart 补成一次保持。
+            noPoseSinceMs =
+                if (noPoseSinceMs == 0L) lastFrameTimestampMs else noPoseSinceMs
+            if (lastFrameTimestampMs - noPoseSinceMs > GATE_RESET_MS) {
+                analyzer.reset()
+                lastUpdate = AnalysisUpdate(0, null)
+            }
             onFrame(PoseFrame.NoPose)
             return
         }
+        noPoseSinceMs = 0L
         // 第 2 副骨架只用于门禁：护理员入镜时跟踪目标会切走，这一次计数不可信。
         val secondPersonPresent = SecondPersonGate.isPresent(poses)
         val cameraRoll = PoseGeometry.cameraRollRadians(points, frameAspect)
@@ -236,23 +245,24 @@ class PoseAnalyzer(
             shoulderWidth < 0.08f -> "距离太远：请靠近一些或把手机放近一点"
             else -> null
         }
-        val torsoForLog = PoseGeometry.torsoHeight(points)
-        val wristRaise = if (torsoForLog != null) {
-            val shoulderY = PoseGeometry.midY(points, PoseIndex.LEFT_SHOULDER, PoseIndex.RIGHT_SHOULDER)
-            maxOf(
-                (shoulderY - points[PoseIndex.LEFT_WRIST].y) / torsoForLog,
-                (shoulderY - points[PoseIndex.RIGHT_WRIST].y) / torsoForLog
-            )
-        } else {
-            0f
-        }
-        val hipAnkle = if (torsoForLog != null) {
-            (PoseGeometry.midY(points, PoseIndex.LEFT_ANKLE, PoseIndex.RIGHT_ANKLE) -
-                PoseGeometry.midY(points, PoseIndex.LEFT_HIP, PoseIndex.RIGHT_HIP)) / torsoForLog
-        } else {
-            0f
-        }
         logThrottled {
+            // 仅日志用的几何量放进节流块，实时路径不为每秒一次的字符串付计算成本。
+            val torsoForLog = PoseGeometry.torsoHeight(points)
+            val wristRaise = if (torsoForLog != null) {
+                val shoulderY = PoseGeometry.midY(points, PoseIndex.LEFT_SHOULDER, PoseIndex.RIGHT_SHOULDER)
+                maxOf(
+                    (shoulderY - points[PoseIndex.LEFT_WRIST].y) / torsoForLog,
+                    (shoulderY - points[PoseIndex.RIGHT_WRIST].y) / torsoForLog
+                )
+            } else {
+                0f
+            }
+            val hipAnkle = if (torsoForLog != null) {
+                (PoseGeometry.midY(points, PoseIndex.LEFT_ANKLE, PoseIndex.RIGHT_ANKLE) -
+                    PoseGeometry.midY(points, PoseIndex.LEFT_HIP, PoseIndex.RIGHT_HIP)) / torsoForLog
+            } else {
+                0f
+            }
             "pose: shoulder=%.2f wrist=%.2f hip=%.2f ankle=%.2f width=%.2f wristRaise=%.2f hipAnkle=%.2f secondPerson=%b cameraRoll=%.1f".format(
                 minOf(points[PoseIndex.LEFT_SHOULDER].visibility, points[PoseIndex.RIGHT_SHOULDER].visibility),
                 minOf(points[PoseIndex.LEFT_WRIST].visibility, points[PoseIndex.RIGHT_WRIST].visibility),

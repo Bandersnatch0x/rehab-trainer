@@ -143,6 +143,10 @@ class ApiSessionSyncServiceTest {
             clientRecordIds.forEach { items.remove(it) }
         }
 
+        override suspend fun clear() {
+            items.clear()
+        }
+
         override suspend fun pendingCount(): Int = items.size
     }
 

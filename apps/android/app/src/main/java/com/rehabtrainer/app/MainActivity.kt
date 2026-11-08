@@ -31,7 +31,8 @@ class MainActivity : ComponentActivity() {
         AppData.install(applicationContext, api)
         lifecycleScope.launch {
             withContext(Dispatchers.IO) { ModelFingerprint.sha256(applicationContext) }
-            AppData.flushPending()
+            // 未绑定/已登出时补传只会得到 401，并把记录推进退避；有会话再补传。
+            if (sessionRepository.hasSession()) AppData.flushPending()
         }
         enableEdgeToEdge()
         setContent {

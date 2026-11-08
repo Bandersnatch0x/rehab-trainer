@@ -48,6 +48,9 @@ fun PatientsScreen(orgName: String? = null, modifier: Modifier = Modifier) {
     var error by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(patientId) {
+        error = null
+        summary = null
+        patient = null
         val id = patientId ?: return@LaunchedEffect
         when (val result = AppData.getPatient(id)) {
             is ApiResult.Success -> patient = result.value
@@ -96,7 +99,11 @@ fun PatientsScreen(orgName: String? = null, modifier: Modifier = Modifier) {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = profileTitle(patient),
+                        text = when {
+                            patient != null -> profileTitle(patient)
+                            patientId != null -> if (error != null) "档案读取失败" else "档案读取中…"
+                            else -> profileTitle(null)
+                        },
                         style = MaterialTheme.typography.headlineMedium
                     )
                 }
@@ -118,7 +125,8 @@ fun PatientsScreen(orgName: String? = null, modifier: Modifier = Modifier) {
                     ) {
                         if (summary == null) {
                             Text(
-                                text = "训练累计读取中…",
+                                text = if (patientId == null) "未绑定患者，暂无训练累计。"
+                                else "训练累计读取中…",
                                 style = MaterialTheme.typography.bodyLarge
                             )
                         } else {

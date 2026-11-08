@@ -61,8 +61,11 @@ class CalibrationStore(
         file.parentFile?.mkdirs()
         val temp = File(file.parentFile, "$FILE_NAME.tmp")
         temp.writeText(json.encodeToString(Stored(entries)))
-        if (file.exists()) file.delete()
-        temp.renameTo(file)
+        if (!temp.renameTo(file)) {
+            // Windows 上 rename 不能覆盖已存在的目标文件；只在这条兜底路径删旧文件。
+            file.delete()
+            check(temp.renameTo(file)) { "幅度校准文件原子替换失败：${file.absolutePath}" }
+        }
     }
 
     @Serializable

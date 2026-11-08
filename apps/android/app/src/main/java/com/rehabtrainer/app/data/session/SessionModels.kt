@@ -15,7 +15,9 @@ data class PlanExercise(
     val videoUri: String? = null,
     val watermarkText: String? = null,
     val creditLine: String? = null,
-    val riskLevel: String? = null
+    val riskLevel: String? = null,
+    /** 变体指定的支撑等级（unsupported-standing / supported-standing / seated）。 */
+    val supportLevel: String? = null
 )
 
 /** 一次成功同步后的本地快照；离线启动时直接读它。 */

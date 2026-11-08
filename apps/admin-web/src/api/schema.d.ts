@@ -259,6 +259,7 @@ export interface paths {
          *     校验通过才写入。这样中途放弃不会把账号锁死在一个没录进认证器的密钥上。
          *
          *     已启用的账号返回 409——换密钥必须先停用，否则会话被盗即可静默轮换密钥。
+         *     必须再验证一次登录口令：只凭会话即可绑定时，被盗会话可绑定攻击者认证器。
          */
         post: {
             parameters: {
@@ -267,7 +268,11 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["TotpEnrollRequest"];
+                };
+            };
             responses: {
                 /** @description 待确认的密钥 */
                 200: {
@@ -1559,14 +1564,20 @@ export interface components {
         TotpStatus: {
             totpEnabled: boolean;
         };
+        TotpEnrollRequest: {
+            /** Format: password */
+            password: string;
+        };
         TotpEnrollment: {
             /** @description Base32 密钥，供认证器手工录入 */
             secret: string;
             /** @description otpauth:// 录入 URI（含发证方与账号名） */
             provisioningUri: string;
+            /** @description 短时签名凭证；confirm 必须原样带回，5 分钟内有效 */
+            enrollmentToken: string;
         };
         TotpConfirmRequest: {
-            secret: string;
+            enrollmentToken: string;
             code: string;
         };
         TotpDisableRequest: {

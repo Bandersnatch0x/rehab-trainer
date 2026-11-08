@@ -3,9 +3,12 @@ package com.rehabtrainer.app.data.session
 import android.content.Context
 import com.rehabtrainer.app.core.network.ApiContainer
 import com.rehabtrainer.app.core.network.ApiResult
-import com.rehabtrainer.app.core.network.getOrNull
 import com.rehabtrainer.app.data.contract.ApiError
 import com.rehabtrainer.app.data.contract.Exercise
+import com.rehabtrainer.app.data.local.AppPreferences
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.json.Json
 import java.time.Instant
 
@@ -39,12 +42,18 @@ class SessionRepository(
     fun logout() {
         api.clearSession()
         prefs.edit().clear().apply()
+        // 待上传队列属于上一个患者，换绑后不能带着旧 token 重放或落到新账号名下。
+        AppData.clearPending()
     }
 
     suspend fun bind(bindingCode: String, deviceId: String?): ApiResult<SessionSnapshot> {
         val result = api.bind(bindingCode, deviceId)
         return when (result) {
-            is ApiResult.Success -> loadSnapshot()
+            is ApiResult.Success -> {
+                AppPreferences.markDeviceBound(context)
+                loadSnapshot()
+            }
+
             is ApiResult.Failure -> result
         }
     }
@@ -52,7 +61,11 @@ class SessionRepository(
     suspend fun login(username: String, password: String, totp: String?): ApiResult<SessionSnapshot> {
         val result = api.login(username, password, totp)
         return when (result) {
-            is ApiResult.Success -> loadSnapshot()
+            is ApiResult.Success -> {
+                AppPreferences.markDeviceBound(context)
+                loadSnapshot()
+            }
+
             is ApiResult.Failure -> result
         }
     }
@@ -61,20 +74,43 @@ class SessionRepository(
     suspend fun refresh(): ApiResult<SessionSnapshot> = loadSnapshot()
 
     private suspend fun loadSnapshot(): ApiResult<SessionSnapshot> {
-        val me = api.me().getOrNull()
-            ?: return ApiResult.Failure(ApiError("UNAUTHORIZED", "登录状态已失效，请重新绑定设备"))
-        val patients = api.listPatients(limit = 5).getOrNull()?.items.orEmpty()
-        val patient = patients.firstOrNull()
+        val me = when (val result = api.me()) {
+            is ApiResult.Failure -> return if (result.httpStatus == 401) {
+                ApiResult.Failure(ApiError("UNAUTHORIZED", "登录状态已失效，请重新绑定设备"))
+            } else {
+                // 超时/5xx/解析错误不是「会话失效」，原样上抛，避免错误提示误导用户。
+                result
+            }
+
+            is ApiResult.Success -> result.value
+        }
+
+        val patients = when (val result = api.listPatients(limit = 5)) {
+            is ApiResult.Failure -> return result
+            is ApiResult.Success -> result.value
+        }
+        val patient = patients.items.firstOrNull()
             ?: return ApiResult.Failure(
                 ApiError("NO_PATIENT", "当前账号未绑定患者，请联系机构获取绑定码")
             )
 
-        val prescriptions = api.listPrescriptions(patient.id, limit = 20).getOrNull()?.items.orEmpty()
-        val current = PlanSelector.selectCurrent(prescriptions, nowIsoPrefix())
+        val prescriptions = when (val result = api.listPrescriptions(patient.id, limit = 20)) {
+            is ApiResult.Failure -> return result
+            is ApiResult.Success -> result.value
+        }
+        val current = PlanSelector.selectCurrent(prescriptions.items, nowIsoPrefix())
 
         val exercises = mutableMapOf<String, Exercise>()
-        current?.items.orEmpty().forEach { item ->
-            api.getExercise(item.exerciseCode).getOrNull()?.let { exercises[it.code] = it }
+        val items = current?.items.orEmpty()
+        // 逐条串行会在登录时叠加 N 次往返；并发拉取，任一详情失败则整体失败，避免半份方案落盘。
+        val details = coroutineScope {
+            items.map { item -> async { api.getExercise(item.exerciseCode) } }.awaitAll()
+        }
+        for (detail in details) {
+            when (detail) {
+                is ApiResult.Failure -> return detail
+                is ApiResult.Success -> exercises[detail.value.code] = detail.value
+            }
         }
 
         val snapshot = SessionSnapshot(

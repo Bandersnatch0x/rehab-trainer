@@ -46,6 +46,9 @@ interface SessionUploadQueue {
     /** 主动丢弃记录（例如数据损坏且用户确认）。 */
     suspend fun remove(clientRecordIds: Collection<String>)
 
+    /** 登出/换绑时清空队列：旧患者的记录不能在新账号下重放。 */
+    suspend fun clear()
+
     /** 待上传记录数（pending 计数），含等待重试的条目。 */
     suspend fun pendingCount(): Int
 

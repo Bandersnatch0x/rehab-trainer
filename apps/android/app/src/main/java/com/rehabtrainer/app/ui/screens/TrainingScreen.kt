@@ -18,6 +18,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,7 +33,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.rehabtrainer.app.core.pose.CaptureGate
@@ -62,7 +63,6 @@ import com.rehabtrainer.app.data.session.SetOutcome
 import com.rehabtrainer.app.ui.ExerciseRegistry
 import com.rehabtrainer.app.ui.audio.VoiceCoach
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.io.File
 import java.time.Instant
 import java.util.concurrent.Executors
@@ -159,7 +159,7 @@ fun TrainingScreen(
     var ttsReady by remember { mutableStateOf(false) }
     var ttsFailed by remember { mutableStateOf(false) }
 
-    val scope = rememberCoroutineScope()
+    // 记录写入与补传由 AppData 的应用级作用域负责，页面退出不取消。
     var repCount by remember { mutableIntStateOf(0) }
     var repHint by remember { mutableStateOf<String?>(null) }
     var setValidFrames by remember { mutableIntStateOf(0) }
@@ -230,6 +230,8 @@ fun TrainingScreen(
                             // 两种门禁都会冻结计数：脚部出框（D17）与画面内出现第二个人。
                             gateBlocked =
                                 frame.multiPersonPresent || (requiresFullBody && !feetVisible)
+                            // 分母计所有检出帧（含门禁帧），否则 validFrameRatio 恒为 1。
+                            setTotalFrames += 1
                             if (gateBlocked) {
                                 // 门禁期间冻结计数，姿态检测继续以等待自动恢复。
                                 statusText = when {
@@ -244,7 +246,7 @@ fun TrainingScreen(
                                     else -> ""
                                 }
                                 setTotalFrames += 1
-                                if (feetVisible && !gateBlocked) {
+                                if (feetVisible) {
                                     setValidFrames += 1
                                 }
                                 if (!setProgress.isComplete) {
@@ -360,7 +362,11 @@ fun TrainingScreen(
     LaunchedEffect(gateBlocked, shouldSpeak, ttsReady) {
         if (shouldSpeak && ttsReady) {
             if (gateBlocked && !previousGateBlocked) {
-                voiceCoach.speak("脚部未入镜，请后退站入全身框", flush = false)
+                voiceCoach.speak(
+                    if (multiPersonPresent) "画面内有多人，请让陪护者离开画面"
+                    else "脚部未入镜，请后退站入全身框",
+                    flush = false
+                )
             } else if (!gateBlocked && previousGateBlocked) {
                 voiceCoach.speak("已恢复计数", flush = false)
             }
@@ -395,7 +401,7 @@ fun TrainingScreen(
                 outcome = outcome,
                 modelSha256 = ModelFingerprint.sha256(context)
             )
-            scope.launch { AppData.submit(record) }
+            AppData.submitDetached(record)
         }
         // 存下的幅度不合身时不能一直沿用；判据见 CalibrationStore.shouldInvalidate。
         if (CalibrationStore.shouldInvalidate(knownAmplitude, completedReps, setValidFrames)) {
@@ -455,7 +461,8 @@ fun TrainingScreen(
             isPhoneLandscape = isPhoneLandscape,
             compactLabels = largeFont,
             showModeSelector = !largeFont,
-            showVoiceToggle = displayPolicy.effectiveMode == TrainingDisplayMode.CAMERA_ONLY && isPhoneLandscape,
+            showVoiceToggle = displayPolicy.effectiveMode == TrainingDisplayMode.CAMERA_ONLY &&
+                (isPhoneLandscape || largeFont),
             voiceEnabled = voiceEnabled,
             ttsFailed = ttsFailed,
             onToggleVoice = { voiceEnabled = it },
@@ -550,6 +557,35 @@ fun TrainingScreen(
                                 onToggleMetronome = { metronomeEnabled = it },
                                 compact = compact
                             )
+                        },
+                        overlaySlot = {
+                            if (videoIsMain) {
+                                // 摄像头缩成小窗后，计数、目标与节拍仍要留在主画面上。
+                                Row(
+                                    modifier = Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(8.dp)
+                                        .zIndex(3f),
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    CounterBadge(
+                                        repCount = repCount,
+                                        repsPerSet = setProgress.repsPerSet,
+                                        counterLabel = currentExercise.counterLabel,
+                                        repHint = repHint,
+                                        largeCount = true
+                                    )
+                                    if (currentExercise.hasRas) {
+                                        MetronomeBadge(
+                                            bpm = currentExercise.bpm,
+                                            enabled = metronomeEnabled,
+                                            onToggle = { metronomeEnabled = it },
+                                            compact = true
+                                        )
+                                    }
+                                }
+                            }
                         }
                     )
                 }

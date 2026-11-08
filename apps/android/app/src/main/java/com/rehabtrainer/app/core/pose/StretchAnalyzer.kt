@@ -99,9 +99,8 @@ class StretchAnalyzer(
         }
 
         if (issues.isNotEmpty()) {
-            // 双臂已明显放下（而非瞬时抖动）时立即结束本次保持，允许下一次重新计数。
-            val clearlyDown = leftRaise < 0.05f && rightRaise < 0.05f
-            if (clearlyDown) resetHold() else onInvalidFrame(timestampMs)
+            // 指标偏离是已观测到的事实，不能按丢帧容错把这段不合规时间计入保持。
+            resetHold()
             return AnalysisUpdate(count, lastRep, issues)
         }
         lastValidMs = timestampMs

@@ -42,15 +42,23 @@ class TotpStatus(APIModel):
     totp_enabled: bool
 
 
+class TotpEnrollRequest(APIModel):
+    """启用二次验证前必须再验证一次口令。"""
+
+    password: str = Field(min_length=1)
+
+
 class TotpEnrollment(APIModel):
     """待确认的密钥；确认成功前不落库。"""
 
     secret: str
     provisioning_uri: str
+    # 短时签名凭证：confirm 只接受本次签发的密钥，客户端无法自行替换 secret。
+    enrollment_token: str
 
 
 class TotpConfirmRequest(APIModel):
-    secret: str = Field(min_length=16)
+    enrollment_token: str = Field(min_length=16)
     code: str = Field(pattern=r"^[0-9]{6}$")
 
 

@@ -57,16 +57,18 @@ fun ExercisesScreen(
     ) {
         // 页面标题由顶栏统一承担，页内不再重复大标题。
         val exercises = ExerciseRegistry.exercises
+        val bound = ExerciseRegistry.patientId != null
+        val planReady = ExerciseRegistry.isPlanLoaded
         Text(
-            text = if (ExerciseRegistry.isPlanLoaded) {
-                "以下训练项目由康复治疗师制定，请按顺序完成；不适时立即停止。"
-            } else {
-                "以下为演示用训练条目，实际训练方案由康复治疗师制定。请在适宜体力下按顺序完成。"
+            text = when {
+                planReady -> "以下训练项目由康复治疗师制定，请按顺序完成；不适时立即停止。"
+                bound -> "当前没有可用的训练方案，暂不能开始训练。请联系治疗师更新方案。"
+                else -> "以下为演示用训练条目，实际训练方案由康复治疗师制定。请在适宜体力下按顺序完成。"
             },
             style = MaterialTheme.typography.bodyLarge
         )
 
-        if (!ExerciseRegistry.isPlanLoaded) {
+        if (!planReady && !bound) {
             Text(
                 text = "演示数据：当前为演示模式，下列训练条目、推荐训练量、适宜性与分级标签均为示例数据。",
                 style = MaterialTheme.typography.bodyMedium,
@@ -75,7 +77,8 @@ fun ExercisesScreen(
         }
 
         exercises.forEach { exercise ->
-            val requiresConfirmation = exercise.riskLevel == "high"
+            val requiresConfirmation = exercise.riskLevel == "high" ||
+                (!ExerciseRegistry.isPlanLoaded && exercise.kind == ExerciseKind.POSTURE)
             ExerciseCategoryCard(
                 categoryTitle = categoryTitle(exercise.kind),
                 categoryDesc = categoryDescription(exercise.kind),
@@ -92,6 +95,8 @@ fun ExercisesScreen(
                 onStart = { onSelectExercise(exercise.code) },
                 requiresStageConfirmation = requiresConfirmation,
                 stageConfirmed = stageConfirmed,
+                // 已绑定患者但没有有效处方：不能拿演示条目开始训练。
+                startBlocked = bound && !planReady,
                 onContactTherapist = { showContactDialog = true }
             )
         }
@@ -108,10 +113,11 @@ private fun ExerciseCategoryCard(
     onStart: () -> Unit,
     requiresStageConfirmation: Boolean = false,
     stageConfirmed: Boolean = false,
+    startBlocked: Boolean = false,
     onContactTherapist: () -> Unit = {}
 ) {
     val dimens = LocalElderlyDimens.current
-    val canStart = TrainingAccessPolicy.canStart(requiresStageConfirmation, stageConfirmed)
+    val canStart = !startBlocked && TrainingAccessPolicy.canStart(requiresStageConfirmation, stageConfirmed)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -180,13 +186,23 @@ private fun ExerciseCategoryCard(
             }
 
             ElderlyButton(
-                text = if (canStart) "开始此项训练" else "需治疗师确认分级",
+                text = when {
+                    startBlocked -> "暂无训练方案"
+                    canStart -> "开始此项训练"
+                    else -> "需治疗师确认分级"
+                },
                 onClick = onStart,
                 variant = ElderlyButtonVariant.Primary,
                 enabled = canStart
             )
 
-            if (!canStart) {
+            if (startBlocked) {
+                Text(
+                    text = "当前没有可用的训练方案，请联系治疗师更新方案。",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else if (!canStart) {
                 Text(
                     text = "该训练属于需治疗师评估的高风险条目。为保证安全，分级确认前不能开始。",
                     style = MaterialTheme.typography.bodyMedium,

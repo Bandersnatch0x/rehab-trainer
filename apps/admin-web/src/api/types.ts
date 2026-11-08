@@ -12,6 +12,7 @@ export type LoginRequest = components["schemas"]["LoginRequest"];
 export type LoginResponse = components["schemas"]["LoginResponse"];
 export type Me = components["schemas"]["Me"];
 export type TotpEnrollment = components["schemas"]["TotpEnrollment"];
+export type TotpEnrollRequest = components["schemas"]["TotpEnrollRequest"];
 export type TotpConfirmRequest = components["schemas"]["TotpConfirmRequest"];
 export type TotpDisableRequest = components["schemas"]["TotpDisableRequest"];
 export type TotpStatus = components["schemas"]["TotpStatus"];

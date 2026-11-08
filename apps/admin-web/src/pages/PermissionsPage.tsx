@@ -26,11 +26,16 @@ export default function PermissionsPage() {
   // 服务端仍是最终裁决者（越权返回 403），这里只是不渲染越权入口。
   const grantable: AdminRole[] =
     session?.role === "care_admin" ? ["care_admin", "rehab_therapist"] : ["rehab_therapist"];
-  const canManage = (account: Account): boolean =>
-    account.roles.filter(isAdminRole).every((role) => grantable.includes(role));
+  // 只有管理端账号才可管理：空 roles 或仅含患者/照护者角色时，every() 会返回 true，
+  // 必须显式要求至少有一个管理端角色。
+  const canManage = (account: Account): boolean => {
+    const adminRoles = account.roles.filter(isAdminRole);
+    return adminRoles.length > 0 && adminRoles.every((role) => grantable.includes(role));
+  };
 
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reloadToken, setReloadToken] = useState(0);
 
@@ -45,7 +50,8 @@ export default function PermissionsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editStatus, setEditStatus] = useState<AccountStatus>("active");
-  const [editRole, setEditRole] = useState<AdminRole>(grantable[0]);
+  const [editRole, setEditRole] = useState<AdminRole | null>(grantable[0]);
+  const [editOriginalRole, setEditOriginalRole] = useState<AdminRole | null>(null);
   const [editError, setEditError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -53,6 +59,7 @@ export default function PermissionsPage() {
     let cancelled = false;
     setLoading(true);
     setError(null);
+    setLoadFailed(false);
 
     async function loadAll() {
       const collected: Account[] = [];
@@ -68,6 +75,7 @@ export default function PermissionsPage() {
         }
         if (!result.ok) {
           setError(result.error.message);
+          setLoadFailed(true);
           setAccounts([]);
           setLoading(false);
           return;
@@ -84,6 +92,7 @@ export default function PermissionsPage() {
       } while (cursor && collected.length < MAX_ACCOUNTS);
 
       setAccounts(collected);
+      setLoadFailed(false);
       setLoading(false);
     }
 
@@ -95,10 +104,12 @@ export default function PermissionsPage() {
   }, [reloadToken]);
 
   function openEditor(account: Account) {
+    const originalRole = account.roles.find(isAdminRole) ?? null;
     setEditingId(account.accountId);
     setEditName(account.displayName);
     setEditStatus(account.status);
-    setEditRole(account.roles.find(isAdminRole) ?? grantable[0]);
+    setEditRole(originalRole);
+    setEditOriginalRole(originalRole);
     setEditError(null);
   }
 
@@ -135,7 +146,8 @@ export default function PermissionsPage() {
     const result = await updateAccount(editingId, {
       displayName: editName,
       status: editStatus,
-      role: editRole,
+      // 只在角色确实变化时发送 role；改名/停用不应顺带重写角色绑定。
+      ...(editRole && editRole !== editOriginalRole ? { role: editRole } : {}),
     });
     setSaving(false);
     if (!result.ok) {
@@ -199,6 +211,8 @@ export default function PermissionsPage() {
                 value={createUsername}
                 onChange={(event) => setCreateUsername(event.target.value)}
                 required
+                minLength={3}
+                maxLength={128}
               />
             </label>
             <label>
@@ -207,6 +221,9 @@ export default function PermissionsPage() {
                 type="password"
                 value={createPassword}
                 onChange={(event) => setCreatePassword(event.target.value)}
+                autoComplete="new-password"
+                minLength={8}
+                maxLength={128}
                 required
               />
             </label>
@@ -237,9 +254,17 @@ export default function PermissionsPage() {
         <span className="hint">每个账号本轮只绑定一个管理端角色，如需调整请在「权限配置」中修改。</span>
 
         {error ? (
-          <p role="alert" className="notice notice--danger">
-            机构账号加载失败：{error}
-          </p>
+          <div role="alert" className="notice notice--danger" style={{ display: "flex", gap: 12, alignItems: "center" }}>
+            <span>机构账号加载失败：{error}</span>
+            <button
+              type="button"
+              className="btn-secondary"
+              style={{ padding: "4px 10px", minHeight: 30, fontSize: 13 }}
+              onClick={() => setReloadToken((token) => token + 1)}
+            >
+              重试
+            </button>
+          </div>
         ) : null}
 
         <div className="table-container">
@@ -259,6 +284,10 @@ export default function PermissionsPage() {
               {loading ? (
                 <tr>
                   <td colSpan={7}>正在读取机构账号…</td>
+                </tr>
+              ) : loadFailed ? (
+                <tr>
+                  <td colSpan={7}>加载失败，请点击上方「重试」。</td>
                 </tr>
               ) : accounts.length === 0 ? (
                 <tr>
@@ -329,7 +358,7 @@ export default function PermissionsPage() {
                             <label>
                               <span>角色</span>
                               <select
-                                value={editRole}
+                                value={editRole ?? ""}
                                 onChange={(event) => setEditRole(event.target.value as AdminRole)}
                               >
                                 {grantable.map((role) => (

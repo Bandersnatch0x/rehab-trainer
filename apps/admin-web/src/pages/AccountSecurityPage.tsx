@@ -17,6 +17,7 @@ export default function AccountSecurityPage() {
   const [enabled, setEnabled] = useState<boolean | null>(null);
   const [enrollment, setEnrollment] = useState<TotpEnrollment | null>(null);
   const [confirmCode, setConfirmCode] = useState("");
+  const [enrollPassword, setEnrollPassword] = useState("");
   const [password, setPassword] = useState("");
   const [disableCode, setDisableCode] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -36,16 +37,19 @@ export default function AccountSecurityPage() {
     void load();
   }, [load]);
 
-  async function startEnroll() {
+  async function startEnroll(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     setBusy(true);
     setError(null);
-    const result = await enrollTotp();
+    // 口令再验证：只凭会话就能绑认证器的话，被盗会话可以把真实用户锁在账号外。
+    const result = await enrollTotp({ password: enrollPassword });
     setBusy(false);
     if (!result.ok) {
       setError(result.error.message);
       return;
     }
     setEnrollment(result.data);
+    setEnrollPassword("");
     setConfirmCode("");
   }
 
@@ -57,7 +61,7 @@ export default function AccountSecurityPage() {
     setBusy(true);
     setError(null);
     const result = await confirmTotp({
-      secret: enrollment.secret,
+      enrollmentToken: enrollment.enrollmentToken,
       code: confirmCode,
     });
     setBusy(false);
@@ -200,15 +204,27 @@ export default function AccountSecurityPage() {
             </p>
             <p className="hint">
               启用后登录需额外输入认证器验证码。请先确认手机上已安装认证器应用。
+              为防会话被盗后绑定攻击者认证器，启用前需要再输入一次登录口令。
             </p>
-            <button
-              type="button"
-              className="btn-primary"
-              onClick={startEnroll}
-              disabled={busy}
+            <form
+              aria-label="启用二次验证"
+              onSubmit={startEnroll}
+              style={{ display: "grid", gap: 12, maxWidth: 360 }}
             >
-              启用二次验证
-            </button>
+              <label>
+                登录口令
+                <input
+                  type="password"
+                  value={enrollPassword}
+                  onChange={(event) => setEnrollPassword(event.target.value)}
+                  autoComplete="current-password"
+                  required
+                />
+              </label>
+              <button type="submit" className="btn-primary" disabled={busy}>
+                启用二次验证
+              </button>
+            </form>
           </>
         )}
       </div>

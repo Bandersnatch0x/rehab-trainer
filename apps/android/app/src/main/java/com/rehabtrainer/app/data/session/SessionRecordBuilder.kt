@@ -35,7 +35,7 @@ object SessionRecordBuilder {
         modelSha256 = modelSha256,
         metricAlgorithmVersion = ModelFingerprint.METRIC_ALGORITHM_VERSION,
         thresholdConfigVersion = ModelFingerprint.THRESHOLD_CONFIG_VERSION,
-        checkedIn = true,
+        checkedIn = outcome.completionCount > 0,
         completionCount = outcome.completionCount,
         movementErrorCount = outcome.movementErrorCount,
         interruptionCount = outcome.interruptionCount,

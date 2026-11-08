@@ -7,7 +7,7 @@
 
 前提：目标库必须是空库。脚本会拒绝在已有业务表的库上运行，避免误删数据。
 
-    $env:REHAB_DATABASE_URL = "postgresql+psycopg://rehab:rehabtest@127.0.0.1:55432/rehab"
+    $env:REHAB_DATABASE_URL = "postgresql+psycopg://rehab:<密码>@127.0.0.1:55432/rehab"
     python deploy/verify_postgres.py
 
 只读断言，不修改仓库文件；失败时抛出 AssertionError 并保留现场以便排查。

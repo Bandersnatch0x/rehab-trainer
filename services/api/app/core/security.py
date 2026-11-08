@@ -68,6 +68,25 @@ def create_token(
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
+def create_totp_enrollment_token(
+    *, account_id: str, org_id: str, secret: str, ttl_seconds: int = 300
+) -> str:
+    """把待确认的 TOTP 密钥签成短时凭证：confirm 只认本次 enroll 的结果。"""
+    settings = get_settings()
+    now = datetime.now(timezone.utc)
+    payload: dict[str, Any] = {
+        "sub": account_id,
+        "org_id": org_id,
+        "roles": [],
+        "typ": "totp_enroll",
+        "secret": secret,
+        "iat": now,
+        "exp": now + timedelta(seconds=ttl_seconds),
+        "jti": uuid.uuid4().hex,
+    }
+    return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+
+
 def decode_token(token: str, expected_type: str) -> dict[str, Any]:
     settings = get_settings()
     try:

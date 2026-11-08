@@ -39,6 +39,10 @@ object AppPreferences {
     fun clearDeviceBinding(context: Context) =
         put(context, KEY_DEVICE_BOUND, false)
 
+    /** 绑定成功后回写；否则解绑再重绑时设置页会一直显示「未绑定」。 */
+    fun markDeviceBound(context: Context) =
+        put(context, KEY_DEVICE_BOUND, true)
+
     private fun put(context: Context, key: String, value: Boolean) {
         prefs(context).edit().putBoolean(key, value).apply()
     }

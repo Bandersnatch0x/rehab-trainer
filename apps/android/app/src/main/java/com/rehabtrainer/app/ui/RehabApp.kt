@@ -65,7 +65,9 @@ data class ExerciseMeta(
     val videoUri: String? = null,
     val watermarkText: String? = null,
     val creditLine: String? = null,
-    val riskLevel: String? = null
+    val riskLevel: String? = null,
+    // 变体指定的支撑等级（如「坐位」「站立 · 可扶支撑」）；无变体时为空。
+    val supportLevelText: String? = null
 )
 
 /** 首页「开始今日训练」与训练列表共用同一训练条目代码。 */
@@ -153,12 +155,9 @@ fun RehabApp(
     val scope = rememberCoroutineScope()
 
     var snapshot by remember { mutableStateOf(sessionRepository?.cachedSnapshot()) }
+    // 没有令牌就必须重新绑定；不能靠残留快照把用户留在旧患者数据里。
     var needBind by remember {
-        mutableStateOf(
-            sessionRepository != null &&
-                !sessionRepository.hasSession() &&
-                sessionRepository.cachedSnapshot() == null
-        )
+        mutableStateOf(sessionRepository != null && !sessionRepository.hasSession())
     }
     var demoMode by rememberSaveable { mutableStateOf(false) }
     var bindBusy by remember { mutableStateOf(false) }

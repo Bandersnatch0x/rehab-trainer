@@ -164,9 +164,9 @@ private fun RecordCard(record: SessionRecord) {
                     modifier = Modifier.padding(14.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    RecordMetricRow(label = "完成次数", value = "${record.completionCount ?: 0} 次")
-                    RecordMetricRow(label = "动作错误", value = "${record.movementErrorCount ?: 0} 次")
-                    RecordMetricRow(label = "中断次数", value = "${record.interruptionCount ?: 0} 次")
+                    RecordMetricRow(label = "完成次数", value = record.completionCount?.let { "$it 次" } ?: "—")
+                    RecordMetricRow(label = "动作错误", value = record.movementErrorCount?.let { "$it 次" } ?: "—")
+                    RecordMetricRow(label = "中断次数", value = record.interruptionCount?.let { "$it 次" } ?: "—")
                     // 无有效帧时契约回传 null；不得把它渲染成 0% 造成误读。
                     val ratioValue = ratio?.let { "${formatPercent(it)}%" } ?: "—"
                     RecordMetricRow(

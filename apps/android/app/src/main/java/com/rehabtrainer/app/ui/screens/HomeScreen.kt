@@ -64,21 +64,22 @@ fun HomeScreen(
     val contentModifier = modifier
         .fillMaxSize()
         .padding(dimens.screenPadding)
-    val (planRows, isDemoPlan) = remember(snapshot) { planRowsOf(snapshot) }
-    val summary = rememberRecordSummary(snapshot?.patientId)
+    val planState = remember(snapshot) { planRowsOf(snapshot) }
+    val (summary, summaryUnavailable) = rememberRecordSummary(snapshot?.patientId)
 
     if (widthSizeClass != WindowWidthSizeClass.Expanded) {
         Column(
             modifier = contentModifier.verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(dimens.sectionSpacing)
         ) {
-            HomeStatusBanner(displayName = snapshot?.displayName, summary = summary)
+            HomeStatusBanner(displayName = snapshot?.displayName, summary = summary, unavailable = summaryUnavailable)
             HomeQuickActions(
-                projectCount = planRows.size,
+                projectCount = planState.rows.size,
+                startEnabled = planState.hasPrescription,
                 onStartTraining = onStartTraining,
                 onOpenPrescription = onOpenPrescription
             )
-            HomeTodayPlan(rows = planRows, isDemoPlan = isDemoPlan)
+            HomeTodayPlan(rows = planState.rows, isDemoPlan = planState.isDemoPlan)
             HomeSafetyGuide()
         }
     } else {
@@ -92,9 +93,10 @@ fun HomeScreen(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(dimens.itemSpacing)
             ) {
-                HomeStatusBanner(displayName = snapshot?.displayName, summary = summary)
+                HomeStatusBanner(displayName = snapshot?.displayName, summary = summary, unavailable = summaryUnavailable)
                 HomeQuickActions(
-                    projectCount = planRows.size,
+                    projectCount = planState.rows.size,
+                    startEnabled = planState.hasPrescription,
                     onStartTraining = onStartTraining,
                     onOpenPrescription = onOpenPrescription
                 )
@@ -105,31 +107,37 @@ fun HomeScreen(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(dimens.itemSpacing)
             ) {
-                HomeTodayPlan(rows = planRows, isDemoPlan = isDemoPlan)
+                HomeTodayPlan(rows = planState.rows, isDemoPlan = planState.isDemoPlan)
                 HomeSafetyGuide()
             }
         }
     }
 }
 
-/** 记录汇总只在绑定后拉取；失败或未绑定返回 null，调用方据此不展示任何数字。 */
+/** 记录汇总只在绑定后拉取；返回（汇总, 是否读取失败），调用方据此区分「没有记录」与「读不到」。 */
 @Composable
-private fun rememberRecordSummary(patientId: String?): RecordSummary? {
+private fun rememberRecordSummary(patientId: String?): Pair<RecordSummary?, Boolean> {
     var summary by remember { mutableStateOf<RecordSummary?>(null) }
+    var unavailable by remember { mutableStateOf(false) }
     LaunchedEffect(patientId) {
+        summary = null
+        unavailable = false
         summary = patientId?.let { id ->
             when (val result = AppData.listSessions(id, limit = RECORD_SAMPLE_LIMIT)) {
                 is ApiResult.Success ->
                     RecordSummaries.summarize(result.value.items, LocalDate.now())
-                else -> null
+                else -> {
+                    unavailable = true
+                    null
+                }
             }
         }
     }
-    return summary
+    return summary to unavailable
 }
 
 @Composable
-private fun HomeStatusBanner(displayName: String?, summary: RecordSummary?) {
+private fun HomeStatusBanner(displayName: String?, summary: RecordSummary?, unavailable: Boolean) {
     val greeting = displayName?.takeIf { it.isNotBlank() }?.let { "你好，$it" } ?: "你好"
     // 连续天数只在真拿到记录时展示；没有记录就不报数字，避免编造坚持天数。
     val streak = summary?.streakDays?.takeIf { it > 0 }
@@ -138,10 +146,10 @@ private fun HomeStatusBanner(displayName: String?, summary: RecordSummary?) {
     } else {
         "今日活力打卡"
     }
-    val subtitle = if (streak != null) {
-        "🦌 康康小鹿陪您练习：今天也是元气满满的一天，跟着节拍动一动～"
-    } else {
-        "🦌 康康小鹿陪您练习：今天还没有训练记录，动一动更舒畅～"
+    val subtitle = when {
+        streak != null -> "🦌 康康小鹿陪您练习：今天也是元气满满的一天，跟着节拍动一动～"
+        unavailable -> "🦌 康康小鹿陪您练习：训练记录暂时无法读取，稍后再看看～"
+        else -> "🦌 康康小鹿陪您练习：今天还没有训练记录，动一动更舒畅～"
     }
 
     Card(
@@ -186,6 +194,7 @@ private fun HomeStatusBanner(displayName: String?, summary: RecordSummary?) {
 @Composable
 private fun HomeQuickActions(
     projectCount: Int,
+    startEnabled: Boolean,
     onStartTraining: () -> Unit,
     onOpenPrescription: () -> Unit
 ) {
@@ -196,13 +205,18 @@ private fun HomeQuickActions(
             style = MaterialTheme.typography.headlineLarge
         )
         Text(
-            text = "今日计划：共 $projectCount 个训练项目 · 建议在照护者监护下开始。感到头晕或肌肉酸痛请随时休息。",
+            text = if (startEnabled) {
+                "今日计划：共 $projectCount 个训练项目 · 建议在照护者监护下开始。感到头晕或肌肉酸痛请随时休息。"
+            } else {
+                "当前没有可用的训练方案，暂不能开始训练。请联系治疗师更新方案。"
+            },
             style = MaterialTheme.typography.bodyLarge
         )
         ElderlyButton(
             text = "开始今日训练",
             onClick = onStartTraining,
             icon = Icons.Filled.PlayArrow,
+            enabled = startEnabled,
             variant = ElderlyButtonVariant.Primary
         )
         ElderlyButton(
@@ -220,22 +234,34 @@ private data class PlanRowData(val label: String, val volume: String, val cadenc
 /**
  * @return 行数据与「是否为内置示例」标记；未绑定（无服务端方案）时回退内置示例并标记。
  */
-private fun planRowsOf(snapshot: SessionSnapshot?): Pair<List<PlanRowData>, Boolean> {
+private data class HomePlanState(
+    val rows: List<PlanRowData>,
+    val isDemoPlan: Boolean,
+    /** 是否有可用处方；没有时禁止开始训练，避免按失效方案训练并生成记录。 */
+    val hasPrescription: Boolean
+)
+
+private fun planRowsOf(snapshot: SessionSnapshot?): HomePlanState {
     val plan = snapshot?.plan.orEmpty()
     if (plan.isNotEmpty()) {
-        return plan.map { item ->
+        val rows = plan.map { item ->
             PlanRowData(
                 label = item.label,
                 volume = "${item.sets} 组 × ${item.reps} 次",
                 cadence = if (item.bpm > 0) "${item.bpm} BPM" else null
             )
-        } to false
+        }
+        return HomePlanState(rows = rows, isDemoPlan = false, hasPrescription = true)
     }
-    // 内置示例沿用旧版 target 文案（如「目标 12 次 · 100 BPM」），不臆造节拍值。
-    val fallback = ExerciseRegistry.exercises.map { exercise ->
-        PlanRowData(label = exercise.name, volume = exercise.target, cadence = null)
+    if (snapshot == null) {
+        // 未绑定：内置示例沿用旧版 target 文案（如「目标 12 次 · 100 BPM」），不臆造节拍值。
+        val fallback = ExerciseRegistry.exercises.map { exercise ->
+            PlanRowData(label = exercise.name, volume = exercise.target, cadence = null)
+        }
+        return HomePlanState(rows = fallback, isDemoPlan = true, hasPrescription = false)
     }
-    return fallback to true
+    // 已绑定患者但没有有效处方：不拿演示条目冒充方案，也不允许开始训练。
+    return HomePlanState(rows = emptyList(), isDemoPlan = false, hasPrescription = false)
 }
 
 @Composable
@@ -262,6 +288,12 @@ private fun HomeTodayPlan(rows: List<PlanRowData>, isDemoPlan: Boolean) {
                 // 未绑定时的内置示例：明确标注，不冒充机构下发的训练方案。
                 Text(
                     text = "演示模式：未绑定患者，以下为内置示例项目，不是机构下发的训练方案。",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else if (rows.isEmpty()) {
+                Text(
+                    text = "当前没有可用的训练方案，请联系治疗师更新。",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

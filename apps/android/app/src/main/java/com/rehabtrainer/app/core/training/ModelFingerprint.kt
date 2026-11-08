@@ -22,10 +22,18 @@ object ModelFingerprint {
     fun sha256(context: Context): String {
         cached?.let { return it }
         return runCatching {
-            val bytes = context.assets.open(MODEL_ASSET).use { it.readBytes() }
-            MessageDigest.getInstance("SHA-256").digest(bytes)
-                .joinToString("") { "%02x".format(it) }
-        }.getOrDefault(UNKNOWN_SHA256).also { cached = it }
+            // 流式计算，避免把整个模型读进堆；失败不写缓存，下次还能重试。
+            val digest = MessageDigest.getInstance("SHA-256")
+            context.assets.open(MODEL_ASSET).use { input ->
+                val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                while (true) {
+                    val read = input.read(buffer)
+                    if (read < 0) break
+                    digest.update(buffer, 0, read)
+                }
+            }
+            digest.digest().joinToString("") { "%02x".format(it) }
+        }.getOrElse { return UNKNOWN_SHA256 }.also { cached = it }
     }
 
     private const val MODEL_ASSET = "pose_landmarker_lite.task"

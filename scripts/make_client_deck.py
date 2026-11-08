@@ -9,6 +9,7 @@
 缺截图时自动跳过图片，不影响文字页。
 """
 
+import argparse
 from pathlib import Path
 
 from PIL import Image
@@ -20,7 +21,8 @@ from pptx.util import Inches, Pt
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / ".agent" / "tmp" / "deck"
-OUT = ROOT / "docs" / "delivery" / "client-briefing-2026-11-07.pptx"
+DECK_DATE = "2026-11-07"
+OUT = ROOT / "docs" / "delivery" / f"client-briefing-{DECK_DATE}.pptx"
 
 NAVY = RGBColor(0x0B, 0x1B, 0x33)
 NAVY_2 = RGBColor(0x13, 0x2E, 0x4F)
@@ -144,7 +146,7 @@ def footer(slide):
             "rehab-trainer · 帕金森病患者肌肉保护训练系统 · 演示交付版",
             9, False, MUTED)
     textbox(slide, Inches(11.4), Inches(7.08), Inches(1.3), Inches(0.25),
-            "2026-11-06", 9, False, MUTED, PP_ALIGN.RIGHT)
+            f"{DECK_DATE}", 9, False, MUTED, PP_ALIGN.RIGHT)
 
 
 def table(slide, rows, left, top, width, col_widths, header=True, size=11,
@@ -207,6 +209,13 @@ def picture_fit(slide, filename, left, top, max_width, max_height, caption=""):
 
 
 def main():
+    global DECK_DATE, OUT
+    parser = argparse.ArgumentParser(description="生成客户汇报 PPT")
+    parser.add_argument("--date", default=DECK_DATE, help="版本日期，如 2026-11-08")
+    args = parser.parse_args()
+    DECK_DATE = args.date
+    OUT = ROOT / "docs" / "delivery" / f"client-briefing-{DECK_DATE}.pptx"
+
     prs = Presentation()
     prs.slide_width = Inches(13.333)
     prs.slide_height = Inches(7.5)
@@ -227,7 +236,7 @@ def main():
             "Android App · 微信小程序 · Web 管理端 · FastAPI 后端", 14,
             False, RGBColor(0x94, 0xA3, 0xB8))
     textbox(slide, Inches(1.05), Inches(6.45), Inches(6), Inches(0.3),
-            "2026-11-06 · 演示基线", 12, False, RGBColor(0x94, 0xA3, 0xB8))
+            f"{DECK_DATE} · 演示基线", 12, False, RGBColor(0x94, 0xA3, 0xB8))
     textbox(slide, Inches(9.8), Inches(6.4), Inches(2.9), Inches(0.4),
             "内部编号：D30 / 票 0015–0016", 10, False,
             RGBColor(0x64, 0x74, 0x8B), PP_ALIGN.RIGHT)

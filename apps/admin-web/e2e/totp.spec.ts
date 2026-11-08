@@ -38,7 +38,15 @@ async function enableTotp(page: import('@playwright/test').Page): Promise<string
   await expect(page.getByRole('heading', { name: '账号安全' })).toBeVisible();
   await expect(page.getByText('未启用', { exact: true })).toBeVisible();
 
-  await page.getByRole('button', { name: '启用二次验证' }).click();
+  const password = process.env.E2E_PASSWORD;
+  if (!password) {
+    throw new Error('E2E_PASSWORD must be initialized by the test configuration');
+  }
+
+  // 启用前必须再验证一次口令：只凭会话不能绑定认证器。
+  const enrollForm = page.getByRole('form', { name: '启用二次验证' });
+  await enrollForm.getByLabel('登录口令').fill(password);
+  await enrollForm.getByRole('button', { name: '启用二次验证' }).click();
   const secret = (await page.getByTestId('totp-secret').innerText()).trim();
   expect(secret.length).toBeGreaterThanOrEqual(16);
 

@@ -2,6 +2,7 @@ package com.rehabtrainer.app.ui
 
 import com.rehabtrainer.app.core.pose.ExerciseKind
 import com.rehabtrainer.app.data.contract.ExerciseCategory
+import com.rehabtrainer.app.data.contract.SupportLevel
 import com.rehabtrainer.app.data.session.PlanExercise
 import com.rehabtrainer.app.data.session.PlanSelector
 
@@ -33,10 +34,13 @@ object ExerciseRegistry {
         get() = current
 
     fun updateFromPlan(plan: List<PlanExercise>, patientId: String?, prescriptionId: String?) {
-        isPlanLoaded = plan.isNotEmpty()
+        val hasPlan = plan.isNotEmpty()
+        isPlanLoaded = hasPlan
+        // 保留患者身份以区分「未绑定」与「已绑定但无有效处方」；处方 id 只在有方案时保留，
+        // 否则演示条目会被当成真实记录上传（提交记录要求 patientId 与 prescriptionId 同时非空）。
         this.patientId = patientId
-        this.prescriptionId = prescriptionId
-        current = if (plan.isEmpty()) DEFAULT_EXERCISES else plan.map(::toExerciseMeta)
+        this.prescriptionId = prescriptionId.takeIf { hasPlan }
+        current = if (hasPlan) plan.map(::toExerciseMeta) else DEFAULT_EXERCISES
     }
 
     fun reset() {
@@ -69,7 +73,13 @@ internal fun toExerciseMeta(plan: PlanExercise): ExerciseMeta = ExerciseMeta(
     videoUri = plan.videoUri,
     watermarkText = plan.watermarkText,
     creditLine = plan.creditLine,
-    riskLevel = plan.riskLevel
+    riskLevel = plan.riskLevel,
+    supportLevelText = when (plan.supportLevel) {
+        SupportLevel.SEATED.wireValue -> "坐位"
+        SupportLevel.SUPPORTED_STANDING.wireValue -> "站立 · 可扶支撑"
+        SupportLevel.UNSUPPORTED_STANDING.wireValue -> "站立 · 无需支撑"
+        else -> null
+    }
 )
 
 /**

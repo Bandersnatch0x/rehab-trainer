@@ -50,7 +50,12 @@ README_TEMPLATE = """帕金森病患者肌肉保护训练系统 · 客户交付�
 def latest_package(before: str) -> Path:
     """取日期不晚于 [before] 的最新一版：同一天重切时以自己为原型来源，避免把补丁回滚掉。"""
     candidates = sorted(DELIVERY.glob("客户交付包-*.zip"))
-    usable = [p for p in candidates if p.stem.split("-")[-1] <= before]
+    # 文件名后缀是完整 YYYY-MM-DD；按 "-" 取最后一段会得到 07，做字符串比较时恒小于 2026-...
+    usable = [
+        p for p in candidates
+        if (found := re.search(r"(\d{4}-\d{2}-\d{2})$", p.stem))
+        and found.group(1) <= before
+    ]
     if not usable:
         raise SystemExit(f"找不到 {before} 及之前的交付包，无法沿用原型；请用 --prototype 指定")
     return usable[-1]

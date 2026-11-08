@@ -36,6 +36,13 @@ restore_db_pattern='^[A-Za-z0-9_]+$'
 [[ "$RESTORE_DB" =~ $restore_db_pattern ]] || { echo "RESTORE_DB 只允许字母数字与下划线" >&2; exit 2; }
 [[ "$RESTORE_DB" != "$SOURCE_DB" ]] || { echo "恢复库不能与源库同名" >&2; exit 2; }
 
+# 恢复库必须是本次新建的：若已存在（上一次演练残留或手工 DR 副本），
+# 后面的 dropdb 与 cleanup trap 会把它删掉。必须在安装 trap 之前拒绝。
+if psql -tAc "SELECT 1 FROM pg_database WHERE datname = '$RESTORE_DB'" -d "$ADMIN_DB" | grep -qx 1; then
+    echo "恢复库 ${RESTORE_DB} 已存在，拒绝覆盖" >&2
+    exit 2
+fi
+
 cleanup() {
     dropdb --if-exists "$RESTORE_DB" >/dev/null 2>&1 || true
     rm -f "$DUMP"

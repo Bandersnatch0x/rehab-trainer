@@ -13,6 +13,9 @@ import kotlin.math.min
 
 private const val MIN_VISIBILITY = 0.20f
 
+/** 校准期的进入阈值比例：比常规 0.80 更低，幅度小的患者也能完成校准动作（阈值待临床签核）。 */
+private const val CALIBRATION_ENTER_RATIO = 0.92f
+
 class ArmRaiseAnalyzer(
     private val raiseThreshold: Float = -0.30f,
     private val lowerThreshold: Float = -0.10f,
@@ -130,7 +133,6 @@ class MarchAnalyzer(
     private val legs = listOf(LegState(), LegState())
     private val calibration = AmplitudeCalibration(calibrationReps, knownAmplitude)
     private var repIndex = 0
-    private var lastStepLeg = -1
     private var lastRepAtMs = 0L
 
     override var count: Int = 0
@@ -176,7 +178,8 @@ class MarchAnalyzer(
     }
 
     private fun enterLift(baseline: Float): Float =
-        calibration.amplitude()?.let { calibration.enterLift() } ?: (baseline * (1f - enterRatio))
+        calibration.amplitude()?.let { calibration.enterLift() }
+            ?: (baseline * (1f - if (calibration.isCalibrating) CALIBRATION_ENTER_RATIO else enterRatio))
 
     private fun exitLift(baseline: Float): Float =
         calibration.amplitude()?.let { calibration.exitLift() } ?: (baseline * (1f - exitRatio))
@@ -226,7 +229,6 @@ class MarchAnalyzer(
                 }
                 repIndex += 1
                 count += 1
-                lastStepLeg = index
                 lastRep = RepResult(repIndex, issues.isEmpty(), issues)
             }
             return
@@ -243,7 +245,6 @@ class MarchAnalyzer(
             it.lastExitMs = 0L
         }
         repIndex = 0
-        lastStepLeg = -1
         lastRepAtMs = 0L
         count = 0
         lastRep = null

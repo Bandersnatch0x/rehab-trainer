@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -151,6 +152,15 @@ internal fun TrainingHeaderBar(
                         Spacer(Modifier.width(8.dp))
                         SwapMainChip(onSwapMain = onSwapMain, isPhoneLandscape = false)
                     }
+                    if (showVoiceToggle && !isPhoneLandscape) {
+                        // 大字号竖屏同样要能关语音，不能只能退出训练页才能关。
+                        Spacer(Modifier.width(4.dp))
+                        VoiceToggleChip(
+                            voiceEnabled = voiceEnabled,
+                            ttsFailed = ttsFailed,
+                            onToggleVoice = onToggleVoice
+                        )
+                    }
                     if (showModeSelector) {
                         Spacer(Modifier.width(8.dp))
                         TrainingModeSelector(
@@ -162,6 +172,17 @@ internal fun TrainingHeaderBar(
                         )
                     }
                 }
+            }
+
+            exercise.supportLevelText?.let { level ->
+                // 变体指定的支撑等级直接影响动作安全，训练中必须常显。
+                Text(
+                    text = "支撑等级：$level",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
             }
 
             if (forcedCameraOnly) {
@@ -670,6 +691,8 @@ internal fun TrainingPipLayout(
     pipWidth: Dp,
     videoSlot: @Composable (modifier: Modifier, compact: Boolean) -> Unit,
     cameraSlot: @Composable (modifier: Modifier, compact: Boolean) -> Unit,
+    // 视频为主画面时，计数与节拍不能随着摄像头缩成小窗而消失。
+    overlaySlot: @Composable BoxScope.() -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxSize()) {
@@ -692,6 +715,7 @@ internal fun TrainingPipLayout(
             if (videoIsMain) Modifier.fillMaxSize() else pipModifier,
             !videoIsMain
         )
+        overlaySlot()
     }
 }
 
@@ -740,16 +764,16 @@ internal fun PatientRealtimeCameraPane(
             )
 
             if (largeFont && !compact) {
-                Row(
+                Column(
                     modifier = Modifier
                         .align(Alignment.TopStart)
                         .padding(6.dp),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
+                    // 大字号是目标用户，不能为了省地方丢掉目标次数、计数标签与纠正提示。
                     CounterBadge(
                         repCount, repsPerSet, counterLabel, repHint, largeCount,
-                        compact = true
+                        compact = false
                     )
                     if (hasRas) {
                         MetronomeBadge(
@@ -817,12 +841,13 @@ internal fun PatientRealtimeCameraPane(
                     if (gateBlocked) {
                         Icon(
                             imageVector = Icons.Filled.Warning,
-                            contentDescription = "脚部未入镜警告",
+                            contentDescription = if (multiPersonPresent) "画面内多人警告" else "脚部未入镜警告",
                             tint = Color.White,
                             modifier = Modifier.size(20.dp)
                         )
                         Text(
-                            text = "⚠️ 脚部未入镜，请后退入框",
+                            text = if (multiPersonPresent) "⚠️ 画面内有多人，请让陪护者离开画面"
+                            else "⚠️ 脚部未入镜，请后退入框",
                             color = Color.White,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
@@ -951,7 +976,7 @@ internal fun PersistentControlFooter(
 
 
 @Composable
-private fun CounterBadge(
+internal fun CounterBadge(
     repCount: Int,
     repsPerSet: Int,
     counterLabel: String,
@@ -1026,7 +1051,7 @@ private fun CounterBadge(
 }
 
 @Composable
-private fun MetronomeBadge(
+internal fun MetronomeBadge(
     bpm: Int,
     enabled: Boolean,
     onToggle: (Boolean) -> Unit,

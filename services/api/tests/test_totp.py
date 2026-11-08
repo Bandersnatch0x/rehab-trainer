@@ -5,6 +5,8 @@ from app.models.audit import AuditEvent
 from app.models.identity import Account
 from tests.helpers import API, auth_headers, login
 
+PASSWORD = "secret123"
+
 
 def test_verify_accepts_current_and_adjacent_steps():
     secret = totp.generate_secret()
@@ -36,10 +38,22 @@ def test_provisioning_uri_contains_secret_and_issuer():
 # ---------- 自助启用/停用端点 ----------
 
 
-def _enroll(client, token):
-    response = client.post(f"{API}/auth/totp/enroll", headers=auth_headers(token))
+def _enroll(client, token, password=PASSWORD):
+    response = client.post(
+        f"{API}/auth/totp/enroll",
+        json={"password": password},
+        headers=auth_headers(token),
+    )
     assert response.status_code == 200, response.text
-    return response.json()["secret"]
+    return response.json()
+
+
+def _confirm(client, token, enrollment, code):
+    return client.post(
+        f"{API}/auth/totp/confirm",
+        json={"enrollmentToken": enrollment["enrollmentToken"], "code": code},
+        headers=auth_headers(token),
+    )
 
 
 def _status(client, token) -> bool:
@@ -48,51 +62,35 @@ def _status(client, token) -> bool:
     return response.json()["totpEnabled"]
 
 
+def test_enroll_requires_password(client, seed):
+    token = login(client, "therapist-a")
+
+    wrong = client.post(
+        f"{API}/auth/totp/enroll",
+        json={"password": "wrong-password"},
+        headers=auth_headers(token),
+    )
+    assert wrong.status_code == 422
+    assert wrong.json()["code"] == "VALIDATION_FAILED"
+    assert _status(client, token) is False
+
+
 def test_enroll_returns_secret_but_does_not_enable_before_confirm(client, seed):
     token = login(client, "therapist-a")
 
-    secret = _enroll(client, token)
-    assert len(secret) >= 16
+    enrollment = _enroll(client, token)
+    assert len(enrollment["secret"]) >= 16
+    assert len(enrollment["enrollmentToken"]) >= 16
     # 关键：拿到密钥不等于已启用。确认前放弃，账号不会被锁在没录入的密钥上。
     assert _status(client, token) is False
 
 
-def test_confirm_enables_totp_and_code_cannot_be_replayed(client, seed):
+def test_confirm_rejects_forged_enrollment_token(client, seed):
     token = login(client, "therapist-a")
-    secret = _enroll(client, token)
-    code = totp.generate_code(secret)
-
-    confirmed = client.post(
-        f"{API}/auth/totp/confirm",
-        json={"secret": secret, "code": code},
-        headers=auth_headers(token),
-    )
-    assert confirmed.status_code == 200, confirmed.text
-    assert confirmed.json()["totpEnabled"] is True
-    assert _status(client, token) is True
-
-    missing = client.post(
-        f"{API}/auth/login",
-        json={"username": "therapist-a", "password": "secret123"},
-    )
-    assert missing.status_code == 401
-    assert "二次验证" in missing.json()["message"]
-
-    # 确认时消费掉的时间步不能紧接着用于登录。
-    replay = client.post(
-        f"{API}/auth/login",
-        json={"username": "therapist-a", "password": "secret123", "totp": code},
-    )
-    assert replay.status_code == 401
-
-
-def test_confirm_rejects_wrong_code_and_keeps_totp_off(client, seed):
-    token = login(client, "therapist-a")
-    secret = _enroll(client, token)
 
     response = client.post(
         f"{API}/auth/totp/confirm",
-        json={"secret": secret, "code": "000000"},
+        json={"enrollmentToken": "x" * 32, "code": "123456"},
         headers=auth_headers(token),
     )
     assert response.status_code == 422
@@ -100,21 +98,57 @@ def test_confirm_rejects_wrong_code_and_keeps_totp_off(client, seed):
     assert _status(client, token) is False
 
 
+def test_confirm_enables_totp_and_code_cannot_be_replayed(client, seed):
+    token = login(client, "therapist-a")
+    enrollment = _enroll(client, token)
+    secret = enrollment["secret"]
+    code = totp.generate_code(secret)
+
+    confirmed = _confirm(client, token, enrollment, code)
+    assert confirmed.status_code == 200, confirmed.text
+    assert confirmed.json()["totpEnabled"] is True
+    assert _status(client, token) is True
+
+    missing = client.post(
+        f"{API}/auth/login",
+        json={"username": "therapist-a", "password": PASSWORD},
+    )
+    assert missing.status_code == 401
+    assert "二次验证" in missing.json()["message"]
+
+    # 确认时消费掉的时间步不能紧接着用于登录。
+    replay = client.post(
+        f"{API}/auth/login",
+        json={"username": "therapist-a", "password": PASSWORD, "totp": code},
+    )
+    assert replay.status_code == 401
+
+
+def test_confirm_rejects_wrong_code_and_keeps_totp_off(client, seed):
+    token = login(client, "therapist-a")
+    enrollment = _enroll(client, token)
+
+    response = _confirm(client, token, enrollment, "000000")
+    assert response.status_code == 422
+    assert response.json()["code"] == "VALIDATION_FAILED"
+    assert _status(client, token) is False
+
+
 def test_enroll_and_confirm_reject_when_already_enabled(client, seed):
     token = login(client, "therapist-a")
-    secret = _enroll(client, token)
-    client.post(
-        f"{API}/auth/totp/confirm",
-        json={"secret": secret, "code": totp.generate_code(secret)},
+    enrollment = _enroll(client, token)
+    _confirm(client, token, enrollment, totp.generate_code(enrollment["secret"]))
+
+    enroll_again = client.post(
+        f"{API}/auth/totp/enroll",
+        json={"password": PASSWORD},
         headers=auth_headers(token),
     )
-
-    enroll_again = client.post(f"{API}/auth/totp/enroll", headers=auth_headers(token))
     assert enroll_again.status_code == 409
 
     confirm_again = client.post(
         f"{API}/auth/totp/confirm",
-        json={"secret": totp.generate_secret(), "code": "123456"},
+        json={"enrollmentToken": "x" * 32, "code": "123456"},
         headers=auth_headers(token),
     )
     assert confirm_again.status_code == 409
@@ -137,14 +171,14 @@ def test_disable_requires_password_and_code(client, seed, db_session):
 
     wrong_code = client.post(
         f"{API}/auth/totp/disable",
-        json={"password": "secret123", "code": "000000"},
+        json={"password": PASSWORD, "code": "000000"},
         headers=auth_headers(token),
     )
     assert wrong_code.status_code == 422
 
     ok = client.post(
         f"{API}/auth/totp/disable",
-        json={"password": "secret123", "code": totp.generate_code(secret)},
+        json={"password": PASSWORD, "code": totp.generate_code(secret)},
         headers=auth_headers(token),
     )
     assert ok.status_code == 200, ok.text
@@ -153,16 +187,34 @@ def test_disable_requires_password_and_code(client, seed, db_session):
     # 停用后登录不再要验证码。
     after = client.post(
         f"{API}/auth/login",
-        json={"username": "therapist-a", "password": "secret123"},
+        json={"username": "therapist-a", "password": PASSWORD},
     )
     assert after.status_code == 200, after.text
+
+
+def test_disable_rejects_replayed_code(client, seed, db_session):
+    token = login(client, "therapist-a")
+    secret = totp.generate_secret()
+    account = db_session.get(Account, "therapist-a")
+    account.totp_secret = secret
+    account.totp_last_step = totp.current_step()
+    db_session.commit()
+
+    # 当前时间步已消费：停用必须等下一个码，不能用同一个码剥掉第二因素。
+    replay = client.post(
+        f"{API}/auth/totp/disable",
+        json={"password": PASSWORD, "code": totp.generate_code(secret)},
+        headers=auth_headers(token),
+    )
+    assert replay.status_code == 422
+    assert _status(client, token) is True
 
 
 def test_disable_rejects_when_not_enabled(client, seed):
     token = login(client, "therapist-a")
     response = client.post(
         f"{API}/auth/totp/disable",
-        json={"password": "secret123", "code": "123456"},
+        json={"password": PASSWORD, "code": "123456"},
         headers=auth_headers(token),
     )
     assert response.status_code == 409
@@ -170,15 +222,16 @@ def test_disable_rejects_when_not_enabled(client, seed):
 
 def test_totp_changes_are_audited(client, seed, db_session):
     token = login(client, "therapist-a")
-    secret = _enroll(client, token)
-    client.post(
-        f"{API}/auth/totp/confirm",
-        json={"secret": secret, "code": totp.generate_code(secret)},
-        headers=auth_headers(token),
+    enrollment = _enroll(client, token)
+    secret = enrollment["secret"]
+    _confirm(client, token, enrollment, totp.generate_code(secret))
+    # 确认消费了当前时间步；停用改用下一个码。
+    next_code = totp.generate_code(
+        secret, at=(totp.current_step() + 1) * totp.STEP_SECONDS
     )
     client.post(
         f"{API}/auth/totp/disable",
-        json={"password": "secret123", "code": totp.generate_code(secret)},
+        json={"password": PASSWORD, "code": next_code},
         headers=auth_headers(token),
     )
 

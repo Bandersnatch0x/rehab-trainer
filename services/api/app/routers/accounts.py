@@ -241,6 +241,13 @@ def update_account(
     db: Session = Depends(get_db),
 ):
     account = _load_scoped(db, principal, accountId)
+    # 同一账号的并发 PATCH 会各自通过校验后各插一条角色绑定（patient_id 为 NULL 时
+    # 唯一约束挡不住）。锁账号行，把同一目标的写序列化。
+    db.execute(
+        select(Account.account_id)
+        .where(Account.account_id == account.account_id)
+        .with_for_update()
+    )
     binding = _managed_binding(db, account.account_id, principal.org_id)
     current_role = binding.role if binding else None
     grantable = _grantable_roles(principal)
@@ -254,6 +261,19 @@ def update_account(
                 "targetAccountId": account.account_id,
                 "targetRole": current_role,
                 "grantableRoles": list(grantable),
+            },
+        )
+    # 目标账号不是管理端账号（患者/照护者）：不允许挂管理端角色。
+    # 否则一次改名/停用请求就会顺带把患者升成临床角色（其患者绑定仍保留），
+    # 且这条路径不需要任何额外的角色变更意图。
+    if payload.role is not None and current_role is None:
+        _deny_role_change(
+            db,
+            principal,
+            {
+                "targetAccountId": account.account_id,
+                "requestedRole": payload.role.value,
+                "reason": "target_not_managed",
             },
         )
     if payload.role is not None and payload.role.value not in grantable:
