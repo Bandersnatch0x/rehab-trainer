@@ -1,7 +1,7 @@
 ---
 id: "0035"
 type: "task"
-status: "open"
+status: "done"
 assignee: null
 part-of: null
 created: 2026-11-08
@@ -73,4 +73,11 @@ created: 2026-11-08
   - 单测 6 项（`TtsInitWatchdogTest`），Android 单测 190 项全通过（原 184）。
   - 文案两项（`videoTitle`、训练准入提示）未改：main 已用 `isGenericDemo` 标注
     处理了通用素材误导，措辞留给产品定，不在本次范围。
-- **待办 1（删两个已覆盖分支）**：待执行。
+- **待办 1（删两个已覆盖分支）**：已完成。`ui-pip-video`、`demo-audio-placeholder`
+  本地 + origin + gitee 三处已删；删前验过内容确实在 main（占位音轨版 mp4 含 `soun`
+  atom、`setVolume(VIDEO_AUDIO_VOLUME)` 在位、画中画/`aspectRatio`/通用演示标注均在）。
+
+### 2026-11-08 结票
+
+4 个未并入分支全部收敛，仓库只剩 `main`。遗留的只有 `videoTitle`（5 处「标准示范」
+→「动作演示」）与训练准入提示措辞两项，属产品口径，需要时按本节记录重做。

@@ -1,7 +1,7 @@
 ---
 id: "0036"
 type: "task"
-status: "open"
+status: "done"
 assignee: null
 part-of: null
 created: 2026-11-08
