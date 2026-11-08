@@ -21,6 +21,7 @@ class VoiceCoach(
 ) {
     private val mainHandler = Handler(Looper.getMainLooper())
     private val utteranceSeq = AtomicInteger(0)
+    private val initWatchdog = TtsInitWatchdog()
 
     @Volatile
     private var tts: TextToSpeech? = null
@@ -44,10 +45,20 @@ class VoiceCoach(
             Log.w(TAG, "TTS engine creation failed")
             isReady = false
             mainHandler.post { onReadyChanged(false) }
+        } else {
+            // 引擎不回调时不能一直显示「语音开」却永远无声。
+            mainHandler.postDelayed({
+                if (initWatchdog.onTimeout()) {
+                    Log.w(TAG, "TTS init timed out")
+                    onReadyChanged(false)
+                }
+            }, INIT_TIMEOUT_MS)
         }
     }
 
     private fun handleInit(status: Int) {
+        // 释放后才到的回调：引擎已 shutdown，不再改状态也不通知已销毁的界面。
+        if (!initWatchdog.onCallback()) return
         val engine = tts
         var languageResult = if (status == TextToSpeech.SUCCESS && engine != null) {
             engine.setLanguage(Locale.SIMPLIFIED_CHINESE)
@@ -64,6 +75,12 @@ class VoiceCoach(
             languageResult != TextToSpeech.LANG_NOT_SUPPORTED
         Log.i(TAG, "TTS init status=$status language=$languageResult usable=$usable")
         isReady = usable
+        if (!usable) {
+            // 初始化失败：主动释放引擎。只把字段置空的话 release() 拿不到引用，
+            // 每次进训练页都会漏一个原生 TTS 实例。
+            tts = null
+            runCatching { engine?.shutdown() }
+        }
         mainHandler.post { onReadyChanged(usable) }
     }
 
@@ -84,6 +101,7 @@ class VoiceCoach(
     }
 
     fun release() {
+        initWatchdog.release()
         tts?.stop()
         tts?.shutdown()
         tts = null
@@ -96,5 +114,8 @@ class VoiceCoach(
         const val TAG = "VoiceCoach"
         const val TONE_VOLUME = 80
         const val BEEP_DURATION_MS = 60
+
+        /** 引擎初始化最长等待；超过即按不可用通知界面，避免「语音开」却全程静音。 */
+        const val INIT_TIMEOUT_MS = 5_000L
     }
 }
