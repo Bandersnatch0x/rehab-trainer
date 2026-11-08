@@ -219,7 +219,7 @@ python -m unittest discover -s scripts -p "test_*.py"
 
 预期：
 
-- 后端测试 162 项全部通过。
+- 后端测试 165 项全部通过。
 - 部署自检输出 `PASS: 18 tables; SQLite upgrade/repeat/downgrade/upgrade; model diff empty; PostgreSQL SQL; YAML`。
 - 联调脚本回归测试 12 项通过。
 
@@ -254,7 +254,7 @@ $env:JAVA_HOME = 'E:\jdk\microsoft-jdk-21.0.10-windows-x64\jdk-21.0.10+7'
 ./gradlew.bat :app:testDebugUnitTest :app:assembleDebug --no-daemon
 ```
 
-预期：184 项单元测试全部通过，`assembleDebug` 成功。以上路径是本次验证环境；现场按实际 JDK 与 SDK 安装位置替换。`scripts/verify_all.py` 在 Windows 上会用绝对路径直接调用 `gradlew.bat`，无需先跑 `--skip-android`。
+预期：206 项单元测试全部通过，`assembleDebug` 成功。以上路径是本次验证环境；现场按实际 JDK 与 SDK 安装位置替换。`scripts/verify_all.py` 在 Windows 上会用绝对路径直接调用 `gradlew.bat`，无需先跑 `--skip-android`。
 
 ### 9.6 API 联调
 

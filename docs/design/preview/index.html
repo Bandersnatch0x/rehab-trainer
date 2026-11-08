@@ -1530,11 +1530,13 @@
                 </span>
               </div>
 
-              <!-- PiP: 微信视频式小浮窗，点击切换主/小画面 -->
+              ${isDual ? `
+              <!-- PiP: 微信视频式小浮窗；纯实景模式没有教学视频，不显示浮窗 -->
               <div style="position:absolute; right:8px; bottom:34px; width:38%; aspect-ratio:16/9; background:#1E293B; border:1.5px solid #F59E0B; border-radius:10px; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:2px; box-shadow:0 4px 12px rgba(0,0,0,0.45); cursor:pointer;" onclick="alert('演示：点击小浮窗可切换主/小画面')">
                 <span style="font-size:11px; color:#FBBF24; font-weight:700;">🎬 通用演示 · 非本条动作</span>
                 <span style="font-size:10px; color:#94A3B8;">点击切换主/小画面</span>
               </div>
+              ` : ''}
             </div>
 
           </div>
