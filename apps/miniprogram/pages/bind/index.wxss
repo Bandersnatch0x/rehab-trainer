@@ -24,3 +24,11 @@ button.bind__button {
   min-height: 160rpx;
   margin-top: 28rpx;
 }
+
+/* 原生 button 的禁用态默认把文字压到几乎不可读；这里给出可读的灰底深灰字。 */
+.bind__button--off {
+  color: #475569;
+  background-color: #e2e8f0;
+  border: 2rpx solid #94a3b8;
+  box-shadow: none;
+}

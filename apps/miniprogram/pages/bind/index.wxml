@@ -21,7 +21,7 @@
     />
     <view wx:if="{{error}}" class="notice notice--danger" aria-role="alert">{{error}}</view>
     <button
-      class="btn btn--primary bind__button"
+      class="btn btn--primary bind__button {{submitting || !code ? 'bind__button--off' : ''}}"
       bindtap="submit"
       loading="{{submitting}}"
       disabled="{{submitting || !code}}"
@@ -37,7 +37,7 @@
     </view>
     <view wx:if="{{demoError}}" class="notice notice--danger" aria-role="alert">{{demoError}}</view>
     <button
-      class="btn btn--secondary bind__button"
+      class="btn btn--secondary bind__button {{demoLoading || submitting ? 'bind__button--off' : ''}}"
       bindtap="enterDemo"
       loading="{{demoLoading}}"
       disabled="{{demoLoading || submitting}}"
