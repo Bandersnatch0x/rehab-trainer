@@ -11,6 +11,7 @@ import com.rehabtrainer.app.data.offline.FileSessionUploadQueue
 import com.rehabtrainer.app.data.offline.PendingSessionUpload
 import com.rehabtrainer.app.data.offline.SessionSyncService
 import com.rehabtrainer.app.data.offline.SessionUploadQueue
+import com.rehabtrainer.app.data.offline.UploadBackoffPolicy
 import java.io.IOException
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -209,5 +210,119 @@ class ApiSessionSyncServiceTest {
 
         assertTrue(result is ApiResult.Failure)
         assertEquals(1, queue.pendingCount())
+    }
+
+    @Test
+    fun itemsInBackoffAreSkippedWithoutNetworkCall() = runBlocking {
+        val queue = InMemoryQueue()
+        // 已失败 3 次 → 退避 120s；现在只过去 10s，本轮不该发请求。
+        queue.items["client-1"] = PendingSessionUpload(
+            record = record("client-1"),
+            enqueuedAtEpochMillis = 0L,
+            attemptCount = 3,
+            lastAttemptAtEpochMillis = 1_000L
+        )
+        var calls = 0
+        val service = ApiSessionSyncService(queue, nowMillis = { 11_000L }) {
+            calls++
+            SessionBatchResult(emptyList())
+        }
+
+        val result = service.flushPending()
+
+        assertEquals(0, calls)
+        // 退避中返回空成功而不是失败：没有错误可提示，只是本轮没传。
+        assertTrue(result is ApiResult.Success)
+        assertEquals(1, queue.pendingCount())
+    }
+
+    @Test
+    fun dueItemIsUploadedEvenWhenAnotherIsInBackoff() = runBlocking {
+        val queue = InMemoryQueue()
+        // 5 次失败 → 退避 480s，仍在等。
+        queue.items["blocked"] = PendingSessionUpload(
+            record = record("blocked"),
+            enqueuedAtEpochMillis = 0L,
+            attemptCount = 5,
+            lastAttemptAtEpochMillis = 1_000L
+        )
+        // 新记录从未尝试过，必须立刻上传，不被旧记录的退避连坐。
+        queue.items["fresh"] = PendingSessionUpload(
+            record = record("fresh"),
+            enqueuedAtEpochMillis = 0L
+        )
+        val uploaded = mutableListOf<String>()
+        val service = ApiSessionSyncService(queue, nowMillis = { 2_000L }) { request ->
+            uploaded += request.records.map { it.clientRecordId }
+            SessionBatchResult(request.records.map { SessionBatchItemResult(it.clientRecordId, true) })
+        }
+
+        service.flushPending()
+
+        assertEquals(listOf("fresh"), uploaded)
+        assertEquals(listOf("blocked"), queue.items.keys.toList())
+    }
+}
+
+class UploadBackoffPolicyTest {
+
+    private fun item(attemptCount: Int, lastAttemptAt: Long?) = PendingSessionUpload(
+        record = SessionRecordCreate(
+            clientRecordId = "client-1",
+            patientId = "patient-1",
+            prescriptionId = "rx-1",
+            recordedAt = "2026-11-07T02:00:00Z",
+            modelVersion = "m",
+            modelSha256 = "a".repeat(64),
+            metricAlgorithmVersion = "alg",
+            thresholdConfigVersion = "th"
+        ),
+        enqueuedAtEpochMillis = 0L,
+        attemptCount = attemptCount,
+        lastAttemptAtEpochMillis = lastAttemptAt
+    )
+
+    @Test
+    fun delayGrowsExponentially() {
+        assertEquals(0L, UploadBackoffPolicy.delayAfterFailure(0))
+        assertEquals(30_000L, UploadBackoffPolicy.delayAfterFailure(1))
+        assertEquals(60_000L, UploadBackoffPolicy.delayAfterFailure(2))
+        assertEquals(120_000L, UploadBackoffPolicy.delayAfterFailure(3))
+        assertEquals(240_000L, UploadBackoffPolicy.delayAfterFailure(4))
+    }
+
+    @Test
+    fun delayCapsWithoutOverflow() {
+        assertEquals(UploadBackoffPolicy.MAX_DELAY_MS, UploadBackoffPolicy.delayAfterFailure(7))
+        // 直接按 Int.MAX_VALUE 位移会溢出成负数，必须仍返回正的上限。
+        assertEquals(UploadBackoffPolicy.MAX_DELAY_MS, UploadBackoffPolicy.delayAfterFailure(Int.MAX_VALUE))
+        // 负数当「从未失败」处理，不是当「无限久」。
+        assertEquals(0L, UploadBackoffPolicy.delayAfterFailure(-3))
+    }
+
+    @Test
+    fun neverAttemptedIsDueImmediately() {
+        assertTrue(UploadBackoffPolicy.isDue(item(attemptCount = 0, lastAttemptAt = null), 0L))
+    }
+
+    @Test
+    fun recentlyFailedIsNotDueUntilDelayElapses() {
+        val failed = item(attemptCount = 1, lastAttemptAt = 1_000L)
+        assertFalse(UploadBackoffPolicy.isDue(failed, nowEpochMillis = 30_999L))
+        assertTrue(UploadBackoffPolicy.isDue(failed, nowEpochMillis = 31_000L))
+    }
+
+    @Test
+    fun laterFailuresWaitLonger() {
+        // 第 4 次失败后等 240s。
+        val failed = item(attemptCount = 4, lastAttemptAt = 0L)
+        assertFalse(UploadBackoffPolicy.isDue(failed, nowEpochMillis = 239_999L))
+        assertTrue(UploadBackoffPolicy.isDue(failed, nowEpochMillis = 240_000L))
+    }
+
+    @Test
+    fun clockRollbackDoesNotCauseRetryStorm() {
+        // 设备时间被往回拨：now < lastAttempt，绝不能判成「已到期」。
+        assertFalse(UploadBackoffPolicy.isDue(item(1, 1_000_000L), nowEpochMillis = 500_000L))
     }
 }

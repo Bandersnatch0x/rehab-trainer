@@ -21,7 +21,9 @@ data class PendingSessionUpload(
  * - 以 `SessionRecordCreate.clientRecordId` 作为本地主键，[enqueue] 遇到同一幂等键应返回 false，
  *   不得产生重复条目。
  * - 队列中的记录可跨进程重启恢复；上传成功后由 [markUploaded] 删除。
- * - 上传失败保留记录并累计 [PendingSessionUpload.attemptCount]，由调用方决定退避策略。
+ * - 上传失败保留记录并累计 [PendingSessionUpload.attemptCount] 与
+ *   [PendingSessionUpload.lastAttemptAtEpochMillis]；退避由 [UploadBackoffPolicy] 按这两个字段计算，
+ *   实现只需如实写入，不要自行丢弃或重置。
  * - 单次最多取出 [MAX_BATCH_SIZE] 条，与服务端 `minItems=1, maxItems=100` 对齐。
  */
 interface SessionUploadQueue {

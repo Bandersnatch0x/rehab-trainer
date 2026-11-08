@@ -10,16 +10,23 @@ import com.rehabtrainer.app.data.contract.SessionBatchResult
  *
  * - 逐条处理服务端 `accepted`：成功出队，失败保留并累计错误；
  * - 整体失败（网络/服务端错误）时不动队列，等待下次联网重试；
+ * - 未到 [UploadBackoffPolicy] 退避时间的条目本轮跳过，不发请求；
  * - 使用 `clientRecordId` 幂等，超时重试安全。
+ *
+ * @param nowMillis 当前时间，用于判定退避是否到期；测试注入假时钟。
  */
 class ApiSessionSyncService(
     private val queue: SessionUploadQueue,
+    private val nowMillis: () -> Long = System::currentTimeMillis,
     private val upload: suspend (SessionBatchRequest) -> SessionBatchResult
 ) : SessionSyncService {
 
     override suspend fun flushPending(limit: Int): ApiResult<SessionBatchResult> {
-        val pending = queue.pending(limit)
+        val now = nowMillis()
+        val pending = queue.pending(limit).filter { UploadBackoffPolicy.isDue(it, now) }
         if (pending.isEmpty()) {
+            // 队列为空、或全部在退避中：都不发请求。
+            // 退避中返回空成功而不是失败——调用方只关心「本轮有没有传」，没有错误可提示。
             return ApiResult.Success(SessionBatchResult(results = emptyList()))
         }
         val result = apiCall { upload(SessionBatchRequest(records = pending.map { it.record })) }

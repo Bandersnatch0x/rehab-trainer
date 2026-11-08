@@ -99,7 +99,8 @@ could not receive data from server: Software caused connection abort (0x00002745
 仍未做，留给 P4-1/P4-5：
 
 - 多副本下的池总量核算（需确定副本数与数据库 `max_connections`）。
-- 客户端对 503 的统一退避重试；Android 训练记录已有本地队列重试，其余读取路径目前只提示失败。
+- ~~客户端对 503 的统一退避重试~~：Android 训练记录上传已接入退避，见票 0037；
+  其余读取路径没有重试循环，暂无可退避的对象。
 
 ## Log
 
