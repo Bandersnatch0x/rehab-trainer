@@ -1,10 +1,13 @@
-# GitHub Actions CI。仓库当前没有 GitHub 远端，本文件未在真实流水线验证。
+# GitHub Actions CI。远端为 github.com 私有仓，已在真实流水线跑通。
+# 手动触发（workflow_dispatch）用于「改完 CI 配置要全量验一遍」——路径过滤会把没碰到的 job 跳过，
+# 那种情况下 android 这类重 job 可能几轮都没被真正执行过。
 name: CI
 
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -13,15 +16,17 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      android: ${{ steps.filter.outputs.android }}
-      miniprogram: ${{ steps.filter.outputs.miniprogram }}
-      admin_web: ${{ steps.filter.outputs.admin_web }}
-      api: ${{ steps.filter.outputs.api }}
-      api_contract: ${{ steps.filter.outputs.api_contract }}
+      # 手动触发时 filter 那步不跑（输出为空），回落到 all —— 视为全量变更。
+      android: ${{ steps.filter.outputs.android || steps.all.outputs.android }}
+      miniprogram: ${{ steps.filter.outputs.miniprogram || steps.all.outputs.miniprogram }}
+      admin_web: ${{ steps.filter.outputs.admin_web || steps.all.outputs.admin_web }}
+      api: ${{ steps.filter.outputs.api || steps.all.outputs.api }}
+      api_contract: ${{ steps.filter.outputs.api_contract || steps.all.outputs.api_contract }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
         id: filter
+        if: github.event_name != 'workflow_dispatch'
         with:
           filters: |
             android:
@@ -38,6 +43,13 @@ jobs:
               - 'packages/api-contract/**'
               - 'packages/api-client-ts/**'
               - 'packages/api-client-kt/**'
+      - name: 手动触发视为全量变更
+        id: all
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          for key in android miniprogram admin_web api api_contract; do
+            echo "$key=true" >> "$GITHUB_OUTPUT"
+          done
 
   android:
     needs: changes
