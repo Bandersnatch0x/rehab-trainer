@@ -73,15 +73,18 @@ class MediaCacheManager(
     private val lock = Any()
     private val entries = mutableListOf<MediaCacheEntry>()
     private val saveMutex = Mutex()
+    private val prefetchMutex = Mutex()
     private val downloadLocks = mutableMapOf<String, Mutex>()
     private val inFlight = mutableSetOf<String>()
     private var persistJob: Job? = null
+    private var prefetchJob: Job? = null
 
     init {
         entries += store.load()
         // 档位变小时（如平板换手机）启动即按 LRU 收敛，pinned 仍不动。
         val startupPlan = MediaCacheEvictionPolicy.plan(entries, quota)
-        if (startupPlan.evicted.isNotEmpty()) {
+        // pinned 自身超限时淘汰非 pinned 也无收益，保留可播放缓存，只告警。
+        if (startupPlan.fitsQuota && startupPlan.evicted.isNotEmpty()) {
             val evictedUrls = startupPlan.evicted.mapTo(HashSet()) { it.url }
             entries.removeAll { it.url in evictedUrls }
             runCatching { store.save(entries.toList()) }
@@ -101,8 +104,10 @@ class MediaCacheManager(
     fun entriesSnapshot(): List<MediaCacheEntry> = synchronized(lock) { entries.toList() }
 
     /**
-     * 播放路径：命中且文件存在时刷新 `lastUsedAt` 并返回本地绝对路径；
-     * 文件丢失则顺手清掉失效条目。
+     * 播放路径：命中索引即返回本地绝对路径并刷新 `lastUsedAt`。
+     *
+     * 只查内存索引，不在 Compose 组合线程做磁盘 stat；条目只有在文件改名成功后
+     * 才会登记，外部删文件属异常场景，播放失败会走既有内置视频回退。
      */
     fun localPlaybackUrl(url: String): String? {
         var resolved: File? = null
@@ -111,16 +116,10 @@ class MediaCacheManager(
             val index = entries.indexOfFirst { it.url == url }
             if (index >= 0) {
                 val entry = entries[index]
-                val file = store.fileFor(entry)
-                if (file.isFile) {
-                    resolved = file
-                    val now = clock()
-                    if (now - entry.lastUsedAt >= TOUCH_INTERVAL_MS || now < entry.lastUsedAt) {
-                        entries[index] = entry.copy(lastUsedAt = now)
-                        changed = true
-                    }
-                } else {
-                    entries.removeAt(index)
+                resolved = store.fileFor(entry)
+                val now = clock()
+                if (now - entry.lastUsedAt >= TOUCH_INTERVAL_MS || now < entry.lastUsedAt) {
+                    entries[index] = entry.copy(lastUsedAt = now)
                     changed = true
                 }
             }
@@ -136,7 +135,7 @@ class MediaCacheManager(
     fun requestPlaybackDownload(url: String) {
         if (!isRemoteHttpUrl(url)) return
         synchronized(lock) {
-            if (entries.any { it.url == url && store.fileFor(it).isFile }) return
+            if (entries.any { it.url == url }) return
             if (!inFlight.add(url)) return
         }
         scope.launch {
@@ -170,12 +169,22 @@ class MediaCacheManager(
      * 预取当前处方（及可选的进行中训练）条目。
      *
      * 先落 pinned 语义（换处方会解除旧处方的 pinned），再按网络与空间门槛决定是否开跑。
+     * 轮次之间串行：新处方不会与旧处方的在途下载交叉写 pinned。
      */
     suspend fun prefetch(
         prescriptionId: String?,
         prescriptionUrls: List<String>,
         activeSessionUrls: List<String> = emptyList(),
         conditions: MediaPrefetchConditions = this.conditions()
+    ): MediaPrefetchReport = prefetchMutex.withLock {
+        prefetchLocked(prescriptionId, prescriptionUrls, activeSessionUrls, conditions)
+    }
+
+    private suspend fun prefetchLocked(
+        prescriptionId: String?,
+        prescriptionUrls: List<String>,
+        activeSessionUrls: List<String>,
+        conditions: MediaPrefetchConditions
     ): MediaPrefetchReport {
         val prescription = prescriptionUrls.filter(::isRemoteHttpUrl).distinct()
         val active = activeSessionUrls.filter(::isRemoteHttpUrl).distinct()
@@ -238,25 +247,27 @@ class MediaCacheManager(
         return MediaPrefetchReport(downloaded = downloaded, failed = failed, skipped = skipped)
     }
 
-    /** 应用启动 8 秒后再预取，避开首屏请求。 */
+    /** 应用启动 8 秒后再预取，避开首屏请求；新轮次取消旧轮次。 */
     fun launchStartupPrefetch(
         prescriptionId: String?,
         prescriptionUrls: List<String>,
         activeSessionUrls: List<String> = emptyList()
     ) {
-        scope.launch {
+        prefetchJob?.cancel()
+        prefetchJob = scope.launch {
             delay(MediaPrefetchPolicy.START_DELAY_MS)
             prefetch(prescriptionId, prescriptionUrls, activeSessionUrls)
         }
     }
 
-    /** 处方变更后的预取。 */
+    /** 处方变更后的预取；新轮次取消旧轮次，避免旧处方的在途下载回写 pinned。 */
     fun launchPrefetch(
         prescriptionId: String?,
         prescriptionUrls: List<String>,
         activeSessionUrls: List<String> = emptyList()
     ) {
-        scope.launch { prefetch(prescriptionId, prescriptionUrls, activeSessionUrls) }
+        prefetchJob?.cancel()
+        prefetchJob = scope.launch { prefetch(prescriptionId, prescriptionUrls, activeSessionUrls) }
     }
 
     /** 立即把内存索引写盘；测试与进程退场前可用。 */
@@ -291,6 +302,20 @@ class MediaCacheManager(
         }
 
         val sha256 = sha256Hex(url)
+        val pinValue = pinnedByPrescriptionId?.takeIf { it.isNotBlank() }
+
+        // 廉价预判：pinned 已占满配额时普通条目不可能放下，直接拒绝，避免整段下载后删除。
+        if (pinValue == null) {
+            val pinnedBlocksEverything = synchronized(lock) {
+                val pinned = entries.filter { it.isPinned }
+                pinned.sumOf { it.bytes } >= quota.maxBytes || pinned.size >= quota.maxEntries
+            }
+            if (pinnedBlocksEverything) {
+                log("pinned 已占满配额，跳过普通条目 key=$sha256")
+                return MediaCacheResult.QUOTA_REJECTED
+            }
+        }
+
         val partial = store.partialFileFor(sha256)
         partial.delete()
         val bytes = try {
@@ -314,21 +339,15 @@ class MediaCacheManager(
             url = url,
             sha256 = sha256,
             bytes = bytes,
-            pinnedByPrescriptionId = pinnedByPrescriptionId?.takeIf { it.isNotBlank() },
+            pinnedByPrescriptionId = pinValue,
             lastUsedAt = now,
             cachedAt = now,
             appVersion = appVersion
         )
         val target = store.fileFor(entry)
-        target.delete()
-        if (!partial.renameTo(target)) {
-            partial.delete()
-            log("媒体缓存改名失败 key=$sha256")
-            return MediaCacheResult.DOWNLOAD_FAILED
-        }
 
         var rejected = false
-        var evictedFiles: List<File> = emptyList()
+        var renameFailed = false
         var pinnedOverQuota = false
         synchronized(lock) {
             entries.removeAll { it.url == url }
@@ -338,24 +357,38 @@ class MediaCacheManager(
                 incomingBytes = bytes,
                 incomingEntries = 1
             )
-            if (!plan.fitsQuota && !entry.isPinned) {
-                rejected = true
-            } else {
-                val evictedUrls = plan.evicted.mapTo(HashSet()) { it.url }
-                entries.removeAll { it.url in evictedUrls }
-                entries += entry
-                evictedFiles = plan.evicted.map(store::fileFor)
-                pinnedOverQuota = MediaCacheEvictionPolicy.pinnedExceedsQuota(entries, quota)
+            when {
+                !plan.fitsQuota && !entry.isPinned -> rejected = true
+                else -> {
+                    target.delete()
+                    if (!partial.renameTo(target)) {
+                        renameFailed = true
+                    } else {
+                        if (plan.fitsQuota) {
+                            // pinned 自身超限时不淘汰其他条目：删了也回不到配额内。
+                            val evictedUrls = plan.evicted.mapTo(HashSet()) { it.url }
+                            entries.removeAll { it.url in evictedUrls }
+                            // 与改名、登记同锁完成，避免删到并发重新下载的同名文件。
+                            plan.evicted.forEach { runCatching { store.fileFor(it).delete() } }
+                        }
+                        entries += entry
+                        pinnedOverQuota = MediaCacheEvictionPolicy.pinnedExceedsQuota(entries, quota)
+                    }
+                }
             }
         }
         if (rejected) {
-            target.delete()
+            partial.delete()
             log("缓存配额不足，跳过 key=$sha256")
             return MediaCacheResult.QUOTA_REJECTED
         }
+        if (renameFailed) {
+            partial.delete()
+            log("媒体缓存改名失败 key=$sha256")
+            return MediaCacheResult.DOWNLOAD_FAILED
+        }
         if (pinnedOverQuota) log("pinned 条目已超出缓存配额，仅告警不删除")
         persistNow()
-        evictedFiles.forEach { it.delete() }
         return MediaCacheResult.STORED
     }
 

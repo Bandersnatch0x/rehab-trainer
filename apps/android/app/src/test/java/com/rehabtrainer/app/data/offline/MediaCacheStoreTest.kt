@@ -53,6 +53,30 @@ class MediaCacheStoreTest {
     }
 
     @Test
+    fun 索引解析失败时保留媒体文件() {
+        val store = MediaCacheStore(folder.newFolder())
+        store.directory.mkdirs()
+        val media = File(store.directory, "abc.mp4").apply { writeBytes(ByteArray(3)) }
+        File(store.directory, MediaCacheStore.INDEX_FILE).writeText("{ broken json")
+
+        assertTrue(store.load().isEmpty())
+        assertTrue(media.exists())
+    }
+
+    @Test
+    fun 非摘要文件名被丢弃且不会删到目录外() {
+        val store = MediaCacheStore(folder.newFolder())
+        store.directory.mkdirs()
+        val outside = File(store.directory.parentFile, "escape-target").apply { writeBytes(ByteArray(1)) }
+        File(store.directory, MediaCacheStore.INDEX_FILE).writeText(
+            """[{"url":"https://media.example/x.mp4","sha256":"../escape-target","bytes":1,"lastUsedAt":1,"cachedAt":1,"appVersion":"0.1.0"}]"""
+        )
+
+        assertTrue(store.load().isEmpty())
+        assertTrue(outside.exists())
+    }
+
+    @Test
     fun 文件缺失的条目被丢弃() {
         val store = storeWithFiles()
         val kept = entry("https://media/kept.mp4")

@@ -35,7 +35,7 @@ created: 2026-11-05
 - 播放接线：`InstructionalVideoSource` 命中缓存返回本地路径，未命中保持远端并触发非计费网络下的后台补缓存；播放解析刷新 `lastUsedAt`（最多每分钟一次）。
 - 日志只记 URL 摘要（缓存键），不输出可能带签名/token 的原始媒体地址。
 
-验证：`:app:testDebugUnitTest` 13 个测试类 80 项全通过（新增缓存层 36 项与播放缓存 2 项；原有 8 项 `MediaPrefetchPolicyTest`、6 项既有 `InstructionalVideoSourceTest` 继续通过）；`:app:assembleDebug` 通过；`git diff --check` 无输出。详细证据与未做项见 `.agent/tmp/OFFLINE-CACHE.md`。
+验证：`:app:testDebugUnitTest` 13 个测试类 84 项全通过（新增缓存层 40 项与播放缓存 2 项；原有 8 项 `MediaPrefetchPolicyTest`、6 项既有 `InstructionalVideoSourceTest` 继续通过）；`:app:assembleDebug` 通过；`git diff --check` 无输出。独立代码审查无 CRITICAL/HIGH，其中的并发轮次、淘汰竞态、pinned 超限无收益删除、下载前配额预判、下载取消、主线程 stat、损坏索引保护与摘要校验已修复。详细证据与未做项见 `.agent/tmp/OFFLINE-CACHE.md`。
 
 未完成（原因已记）：无设备/模拟器，断网播放实测缺运行证据；训练页仍用 `DEFAULT_EXERCISES`（`videoUri` 全空）且处方数据未接 UI，预取触发入口已就绪但暂无调用方；服务端配额下发按规格另立票。
 

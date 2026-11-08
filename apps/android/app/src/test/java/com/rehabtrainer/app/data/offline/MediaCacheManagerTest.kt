@@ -165,6 +165,55 @@ class MediaCacheManagerTest {
     }
 
     @Test
+    fun pinned已占满配额时普通条目不发起下载() {
+        val downloader = FakeDownloader()
+        val manager = newManager(
+            downloader = downloader,
+            quota = MediaCacheQuota(10_000, 1)
+        )
+        runBlocking { assertEquals(MediaCacheResult.STORED, manager.ensureCached(URL_A, "p1")) }
+        downloader.calls.clear()
+
+        val result = runBlocking { manager.ensureCached(URL_B) }
+
+        assertEquals(MediaCacheResult.QUOTA_REJECTED, result)
+        assertTrue(downloader.calls.isEmpty())
+    }
+
+    @Test
+    fun pinned自身超配额时启动与新增pinned都不删非pinned() {
+        val sizes = mapOf(URL_A to 200L, URL_B to 100L, URL_C to 100L, URL_D to 50L)
+        val downloader = FakeDownloader(sizeFor = { url -> sizes.getValue(url) })
+        val directory = folder.newFolder()
+        val wide = newManager(
+            downloader = downloader,
+            quota = MediaCacheQuota(10_000, 100),
+            directory = directory
+        )
+        runBlocking {
+            wide.ensureCached(URL_A, "p1")
+            wide.ensureCached(URL_B, "p1")
+            wide.ensureCached(URL_C)
+        }
+
+        // pinned 自身 300 字节已超 250：启动不应用会删掉 C 的淘汰计划。
+        val narrow = newManager(
+            downloader = downloader,
+            quota = MediaCacheQuota(250, 10),
+            directory = directory
+        )
+        assertTrue(narrow.cachedUrls().containsAll(listOf(URL_A, URL_B, URL_C)))
+
+        // 再新增 pinned 仍超限：只告警，不淘汰 C。
+        val result = runBlocking { narrow.ensureCached(URL_D, "p2") }
+
+        assertEquals(MediaCacheResult.STORED, result)
+        assertTrue(narrow.cachedUrls().containsAll(listOf(URL_A, URL_B, URL_C, URL_D)))
+        assertTrue(File(directory, sha256Hex(URL_C) + ".mp4").exists())
+        assertTrue(logs.any { it.contains("pinned") })
+    }
+
+    @Test
     fun 缓存跨App版本存活() {
         val directory = folder.newFolder()
         val first = newManager(directory = directory, appVersion = "0.1.0")
@@ -318,17 +367,15 @@ class MediaCacheManagerTest {
     }
 
     @Test
-    fun 文件被外部删除后解析为空并清理索引() {
+    fun 文件被外部删除后下次启动加载会清理索引() {
         val directory = folder.newFolder()
         val manager = newManager(directory = directory)
         runBlocking { manager.ensureCached(URL_A) }
         File(directory, sha256Hex(URL_A) + ".mp4").delete()
 
-        assertNull(manager.localPlaybackUrl(URL_A))
-        assertTrue(manager.entriesSnapshot().isEmpty())
-
         runBlocking { manager.flush() }
         val reloaded = newManager(directory = directory)
+
         assertTrue(reloaded.cachedUrls().isEmpty())
     }
 

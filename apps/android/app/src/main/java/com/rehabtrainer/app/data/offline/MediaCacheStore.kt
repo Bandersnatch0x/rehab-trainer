@@ -22,15 +22,20 @@ class MediaCacheStore(
 
     fun load(): List<MediaCacheEntry> {
         if (!directory.isDirectory) return emptyList()
-        val text = runCatching { indexFile.readText(Charsets.UTF_8) }.getOrNull()
-        val parsed = text
-            ?.let { raw ->
-                runCatching { json.decodeFromString<List<MediaCacheEntry>>(raw) }.getOrNull()
-            }
-            .orEmpty()
+        if (!indexFile.isFile) {
+            // 索引不存在（首次安装或索引从未写成）：目录里的残留只能是孤儿/半成品。
+            cleanupOrphans(emptyList())
+            return emptyList()
+        }
+        // 索引存在但读取/解析失败：保留媒体文件，等下次成功写盘恢复，避免瞬时 IO 错误清空缓存。
+        val text = runCatching { indexFile.readText(Charsets.UTF_8) }.getOrNull() ?: return emptyList()
+        val parsed = runCatching {
+            json.decodeFromString<List<MediaCacheEntry>>(text)
+        }.getOrNull() ?: return emptyList()
         val valid = parsed.filter { entry ->
             entry.url.isNotBlank() &&
-                entry.sha256.isNotBlank() &&
+                isRemoteHttpUrl(entry.url) &&
+                SHA256_PATTERN.matches(entry.sha256) &&
                 entry.bytes > 0 &&
                 fileFor(entry).isFile
         }
@@ -67,6 +72,9 @@ class MediaCacheStore(
 
     companion object {
         const val INDEX_FILE: String = "index.json"
+
+        /** 只接受本层生成的 URL 摘要，防止被篡改的索引把删除路径带出缓存目录。 */
+        private val SHA256_PATTERN = Regex("^[0-9a-f]{64}$")
 
         val DEFAULT_JSON: Json = Json {
             ignoreUnknownKeys = true
