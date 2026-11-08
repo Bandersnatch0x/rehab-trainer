@@ -45,7 +45,8 @@ export const NAV_ITEMS: readonly NavItem[] = [
   {
     to: "/admin/permissions",
     label: "权限管理",
-    roles: ["care_admin"],
+    // 两类角色都能进：治疗师只能授予/调整治疗师，服务端另有越权拦截。
+    roles: ["care_admin", "rehab_therapist"],
   },
 ];
 

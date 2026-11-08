@@ -775,7 +775,7 @@ paths:
       tags: [accounts]
       summary: 列出本机构账号
       description: |
-        仅 care_admin。按机构隔离，跨机构不可见；按创建时间倒序返回。
+        照护管理员与康复治疗师均可。按机构隔离，跨机构不可见；按创建时间倒序返回。
       parameters:
         - name: status
           in: query
@@ -799,8 +799,11 @@ paths:
       tags: [accounts]
       summary: 开通机构账号
       description: |
-        仅 care_admin。机构取登录账号所属机构，请求体不携带机构字段；
+        照护管理员与康复治疗师均可。机构取登录账号所属机构，请求体不携带机构字段；
         用户名全局唯一；口令在服务端以 PBKDF2 哈希存储，响应体不含口令或哈希。
+        **可授予的角色按调用者受限**：照护管理员可授予照护管理员与康复治疗师，
+        康复治疗师只能授予康复治疗师——否则等于变相自升权（授予照护管理员即拿到
+        分级确认与开方权）。越权授予返回 403 并写审计。
       requestBody:
         required: true
         content:
@@ -828,8 +831,9 @@ paths:
       tags: [accounts]
       summary: 修改账号名称、状态或角色
       description: |
-        仅 care_admin。跨机构返回 403 并写审计。不能禁用或降级自己，
-        也不能移除本机构最后一个 care_admin。
+        照护管理员与康复治疗师均可，但**目标账号与目标角色都必须在调用者可授予的范围内**：
+        康复治疗师不能调整照护管理员账号，也不能把任何人提成照护管理员（403 并写审计）。
+        跨机构返回 403 并写审计。不能禁用或降级自己，也不能移除本机构最后一个照护管理员。
       parameters:
         - name: accountId
           in: path

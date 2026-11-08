@@ -44,10 +44,20 @@ def test_care_admin_lists_org_accounts(client, seed):
     assert not _contains_secret_key(body)
 
 
-def test_non_care_admin_cannot_list_accounts(client, seed, db_session):
+def test_therapist_can_list_org_accounts(client, seed):
+    # 治疗师要看得到同事名册才能把同事拉进来；患者与照护者不属于管理端角色。
+    token = login(client, "therapist-a")
+    response = client.get(f"{API}/accounts?limit=100", headers=auth_headers(token))
+
+    assert response.status_code == 200, response.text
+    usernames = {item["username"] for item in response.json()["items"]}
+    assert "therapist-a" in usernames
+
+
+def test_patient_and_caregiver_cannot_list_accounts(client, seed, db_session):
     actors = {
-        "therapist-a": "therapist-a",
         "patient-a": "patient-a-account",
+        "caregiver-a": "caregiver-a",
     }
     for username, actor in actors.items():
         token = login(client, username)
@@ -63,6 +73,85 @@ def test_non_care_admin_cannot_list_accounts(client, seed, db_session):
             )
         ).all()
         assert denied, f"{username} 拒绝访问应写审计"
+
+
+def _create(client, token, username, role):
+    return client.post(
+        f"{API}/accounts",
+        headers=auth_headers(token),
+        json={
+            "displayName": "新同事",
+            "username": username,
+            "password": "zqgn-vptl-461",
+            "role": role,
+        },
+    )
+
+
+def test_therapist_can_create_therapist(client, seed):
+    token = login(client, "therapist-a")
+    response = _create(client, token, "new-therapist-1", "rehab_therapist")
+
+    assert response.status_code == 201, response.text
+    assert response.json()["roles"] == ["rehab_therapist"]
+
+
+def test_therapist_cannot_create_care_admin(client, seed, db_session):
+    # 授予 care_admin 等于拿到分级确认与开方权，治疗师不能自造管理员。
+    token = login(client, "therapist-a")
+    response = _create(client, token, "new-admin-1", "care_admin")
+
+    assert response.status_code == 403, response.text
+    assert response.json()["code"] == "FORBIDDEN"
+    denied = db_session.scalars(
+        select(AuditEvent).where(
+            AuditEvent.action == "authz.role_denied",
+            AuditEvent.actor_account_id == "therapist-a",
+        )
+    ).all()
+    assert denied, "越权授予应写审计"
+
+
+def test_therapist_cannot_touch_admin_account(client, seed):
+    # 目标账号是管理员时，治疗师连改名都不行。
+    token = login(client, "therapist-a")
+    response = client.patch(
+        f"{API}/accounts/admin-a",
+        headers=auth_headers(token),
+        json={"displayName": "被治疗师改名"},
+    )
+
+    assert response.status_code == 403, response.text
+    assert response.json()["code"] == "FORBIDDEN"
+
+
+def test_therapist_cannot_promote_anyone_to_admin(client, seed):
+    token = login(client, "therapist-a")
+    created = _create(client, token, "promote-me", "rehab_therapist")
+    assert created.status_code == 201, created.text
+
+    response = client.patch(
+        f"{API}/accounts/{created.json()['accountId']}",
+        headers=auth_headers(token),
+        json={"role": "care_admin"},
+    )
+
+    assert response.status_code == 403, response.text
+
+
+def test_therapist_can_disable_another_therapist(client, seed):
+    token = login(client, "therapist-a")
+    created = _create(client, token, "disable-me", "rehab_therapist")
+    account_id = created.json()["accountId"]
+
+    response = client.patch(
+        f"{API}/accounts/{account_id}",
+        headers=auth_headers(token),
+        json={"status": "disabled"},
+    )
+
+    assert response.status_code == 200, response.text
+    assert response.json()["status"] == "disabled"
 
 
 def test_created_account_can_login_and_response_hides_password(client, seed, db_session):

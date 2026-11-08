@@ -22,6 +22,13 @@ function roleSummary(roles: string[]): string {
 export default function PermissionsPage() {
   const { session } = useAuth();
 
+  // 与后端 GRANTABLE_ROLES 对齐：治疗师只能授予治疗师，自造管理员等于变相自升权。
+  // 服务端仍是最终裁决者（越权返回 403），这里只是不渲染越权入口。
+  const grantable: AdminRole[] =
+    session?.role === "care_admin" ? ["care_admin", "rehab_therapist"] : ["rehab_therapist"];
+  const canManage = (account: Account): boolean =>
+    account.roles.filter(isAdminRole).every((role) => grantable.includes(role));
+
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,14 +38,14 @@ export default function PermissionsPage() {
   const [createName, setCreateName] = useState("");
   const [createUsername, setCreateUsername] = useState("");
   const [createPassword, setCreatePassword] = useState("");
-  const [createRole, setCreateRole] = useState<AdminRole>("care_admin");
+  const [createRole, setCreateRole] = useState<AdminRole>(grantable[0]);
   const [createError, setCreateError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editStatus, setEditStatus] = useState<AccountStatus>("active");
-  const [editRole, setEditRole] = useState<AdminRole>("care_admin");
+  const [editRole, setEditRole] = useState<AdminRole>(grantable[0]);
   const [editError, setEditError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -91,7 +98,7 @@ export default function PermissionsPage() {
     setEditingId(account.accountId);
     setEditName(account.displayName);
     setEditStatus(account.status);
-    setEditRole(account.roles.find(isAdminRole) ?? "care_admin");
+    setEditRole(account.roles.find(isAdminRole) ?? grantable[0]);
     setEditError(null);
   }
 
@@ -114,7 +121,7 @@ export default function PermissionsPage() {
     setCreateName("");
     setCreateUsername("");
     setCreatePassword("");
-    setCreateRole("care_admin");
+    setCreateRole(grantable[0]);
     setReloadToken((token) => token + 1);
   }
 
@@ -209,8 +216,11 @@ export default function PermissionsPage() {
                 value={createRole}
                 onChange={(event) => setCreateRole(event.target.value as AdminRole)}
               >
-                <option value="care_admin">照护管理员</option>
-                <option value="rehab_therapist">康复治疗师</option>
+                {grantable.map((role) => (
+                  <option key={role} value={role}>
+                    {ROLE_LABELS[role]}
+                  </option>
+                ))}
               </select>
             </label>
             <button className="btn-primary" type="submit" disabled={creating}>
@@ -276,6 +286,9 @@ export default function PermissionsPage() {
                         <button
                           className="btn-secondary"
                           style={{ padding: "4px 10px", minHeight: 30, fontSize: 13 }}
+                          // 治疗师看不到也改不了管理员账号：不给入口，服务端另有 403 兜底。
+                          disabled={!canManage(account)}
+                          title={canManage(account) ? undefined : "无权调整该账号"}
                           onClick={() =>
                             editingId === account.accountId
                               ? setEditingId(null)
@@ -319,8 +332,11 @@ export default function PermissionsPage() {
                                 value={editRole}
                                 onChange={(event) => setEditRole(event.target.value as AdminRole)}
                               >
-                                <option value="care_admin">照护管理员</option>
-                                <option value="rehab_therapist">康复治疗师</option>
+                                {grantable.map((role) => (
+                                  <option key={role} value={role}>
+                                    {ROLE_LABELS[role]}
+                                  </option>
+                                ))}
                               </select>
                             </label>
                             <button className="btn-primary" type="submit" disabled={saving}>

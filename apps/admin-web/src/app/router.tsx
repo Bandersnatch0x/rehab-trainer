@@ -45,7 +45,7 @@ export const router = createBrowserRouter([
           {
             path: "patients/:patientId/stage-confirmation",
             element: (
-              <RequireRole role="rehab_therapist">
+              <RequireRole roles={["rehab_therapist"]}>
                 <StageConfirmationPage />
               </RequireRole>
             ),
@@ -53,7 +53,7 @@ export const router = createBrowserRouter([
           {
             path: "patients/:patientId/prescription",
             element: (
-              <RequireRole role="rehab_therapist">
+              <RequireRole roles={["rehab_therapist"]}>
                 <PrescriptionEditPage />
               </RequireRole>
             ),
@@ -66,7 +66,7 @@ export const router = createBrowserRouter([
           {
             path: "admin/permissions",
             element: (
-              <RequireRole role="care_admin">
+              <RequireRole roles={["care_admin", "rehab_therapist"]}>
                 <PermissionsPage />
               </RequireRole>
             ),

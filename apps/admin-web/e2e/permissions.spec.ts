@@ -81,3 +81,18 @@ test('不能停用当前登录账号', async ({ page, data, request }) => {
   // 后端 409 必须原样透出，而不是静默失败。
   await expect(page.getByRole('alert')).toContainText('不能禁用当前登录账号');
 });
+
+test('治疗师只能授予治疗师，且改不了管理员账号', async ({ page, data }) => {
+  await login(page, data, 'rehab_therapist');
+  await page.goto('/admin/permissions');
+  await expect(page.getByRole('heading', { name: '机构权限与角色管理' })).toBeVisible();
+
+  // 角色下拉里不能出现「照护管理员」——治疗师自造管理员等于变相自升权。
+  await page.getByRole('button', { name: /分配机构账号权限/ }).click();
+  const form = page.getByRole('form', { name: '开通机构账号' });
+  await expect(form.getByLabel('管理端角色').locator('option')).toHaveText(['康复治疗师']);
+
+  // 管理员那一行不给入口；服务端另有 403 兜底。
+  const adminRow = page.getByRole('row').filter({ hasText: data.accounts.care_admin });
+  await expect(adminRow.getByRole('button', { name: '权限配置' })).toBeDisabled();
+});

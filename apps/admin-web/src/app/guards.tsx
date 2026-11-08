@@ -19,17 +19,18 @@ export function RequireAuth({ children }: GuardProps) {
 }
 
 interface RequireRoleProps extends GuardProps {
-  role: AdminRole;
+  /** 命中任意一个角色即可进入。 */
+  roles: AdminRole[];
 }
 
 /**
- * 服务端仍是权限的最终裁决者（跨机构返回 403）；
+ * 服务端仍是权限的最终裁决者（跨机构与跨角色都返回 403）；
  * 这里的守卫只负责不渲染越权入口。
  */
-export function RequireRole({ role, children }: RequireRoleProps) {
+export function RequireRole({ roles, children }: RequireRoleProps) {
   const { can } = useAuth();
 
-  if (!can(role)) {
+  if (!roles.some((role) => can(role))) {
     return <Navigate to="/forbidden" replace />;
   }
   return <>{children}</>;

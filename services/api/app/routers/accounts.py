@@ -17,8 +17,42 @@ from app.schemas.account import AccountCreate, AccountOut, AccountPage, AccountP
 
 router = APIRouter(prefix="/accounts", tags=["accounts"])
 
-# 本机构可由照护管理员授予或收回的角色；患者、照护者不在管理范围。
+# 本机构可被授予或收回的角色；患者、照护者不在管理范围。
 MANAGED_ROLES = ("care_admin", "rehab_therapist")
+
+# 谁能管账号：照护管理员与康复治疗师都能（治疗师需要把同事拉进来）。
+ACCOUNT_MANAGERS = ("care_admin", "rehab_therapist")
+
+# 各自**可授予**的角色。治疗师只能开通/调整治疗师，否则等于变相自升权——
+# 授予 care_admin 就是拿到了分级确认与开方权（D4/D11/D12）。
+GRANTABLE_ROLES = {
+    "care_admin": ("care_admin", "rehab_therapist"),
+    "rehab_therapist": ("rehab_therapist",),
+}
+
+
+def _grantable_roles(principal: Principal) -> tuple[str, ...]:
+    """调用者可授予的角色集合；同时决定他能动哪些账号。"""
+    for role in ("care_admin", "rehab_therapist"):
+        if principal.has_role(role):
+            return GRANTABLE_ROLES[role]
+    return ()
+
+
+def _deny_role_change(db: Session, principal: Principal, detail: dict) -> None:
+    """越权改角色：审计后 403，与 require_roles 被拒时同一套动作名。"""
+    record_audit(
+        db,
+        org_id=principal.org_id,
+        actor_account_id=principal.account_id,
+        action="authz.role_denied",
+        outcome="denied",
+        resource_type="account",
+        resource_id=detail.get("targetAccountId"),
+        detail=detail,
+    )
+    db.commit()
+    raise api_error(403, "FORBIDDEN", "无权授予或调整该角色")
 
 
 def _roles_by_account(
@@ -102,7 +136,7 @@ def _other_active_care_admin_exists(
 
 @router.get("", response_model=AccountPage)
 def list_accounts(
-    principal: Principal = Depends(require_roles("care_admin")),
+    principal: Principal = Depends(require_roles(*ACCOUNT_MANAGERS)),
     db: Session = Depends(get_db),
     status: str | None = Query(default=None),
     cursor: str | None = Query(default=None),
@@ -146,9 +180,18 @@ def list_accounts(
 @router.post("", response_model=AccountOut, status_code=201)
 def create_account(
     payload: AccountCreate,
-    principal: Principal = Depends(require_roles("care_admin")),
+    principal: Principal = Depends(require_roles(*ACCOUNT_MANAGERS)),
     db: Session = Depends(get_db),
 ):
+    if payload.role.value not in _grantable_roles(principal):
+        _deny_role_change(
+            db,
+            principal,
+            {
+                "requestedRole": payload.role.value,
+                "grantableRoles": list(_grantable_roles(principal)),
+            },
+        )
     if db.scalar(select(Account).where(Account.username == payload.username)):
         raise api_error(409, "CONFLICT", "用户名已存在")
 
@@ -194,12 +237,35 @@ def create_account(
 def update_account(
     accountId: str,
     payload: AccountPatch,
-    principal: Principal = Depends(require_roles("care_admin")),
+    principal: Principal = Depends(require_roles(*ACCOUNT_MANAGERS)),
     db: Session = Depends(get_db),
 ):
     account = _load_scoped(db, principal, accountId)
     binding = _managed_binding(db, account.account_id, principal.org_id)
     current_role = binding.role if binding else None
+    grantable = _grantable_roles(principal)
+
+    # 治疗师不能碰管理员账号，也不能把任何人提成管理员——否则等于变相自升权。
+    if current_role is not None and current_role not in grantable:
+        _deny_role_change(
+            db,
+            principal,
+            {
+                "targetAccountId": account.account_id,
+                "targetRole": current_role,
+                "grantableRoles": list(grantable),
+            },
+        )
+    if payload.role is not None and payload.role.value not in grantable:
+        _deny_role_change(
+            db,
+            principal,
+            {
+                "targetAccountId": account.account_id,
+                "requestedRole": payload.role.value,
+                "grantableRoles": list(grantable),
+            },
+        )
 
     new_status = (
         payload.status.value if payload.status is not None else account.status

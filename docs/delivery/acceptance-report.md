@@ -38,7 +38,7 @@
 | 契约一致性 | 23 个路径、28 个操作；实现与契约的操作集、参数、成功响应字段一致 | `services/api/tests/test_contract.py` 4 项；契约 `servers[0]` 前缀 `/v1` | 实现多一个或少一个操作都会失败 |
 | 部署自检 | 18 张业务表；SQLite 升级、重复升级、降级、再升级；模型差异为空；PostgreSQL 离线 SQL；YAML | `python deploy/verify.py` | 输出 `PASS: 18 tables; ...`；当前迁移 head 为 `0005` |
 | 管理端类型检查 | 通过 | `cd apps/admin-web && npx tsc --noEmit` | 退出码 0 |
-| 管理端 E2E | 26 项通过，0 失败 | `cd apps/admin-web && npx playwright test` | 覆盖登录与 403、分级入口权限、患者筛选与详情、训练方案冲突与读取失败保护、预警确认/随访/关闭与持久化、随访台账、患者超过单页上限、科研小样本抑制、404、视频上架门禁、身体感受记录回读、新建患者持久化、多条目训练量调整、审计日志服务端筛选与 CSV 导出、训练项目添加/移除、权限管理开通/改名/停用 |
+| 管理端 E2E | 27 项通过，0 失败 | `cd apps/admin-web && npx playwright test` | 覆盖登录与 403、分级入口权限、患者筛选与详情、训练方案冲突与读取失败保护、预警确认/随访/关闭与持久化、随访台账、患者超过单页上限、科研小样本抑制、404、视频上架门禁、身体感受记录回读、新建患者持久化、多条目训练量调整、审计日志服务端筛选与 CSV 导出、训练项目添加/移除、权限管理开通/改名/停用/治疗师越权边界 |
 | 小程序类型检查 | 通过 | `cd apps/miniprogram && npx --no-install tsc --noEmit` | 退出码 0 |
 | 小程序行为测试 | 17 项通过，0 失败 | `cd apps/miniprogram && node --test tests/patient-data.cjs` | 以 `wx` 桩驱动请求层与五个页面 |
 | 小程序静态检查 | 通过 | `cd apps/miniprogram && python tests/static_check.py .` | 页面与绑定一致性、事件处理函数存在性、患者端禁用词、WCAG AA 对比度 |
