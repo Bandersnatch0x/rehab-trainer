@@ -180,3 +180,69 @@ jobs:
           assert len(paths) > 0, 'paths 不能为空'
           print(f'openapi ok: {len(paths)} paths')
           "
+
+  # 真库联调：起 PostgreSQL → 迁移到 head → 写演示数据 → 起服务 → 跑 28 个操作的冒烟。
+  #
+  # 为什么要单独一个 job：其余 job 用的是 SQLite，PostgreSQL 特有的东西（JSONB、序列、
+  # 约束名长度、迁移脚本里的原生 SQL）在那边根本走不到。契约联调此前**只在本机跑过**。
+  integration:
+    needs: changes
+    if: >-
+      needs.changes.outputs.api == 'true' ||
+      needs.changes.outputs.api_contract == 'true'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: rehab
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_DB: rehab
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      # 仅 CI 使用的临时口令，与生产无关。
+      REHAB_DATABASE_URL: postgresql+psycopg://rehab:ci-only-password@127.0.0.1:5432/rehab
+      REHAB_JWT_SECRET: ci-only-secret-not-for-production
+      REHAB_MEDIA_ROOT: /tmp/rehab-media
+      REHAB_AUTO_CREATE_SCHEMA: "false"
+      PYTHONIOENCODING: utf-8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: python -m pip install -e 'services/api[dev,postgres]' -r deploy/requirements.txt
+
+      - name: 迁移到 head
+        run: alembic -c deploy/alembic.ini upgrade head
+
+      - name: 写演示数据
+        working-directory: services/api
+        run: python -m app.seed
+
+      - name: 起服务并等就绪
+        run: |
+          python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --log-level warning &
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8000/readyz > /dev/null; then
+              echo "ready after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "服务 60 秒内未就绪"
+          exit 1
+
+      - name: 契约联调（28 个操作）
+        run: |
+          # 演示凭据来自 app/seed.py，仅 CI 临时库使用。
+          cat > /tmp/smoke-config.json <<'JSON'
+          {"username": "therapist", "password": "therapist123", "bindingToken": "demo-binding-token"}
+          JSON
+          python scripts/smoke-api.py --config /tmp/smoke-config.json             --base-url http://127.0.0.1:8000/v1
