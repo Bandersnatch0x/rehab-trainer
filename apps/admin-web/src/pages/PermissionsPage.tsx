@@ -36,6 +36,7 @@ export default function PermissionsPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
+  const [truncated, setTruncated] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reloadToken, setReloadToken] = useState(0);
 
@@ -92,6 +93,8 @@ export default function PermissionsPage() {
       } while (cursor && collected.length < MAX_ACCOUNTS);
 
       setAccounts(collected);
+      // 达到页数上限时游标仍在，明确告知名单被截断，避免误以为已是全部。
+      setTruncated(Boolean(cursor));
       setLoadFailed(false);
       setLoading(false);
     }
@@ -252,6 +255,9 @@ export default function PermissionsPage() {
         ) : null}
 
         <span className="hint">每个账号本轮只绑定一个管理端角色，如需调整请在「权限配置」中修改。</span>
+        {truncated ? (
+          <p className="hint">账号过多，仅显示前 {MAX_ACCOUNTS} 条，请缩小机构范围后再查看。</p>
+        ) : null}
 
         {error ? (
           <div role="alert" className="notice notice--danger" style={{ display: "flex", gap: 12, alignItems: "center" }}>

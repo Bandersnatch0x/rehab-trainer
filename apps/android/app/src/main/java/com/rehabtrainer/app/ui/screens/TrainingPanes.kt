@@ -597,7 +597,7 @@ internal fun InstructionalVideoPane(
                         shape = RoundedCornerShape(6.dp)
                     ) {
                         Text(
-                            text = "🎬 教学示范 · 演示",
+                            text = videoTitle.ifBlank { "🎬 教学示范 · 演示" },
                             fontSize = if (compact) 11.sp else 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,

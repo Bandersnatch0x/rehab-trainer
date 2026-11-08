@@ -1,5 +1,8 @@
 package com.rehabtrainer.app.ui
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.rehabtrainer.app.core.pose.ExerciseKind
 import com.rehabtrainer.app.data.contract.ExerciseCategory
 import com.rehabtrainer.app.data.contract.SupportLevel
@@ -14,20 +17,18 @@ import com.rehabtrainer.app.data.session.PlanSelector
  */
 object ExerciseRegistry {
 
-    @Volatile
-    private var current: List<ExerciseMeta> = DEFAULT_EXERCISES
+    // 用 Compose State 暴露：方案更新后，正在显示的首页/列表/记录页会重组，
+    // 不会停留在旧患者或演示条目上。
+    private var current by mutableStateOf<List<ExerciseMeta>>(DEFAULT_EXERCISES)
 
-    @Volatile
-    var isPlanLoaded: Boolean = false
+    var isPlanLoaded: Boolean by mutableStateOf(false)
         private set
 
     /** 当前绑定患者与处方；用于训练记录上传，未绑定时为 null。 */
-    @Volatile
-    var patientId: String? = null
+    var patientId: String? by mutableStateOf(null)
         private set
 
-    @Volatile
-    var prescriptionId: String? = null
+    var prescriptionId: String? by mutableStateOf(null)
         private set
 
     val exercises: List<ExerciseMeta>

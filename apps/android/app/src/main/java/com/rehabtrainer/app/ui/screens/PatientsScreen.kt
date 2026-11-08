@@ -132,19 +132,19 @@ fun PatientsScreen(orgName: String? = null, modifier: Modifier = Modifier) {
                         } else {
                             val data = summary!!
                             Text(
-                                text = "累计完成训练：${data.totalSets} 组",
+                                text = "最近 $RECORD_SAMPLE_LIMIT 组完成训练：${data.totalSets} 组",
                                 style = MaterialTheme.typography.bodyLarge
                             )
                             Text(
-                                text = "累计完成动作：${data.totalReps} 次",
+                                text = "最近 $RECORD_SAMPLE_LIMIT 组完成动作：${data.totalReps} 次",
                                 style = MaterialTheme.typography.bodyLarge
                             )
                             Text(
-                                text = "连续健康打卡：${data.streakDays} 天",
+                                text = "最近 $RECORD_SAMPLE_LIMIT 组内连续打卡：${data.streakDays} 天",
                                 style = MaterialTheme.typography.bodyLarge
                             )
                             Text(
-                                text = "有记录的训练日：${data.activeDays} 天",
+                                text = "最近 $RECORD_SAMPLE_LIMIT 组内有记录的训练日：${data.activeDays} 天",
                                 style = MaterialTheme.typography.bodyLarge
                             )
                         }

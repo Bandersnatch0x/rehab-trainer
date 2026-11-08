@@ -440,8 +440,14 @@ fun TrainingScreen(
     }
 
     // 达到本组目标次数后自动进入下一组，避免患者还要点一次「完成本组」。
+    // 每个目标只触发一次：旧组的晚到回调可能把 repCount 设回目标值，不能据此完成新组。
+    var autoFinishArmed by remember { mutableStateOf(true) }
     LaunchedEffect(repCount, setProgress.currentSet, setProgress.isComplete) {
-        if (setProgress.isTargetReached(repCount)) {
+        if (setProgress.isComplete) return@LaunchedEffect
+        if (!setProgress.isTargetReached(repCount)) {
+            autoFinishArmed = true
+        } else if (autoFinishArmed) {
+            autoFinishArmed = false
             finishCurrentSet()
         }
     }
