@@ -41,17 +41,44 @@
 
 | 规则 | 预设 | 时间窗 | 证据 |
 | --- | --- | --- | --- |
-| PAIN_PERSISTENT | NRS ≥4，或较基线升高 ≥2；窗口内 ≥4 天 | 7 天 | D（NRS 4 与 ≥2 有间接证据；7 天窗口为工程默认） |
-| RIGIDITY_WORSENING | 5 级自评升高 ≥1 级（0–10 自评则 ≥2 分） | 基线 7 天，持续 14 天 | D（无单项 MCID；14 天为工程默认） |
-| CRAMP_RECURRENT | 单次 >10 分钟，或 ≥2 次/周且 14 天内 ≥4 次 | 14 天 | D（时长有描述性证据；频次借自夜间腿痉挛 RCT 入组标准） |
+| PAIN_PERSISTENT | NRS ≥4，或较基线升高 ≥2；窗口内 ≥4 天 | 7 天 | **B（阈值）/ C（窗口）**：NRS 轻-中度界值文献多落在 3–4；7 天内 ≥4 次日评的组内信度 r=0.95 |
+| RIGIDITY_WORSENING | 5 级自评升高 ≥1 级（0–10 自评则 ≥2 分） | 基线 7 天，持续 14 天 | **D**（检索确认无单项 MCID；14 天为工程默认） |
+| CRAMP_RECURRENT | 单次 >10 分钟，或 ≥2 次/周且 14 天内 ≥4 次 | 14 天 | **C**：10 分钟为文献公认的抽筋时长上限；≥2 次/周接近抽筋人群均值 |
 | FALL_RECURRENT | 12 个月 ≥2 次，或 1 次伴受伤 | 365 天 | A/B（CDC 2017、World Falls Guidelines 2022、PD 队列） |
 
 ### 3.1 关键纠正
 
 - **NRS ≥4 是常用「中度疼痛」界值，不是运动指南的停止阈值**。运动中的停止规则另见第 5 节。
-- **未找到 rigidity 单项 MCID**；MDS-UPDRS Part III 总分 MCWP 4.4–4.6 不能拆分到单个僵硬条目。
-- **未找到 PD 专属痉挛频率阈值**；频率数字来自夜间腿痉挛 RCT，属工程默认。
+- **未找到 rigidity 单项 MCID**；MDS-UPDRS Part III 总分 MCWP 4.4–4.6 不能拆分到单个僵硬条目。2023 年基于 MDS-UPDRS 的推断研究亦确认 rigidity 无法从其他条目可靠还原（balanced accuracy 0.34–0.47，低于可避免误标临床显著差异所需的确定性），支持「单项自评只作趋势、不作分界」的处理。
+- **未找到 PD 专属痉挛频率阈值**；频率数字来自夜间腿痉挛 RCT 与诊断标准，属**借用的 C 级证据**，非 PD 专属。
 - **单次无伤跌倒不应忽略**：对 PD 患者按中风险评估并转介，不作为高危预警。
+
+### 3.2 三个 D 级项的补强检索（2026-11-08）
+
+针对原「工程默认」的三项做了定向检索，结果如下——**两项可升级，一项确认无更优证据**：
+
+**PAIN_PERSISTENT（D → B/C）**
+- 阈值：慢性肌骨痛人群的 NRS 轻-中度界值文献多落在 **3–4** 之间（受性别与灾难化思维影响），支持取 4 作为「中度及以上」的操作界值。来源：Cut-Off Points for Mild, Moderate, and Severe Pain on the NRS, *Pain Research and Management* 2016 (PMC5043012)。
+- 窗口：**7 天内 ≥4 次日评**的组内信度 **r=0.95**，显著优于单次或两次评定（r=0.63），这是「窗口内 ≥4 天」规则的**心理测量学依据**，而非纯工程约定。来源：Jensen & McFarland 1993，经 RehabMeasures 汇总。
+- ⚠️ 该证据来自慢性肌骨痛与混合疼痛人群，**非 PD 专属**；PD 疼痛异质性高（中枢性、肌骨性、肌张力障碍性并存），签核时须确认是否直接沿用。
+
+**CRAMP_RECURRENT（D → C）**
+- 时长：Parkinson's UK 患者科普明确「抽筋通常持续数秒，**但可达 10 分钟**」；夜间腿痉挛（NLC）诊断标准的系统综述中，多项研究以「**最长 10 分钟**」为界定特征。**>10 分钟因此属于超出典型范围**，作为预警阈值有描述性依据。来源：Parkinson's UK《Muscle cramps and dystonia》；Criteria in diagnosing nocturnal leg cramps: a systematic review, *BMC Family Practice* 2017 (PMC5330021)。
+- 频次：NLC 诊断标准普遍采用「**至少每周 1 次**」；一项 2024 年 RCT 中抽筋人群均值为 **2.6–2.7 次/周**。取 ≥2 次/周大致对应该人群均值水平，属合理的「高于典型」界值。来源：Tan J, et al. *JAMA Internal Medicine* 2024。
+- ⚠️ 同样**非 PD 专属**；且须区分 OFF 期肌张力障碍（dystonia），后者不是抽筋、处理路径不同。
+
+**RIGIDITY_WORSENING（维持 D）**
+- 检索未发现任何针对 MDS-UPDRS 僵硬**单项**的 MCID 或反应度研究。Shulman 2010 给出的 UPDRS 临床重要差异是**总分层面**，不可拆分到条目。
+- 2023 年 MDS 摘要研究进一步显示 rigidity 组间区分度差（balanced accuracy 0.335–0.469），说明单项评分本身噪声大。
+- **结论：维持「不设分界、仅作随访趋势」**，14 天窗口保留为工程默认并明确标注。这一项**没有可升级的证据，也不应假装有**。
+
+### 3.3 签核提示
+
+上述补强不改变「文献预设，待临床签核」的状态。三项中有两项证据来自**非 PD 人群**，签核人须明确回答：
+
+1. 是否接受将非 PD 人群的阈值外推至 PD？
+2. 若不接受，是否改用更保守的界值，或改为「仅提示、不预警」？
+3. 僵硬项是否同意**不设自动分界**、只做趋势展示？
 
 ## 4. RAS 节拍与运动剂量
 
@@ -126,6 +153,12 @@
 22. Garber CE, et al. ACSM quantity and quality of exercise. *Med Sci Sports Exerc.* 2011;43(7):1334–1359. doi:10.1249/MSS.0b013e318213fefb
 23. Fletcher GF, et al. AHA exercise standards. *Circulation.* 2013;128(8):873–934. doi:10.1161/CIR.0b013e31829b5b44
 24. Penko AL, et al. Borg RPE validity in PD. *Int J Exerc Sci.* 2017;10(1):76–86.
+25. Jensen MP, McFarland CA. Increasing the reliability and validity of pain intensity measurement in chronic pain patients. *Pain.* 1993;55(2):195–203.（7 天内 ≥4 次日评 r=0.95；经 RehabMeasures 汇总 https://www.sralab.org/rehabilitation-measures/numeric-pain-rating-scale）
+26. Cut-Off Points for Mild, Moderate, and Severe Pain on the Numeric Rating Scale for Pain in Patients with Chronic Musculoskeletal Pain. *Pain Res Manag.* 2016;2016:4630906. https://pmc.ncbi.nlm.nih.gov/articles/PMC5043012
+27. Parkinson's UK. Muscle cramps and dystonia. https://www.parkinsons.org.uk/information/symptoms/motor/muscle-cramps-dystonia
+28. Criteria in diagnosing nocturnal leg cramps: a systematic review. *BMC Fam Pract.* 2017;18:29. https://pmc.ncbi.nlm.nih.gov/articles/PMC5330021
+29. Tan J, et al. Vitamin K2 in managing nocturnal leg cramps: a randomized clinical trial. *JAMA Intern Med.* 2024.（抽筋人群均值 2.6–2.7 次/周）
+30. Inferring Rigidity Scores in MDS-UPDRS Motor Assessment from Other Items. MDS 2023 摘要. https://www.mdsabstracts.org/abstract/inferring-rigidity-scores-in-mds-updrs-motor-assessment-from-other-items
 
 ## 7. 签核清单
 

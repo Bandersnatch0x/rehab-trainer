@@ -105,9 +105,9 @@ ALERT_RULES: dict[str, dict[str, Any]] = {
         "window_days": 7,
         "min_days_in_window": 4,
         "unit": "NRS_0_10",
-        "confidence": "low",
-        "source": "Farrar 2001 (doi:10.1016/S0304-3959(01)00349-9)；Cheung 2003 (doi:10.2165/00007256-200333020-00005)；7 天窗口为工程保守默认",
-        "note": "NRS ≥4 为常用中度界值，非指南停止阈值；7 天内 ≥4 天或连续 7 天。",
+        "confidence": "medium",
+        "source": "Farrar 2001 (doi:10.1016/S0304-3959(01)00349-9)；Cheung 2003 (doi:10.2165/00007256-200333020-00005)；NRS 轻-中度界值 3–4 (PMC5043012)；7 天内 ≥4 次日评信度 r=0.95（Jensen & McFarland 1993）",
+        "note": "NRS ≥4 为常用中度界值，非指南停止阈值；7 天内 ≥4 天或连续 7 天。证据来自慢性肌骨痛/混合疼痛人群，非 PD 专属。",
     },
     "RIGIDITY_WORSENING": {
         "threshold": 1,
@@ -123,8 +123,8 @@ ALERT_RULES: dict[str, dict[str, Any]] = {
         "occurrences_per_week": 2,
         "window_days": 14,
         "injury_override": True,
-        "confidence": "low",
-        "source": "Parkinson's UK 痉挛科普；Hallegraeff 2017 (doi:10.1186/s12875-017-0600-x)；频次阈值借自夜间腿痉挛 RCT 入组标准",
+        "confidence": "medium",
+        "source": "Parkinson's UK 痉挛科普（可持续至 10 分钟）；Hallegraeff 2017 (doi:10.1186/s12875-017-0600-x)；NLC 诊断标准以 10 分钟为上限、≥1 次/周为界 (PMC5330021)；抽筋人群均值 2.6–2.7 次/周 (Tan 2024)",
         "note": "单次 >10 分钟或 14 天内 ≥4 次；任何导致跌倒/受伤的痉挛单独升级；须区分 OFF 期肌张力障碍。",
     },
     "FALL_RECURRENT": {
