@@ -39,6 +39,7 @@
 ## 门禁
 
 - 交付门禁命令(全绿方可交付):`git diff --check`。当前仅覆盖空白与行尾错误;首个测试套件落地后须替换为真实测试命令。
+- 提交前 OCR 扫描(本地):先执行一次 `git config core.hooksPath .githooks`。`pre-commit` 只审已暂存内容,存在 critical/high 时阻断提交;`OCR_PRECOMMIT_SKIP=1` 或 `git commit --no-verify` 仅作应急,不视为通过门禁。
 
 ## 验收
 

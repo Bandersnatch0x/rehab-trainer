@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+# 提交前 OCR 扫描：只审查已暂存内容（git write-tree + 临时 commit），
+# critical/high 阻断提交；OCR 不可用或超时则放行，避免把本地开发卡死。
+#
+# 启用：git config core.hooksPath .githooks
+# 跳过：OCR_PRECOMMIT_SKIP=1 git commit ...（或 git commit --no-verify）
+
+set -euo pipefail
+
+if [ "${OCR_PRECOMMIT_SKIP:-}" = "1" ]; then
+    echo "OCR pre-commit：已按 OCR_PRECOMMIT_SKIP=1 跳过。"
+    exit 0
+fi
+
+if ! command -v ocr >/dev/null 2>&1; then
+    echo "OCR pre-commit：未找到 ocr，跳过（安装见 https://github.com/alibaba/open-code-review）。"
+    exit 0
+fi
+
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root"
+
+head=$(git rev-parse HEAD 2>/dev/null || true)
+tree=$(git write-tree)
+
+# 用只含 index 的临时 commit 构造 diff，避免把未暂存改动一起审进来。
+export GIT_AUTHOR_NAME="ocr-precommit"
+export GIT_AUTHOR_EMAIL="ocr-precommit@local"
+export GIT_COMMITTER_NAME="ocr-precommit"
+export GIT_COMMITTER_EMAIL="ocr-precommit@local"
+if [ -n "$head" ]; then
+    tmp_commit=$(git commit-tree "$tree" -p "$head" -m "ocr-precommit")
+    from_ref="$head"
+else
+    from_ref=$(git hash-object -t tree /dev/null)
+    tmp_commit=$(git commit-tree "$tree" -m "ocr-precommit")
+fi
+
+out_file=$(mktemp)
+err_file=$(mktemp)
+cleanup() { rm -f "$out_file" "$err_file"; }
+trap cleanup EXIT
+
+set +e
+ocr review --from "$from_ref" --to "$tmp_commit" \
+    --audience agent --format json --effort medium --timeout 10 \
+    -o "$out_file" >/dev/null 2>"$err_file"
+ocr_status=$?
+set -e
+
+if [ "$ocr_status" -ne 0 ]; then
+    echo "OCR pre-commit：扫描未完成（exit $ocr_status），本轮放行。"
+    tail -5 "$err_file" 2>/dev/null || true
+    exit 0
+fi
+
+py=""
+for candidate in python3 python; do
+    # 不能只看 command -v：Windows 的 python3 常是应用商店 stub，能查到但不能执行。
+    if command -v "$candidate" >/dev/null 2>&1 &&
+        "$candidate" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 8) else 1)' >/dev/null 2>&1; then
+        py="$candidate"
+        break
+    fi
+done
+if [ -z "$py" ]; then
+    echo "OCR pre-commit：未找到可用的 python3/python，跳过结果解析。"
+    exit 0
+fi
+
+"$py" - "$out_file" <<'PY'
+import json
+import sys
+
+try:
+    with open(sys.argv[1], encoding="utf-8") as handle:
+        data = json.load(handle)
+except Exception as exc:  # noqa: BLE001 - 解析失败不应阻塞提交
+    print(f"OCR pre-commit：结果解析失败（{exc}），本轮放行。")
+    sys.exit(0)
+
+comments = data.get("comments") or []
+counts = {}
+for comment in comments:
+    severity = str(comment.get("severity") or "unknown").lower()
+    counts[severity] = counts.get(severity, 0) + 1
+
+print(
+    "OCR 审查：{} 条（critical {} / high {} / medium {} / low {}）".format(
+        len(comments),
+        counts.get("critical", 0),
+        counts.get("high", 0),
+        counts.get("medium", 0),
+        counts.get("low", 0),
+    )
+)
+
+blocking = [
+    comment
+    for comment in comments
+    if str(comment.get("severity") or "").lower() in ("critical", "high")
+]
+for comment in blocking[:10]:
+    path = comment.get("path") or "?"
+    line = comment.get("start_line") or "?"
+    text = str(comment.get("content") or "").replace("\n", " ")[:160]
+    print(f"  [{comment.get('severity')}] {path}:{line} {text}")
+
+if blocking:
+    print("存在 critical/high 问题：请修复后重新提交；确需跳过用 git commit --no-verify。")
+    sys.exit(1)
+PY
