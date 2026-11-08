@@ -40,6 +40,12 @@ class PercentileTests(unittest.TestCase):
 
 
 class CommandTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # 这个目录是 gitignored 的本地残留，CI 全新检出时不存在；
+        # 不先建出来，TemporaryDirectory(dir=...) 会直接 FileNotFoundError。
+        (ROOT / ".agent/tmp").mkdir(parents=True, exist_ok=True)
+
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory(dir=(ROOT / ".agent/tmp"))
         self.config = Path(self.directory.name) / "config.json"
