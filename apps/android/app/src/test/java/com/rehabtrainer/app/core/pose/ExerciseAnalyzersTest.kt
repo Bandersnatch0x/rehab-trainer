@@ -1,6 +1,7 @@
 package com.rehabtrainer.app.core.pose
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -656,5 +657,98 @@ class ExerciseAnalyzersTest {
         assertNull(posture.calibratedAmplitude)
         val stretch = createExerciseAnalyzer(ExerciseKind.STRETCH, knownAmplitude = 0.12f)
         assertNull(stretch.calibratedAmplitude)
+    }
+
+    // ---------- 票 0031：归一化坐标各向异性（阈值随握持方向漂移） ----------
+
+    /**
+     * 把「物理像素姿势」按帧尺寸归一化。
+     *
+     * 归一化后 x 除以宽、y 除以高，同一物理姿势在竖屏（720×1280）与横屏（1280×720）
+     * 下的坐标不同；跨轴相除会让比值带上 宽/高 因子，阈值随手机方向漂移。
+     * 物理姿势：肩 y=100、髋 y=300+[hipDropPx]、膝 y=500、踝 y=600，躯干恒为 200px。
+     */
+    private fun physicalPose(
+        width: Float,
+        height: Float,
+        hipDropPx: Float,
+        offsetPx: Float
+    ): MutableList<PosePoint> = MutableList(PoseIndex.LANDMARK_COUNT) {
+        PosePoint(0.5f, 0.5f)
+    }.apply {
+        fun put(index: Int, xPx: Float, yPx: Float) {
+            set(index, PosePoint(xPx / width, yPx / height))
+        }
+        val shoulderY = 100f + hipDropPx
+        val hipY = 300f + hipDropPx
+        put(PoseIndex.LEFT_SHOULDER, 310f, shoulderY)
+        put(PoseIndex.RIGHT_SHOULDER, 410f, shoulderY)
+        put(PoseIndex.LEFT_HIP, 310f, hipY)
+        put(PoseIndex.RIGHT_HIP, 410f, hipY)
+        put(PoseIndex.LEFT_KNEE, 310f + offsetPx, 500f)
+        put(PoseIndex.RIGHT_KNEE, 410f - offsetPx, 500f)
+        put(PoseIndex.LEFT_ANKLE, 310f, 600f)
+        put(PoseIndex.RIGHT_ANKLE, 410f, 600f)
+    }
+
+    /** 深蹲到底时是否判膝外翻；[offsetPx] 为膝-踝水平偏移的物理像素值。 */
+    private fun kneeValgusFlagged(width: Float, height: Float, offsetPx: Float): Boolean {
+        val aspectRatio = PoseGeometry.aspectRatioOf(width.toInt(), height.toInt())
+        val analyzer = SquatAnalyzer()
+        analyzer.update(physicalPose(width, height, 0f, 0f), 0L, aspectRatio)
+        analyzer.update(physicalPose(width, height, 120f, offsetPx), 100L, aspectRatio)
+        val update = analyzer.update(physicalPose(width, height, 0f, 0f), 2_000L, aspectRatio)
+        return update.lastRep?.issues?.contains(RepIssue.KNEE_VALGUS) == true
+    }
+
+    @Test
+    fun kneeValgusVerdictIsOrientationIndependent() {
+        // 物理比值 40/200 = 0.20 > 阈值 0.12：两种握持方向都必须判膝外翻。
+        // 回归前竖屏有效阈值 0.0675（判）、横屏 0.213（不判），同一姿势两种结论。
+        assertTrue("竖屏应判膝外翻", kneeValgusFlagged(720f, 1280f, 40f))
+        assertTrue("横屏应判膝外翻", kneeValgusFlagged(1280f, 720f, 40f))
+        // 物理比值 12/200 = 0.06 < 0.12：两种方向都不该判。
+        assertFalse("竖屏不应判膝外翻", kneeValgusFlagged(720f, 1280f, 12f))
+        assertFalse("横屏不应判膝外翻", kneeValgusFlagged(1280f, 720f, 12f))
+    }
+
+    /** 双上肢上举姿势；[raisePx] 为腕相对肩的垂直抬高量，肩宽固定 100px。 */
+    private fun stretchPose(
+        width: Float,
+        height: Float,
+        raisePx: Float
+    ): MutableList<PosePoint> = MutableList(PoseIndex.LANDMARK_COUNT) {
+        PosePoint(0.5f, 0.5f)
+    }.apply {
+        fun put(index: Int, xPx: Float, yPx: Float) {
+            set(index, PosePoint(xPx / width, yPx / height))
+        }
+        val wristY = 100f - raisePx
+        val elbowY = (100f + wristY) / 2f
+        put(PoseIndex.LEFT_SHOULDER, 310f, 100f)
+        put(PoseIndex.RIGHT_SHOULDER, 410f, 100f)
+        put(PoseIndex.LEFT_ELBOW, 310f, elbowY)
+        put(PoseIndex.RIGHT_ELBOW, 410f, elbowY)
+        put(PoseIndex.LEFT_WRIST, 310f, wristY)
+        put(PoseIndex.RIGHT_WRIST, 410f, wristY)
+    }
+
+    /** 抬举幅度是否达到阈值；[raisePx] 为物理像素抬高量。 */
+    private fun stretchRaisedEnough(width: Float, height: Float, raisePx: Float): Boolean {
+        val aspectRatio = PoseGeometry.aspectRatioOf(width.toInt(), height.toInt())
+        val analyzer = StretchAnalyzer()
+        val update = analyzer.update(stretchPose(width, height, raisePx), 0L, aspectRatio)
+        return RepIssue.INSUFFICIENT_RANGE !in update.currentIssues
+    }
+
+    @Test
+    fun stretchVerdictIsOrientationIndependent() {
+        // 物理比值 60/100 = 0.60 > 阈值 0.45：两种握持方向都应算抬举到位。
+        // 回归前竖屏有效阈值 0.80（判幅度不足）、横屏 0.25（不判）。
+        assertTrue("竖屏应算抬举到位", stretchRaisedEnough(720f, 1280f, 60f))
+        assertTrue("横屏应算抬举到位", stretchRaisedEnough(1280f, 720f, 60f))
+        // 物理比值 30/100 = 0.30 < 0.45：两种方向都应判幅度不足。
+        assertFalse("竖屏应判幅度不足", stretchRaisedEnough(720f, 1280f, 30f))
+        assertFalse("横屏应判幅度不足", stretchRaisedEnough(1280f, 720f, 30f))
     }
 }

@@ -325,11 +325,11 @@ class SquatAnalyzer(
             inSquat = true
             squatStartedMs = timestampMs
             minSpan = span
-            bottomIssues = bottomIssues(points, torso, lean)
+            bottomIssues = bottomIssues(points, torso, lean, aspectRatio)
         } else if (inSquat) {
             if (span < minSpan) {
                 minSpan = span
-                bottomIssues = bottomIssues(points, torso, lean)
+                bottomIssues = bottomIssues(points, torso, lean, aspectRatio)
             }
             if (span > base - exitLift) {
                 inSquat = false
@@ -359,13 +359,21 @@ class SquatAnalyzer(
         return AnalysisUpdate(count, lastRep)
     }
 
-    private fun bottomIssues(points: List<PosePoint>, torso: Float, lean: Float): Set<RepIssue> =
+    private fun bottomIssues(
+        points: List<PosePoint>,
+        torso: Float,
+        lean: Float,
+        aspectRatio: Float
+    ): Set<RepIssue> =
         buildSet {
             if (lean > maxLateralLean) add(RepIssue.LATERAL_LEAN)
-            if (abs(points[PoseIndex.LEFT_KNEE].x - points[PoseIndex.LEFT_ANKLE].x) >
-                maxValgusRatio * torso ||
-                abs(points[PoseIndex.RIGHT_KNEE].x - points[PoseIndex.RIGHT_ANKLE].x) >
-                maxValgusRatio * torso
+            // 膝踝水平偏移是 x 距离、躯干高度是 y 距离，两者归一化单位不同（x 除以宽、
+            // y 除以高），须乘宽高比才能同尺度比较；否则同一个膝外翻角度在竖屏被判超标、
+            // 横屏不超标，阈值实际随握持方向漂移。
+            if (abs(points[PoseIndex.LEFT_KNEE].x - points[PoseIndex.LEFT_ANKLE].x) *
+                aspectRatio > maxValgusRatio * torso ||
+                abs(points[PoseIndex.RIGHT_KNEE].x - points[PoseIndex.RIGHT_ANKLE].x) *
+                aspectRatio > maxValgusRatio * torso
             ) {
                 add(RepIssue.KNEE_VALGUS)
             }

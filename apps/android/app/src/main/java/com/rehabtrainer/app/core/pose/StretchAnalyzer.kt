@@ -61,13 +61,16 @@ class StretchAnalyzer(
             resetHold()
             return AnalysisUpdate(count, lastRep, setOf(RepIssue.POSE_INCOMPLETE))
         }
+        // 归一化坐标各向异性（x 除以宽、y 除以高），肩宽须乘宽高比才与 y 距离同尺度。
+        // 否则同一姿势的抬臂/倾斜比值随握持方向漂移：1280×720 下横竖屏相差 3.16 倍。
+        val physicalWidth = width * aspectRatio
         val shoulderY = PoseGeometry.midY(
             points,
             PoseIndex.LEFT_SHOULDER,
             PoseIndex.RIGHT_SHOULDER
         )
-        val leftRaise = (shoulderY - points[PoseIndex.LEFT_WRIST].y) / width
-        val rightRaise = (shoulderY - points[PoseIndex.RIGHT_WRIST].y) / width
+        val leftRaise = (shoulderY - points[PoseIndex.LEFT_WRIST].y) / physicalWidth
+        val rightRaise = (shoulderY - points[PoseIndex.RIGHT_WRIST].y) / physicalWidth
         val leftElbow = PoseGeometry.angleDegrees(
             points[PoseIndex.LEFT_SHOULDER],
             points[PoseIndex.LEFT_ELBOW],
@@ -82,7 +85,7 @@ class StretchAnalyzer(
         ) ?: 0f
         val shoulderTilt = abs(
             points[PoseIndex.LEFT_SHOULDER].y - points[PoseIndex.RIGHT_SHOULDER].y
-        ) / width
+        ) / physicalWidth
 
         val issues = buildSet {
             if (leftRaise < minRaiseRatio || rightRaise < minRaiseRatio) {
