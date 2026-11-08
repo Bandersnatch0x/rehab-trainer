@@ -74,7 +74,7 @@ main 当前版本没有这些。
 - **E2E**：main 的 `apps/admin-web/e2e/` 有 `admin.spec.ts`（19.9K）+ `permissions.spec.ts` + `totp.spec.ts`，分支只有一个更小的 `admin-web.spec.ts`（159 行）。
 - **API 接线**：main 的 `vite.config.ts` 已有 `/v1` 代理、`build.gradle.kts` 已有 debug 变体的 `API_BASE_URL`、小程序 `config.ts` 已指向 `127.0.0.1:8000/v1`。
 - **CORS**：`api-integration-claude` 往 `main.py` 加了 `CORSMiddleware`，但 `docs/deployment/README.md` 明确「当前部署只提供 API 与数据库，不包含管理端静态站点」，开发期走 vite 代理，不需要跨域。
-- **`training-voice`**：独有的 TTS 超时已重做进 main（`1e3f26f`，见票 0035），剩余只有文案差异（`videoTitle` 5 处「标准示范」→「动作演示」、`suitabilityTag`「疑似 · 需分期确认准入」→「疑似 · 需治疗师确认」），无测试断言，属产品口径，随分支一并删除，需要时按此记录重做。
+- **`training-voice`**：独有的 TTS 超时已重做进 main（`1e3f26f`，见票 0035），剩余只有文案差异，已补：`videoTitle` 5 处「标准示范」→「动作演示」（`ExerciseRegistry.kt` 1 处 + `RehabApp.kt` 4 处）；`suitabilityTag` 现已是「需治疗师确认准入」，与目标口径一致，无需改动。
 
 已从本地 + origin + gitee 三处删除 9 个分支（含 `training-voice`）。
 

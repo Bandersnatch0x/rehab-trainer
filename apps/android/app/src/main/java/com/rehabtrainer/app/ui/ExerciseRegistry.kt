@@ -58,7 +58,7 @@ internal fun toExerciseMeta(plan: PlanExercise): ExerciseMeta = ExerciseMeta(
     },
     hasRas = PlanSelector.hasRas(plan.category),
     bpm = plan.bpm,
-    videoTitle = "${plan.label} · 标准示范",
+    videoTitle = "${plan.label} · 动作演示",
     prompt = "“按示范完成「${plan.label}」，保持呼吸均匀，出现不适立即停止”",
     sets = plan.sets,
     repsPerSet = plan.reps,
