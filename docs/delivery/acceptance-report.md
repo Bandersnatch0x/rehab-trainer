@@ -47,7 +47,7 @@
 | API 联调 | 28 个契约操作全部通过（23 个路径） | `python scripts/smoke-api.py --config .agent/tmp/smoke-config.json` | 覆盖全部契约操作，含科研聚合端点、机构账号与媒体上传/上架；退出码 0 |
 | 联调脚本回归 | 12 项通过 | `python -m unittest discover -s scripts -p "test_*.py"` | 覆盖联调脚本自身行为 |
 | 专业阈值预设 | 7 个量表 + 4 条预警规则均有数值或无分界声明、来源与置信度；`AUTO_ALERTS_ENABLED`/`RISK_LEVELS_ENABLED` 均为 False | `services/api/tests/test_clinical_presets.py` 3 项 | 文献预设待专业签核；来源见 `docs/clinical/literature-presets.md` |
-| 本地容器与 PostgreSQL | 见 `docs/deployment/README.md` 的「容器与真实 PostgreSQL 验证（2026-11-05）」表 | 该记录由部署轮次在 WSL2 内实跑 | 该证据对应迁移 `0001` 且当时契约为 18 个操作；当前 head 为 `0005`、契约为 32 个操作，未在容器内复跑 |
+| 本地容器与 PostgreSQL | 见 `docs/deployment/README.md` 的「容器与真实 PostgreSQL 验证（2026-11-05）」表 | 该记录由部署轮次在 WSL2 内实跑 | 该证据对应迁移 `0001` 且当时契约为 18 个操作；当前 head 为 `0005`、契约 32 个操作，已于 2026-11-08 在 `postgres:17-bookworm`（PostgreSQL 17.11）上复跑 32/32 |
 | 全量校验脚本 | 后端、部署自检、管理端构建、管理端 E2E、小程序、Android 各步全部通过 | `python scripts/verify_all.py` | 串行失败即停；Android 步骤已改用绝对路径调用 `gradlew.bat` |
 | 提交门禁 | `git diff --check` 通过 | 仓库根目录执行 | 仅覆盖空白与行尾错误 |
 
