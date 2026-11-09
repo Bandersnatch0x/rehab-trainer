@@ -1,4 +1,4 @@
-<!-- scaffold-stamp: agent-scaffold/templates/agents/AGENTS.md@6c32ae3 -->
+<!-- scaffold-stamp: agent-scaffold/templates/agents/AGENTS.md@36512bc -->
 
 # 代理工作规则
 

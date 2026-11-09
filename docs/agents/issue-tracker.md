@@ -1,4 +1,4 @@
-<!-- scaffold-stamp: agent-scaffold/templates/agents/issue-tracker.md@6c32ae3 -->
+<!-- scaffold-stamp: agent-scaffold/templates/agents/issue-tracker.md@36512bc -->
 
 # 票据惯例
 
@@ -35,7 +35,7 @@
 - **本地面**:个人待办、临时工作项与个人票据记录只落 `.agents/`,**永不**写入正式 tracker:
   不为个人事项创建或更新议题、不评论、不打标签、不分配负责人。
 - 个人事项升级为项目事项须经用户**明确要求**;升级 = 在正式 tracker 建票,并与本地条目互指。
-- 本地面落点须**同轮**写入该仓忽略规则;已有条目不重复添加,同轮改动走逐文件批准,合并不覆盖。
+- 本地面落点须**同轮**写入该仓忽略规则(内容忽略、`skills/` 子树放行);已有条目不重复添加,同轮改动走逐文件批准,合并不覆盖。
 
 ## 自主分诊与执行回传
 
