@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { login } from "../api/operations";
 import { useAuth } from "../auth/AuthProvider";
 import { isAdminRole } from "../auth/roles";
@@ -13,6 +13,7 @@ export default function LoginPage() {
 
   const { signIn } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [params] = useSearchParams();
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -49,7 +50,15 @@ export default function LoginPage() {
       refreshToken: result.data.refreshToken,
     });
     setBusy(false);
-    navigate(params.get("redirect") ?? "/patients", { replace: true });
+    // 守卫把原目标放在 state.from；401 广播放在 ?redirect=。两处都读。
+    const fromState = (location.state as { from?: string } | null)?.from;
+    const requested = params.get("redirect") ?? fromState ?? "/patients";
+    // 只允许站内绝对路径，避免跨源 URL 触发 history 异常。
+    const target =
+      requested.startsWith("/") && !requested.startsWith("//")
+        ? requested
+        : "/patients";
+    navigate(target, { replace: true });
   }
 
   return (

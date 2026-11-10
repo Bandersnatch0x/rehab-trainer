@@ -42,6 +42,9 @@ object AppData {
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     fun install(context: Context, container: ApiContainer) {
+        // Activity 重建会再次调用 install；队列必须保持单实例，否则两个 Mutex
+        // 会并发改写同一个 session-uploads.json，静默丢失待上传记录。
+        if (queue != null) return
         val dir = File(context.applicationContext.filesDir, DIR_NAME).apply { mkdirs() }
         val uploadQueue = FileSessionUploadQueue(dir)
         queue = uploadQueue

@@ -139,4 +139,7 @@ def get_exercise(
     if patient is not None and not _visible_for_patient(exercise, patient, None):
         # 患者上下文下，不可用条目与不存在同义，避免暴露未发布内容。
         raise api_error(404, "NOT_FOUND", "训练条目不存在")
+    if not principal.is_clinician and exercise.publication_status != "published":
+        # 非临床账号（含未绑定/多患者账号）同样不得读取草稿或已下架条目。
+        raise api_error(404, "NOT_FOUND", "训练条目不存在")
     return _with_media(db, principal, [exercise], patient)[0]

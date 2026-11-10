@@ -8,4 +8,10 @@ export default defineConfig({
       '/v1': 'http://127.0.0.1:8000',
     },
   },
+  // vite preview 不会复用 server.proxy；不单独声明时 preview 下 /v1 全部 404。
+  preview: {
+    proxy: {
+      '/v1': 'http://127.0.0.1:8000',
+    },
+  },
 });

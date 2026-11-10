@@ -64,6 +64,8 @@
 }
 
 .research-bar-fill {
+  /* span 默认 inline，width/height 不生效；必须块级化。 */
+  display: block;
   height: 100%;
   border-radius: 5px;
   background: var(--color-primary);

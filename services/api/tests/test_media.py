@@ -173,6 +173,21 @@ def test_publish_requires_applicable_stages(client, seed):
     assert response.json()["code"] == "VALIDATION_FAILED"
 
 
+def test_published_asset_cannot_clear_stages(client, seed):
+    """已上架资产单独清空分级也必须拒绝，否则患者端会静默停止收到视频。"""
+    token = login(client, "therapist-a")
+    asset = _upload(client, token, applicableStages="1,2,3").json()
+    assert _publish(client, token, asset["id"]).status_code == 200
+
+    response = client.patch(
+        f"{API}/media-assets/{asset['id']}",
+        headers=auth_headers(token),
+        json={"applicableStages": []},
+    )
+    assert response.status_code == 422
+    assert response.json()["code"] == "VALIDATION_FAILED"
+
+
 def test_publish_and_retire_write_audit(client, seed, db_session):
     token = login(client, "therapist-a")
     asset = _upload(client, token, applicableStages="1,2,3").json()

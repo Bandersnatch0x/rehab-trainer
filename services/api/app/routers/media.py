@@ -1,6 +1,5 @@
 """训练视频资产：上传、登记、上下架与按分级下发。"""
 
-from datetime import datetime
 from typing import Annotated
 from uuid import uuid4
 
@@ -9,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.audit import record_audit
-from app.core.auth import Principal, get_principal, require_roles
+from app.core.auth import Principal, require_roles
 from app.core.config import get_settings
 from app.core.database import get_db
 from app.core.errors import api_error
@@ -83,10 +82,11 @@ def list_media_assets(
         stmt = stmt.where(MediaAsset.status == status.value)
     if exercise_code is not None:
         stmt = stmt.where(MediaAsset.exercise_code == exercise_code)
-    rows = db.scalars(stmt.order_by(MediaAsset.id.asc())).all()
-
     if keyset is not None:
-        rows = [row for row in rows if row.id > keyset["k"]]
+        stmt = stmt.where(MediaAsset.id > keyset["k"])
+    rows = db.scalars(
+        stmt.order_by(MediaAsset.id.asc()).limit(limit + 1)
+    ).all()
 
     page = rows[:limit]
     has_more = len(rows) > limit
@@ -108,8 +108,13 @@ def upload_media_asset(
     db: Session = Depends(get_db),
     exercise_code: Annotated[str | None, Form(alias="exerciseCode")] = None,
     applicable_stages: Annotated[str | None, Form(alias="applicableStages")] = None,
-    watermark_text: Annotated[str | None, Form(alias="watermarkText")] = None,
-    credit_line: Annotated[str | None, Form(alias="creditLine")] = None,
+    # 与 MediaAssetPatch / 数据库列宽一致；否则 PostgreSQL 超长会变成 500。
+    watermark_text: Annotated[
+        str | None, Form(alias="watermarkText", max_length=128)
+    ] = None,
+    credit_line: Annotated[
+        str | None, Form(alias="creditLine", max_length=255)
+    ] = None,
     note: Annotated[str | None, Form()] = None,
 ):
     """上传一个 MP4 并登记为草稿资产；上架需另行 PATCH status。
@@ -202,6 +207,15 @@ def update_media_asset(
             asset.retired_at = now
         else:
             asset.status = payload.status.value
+
+    # 已上架资产始终必须有适用分级：只在「本次改为 published」时校验会被
+    # 「对已上架资产单独清空分级」绕过，患者端会静默停止收到该视频。
+    if asset.status == "published" and not list(asset.applicable_stages or []):
+        raise api_error(
+            422,
+            "VALIDATION_FAILED",
+            "已上架资产必须设置适用分级，否则不会下发任何患者",
+        )
 
     asset.updated_at = now
     record_audit(

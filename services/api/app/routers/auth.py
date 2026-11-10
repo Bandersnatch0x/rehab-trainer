@@ -52,8 +52,12 @@ def _check_login_rate_limit(db: Session, username: str) -> None:
         raise api_error(429, "RATE_LIMITED", "尝试次数过多，请稍后再试")
 
 
-def _record_login_failure(db: Session, username: str) -> None:
+def _record_login_failure(db: Session, username: str | None) -> None:
     """失败记录落库：多副本共享计数，重启不清零。"""
+    # 绑定码开的患者账号可能没有 username；请求体用户名也未限长。
+    # 直接落库会撞上 String(128) NOT NULL 列（PostgreSQL 还会报超长），变成 500。
+    if not username or len(username) > 128:
+        return
     settings = get_settings()
     cutoff = utcnow() - timedelta(seconds=settings.login_window_seconds)
     db.execute(
@@ -102,7 +106,19 @@ def bind(payload: BindRequest, db: Session = Depends(get_db)):
     if account is None or account.status != "active" or account.org_id != token.org_id:
         raise api_error(401, "UNAUTHORIZED", "绑定码无效")
 
-    token.used_at = utcnow()
+    # 一次性绑定码的消费必须是条件更新：并发请求可能同时读到 used_at 为空。
+    consumed = db.execute(
+        update(BindingToken)
+        .where(
+            BindingToken.token == payload.binding_token,
+            BindingToken.used_at.is_(None),
+            BindingToken.expires_at >= utcnow(),
+        )
+        .values(used_at=utcnow())
+    )
+    if consumed.rowcount != 1:
+        db.rollback()
+        raise api_error(409, "CONFLICT", "绑定码已使用或已过期")
     db.commit()
     return _token_pair_for(db, account)
 

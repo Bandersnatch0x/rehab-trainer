@@ -119,6 +119,22 @@ async def database_unavailable_handler(
     )
 
 
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(
+    request: Request, exc: Exception
+) -> JSONResponse:
+    """兜底未预期异常：5xx 也保持契约错误信封，避免客户端只能退化到通用错误。"""
+    logger.exception(
+        "event=unhandled_exception method=%s path=%s",
+        request.method,
+        request.url.path,
+    )
+    return JSONResponse(
+        status_code=500,
+        content={"code": "INTERNAL_ERROR", "message": "服务内部错误"},
+    )
+
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(
     request: Request, exc: RequestValidationError

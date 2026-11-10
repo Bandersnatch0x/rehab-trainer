@@ -255,6 +255,15 @@ def test_zero_cells_are_not_suppressed():
     ]
 
 
+def test_secondary_suppression_skips_zero_cells():
+    """二次抑制不能挑 0 计数格：隐藏 0 不增加歧义，残差会暴露被一次抑制的值。"""
+    from app.core.research import buckets
+
+    rows = buckets({"a": 2, "b": 0, "c": 20}, ("a", "b", "c"))
+    assert [row["key"] for row in rows if row["suppressed"]] == ["a", "c"]
+    assert rows[1] == {"key": "b", "count": 0, "suppressed": False}
+
+
 def test_version_distribution_applies_secondary_suppression():
     """只丢一个版本时，其条数可由总数反推，必须再丢一个可见版本。"""
     from app.core.research import version_buckets

@@ -18,7 +18,9 @@ object PlanSelector {
     /** 只返回当前有效处方；没有有效处方时不再回退到最近一份已过期/停用的处方。 */
     fun selectCurrent(prescriptions: List<Prescription>, nowIsoPrefix: String): Prescription? =
         prescriptions.sortedByDescending { it.issuedAt }.firstOrNull {
-            it.status == PrescriptionStatus.ACTIVE && !it.isExpired(nowIsoPrefix)
+            it.status == PrescriptionStatus.ACTIVE &&
+                !it.isExpired(nowIsoPrefix) &&
+                !it.startsLater(nowIsoPrefix)
         }
 
     fun mergeItems(
@@ -86,4 +88,10 @@ object PlanSelector {
 private fun Prescription.isExpired(nowIsoPrefix: String): Boolean {
     val until = validUntil?.take(19) ?: return false
     return until < nowIsoPrefix.take(19)
+}
+
+/** 尚未生效的处方不能当作当前方案，否则患者会提前开始训练。 */
+private fun Prescription.startsLater(nowIsoPrefix: String): Boolean {
+    val from = validFrom?.take(19) ?: return false
+    return from > nowIsoPrefix.take(19)
 }

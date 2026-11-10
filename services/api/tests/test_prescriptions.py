@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import func, select
 
+from app.models.content import ExerciseVariant
 from app.models.prescription import Prescription
 from tests.helpers import API, auth_headers, login
 
@@ -112,6 +113,68 @@ def test_create_and_patch_prescription_version(client, seed):
         headers={**headers, "If-Match": "1.0.0"},
     )
     assert conflict.status_code == 409
+
+
+def test_prescription_rejects_variant_outside_patient_stage(client, seed, db_session):
+    db_session.add(
+        ExerciseVariant(
+            code="ex-low-v9",
+            exercise_code="ex-low",
+            level=2,
+            support_level="seated",
+            applicable_stages=[1, 2],
+        )
+    )
+    db_session.commit()
+
+    token = login(client, "therapist-a")
+    response = client.post(
+        f"{API}/prescriptions",
+        json=_create_body(seed, variant_code="ex-low-v9"),
+        headers=auth_headers(token),
+    )
+    assert response.status_code == 422
+    assert response.json()["code"] == "VALIDATION_FAILED"
+
+
+def test_prescription_rejects_unsupported_standing_for_stage_3(client, seed, db_session):
+    db_session.add(
+        ExerciseVariant(
+            code="ex-low-v8",
+            exercise_code="ex-low",
+            level=3,
+            support_level="unsupported-standing",
+            applicable_stages=[1, 2, 3, 4],
+        )
+    )
+    db_session.commit()
+
+    token = login(client, "therapist-a")
+    response = client.post(
+        f"{API}/prescriptions",
+        json=_create_body(seed, variant_code="ex-low-v8"),
+        headers=auth_headers(token),
+    )
+    assert response.status_code == 422
+    assert response.json()["code"] == "VALIDATION_FAILED"
+
+
+def test_patch_rejects_valid_until_before_valid_from(client, seed):
+    token = login(client, "therapist-a")
+    headers = auth_headers(token)
+    created = client.post(
+        f"{API}/prescriptions", json=_create_body(seed), headers=headers
+    )
+    assert created.status_code == 201, created.text
+    body = created.json()
+
+    response = client.patch(
+        f"{API}/prescriptions/{body['id']}",
+        json={"validUntil": (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()},
+        headers={**headers, "If-Match": body["version"]},
+    )
+    assert response.status_code == 422
+    assert response.json()["code"] == "VALIDATION_FAILED"
 
 
 def test_list_prescriptions_returns_latest_first(client, seed):

@@ -10,7 +10,7 @@ class BindRequest(APIModel):
 
 
 class LoginRequest(APIModel):
-    username: str = Field(min_length=1)
+    username: str = Field(min_length=1, max_length=128)
     password: str = Field(min_length=1)
     # TODO: 待实现：TOTP 二次验证（契约字段已预留）。
     totp: str | None = None

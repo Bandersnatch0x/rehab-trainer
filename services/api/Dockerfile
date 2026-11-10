@@ -8,7 +8,8 @@ RUN python -m pip wheel --no-cache-dir --wheel-dir /wheels '.[postgres]' -r depl
 FROM python:3.13-slim-bookworm AS runtime
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    REHAB_AUTO_CREATE_SCHEMA=false
+    REHAB_AUTO_CREATE_SCHEMA=false \
+    REHAB_MEDIA_ROOT=/data/media
 WORKDIR /opt/rehab
 COPY --from=builder /wheels /wheels
 # hadolint DL3013：不逐个写死版本，是因为 wheel 由上一阶段按 pyproject 与
@@ -18,7 +19,7 @@ RUN python -m pip install --no-cache-dir --no-index --find-links=/wheels rehab-t
     && rm -rf /wheels \
     && groupadd --gid 10001 rehab \
     && useradd --uid 10001 --gid rehab --no-create-home rehab \
-    && mkdir /data && chown rehab:rehab /data
+    && mkdir -p /data/media && chown -R rehab:rehab /data
 COPY deploy /opt/rehab/deploy
 USER 10001:10001
 EXPOSE 8000

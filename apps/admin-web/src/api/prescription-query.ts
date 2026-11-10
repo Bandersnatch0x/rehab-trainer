@@ -37,7 +37,9 @@ export async function findCurrentPrescription(
     }
 
     scanned += result.data.items.length;
-    cursor = result.data.nextCursor ?? undefined;
+    const nextCursor = result.data.nextCursor ?? undefined;
+    // 游标没有前进说明服务端异常；继续翻页只会死循环。
+    cursor = nextCursor === cursor ? undefined : nextCursor;
   } while (cursor && scanned < 1000);
 
   return { ok: true, data: null };

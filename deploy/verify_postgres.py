@@ -27,8 +27,10 @@ root = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(root / "services/api"))
 
 url = os.environ.get("REHAB_DATABASE_URL")
-assert url, "必须通过 REHAB_DATABASE_URL 指定目标库"
-assert url.startswith("postgresql"), f"本脚本只验证 PostgreSQL，收到：{url.split('://')[0]}"
+if not url:
+    raise SystemExit("必须通过 REHAB_DATABASE_URL 指定目标库")
+if not url.startswith("postgresql"):
+    raise SystemExit(f"本脚本只验证 PostgreSQL，收到：{url.split('://')[0]}")
 
 os.environ.setdefault("REHAB_AUTO_CREATE_SCHEMA", "false")
 
@@ -109,9 +111,9 @@ def current_version(connection):
 with engine.connect() as connection:
     inspector = inspect(connection)
     existing = set(inspector.get_table_names()) - {"alembic_version"}
-    assert not existing, (
-        f"目标库非空，拒绝运行（会降级删除对象）：{sorted(existing)}"
-    )
+    if existing:
+        # 不能用 assert：python -O 会把它优化掉，随后 downgrade 会删掉整库。
+        raise SystemExit(f"目标库非空，拒绝运行（会降级删除对象）：{sorted(existing)}")
 
 try:
     # 1) 0001 → 0005：真实 DDL。

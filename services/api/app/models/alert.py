@@ -33,6 +33,8 @@ class AlertEvent(Base):
         back_populates="alert",
         cascade="all, delete-orphan",
         order_by="NotificationDelivery.created_at",
+        # 列表端点逐行序列化 deliveries；默认懒加载会退化成 N+1。
+        lazy="selectin",
     )
 
 

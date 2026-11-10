@@ -1,7 +1,7 @@
 import { API_BASE_URL, REQUEST_TIMEOUT_MS } from './config';
 import { ApiError } from './api-error';
 import { httpRequest, type HttpMethod } from './http';
-import { getAccessToken, refreshSession } from './auth';
+import { clearSession, getAccessToken, refreshSession } from './auth';
 
 export { ApiError };
 export type { HttpMethod };
@@ -84,6 +84,14 @@ export async function request<T>(options: RequestOptions): Promise<T> {
 
     // 并发 401 由 auth.refreshSession 合并为一次刷新；失败时异常继续上抛。
     const session = await refreshSession();
-    return send<T>(options, session.accessToken);
+    try {
+      return await send<T>(options, session.accessToken);
+    } catch (error) {
+      // 新令牌也被拒（账号被禁用/撤销）时必须清掉缓存会话，否则会反复刷新重试。
+      if (error instanceof ApiError && error.isUnauthorized) {
+        clearSession();
+      }
+      throw error;
+    }
   }
 }

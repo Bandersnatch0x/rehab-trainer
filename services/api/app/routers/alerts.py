@@ -134,7 +134,9 @@ def update_alert(
         alert.note = payload.note
     if alert.status == "acknowledged" and alert.acknowledged_at is None:
         alert.acknowledged_at = utcnow()
-    alert.handled_by = principal.account_id
+    # 终态幂等重复提交（closed -> closed）不改写处置人归属。
+    if target != previous_status:
+        alert.handled_by = principal.account_id
 
     record_audit(
         db,

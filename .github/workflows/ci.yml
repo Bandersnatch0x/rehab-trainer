@@ -11,6 +11,8 @@ on:
 
 permissions:
   contents: read
+  # dorny/paths-filter 在 PR 事件下需要读 PR 变更文件；私有仓缺此权限会导致全流水线 skipped。
+  pull-requests: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -43,6 +45,7 @@ jobs:
               - 'services/api/**'
               - 'packages/api-contract/**'
               - 'scripts/**'
+              - 'deploy/**'
             api_contract:
               - 'packages/api-contract/**'
               - 'packages/api-client-ts/**'
@@ -235,7 +238,8 @@ jobs:
 
       - name: 起服务并等就绪
         run: |
-          python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --log-level warning &
+          # 后台进程必须重定向输出，否则 runner 会一直等管道关闭，直到 job 超时。
+          python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --log-level warning > /tmp/uvicorn.log 2>&1 &
           for i in $(seq 1 60); do
             if curl -fsS http://127.0.0.1:8000/readyz > /dev/null; then
               echo "ready after ${i}s"
@@ -243,10 +247,11 @@ jobs:
             fi
             sleep 1
           done
-          echo "服务 60 秒内未就绪"
+          echo "服务 60 秒内未就绪，服务端日志："
+          cat /tmp/uvicorn.log || true
           exit 1
 
-      - name: 契约联调（28 个操作）
+      - name: 契约联调（全部契约操作）
         run: |
           # 演示凭据来自 app/seed.py，仅 CI 临时库使用。
           cat > /tmp/smoke-config.json <<'JSON'

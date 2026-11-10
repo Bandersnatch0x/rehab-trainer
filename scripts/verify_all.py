@@ -13,6 +13,7 @@
 
 import argparse
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -45,6 +46,13 @@ def run(label, command, cwd, env=None, shell=False):
     print(f"\n=== {label} ===", flush=True)
     print("$ " + " ".join(str(part) for part in command), flush=True)
     merged = {**os.environ, **(env or {})}
+    if shell:
+        # POSIX 下 shell=True + argv 列表只会执行首项，其余变成 $0/$1；先拼成单条命令。
+        command = (
+            subprocess.list2cmdline(command)
+            if os.name == "nt"
+            else shlex.join(command)
+        )
     result = subprocess.run(
         command, cwd=cwd, env=merged, shell=shell,
         capture_output=True, text=True, encoding="utf-8", errors="replace",

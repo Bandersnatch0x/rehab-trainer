@@ -168,6 +168,10 @@ fun TrainingScreen(
     var setInterruptions by remember { mutableIntStateOf(0) }
     var lastRepIndex by remember { mutableIntStateOf(0) }
     var repHintUntilMs by remember { mutableStateOf(0L) }
+    // 暂停会重置分析器计数；恢复后要把暂停前的完成次数加回去。
+    var pausedRepOffset by rememberSaveable(exerciseCode) { mutableStateOf(0) }
+    // 换组后忽略上一组晚到的帧，直到分析器真正从 0 重新开始。
+    var awaitingCounterReset by remember(exerciseCode) { mutableStateOf(false) }
     var setProgress by remember(exerciseCode) {
         mutableStateOf(SetProgress(currentExercise.sets, currentExercise.repsPerSet))
     }
@@ -245,12 +249,22 @@ fun TrainingScreen(
                                     largeFont -> "识别正常"
                                     else -> ""
                                 }
-                                setTotalFrames += 1
-                                if (feetVisible) {
+                                // 分母已在上面按检出帧计过一次；这里不能再加。
+                                // 上肢条目不要求脚部入镜，valid 判据随条目要求变化。
+                                if (!requiresFullBody || feetVisible) {
                                     setValidFrames += 1
                                 }
                                 if (!setProgress.isComplete) {
-                                    repCount = setProgress.capReps(frame.repCount)
+                                    if (
+                                        awaitingCounterReset &&
+                                        frame.repCount >= setProgress.repsPerSet
+                                    ) {
+                                        // 上一组晚到的帧：不能据此完成新的一组。
+                                    } else {
+                                        awaitingCounterReset = false
+                                        repCount =
+                                            setProgress.capReps(pausedRepOffset + frame.repCount)
+                                    }
                                 }
                                 val nowMs = System.currentTimeMillis()
                                 val latestRep = frame.lastRep
@@ -295,7 +309,10 @@ fun TrainingScreen(
         var disposed = false
         providerFuture.addListener({
             if (disposed) return@addListener
-            val provider = providerFuture.get()
+            val provider = runCatching { providerFuture.get() }.getOrElse {
+                statusText = "无法启动摄像头：请检查相机权限或是否被其他应用占用"
+                return@addListener
+            }
             cameraProvider = provider
             val preview = Preview.Builder().build().also {
                 it.setSurfaceProvider(previewView.surfaceProvider)
@@ -307,12 +324,27 @@ fun TrainingScreen(
                 .build()
             analysis.setAnalyzer(executor, analyzer)
             provider.unbindAll()
-            provider.bindToLifecycle(
-                lifecycleOwner,
-                CameraSelector.DEFAULT_FRONT_CAMERA,
-                preview,
-                analysis
-            )
+            // 无前摄或被其他应用占用时回退后摄；两者都失败则给出可读错误而不是崩溃。
+            val bound = runCatching {
+                provider.bindToLifecycle(
+                    lifecycleOwner,
+                    CameraSelector.DEFAULT_FRONT_CAMERA,
+                    preview,
+                    analysis
+                )
+            }.isSuccess
+            if (!bound) {
+                runCatching {
+                    provider.bindToLifecycle(
+                        lifecycleOwner,
+                        CameraSelector.DEFAULT_BACK_CAMERA,
+                        preview,
+                        analysis
+                    )
+                }.onFailure {
+                    statusText = "无法启动摄像头：请检查相机权限或是否被其他应用占用"
+                }
+            }
         }, ContextCompat.getMainExecutor(context))
 
         onDispose {
@@ -337,6 +369,8 @@ fun TrainingScreen(
     LaunchedEffect(isPaused) {
         analyzer.setPaused(isPaused)
         if (isPaused) {
+            // 分析器会被重置，先记住已完成的次数，恢复后继续累加。
+            pausedRepOffset = repCount
             setInterruptions += 1
             voiceCoach.stop()
         }
@@ -430,6 +464,10 @@ fun TrainingScreen(
             } else {
                 repCount = 0
                 repHint = null
+                lastRepIndex = 0
+                repHintUntilMs = 0L
+                pausedRepOffset = 0
+                awaitingCounterReset = true
                 analyzer.resetCounter()
                 statusText = "第 ${next.currentSet} 组准备开始"
                 if (shouldSpeak && ttsReady) {
@@ -440,14 +478,11 @@ fun TrainingScreen(
     }
 
     // 达到本组目标次数后自动进入下一组，避免患者还要点一次「完成本组」。
-    // 每个目标只触发一次：旧组的晚到回调可能把 repCount 设回目标值，不能据此完成新组。
-    var autoFinishArmed by remember { mutableStateOf(true) }
+    // awaitingCounterReset 由帧回调在分析器重新从 0 开始时清除，旧组晚到的帧不会触发新组。
     LaunchedEffect(repCount, setProgress.currentSet, setProgress.isComplete) {
-        if (setProgress.isComplete) return@LaunchedEffect
-        if (!setProgress.isTargetReached(repCount)) {
-            autoFinishArmed = true
-        } else if (autoFinishArmed) {
-            autoFinishArmed = false
+        if (setProgress.isComplete || awaitingCounterReset) return@LaunchedEffect
+        if (setProgress.isTargetReached(repCount)) {
+            awaitingCounterReset = true
             finishCurrentSet()
         }
     }

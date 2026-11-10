@@ -22,6 +22,7 @@ class PlanSelectorTest {
         id: String,
         status: PrescriptionStatus,
         issuedAt: String = "2026-11-01T08:00:00",
+        validFrom: String? = null,
         validUntil: String? = "2026-12-01T08:00:00",
         items: List<PrescriptionItem> = listOf(item("ex-gait-01"))
     ) = Prescription(
@@ -32,6 +33,7 @@ class PlanSelectorTest {
         issuedAt = issuedAt,
         version = "1.0.0",
         status = status,
+        validFrom = validFrom,
         validUntil = validUntil
     )
 
@@ -59,6 +61,23 @@ class PlanSelectorTest {
         val expired = prescription("rx-old", PrescriptionStatus.ACTIVE, validUntil = "2026-01-01T00:00:00")
         val selected = PlanSelector.selectCurrent(listOf(expired, current), "2026-11-06T10:00:00")
         assertEquals("rx-new", selected?.id)
+    }
+
+    @Test
+    fun ignoresNotYetEffectivePrescription() {
+        // 尚未到 validFrom 的处方不能当作当前方案，否则患者会提前开始训练。
+        val future = prescription(
+            "rx-future",
+            PrescriptionStatus.ACTIVE,
+            issuedAt = "2026-11-10T08:00:00",
+            validFrom = "2026-12-01T00:00:00"
+        )
+        val current = prescription("rx-now", PrescriptionStatus.ACTIVE)
+        val selected = PlanSelector.selectCurrent(
+            listOf(future, current),
+            "2026-11-06T10:00:00"
+        )
+        assertEquals("rx-now", selected?.id)
     }
 
     @Test

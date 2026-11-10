@@ -55,7 +55,8 @@ fun AlertsScreen(patientId: String? = null, modifier: Modifier = Modifier) {
     LaunchedEffect(patientId) {
         state = when {
             patientId == null -> AlertsUiState.Unbound
-            else -> when (val result = AppData.listAlerts(patientId)) {
+            // 默认 20 条可能被最近关闭的预警占满，把更早的 open 预警挡在页外。
+            else -> when (val result = AppData.listAlerts(patientId, limit = 100)) {
                 null -> AlertsUiState.Unbound
                 is ApiResult.Success -> AlertsUiState.Loaded(result.value.items)
                 is ApiResult.Failure -> AlertsUiState.Failed(result.error.message)

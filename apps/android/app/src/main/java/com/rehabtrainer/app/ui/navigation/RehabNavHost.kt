@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.rehabtrainer.app.data.contract.RiskLevel
 import com.rehabtrainer.app.data.session.SessionSnapshot
 import com.rehabtrainer.app.ui.ExerciseRegistry
 import com.rehabtrainer.app.ui.screens.AlertsScreen
@@ -38,8 +39,18 @@ fun RehabNavHost(
                 widthSizeClass = widthSizeClass,
                 snapshot = snapshot,
                 onStartTraining = {
-                    onSelectExercise(trainingCode)
-                    navController.navigate(RehabDestination.TRAINING.route)
+                    val target = ExerciseRegistry.exercises.firstOrNull {
+                        it.code == trainingCode
+                    }
+                    if (target?.riskLevel == RiskLevel.HIGH.wireValue) {
+                        // 首页入口不能绕过训练列表的分级确认门禁。
+                        navController.navigate(RehabDestination.EXERCISES.route) {
+                            launchSingleTop = true
+                        }
+                    } else {
+                        onSelectExercise(trainingCode)
+                        navController.navigate(RehabDestination.TRAINING.route)
+                    }
                 },
                 onOpenPrescription = {
                     navController.navigate(RehabDestination.EXERCISES.route) {

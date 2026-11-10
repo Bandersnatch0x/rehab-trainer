@@ -83,7 +83,8 @@ def _accept_record(
             action="authz.cross_org_access",
             outcome="denied",
             resource_type="session_record",
-            resource_id=record.client_record_id,
+            # clientRecordId 最长 128，审计列只有 String(64)：截断避免 PostgreSQL 500。
+            resource_id=record.client_record_id[:64],
             detail={
                 "tokenOrgId": principal.org_id,
                 "resourceOrgId": patient.org_id,
@@ -100,7 +101,7 @@ def _accept_record(
             action="authz.out_of_scope_access",
             outcome="denied",
             resource_type="session_record",
-            resource_id=record.client_record_id,
+            resource_id=record.client_record_id[:64],
             detail={"patientId": record.patient_id, "roles": list(principal.roles)},
         )
         return _reject(record.client_record_id, "FORBIDDEN", "无权为该患者上传记录")
@@ -132,7 +133,7 @@ def _accept_record(
                 action="authz.cross_org_access",
                 outcome="denied",
                 resource_type="session_record",
-                resource_id=record.client_record_id,
+                resource_id=record.client_record_id[:64],
                 detail={"reason": "clientRecordIdMatchedOtherOrg"},
             )
             return _reject(

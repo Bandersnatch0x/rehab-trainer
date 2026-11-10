@@ -27,6 +27,9 @@ def test_verify_rejects_replay_old_steps_and_malformed_codes():
     assert totp.verify(secret, "12345") is None
     assert totp.verify(secret, "abcdef") is None
     assert totp.verify("not-base32!!", code) is None
+    # isdigit() 接受的非 ASCII 数字不能进入 hmac.compare_digest（会抛 TypeError）。
+    assert totp.verify(secret, "١٢٣٤٥٦") is None
+    assert totp.verify(secret, "１２３４５６") is None
 
 
 def test_provisioning_uri_contains_secret_and_issuer():

@@ -25,3 +25,11 @@ packages
 *.db
 *.sqlite3
 **/.pytest_cache
+
+# 秘密文件：构建只需要模板
+.env*
+**/.env*
+!.env.example
+
+# 运行期媒体（上传视频，体积大且含患者数据）
+services/api/media

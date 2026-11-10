@@ -66,8 +66,31 @@ def _validate_items(
                     "VALIDATION_FAILED",
                     f"难度变体不存在或不属于该训练条目：{item.variant_code}",
                 )
+            variant_stages = list(variant.applicable_stages or [])
+            if variant_stages and patient.hy_stage not in variant_stages:
+                raise api_error(
+                    422,
+                    "VALIDATION_FAILED",
+                    f"难度变体不适用于当前 H-Y 分级：{item.variant_code}",
+                    {
+                        "variantCode": item.variant_code,
+                        "hyStage": patient.hy_stage,
+                    },
+                )
+            # models/content.py 的硬约束：H-Y 3–4 级禁无支撑站立。
+            if (
+                patient.hy_stage in (3, 4)
+                and variant.support_level == "unsupported-standing"
+            ):
+                raise api_error(
+                    422,
+                    "VALIDATION_FAILED",
+                    "H-Y 3–4 级不得使用无支撑站立的难度变体",
+                    {"variantCode": item.variant_code},
+                )
         stages = list(exercise.applicable_stages or [])
-        if stages and patient.hy_stage not in stages:
+        # 空数组表示「适用分级尚未裁决」，与下发侧一致：不得开具给任何患者。
+        if not stages or patient.hy_stage not in stages:
             raise api_error(
                 422,
                 "VALIDATION_FAILED",
@@ -295,7 +318,19 @@ def update_prescription(
             for position, item in enumerate(payload.items)
         ]
     if payload.valid_until is not None:
-        prescription.valid_until = to_utc_naive(payload.valid_until)
+        new_valid_until = to_utc_naive(payload.valid_until)
+        if (
+            prescription.valid_from is not None
+            and new_valid_until is not None
+            and new_valid_until < prescription.valid_from
+        ):
+            raise api_error(
+                422,
+                "VALIDATION_FAILED",
+                "validUntil 不得早于 validFrom",
+                {"validFrom": prescription.valid_from.isoformat()},
+            )
+        prescription.valid_until = new_valid_until
     if payload.note is not None:
         prescription.note = payload.note
 

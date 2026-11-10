@@ -12,8 +12,14 @@ from app.core.database import get_db
 from app.core.errors import api_error
 from app.core.pagination import apply_keyset, cursor_from, datetime_key, decode_cursor
 from app.core.security import hash_password
-from app.models.identity import Account, RoleBinding
-from app.schemas.account import AccountCreate, AccountOut, AccountPage, AccountPatch
+from app.models.identity import Account, Org, RoleBinding
+from app.schemas.account import (
+    AccountCreate,
+    AccountOut,
+    AccountPage,
+    AccountPatch,
+    AccountStatus,
+)
 
 router = APIRouter(prefix="/accounts", tags=["accounts"])
 
@@ -138,14 +144,14 @@ def _other_active_care_admin_exists(
 def list_accounts(
     principal: Principal = Depends(require_roles(*ACCOUNT_MANAGERS)),
     db: Session = Depends(get_db),
-    status: str | None = Query(default=None),
+    status: AccountStatus | None = Query(default=None),
     cursor: str | None = Query(default=None),
     limit: int = Query(default=20, ge=1, le=100),
 ):
     keyset = decode_cursor(cursor, keys=("k", "i"))
     stmt = select(Account).where(Account.org_id == principal.org_id)
     if status is not None:
-        stmt = stmt.where(Account.status == status)
+        stmt = stmt.where(Account.status == status.value)
     stmt = apply_keyset(
         stmt,
         Account.created_at,
@@ -295,6 +301,13 @@ def update_account(
     removes_admin = current_role == "care_admin" and (
         new_role != "care_admin" or new_status != "active"
     )
+    if removes_admin:
+        # 跨行不变量必须锁机构行：只锁目标账号时，两个并发降级会各看到对方仍在线。
+        db.execute(
+            select(Org.org_id)
+            .where(Org.org_id == principal.org_id)
+            .with_for_update()
+        )
     if removes_admin and not _other_active_care_admin_exists(
         db, principal.org_id, account.account_id
     ):

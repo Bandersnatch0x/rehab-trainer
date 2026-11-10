@@ -172,7 +172,16 @@ fun RehabApp(
                 snapshot = result.value
                 bindError = null
             }
-            is ApiResult.Failure -> if (snapshot == null) bindError = result.error.message
+            is ApiResult.Failure -> {
+                if (result.error.code == "UNAUTHORIZED") {
+                    // 令牌失效时不能继续展示旧患者的缓存数据。
+                    repo.logout()
+                    snapshot = null
+                    needBind = true
+                } else if (snapshot == null) {
+                    bindError = result.error.message
+                }
+            }
         }
         bindBusy = false
     }
@@ -217,6 +226,9 @@ fun RehabApp(
                 }
             },
             onSkipDemo = {
+                // 演示模式不能继承上一位患者的缓存快照与待上传记录。
+                sessionRepository?.logout()
+                snapshot = null
                 demoMode = true
                 ExerciseRegistry.reset()
             },
@@ -335,6 +347,7 @@ private fun CompactShell(
                 selectedExerciseCode = selectedExerciseCode,
                 snapshot = snapshot,
                 onSelectExercise = onSelectExercise,
+                onLogout = onLogout,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
@@ -392,6 +405,7 @@ private fun ExpandedShell(
                 selectedExerciseCode = selectedExerciseCode,
                 snapshot = snapshot,
                 onSelectExercise = onSelectExercise,
+                onLogout = onLogout,
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()

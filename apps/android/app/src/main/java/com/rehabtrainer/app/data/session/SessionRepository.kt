@@ -89,10 +89,16 @@ class SessionRepository(
             is ApiResult.Failure -> return result
             is ApiResult.Success -> result.value
         }
-        val patient = patients.items.firstOrNull()
-            ?: return ApiResult.Failure(
+        // 治疗师/照护管理员可见多个患者；firstOrNull() 会把训练记录写到最老的无关患者名下。
+        val patient = when {
+            patients.items.isEmpty() -> return ApiResult.Failure(
                 ApiError("NO_PATIENT", "当前账号未绑定患者，请联系机构获取绑定码")
             )
+            patients.items.size > 1 -> return ApiResult.Failure(
+                ApiError("MULTIPLE_PATIENTS", "当前账号可见多位患者，请使用绑定码指定患者")
+            )
+            else -> patients.items.first()
+        }
 
         val prescriptions = when (val result = api.listPrescriptions(patient.id, limit = 20)) {
             is ApiResult.Failure -> return result

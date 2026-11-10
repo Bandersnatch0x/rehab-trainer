@@ -6,13 +6,17 @@ import {
   updatePrescription,
 } from "../api/operations";
 import { findCurrentPrescription } from "../api/prescription-query";
-import type { Exercise, Prescription } from "../api/types";
+import type {
+  Exercise,
+  ExerciseCategory,
+  Prescription,
+} from "../api/types";
 
-const CATEGORY_LABEL: Record<string, string> = {
-  strength: "肌力维持（防肌少症）",
-  stretching: "牵伸放松（缓解僵直）",
-  gait: "节律步态（RAS 引导）",
-  posture: "姿势矫正（躯干对齐）",
+const CATEGORY_LABEL: Record<ExerciseCategory, string> = {
+  "strength-maintenance": "肌力维持（防肌少症）",
+  "stretching-relaxation": "牵伸放松（缓解僵直）",
+  "rhythmic-gait": "节律步态（RAS 引导）",
+  "postural-correction": "姿势矫正（躯干对齐）",
 };
 
 function addDays(from: Date, days: number): string {
@@ -21,6 +25,16 @@ function addDays(from: Date, days: number): string {
 }
 
 const DEFAULT_DOSAGE = { sets: 3, reps: 12, bpm: 64, frequency: 5 };
+
+// 与后端 Dosage 契约一致（sets 0–50、repetitions 0–500、bpm 0–240、frequency 0–14）。
+const DOSAGE_LIMITS = {
+  sets: { min: 0, max: 50 },
+  reps: { min: 0, max: 500 },
+  bpm: { min: 0, max: 240 },
+  frequency: { min: 0, max: 14 },
+} as const;
+
+const MAX_ITEMS = 20;
 
 type EditableItem = {
   rowId: number;
@@ -41,15 +55,22 @@ function toEditable(
   fallbackCode: string,
   rowId: number,
   touched = false,
+  defaultDosage?: Exercise["defaultDosage"],
 ): EditableItem {
   return {
     rowId,
     exerciseCode: item?.exerciseCode ?? fallbackCode,
     ...(item?.variantCode ? { variantCode: item.variantCode } : {}),
-    sets: item?.dosage?.sets ?? DEFAULT_DOSAGE.sets,
-    reps: item?.dosage?.repetitions ?? DEFAULT_DOSAGE.reps,
-    bpm: item?.dosage?.bpm ?? DEFAULT_DOSAGE.bpm,
-    frequency: item?.dosage?.frequencyPerWeek ?? DEFAULT_DOSAGE.frequency,
+    sets: item?.dosage?.sets ?? defaultDosage?.sets ?? DEFAULT_DOSAGE.sets,
+    reps:
+      item?.dosage?.repetitions ??
+      defaultDosage?.repetitions ??
+      DEFAULT_DOSAGE.reps,
+    bpm: item?.dosage?.bpm ?? defaultDosage?.bpm ?? DEFAULT_DOSAGE.bpm,
+    frequency:
+      item?.dosage?.frequencyPerWeek ??
+      defaultDosage?.frequencyPerWeek ??
+      DEFAULT_DOSAGE.frequency,
     touched,
     originalDosage: item?.dosage ?? undefined,
   };
@@ -59,6 +80,8 @@ export default function PrescriptionEditPage() {
   const { patientId } = useParams<{ patientId: string }>();
   const navigate = useNavigate();
   const nextRowId = useRef(1);
+  // state 只在重渲染后生效，用 ref 做真正的同步锁。
+  const inflight = useRef(false);
 
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [current, setCurrent] = useState<Prescription | null>(null);
@@ -79,7 +102,15 @@ export default function PrescriptionEditPage() {
         ),
       );
     } else if (available[0]) {
-      setItems([toEditable(undefined, available[0].code, nextRowId.current++, true)]);
+      setItems([
+        toEditable(
+          undefined,
+          available[0].code,
+          nextRowId.current++,
+          true,
+          available[0].defaultDosage,
+        ),
+      ]);
     } else {
       setItems([]);
     }
@@ -133,7 +164,7 @@ export default function PrescriptionEditPage() {
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     // 同步锁：disabled 依赖重渲染，双击仍可能进第二次。
-    if (submitting || loading || loadError) {
+    if (inflight.current || submitting || loading || loadError) {
       return;
     }
     if (!patientId) {
@@ -160,20 +191,21 @@ export default function PrescriptionEditPage() {
         !Number.isFinite(item.reps) ||
         !Number.isFinite(item.bpm) ||
         !Number.isFinite(item.frequency) ||
-        item.sets < 1 ||
-        item.sets > 10 ||
-        item.reps < 1 ||
-        item.reps > 50 ||
-        item.bpm < 40 ||
-        item.bpm > 120 ||
-        item.frequency < 1 ||
-        item.frequency > 7,
+        item.sets < DOSAGE_LIMITS.sets.min ||
+        item.sets > DOSAGE_LIMITS.sets.max ||
+        item.reps < DOSAGE_LIMITS.reps.min ||
+        item.reps > DOSAGE_LIMITS.reps.max ||
+        item.bpm < DOSAGE_LIMITS.bpm.min ||
+        item.bpm > DOSAGE_LIMITS.bpm.max ||
+        item.frequency < DOSAGE_LIMITS.frequency.min ||
+        item.frequency > DOSAGE_LIMITS.frequency.max,
     );
     if (invalid) {
       setError(`训练条目 ${invalid.exerciseCode} 的训练量超出允许范围。`);
       return;
     }
 
+    inflight.current = true;
     setSubmitting(true);
     setError(null);
 
@@ -185,6 +217,8 @@ export default function PrescriptionEditPage() {
       ...(item.touched
         ? {
             dosage: {
+              // 保留 durationMinutes / restSeconds 等未在表单中展示的字段。
+              ...(item.originalDosage ?? {}),
               sets: item.sets,
               repetitions: item.reps,
               bpm: item.bpm,
@@ -210,22 +244,32 @@ export default function PrescriptionEditPage() {
           mappingTableVersion: "demo.1",
         });
 
-    setSubmitting(false);
     if (result.ok) {
+      inflight.current = false;
+      setSubmitting(false);
       setCurrent(result.data);
       setSuccessVersion(result.data.version);
       return;
     }
 
     if (result.error.status === 409) {
-      setError("训练方案版本冲突：另一端已更新。已载入最新版本，请确认后重新提交。");
+      // 409 后的重拉仍占着锁，避免用户在重拉期间再次提交旧表单。
       // 只更新 current 而不重灌表单，会让下一次提交用旧值覆盖对方刚改的条目。
       const latest = await findCurrentPrescription(patientId);
-      if (latest.ok) {
-        hydrate(latest.data, exercises);
+      inflight.current = false;
+      setSubmitting(false);
+      if (!latest.ok) {
+        setError(
+          `训练方案版本冲突，且重新读取最新版本失败：${latest.error.message}。当前表单可能已过期，请刷新页面后重试。`,
+        );
+        return;
       }
+      hydrate(latest.data, exercises);
+      setError("训练方案版本冲突：另一端已更新。已载入最新版本，请确认后重新提交。");
       return;
     }
+    inflight.current = false;
+    setSubmitting(false);
     setError(result.error.message);
   }
 
@@ -246,7 +290,10 @@ export default function PrescriptionEditPage() {
       if (!next) {
         return prev;
       }
-      return [...prev, toEditable(undefined, next.code, rowId, true)];
+      return [
+        ...prev,
+        toEditable(undefined, next.code, rowId, true, next.defaultDosage),
+      ];
     });
   }
 
@@ -257,9 +304,11 @@ export default function PrescriptionEditPage() {
     );
   }
 
-  const canAdd = exercises.some(
-    (exercise) => !items.some((item) => item.exerciseCode === exercise.code),
-  );
+  const canAdd =
+    items.length < MAX_ITEMS &&
+    exercises.some(
+      (exercise) => !items.some((item) => item.exerciseCode === exercise.code),
+    );
 
   return (
     <div className="page" style={{ maxWidth: 960 }}>
@@ -320,6 +369,12 @@ export default function PrescriptionEditPage() {
                   exercise.code === item.exerciseCode ||
                   !usedElsewhere.has(exercise.code),
               );
+              // 开方后被下架的条目不在已发布列表里；仍要显示当前值，避免看起来像空选择。
+              const missingCurrent =
+                item.exerciseCode &&
+                !options.some((exercise) => exercise.code === item.exerciseCode)
+                  ? item.exerciseCode
+                  : null;
               return (
                 <div
                   key={item.rowId}
@@ -350,15 +405,22 @@ export default function PrescriptionEditPage() {
                           })
                         }
                       >
-                        {options.length === 0 ? (
+                        {options.length === 0 && !missingCurrent ? (
                           <option value="">（训练条目加载中或为空）</option>
                         ) : (
-                          options.map((exercise) => (
-                            <option key={exercise.code} value={exercise.code}>
-                              {exercise.label}（
-                              {CATEGORY_LABEL[exercise.category] ?? exercise.category}）
-                            </option>
-                          ))
+                          <>
+                            {missingCurrent ? (
+                              <option value={missingCurrent}>
+                                {missingCurrent}（已下架）
+                              </option>
+                            ) : null}
+                            {options.map((exercise) => (
+                              <option key={exercise.code} value={exercise.code}>
+                                {exercise.label}（
+                                {CATEGORY_LABEL[exercise.category] ?? exercise.category}）
+                              </option>
+                            ))}
+                          </>
                         )}
                       </select>
                     </label>
@@ -367,8 +429,8 @@ export default function PrescriptionEditPage() {
                       <span>组数 (Sets)：</span>
                       <input
                         type="number"
-                        min={1}
-                        max={10}
+                        min={DOSAGE_LIMITS.sets.min}
+                        max={DOSAGE_LIMITS.sets.max}
                         value={item.sets}
                         onChange={(event) =>
                           updateItem(item.rowId, { sets: Number(event.target.value) })
@@ -381,8 +443,8 @@ export default function PrescriptionEditPage() {
                       <span>每组次数 (Reps)：</span>
                       <input
                         type="number"
-                        min={1}
-                        max={50}
+                        min={DOSAGE_LIMITS.reps.min}
+                        max={DOSAGE_LIMITS.reps.max}
                         value={item.reps}
                         onChange={(event) =>
                           updateItem(item.rowId, { reps: Number(event.target.value) })
@@ -395,8 +457,8 @@ export default function PrescriptionEditPage() {
                       <span>听觉刺激 (BPM)：</span>
                       <input
                         type="number"
-                        min={40}
-                        max={120}
+                        min={DOSAGE_LIMITS.bpm.min}
+                        max={DOSAGE_LIMITS.bpm.max}
                         value={item.bpm}
                         onChange={(event) =>
                           updateItem(item.rowId, { bpm: Number(event.target.value) })
@@ -409,8 +471,8 @@ export default function PrescriptionEditPage() {
                       <span>每周频次 (天)：</span>
                       <input
                         type="number"
-                        min={1}
-                        max={7}
+                        min={DOSAGE_LIMITS.frequency.min}
+                        max={DOSAGE_LIMITS.frequency.max}
                         value={item.frequency}
                         onChange={(event) =>
                           updateItem(item.rowId, { frequency: Number(event.target.value) })
@@ -442,7 +504,11 @@ export default function PrescriptionEditPage() {
                 ＋ 添加训练条目
               </button>
               <span className="hint">
-                {canAdd ? `当前 ${items.length} 条` : "训练条目库已全部加入"}
+                {canAdd
+                  ? `当前 ${items.length} 条`
+                  : items.length >= MAX_ITEMS
+                    ? `已达 ${MAX_ITEMS} 条上限`
+                    : "训练条目库已全部加入"}
               </span>
             </div>
           </div>

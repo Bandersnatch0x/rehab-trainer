@@ -355,7 +355,12 @@ export function uploadMediaAsset(
 
   return new Promise((resolve) => {
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", `${API_BASE_URL}/media-assets/upload`);
+    // openapi-fetch 会去掉 baseUrl 末尾斜杠，这里保持一致，避免 /v1//media-assets。
+    xhr.open(
+      "POST",
+      `${API_BASE_URL.replace(/\/+$/, "")}/media-assets/upload`,
+    );
+    xhr.timeout = 5 * 60 * 1000;
     const token = getAccessToken();
     if (token) {
       xhr.setRequestHeader("Authorization", `Bearer ${token}`);
@@ -368,6 +373,18 @@ export function uploadMediaAsset(
     xhr.onload = () => {
       const payload = parseJson(xhr.responseText);
       if (xhr.status >= 200 && xhr.status < 300) {
+        // 反向代理的 SPA fallback 可能返回 200 HTML；不能把 undefined 当成功数据。
+        if (typeof payload !== "object" || payload === null) {
+          resolve({
+            ok: false,
+            error: {
+              code: "INVALID_RESPONSE",
+              message: "上传响应格式不可识别",
+              status: xhr.status,
+            },
+          });
+          return;
+        }
         resolve({ ok: true, data: payload as MediaAsset });
         return;
       }
@@ -380,6 +397,18 @@ export function uploadMediaAsset(
       resolve({
         ok: false,
         error: { code: "NETWORK_ERROR", message: "网络请求失败" },
+      });
+    };
+    xhr.ontimeout = () => {
+      resolve({
+        ok: false,
+        error: { code: "TIMEOUT", message: "上传超时，请重试" },
+      });
+    };
+    xhr.onabort = () => {
+      resolve({
+        ok: false,
+        error: { code: "ABORTED", message: "上传已取消" },
       });
     };
     xhr.send(form);

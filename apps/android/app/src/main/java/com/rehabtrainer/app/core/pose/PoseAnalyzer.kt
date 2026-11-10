@@ -91,6 +91,7 @@ class PoseAnalyzer(
     private var frameAspect = 1f
 
     /** 手动暂停期间停止累计，恢复后从零开始，避免暂停时动作被补记。 */
+    @Synchronized
     fun setPaused(paused: Boolean) {
         isPaused = paused
         if (paused) {
@@ -100,6 +101,7 @@ class PoseAnalyzer(
     }
 
     /** 完成一组后由 UI 调用，下一组计数从零开始。 */
+    @Synchronized
     fun resetCounter() {
         analyzer.reset()
         lastUpdate = AnalysisUpdate(0, null)
@@ -151,6 +153,8 @@ class PoseAnalyzer(
         landmarker.close()
     }
 
+    // 与 setPaused/resetCounter 共用同一把锁：分析器状态不是线程安全的。
+    @Synchronized
     private fun handleResult(result: PoseLandmarkerResult) {
         resultsHandled.incrementAndGet()
         // 只保留关键点齐全的骨架：缺点的骨架算不出角度，出现即当未检出。

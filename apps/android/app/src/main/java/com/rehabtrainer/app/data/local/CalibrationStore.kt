@@ -58,13 +58,18 @@ class CalibrationStore(
     }
 
     private fun persist(entries: Map<String, Entry>) {
-        file.parentFile?.mkdirs()
-        val temp = File(file.parentFile, "$FILE_NAME.tmp")
-        temp.writeText(json.encodeToString(Stored(entries)))
-        if (!temp.renameTo(file)) {
-            // Windows 上 rename 不能覆盖已存在的目标文件；只在这条兜底路径删旧文件。
-            file.delete()
-            check(temp.renameTo(file)) { "幅度校准文件原子替换失败：${file.absolutePath}" }
+        // 校准缓存是尽力而为的本地状态：写盘失败（磁盘满、文件被占用）不应中断训练流程。
+        runCatching {
+            file.parentFile?.mkdirs()
+            val temp = File(file.parentFile, "$FILE_NAME.tmp")
+            temp.writeText(json.encodeToString(Stored(entries)))
+            if (!temp.renameTo(file)) {
+                // Windows 上 rename 不能覆盖已存在的目标文件；只在这条兜底路径删旧文件。
+                file.delete()
+                check(temp.renameTo(file)) {
+                    "幅度校准文件原子替换失败：${file.absolutePath}"
+                }
+            }
         }
     }
 

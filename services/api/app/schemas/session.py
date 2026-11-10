@@ -19,15 +19,17 @@ class SessionRecordCreate(APIModel):
     # 契约字段；本服务以登录账号为 actor，subject 由 patientId 指定（D4）。
     recorded_by: str | None = None
     checked_in: bool = False
-    completion_count: int = Field(default=0, ge=0)
-    movement_error_count: int = Field(default=0, ge=0)
-    interruption_count: int = Field(default=0, ge=0)
+    # 上限对齐 PostgreSQL int4；超出会在 commit 时抛 DataError，整批 500。
+    completion_count: int = Field(default=0, ge=0, le=2_147_483_647)
+    movement_error_count: int = Field(default=0, ge=0, le=2_147_483_647)
+    interruption_count: int = Field(default=0, ge=0, le=2_147_483_647)
     valid_frame_ratio: float | None = Field(default=None, ge=0, le=1)
     is_doubtful: bool = False
-    model_version: str = Field(min_length=1)
-    model_sha256: str = Field(min_length=1)
-    metric_algorithm_version: str = Field(min_length=1)
-    threshold_config_version: str = Field(min_length=1)
+    # 四个版本字段对应 String(64) 列；超长在 PostgreSQL 上会让整批 500。
+    model_version: str = Field(min_length=1, max_length=64)
+    model_sha256: str = Field(min_length=1, max_length=64)
+    metric_algorithm_version: str = Field(min_length=1, max_length=64)
+    threshold_config_version: str = Field(min_length=1, max_length=64)
     metrics: dict[str, Any] | None = None
 
 

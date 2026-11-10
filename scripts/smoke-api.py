@@ -132,16 +132,21 @@ def run_smoke(base_url, username, password, binding_token):
     from app.core import totp as server_totp
 
     request("GET", "/auth/totp", check=lambda b: b["totpEnabled"] is False)
-    enrollment = request("POST", "/auth/totp/enroll", check=lambda b: (
-        len(b["secret"]) >= 16 and b["provisioningUri"].startswith("otpauth://totp/")))
+    # enroll 必须再校验登录口令；confirm 只认本次签发的 enrollmentToken。
+    enrollment = request("POST", "/auth/totp/enroll", {"password": password},
+                         check=lambda b: len(b["secret"]) >= 16
+                         and b["provisioningUri"].startswith("otpauth://totp/")
+                         and len(b["enrollmentToken"]) >= 16)
     request("GET", "/auth/totp", check=lambda b: b["totpEnabled"] is False)  # 确认前不生效
     request("POST", "/auth/totp/confirm",
-            {"secret": enrollment["secret"],
+            {"enrollmentToken": enrollment["enrollmentToken"],
              "code": server_totp.generate_code(enrollment["secret"])},
             check=lambda b: b["totpEnabled"] is True)
+    # confirm 已消费当前时间步；停用必须用下一步的码。
+    next_step_at = (server_totp.current_step() + 1) * server_totp.STEP_SECONDS
     request("POST", "/auth/totp/disable",
             {"password": password,
-             "code": server_totp.generate_code(enrollment["secret"])},
+             "code": server_totp.generate_code(enrollment["secret"], at=next_step_at)},
             check=lambda b: b["totpEnabled"] is False)
     patient = request("POST", "/patients", {"displayName": "联调患者", "birthYear": 1950}, status=201,
                       check=lambda b: bool(b["id"]) and b["stageConfirmationStatus"] == "suspected")

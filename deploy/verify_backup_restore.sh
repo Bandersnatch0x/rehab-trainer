@@ -24,7 +24,6 @@ PGPORT="${PGPORT:-5432}"
 export PGHOST PGPORT PGUSER PGPASSWORD
 
 RESTORE_DB="${RESTORE_DB:-${SOURCE_DB}_restore_$$}"
-DUMP="${DUMP:-${TMPDIR:-/tmp}/${SOURCE_DB}.dump}"
 ADMIN_DB="${ADMIN_DB:-postgres}"
 
 for tool in psql pg_dump pg_restore createdb dropdb; do
@@ -35,6 +34,13 @@ restore_db_pattern='^[A-Za-z0-9_]+$'
 [[ "$SOURCE_DB" =~ $restore_db_pattern ]] || { echo "SOURCE_DB 只允许字母数字与下划线" >&2; exit 2; }
 [[ "$RESTORE_DB" =~ $restore_db_pattern ]] || { echo "RESTORE_DB 只允许字母数字与下划线" >&2; exit 2; }
 [[ "$RESTORE_DB" != "$SOURCE_DB" ]] || { echo "恢复库不能与源库同名" >&2; exit 2; }
+
+# 转储含完整患者数据：umask 077 + mktemp，避免落在 /tmp 下变成所有人可读。
+# 放在库名校验之后，避免用未校验的 SOURCE_DB 拼临时文件路径。
+umask 077
+if [[ -z "${DUMP:-}" ]]; then
+    DUMP="$(mktemp "${TMPDIR:-/tmp}/${SOURCE_DB}.dump.XXXXXX")"
+fi
 
 # 恢复库必须是本次新建的：若已存在（上一次演练残留或手工 DR 副本），
 # 后面的 dropdb 与 cleanup trap 会把它删掉。必须在安装 trap 之前拒绝。

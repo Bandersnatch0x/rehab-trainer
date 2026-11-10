@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router";
 import { createPatient, listPatients } from "../api/operations";
+import { formatServerTime } from "../api/time";
 import type { Patient } from "../api/types";
 import { useAuth } from "../auth/AuthProvider";
 
@@ -288,11 +289,19 @@ export default function PatientsPage() {
                       )}
                     </td>
                     <td>
-                      <span className={RISK_CLASS[p.fallRisk ?? "low"] ?? "badge"}>
-                        {RISK_LABEL[p.fallRisk ?? "low"] ?? p.fallRisk}
+                      <span
+                        className={
+                          p.fallRisk
+                            ? (RISK_CLASS[p.fallRisk] ?? "badge")
+                            : "badge"
+                        }
+                      >
+                        {p.fallRisk
+                          ? (RISK_LABEL[p.fallRisk] ?? p.fallRisk)
+                          : "未评估"}
                       </span>
                     </td>
-                    <td>{p.createdAt ? p.createdAt.slice(0, 10) : "—"}</td>
+                    <td>{p.createdAt ? formatServerTime(p.createdAt).slice(0, 10) : "—"}</td>
                     <td>
                       <div style={{ display: "flex", gap: 12 }}>
                         <Link to={`/patients/${encodeURIComponent(p.id)}`} className="btn-secondary" style={{ padding: "4px 10px", fontSize: 13, minHeight: 32 }}>

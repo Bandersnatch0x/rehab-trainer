@@ -93,12 +93,19 @@ export default function AuditLogPage() {
   }, [query]);
 
   function applyFilters() {
+    const from = toIso(fromDate, false);
+    const to = toIso(toDate, true);
+    if (from && to && from > to) {
+      setError("开始日期不能晚于结束日期");
+      return;
+    }
+    setError(null);
     setQuery({
       ...(action.trim() ? { action: action.trim() } : {}),
       ...(resourceType.trim() ? { resourceType: resourceType.trim() } : {}),
       ...(actor.trim() ? { actorAccountId: actor.trim() } : {}),
-      ...(toIso(fromDate, false) ? { from: toIso(fromDate, false) } : {}),
-      ...(toIso(toDate, true) ? { to: toIso(toDate, true) } : {}),
+      ...(from ? { from } : {}),
+      ...(to ? { to } : {}),
     });
   }
 
@@ -132,8 +139,11 @@ export default function AuditLogPage() {
     const link = document.createElement("a");
     link.href = url;
     link.download = `audit-log-${new Date().toISOString().slice(0, 10)}.csv`;
+    // 游离节点上的 click 在部分浏览器不会触发下载；revoke 也要等下载启动后。
+    document.body.appendChild(link);
     link.click();
-    URL.revokeObjectURL(url);
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 0);
   }
 
   return (

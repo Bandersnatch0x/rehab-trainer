@@ -69,9 +69,13 @@ Page({
       error: '',
       needBinding: false,
       demoData: isDemoMode(),
+      // 加载失败时不能让上一次（可能是演示条目）的列表继续留在页面上。
+      exercises: [],
     });
     try {
-      this.setData({ exercises: await loadExercises(this.data.demoUnlocked) });
+      // 解锁开关只对演示模式有效；页面切换账号后 demoUnlocked 可能残留。
+      const unlocked = this.data.demoUnlocked && isDemoMode();
+      this.setData({ exercises: await loadExercises(unlocked) });
     } catch (error) {
       this.setData(errorState(error));
     } finally {
@@ -92,7 +96,12 @@ Page({
     const index = Number(event.currentTarget.dataset.index);
     const selected = this.data.exercises[index];
     if (!selected) return;
-    wx.setStorageSync(SELECTED_EXERCISE_KEY, selected);
+    try {
+      wx.setStorageSync(SELECTED_EXERCISE_KEY, selected);
+    } catch (error) {
+      wx.showToast({ title: '无法开始训练，请重试', icon: 'none' });
+      return;
+    }
     wx.navigateTo({ url: '/pages/training/session/index' });
   },
   goBind() {

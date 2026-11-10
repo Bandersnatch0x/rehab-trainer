@@ -113,7 +113,8 @@ class SeatedLegRaiseAnalyzer(
                 if (leg.liftStartedMs != 0L && timestampMs - leg.liftStartedMs < MIN_LIFT_MS) {
                     return
                 }
-                if (span < baseline - exitLift) {
+                // 双腿同时抬起只算一次：与 MarchAnalyzer 的互斥判定保持一致。
+                if (legs[1 - index].lifted) {
                     return
                 }
                 if (lastRepAtMs != 0L && timestampMs - lastRepAtMs < MIN_REP_INTERVAL_MS) {

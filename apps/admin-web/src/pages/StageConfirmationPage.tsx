@@ -5,10 +5,10 @@ import { confirmStage } from "../api/operations";
 export default function StageConfirmationPage() {
   const { patientId } = useParams<{ patientId: string }>();
   const navigate = useNavigate();
-  const [stageValue, setStageValue] = useState<number>(2);
-  const [clinicalNotes, setClinicalNotes] = useState<string>(
-    "患者双侧肢体受累，伴右上肢轻度静止性震颤与齿轮样强直；姿势反射检查阴性，无跌倒发作史。判定符合 H-Y 2期。"
-  );
+  // 必须由治疗师显式选择分级：默认 2 期会让未作判断的提交落成真实临床记录。
+  const [stageValue, setStageValue] = useState<number | "">("");
+  // 查体意见必须来自本次实际检查，不能预填一段患者特定的虚构描述。
+  const [clinicalNotes, setClinicalNotes] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +21,10 @@ export default function StageConfirmationPage() {
     }
     if (!patientId) {
       setError("缺少患者编号，无法保存分级");
+      return;
+    }
+    if (stageValue === "") {
+      setError("请选择 H-Y 分级后再提交");
       return;
     }
     setSubmitting(true);
@@ -44,7 +48,7 @@ export default function StageConfirmationPage() {
     <div className="page" style={{ maxWidth: 880 }}>
       <h1>H-Y 分级确认</h1>
       <p className="page-description">
-        患者编号：<strong>{patientId ?? "PT-2026-085"}</strong> · 康复治疗师康复权威判定
+        患者编号：<strong>{patientId ?? "—"}</strong> · 康复治疗师康复权威判定
       </p>
 
       <div className="notice notice--warning">
@@ -59,7 +63,7 @@ export default function StageConfirmationPage() {
           <div style={{ fontSize: 48, color: "var(--color-success)", marginBottom: 12 }}>✓</div>
           <h2>H-Y 分级确认已保存</h2>
           <p className="hint" style={{ margin: "12px 0 24px" }}>
-            系统已更新该患者档案为「已确认（H-Y {stageValue}期）」，并自动匹配推荐训练方案。
+            系统已更新该患者档案为「已确认（H-Y {stageValue}期）」，请前往患者档案确认并调整训练方案。
           </p>
           <button
             type="button"
@@ -78,6 +82,9 @@ export default function StageConfirmationPage() {
               onChange={(e) => setStageValue(Number(e.target.value))}
               style={{ fontWeight: 700, fontSize: 16 }}
             >
+              <option value="" disabled>
+                请选择分级
+              </option>
               <option value={1}>1 期 - 仅单侧受累，通常伴有极少或无功能损害</option>
               <option value={2}>2 期 - 双侧或中线受累，无平衡功能障碍 (准入节律步态训练)</option>
               <option value={3}>3 期 - 双侧受累并伴轻至中度姿势不稳定，生活可自理 (禁无支撑站立)</option>

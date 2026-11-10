@@ -49,14 +49,22 @@ export function readSession(): AdminSession | null {
       return null;
     }
     const parsed: unknown = JSON.parse(raw);
-    return isAdminSession(parsed) ? parsed : null;
+    if (!isAdminSession(parsed)) {
+      window.localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+    return parsed;
   } catch {
     return null;
   }
 }
 
 export function writeSession(session: AdminSession): void {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+  } catch {
+    // 隐私模式或配额耗尽时 setItem 会抛异常：不能让登录流程卡在「登录中…」。
+  }
   unauthorizedNotified = false;
 }
 

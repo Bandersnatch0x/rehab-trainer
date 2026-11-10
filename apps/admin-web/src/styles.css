@@ -273,15 +273,21 @@ button:focus-visible,
   outline-offset: 2px;
 }
 
+button:disabled,
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .btn-primary,
-button[type="submit"] {
+button[type="submit"]:not(.btn-secondary):not(.btn-danger) {
   background: var(--color-primary);
   color: #ffffff;
   border-color: var(--color-primary);
 }
 
 .btn-primary:hover,
-button[type="submit"]:hover {
+button[type="submit"]:not(.btn-secondary):not(.btn-danger):hover {
   background: var(--color-primary-dark);
 }
 
@@ -359,12 +365,14 @@ label {
   color: var(--text-primary);
 }
 
-input,
+input:not([type="checkbox"]):not([type="radio"]),
 select,
 textarea {
   min-height: 42px;
   padding: 8px 12px;
   font-size: 15px;
+  /* 表单控件默认不继承正文字体。 */
+  font-family: inherit;
   color: var(--text-primary);
   background: #ffffff;
   border: 1.5px solid var(--border-card);

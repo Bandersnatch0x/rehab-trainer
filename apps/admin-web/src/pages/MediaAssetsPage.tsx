@@ -6,6 +6,7 @@ import {
   uploadMediaAsset,
   type UploadProgress,
 } from "../api/operations";
+import { formatServerTime } from "../api/time";
 import type { Exercise, MediaAsset, MediaAssetStatus } from "../api/types";
 import "./media.css";
 
@@ -30,8 +31,7 @@ function formatSize(bytes: number): string {
 }
 
 function formatTime(value: string | null | undefined): string {
-  if (!value) return "—";
-  return value.slice(0, 19).replace("T", " ");
+  return formatServerTime(value);
 }
 
 function stagesText(stages: number[]): string {
@@ -101,6 +101,7 @@ export default function MediaAssetsPage() {
   const loadAssets = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setRowError(null);
     const result = await listMediaAssets({
       ...(statusFilter ? { status: statusFilter } : {}),
       ...(exerciseFilter ? { exerciseCode: exerciseFilter } : {}),
@@ -181,6 +182,10 @@ export default function MediaAssetsPage() {
     );
     setFile(null);
     setNote("");
+    setFormExercise("");
+    setFormStages([1, 2, 3, 4]);
+    setWatermarkText("");
+    setCreditLine("");
     if (fileInput.current) {
       fileInput.current.value = "";
     }

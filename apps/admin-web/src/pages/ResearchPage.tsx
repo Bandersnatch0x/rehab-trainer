@@ -53,6 +53,11 @@ function rateText(cell: { value?: number | null; suppressed: boolean }): string 
     : `${(cell.value * 100).toFixed(1)}%`;
 }
 
+const DATA_ORIGIN_LABEL: Record<string, string> = {
+  real: "真实世界数据",
+  demo: "演示数据",
+};
+
 function BarList({
   rows,
   labels,
@@ -60,13 +65,12 @@ function BarList({
   rows: ResearchBucket[];
   labels: Record<string, string>;
 }) {
-  const visible = rows.filter(
-    (row) => !row.suppressed && row.count != null && row.count > 0,
-  );
+  // 0 计数是「零缺失」这一质量信号，服务端刻意不抑制，不能在这里过滤掉。
+  const visible = rows.filter((row) => !row.suppressed && row.count != null);
   const max = visible.reduce((peak, row) => Math.max(peak, row.count ?? 0), 0);
 
   if (visible.length === 0) {
-    return <p className="research-suppressed">各分段样本数均为 0 或不足 5，无可展示的计数。</p>;
+    return <p className="research-suppressed">各分段样本数均未达到展示阈值，无可展示的计数。</p>;
   }
 
   return (
@@ -98,11 +102,12 @@ function VersionList({
     <div className="research-versions">
       <strong>{title}</strong>
       {rows.length === 0 ? (
-        <span className="research-suppressed">无样本数达到 5 条的版本。</span>
+        <span className="research-suppressed">无样本数达到展示阈值的版本。</span>
       ) : (
         rows.map((row) => (
           <span key={row.key}>
-            <code>{row.key}</code> · {row.count} 条
+            <code>{row.key}</code> ·{" "}
+            {row.suppressed || row.count == null ? "—" : `${row.count} 条`}
           </span>
         ))
       )}
@@ -200,7 +205,8 @@ export default function ResearchPage() {
                 <BarList rows={overview.ageDistribution} labels={AGE_LABEL} />
                 <p className="research-meta">
                   生成时间 {overview.generatedAt.slice(0, 19).replace("T", " ")} ·
-                  数据来源 {overview.dataOrigin}
+                  数据来源{" "}
+                  {DATA_ORIGIN_LABEL[overview.dataOrigin] ?? overview.dataOrigin}
                 </p>
               </>
             ) : null}

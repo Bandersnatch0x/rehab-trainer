@@ -34,6 +34,7 @@ export default function PatientDetailPage() {
   const [sessionsError, setSessionsError] = useState<string | null>(null);
   const [assessmentsError, setAssessmentsError] = useState<string | null>(null);
   const [assessmentsCapped, setAssessmentsCapped] = useState(false);
+  const [sessionsCapped, setSessionsCapped] = useState(false);
   const [patientFailed, setPatientFailed] = useState(false);
 
   useEffect(() => {
@@ -54,6 +55,7 @@ export default function PatientDetailPage() {
     setSessionsError(null);
     setAssessmentsError(null);
     setAssessmentsCapped(false);
+    setSessionsCapped(false);
     setPatientFailed(false);
 
     Promise.all([
@@ -82,6 +84,7 @@ export default function PatientDetailPage() {
 
       if (sessionResult.ok) {
         setSessions(sessionResult.data.items);
+        setSessionsCapped(Boolean(sessionResult.data.nextCursor));
       } else {
         setSessionsError(sessionResult.error.message);
       }
@@ -106,7 +109,12 @@ export default function PatientDetailPage() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div>
           <h1>患者详情档案</h1>
-          <p className="page-description">患者编号：{patientId} · 机构康复监护中</p>
+          <p className="page-description">
+            患者编号：{patientId}
+            {patient
+              ? ` · ${patient.status === "active" ? "在访监护中" : "已停用"}`
+              : ""}
+          </p>
         </div>
         {isTherapist && (
           <div style={{ display: "flex", gap: 12 }}>
@@ -164,8 +172,16 @@ export default function PatientDetailPage() {
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span className="hint">跌倒风险评级</span>
-              <span className={RISK_CLASS[patient?.fallRisk ?? "low"] ?? "badge"}>
-                {RISK_LABEL[patient?.fallRisk ?? "low"] ?? "—"}
+              <span
+                className={
+                  patient?.fallRisk
+                    ? (RISK_CLASS[patient.fallRisk] ?? "badge")
+                    : "badge"
+                }
+              >
+                {patient?.fallRisk
+                  ? (RISK_LABEL[patient.fallRisk] ?? patient.fallRisk)
+                  : "未评估"}
               </span>
             </div>
           </div>
@@ -221,15 +237,17 @@ export default function PatientDetailPage() {
                     ? "读取失败"
                     : sessionsError
                       ? "读取失败"
-                      : `${sessions.length} 条${sessions.length >= 100 ? "（仅显示最近 100 条）" : ""}`}
+                      : `${sessions.length} 条${sessionsCapped ? "（仅显示最近 100 条）" : ""}`}
               </strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span className="hint">训练方案调整</span>
-              <Link to={`/patients/${encodedId}/prescription`} className="btn-secondary">
-                前往调整
-              </Link>
-            </div>
+            {isTherapist ? (
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span className="hint">训练方案调整</span>
+                <Link to={`/patients/${encodedId}/prescription`} className="btn-secondary">
+                  前往调整
+                </Link>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

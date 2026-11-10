@@ -16,7 +16,11 @@ const MAX_ACCOUNTS = 1000;
 /** roles 里可能有患者/照护者等非管理端角色，列表只展示管理端的两类。 */
 function roleSummary(roles: string[]): string {
   const labels = roles.filter(isAdminRole).map((role) => ROLE_LABELS[role]);
-  return labels.length > 0 ? labels.join("、") : "未分配";
+  if (labels.length > 0) {
+    return labels.join("、");
+  }
+  // roles 非空但全是患者/照护者：不是「未分配」，而是本页不管理的账号。
+  return roles.length > 0 ? "非管理端账号" : "未分配";
 }
 
 export default function PermissionsPage() {

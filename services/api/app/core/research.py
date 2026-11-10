@@ -88,7 +88,10 @@ def buckets(counts: dict[str, int], keys: tuple[str, ...]) -> list[dict[str, Any
         and total >= MIN_CELL_COUNT
     ):
         visible = [i for i in range(len(cells)) if i not in hidden]
-        hidden.add(min(visible, key=lambda i: cells[i][1]))
+        # 只从计数 >= MIN_CELL_COUNT 的可见格中挑：隐藏 0 计数的格子不增加歧义，
+        # 残差仍会直接等于被一次抑制隐藏的小样本值。
+        candidates = [i for i in visible if cells[i][1] >= MIN_CELL_COUNT] or visible
+        hidden.add(min(candidates, key=lambda i: cells[i][1]))
 
     return [
         _hidden(key) if index in hidden else {"key": key, **suppressed(count)}
@@ -131,6 +134,9 @@ def age_band(birth_year: int | None, *, year: int | None = None) -> str:
     if birth_year is None:
         return AGE_UNKNOWN_KEY
     age = current_year - birth_year
+    if age < 0:
+        # 出生年份允许到 2100；未来年份不能落进 under-60 分段。
+        return AGE_UNKNOWN_KEY
     for key, low, high in AGE_BANDS:
         if (low is None or age >= low) and (high is None or age <= high):
             return key

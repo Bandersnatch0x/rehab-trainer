@@ -46,7 +46,10 @@ fun RehabDrawerContent(
             )
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
             Spacer(modifier = Modifier.height(dimens.itemSpacing))
-            RehabDestination.entries.forEach { destination ->
+            // 训练页只能从条目列表或首页入口进入，不能从抽屉绕过分级准入。
+            RehabDestination.entries
+                .filterNot { it == RehabDestination.TRAINING }
+                .forEach { destination ->
                 NavigationDrawerItem(
                     label = {
                         Text(
@@ -89,7 +92,9 @@ fun RehabNavigationRail(
         windowInsets = WindowInsets(0, 0, 0, 0)
     ) {
         Spacer(modifier = Modifier.height(dimens.itemSpacing))
-        RehabDestination.entries.forEach { destination ->
+        RehabDestination.entries
+            .filterNot { it == RehabDestination.TRAINING }
+            .forEach { destination ->
             NavigationRailItem(
                 selected = currentRoute == destination.route,
                 onClick = { onNavigate(destination.route) },

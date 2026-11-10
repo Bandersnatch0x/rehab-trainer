@@ -56,7 +56,8 @@ def verify(
     `last_step` 为该账号上次成功使用的时间步，用于拒绝重放与旧码。
     """
     candidate = code.strip()
-    if len(candidate) != DIGITS or not candidate.isdigit():
+    # isdigit() 也接受非 ASCII 数字；hmac.compare_digest 对非 ASCII 会抛 TypeError。
+    if len(candidate) != DIGITS or not candidate.isascii() or not candidate.isdigit():
         return None
     try:
         key = _key(secret)

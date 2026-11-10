@@ -469,6 +469,26 @@ class ExerciseAnalyzersTest {
     }
 
     @Test
+    fun bilateralSeatedLegRaiseCountsOnce() {
+        val analyzer = SeatedLegRaiseAnalyzer()
+        repeat(8) { index -> analyzer.update(seatedLeg(), timestampMs = index * 33L) }
+
+        // 双腿同时抬起再同时落下：互斥判定只允许其中一条腿计数。
+        analyzer.update(
+            seatedLeg(
+                leftAnkleY = 0.55f,
+                rightAnkleY = 0.55f,
+                leftKneeY = 0.55f,
+                rightKneeY = 0.55f
+            ),
+            timestampMs = 500
+        )
+        val update = analyzer.update(seatedLeg(), timestampMs = 1_000)
+
+        assertEquals(1, update.count)
+    }
+
+    @Test
     fun shallowSeatedLiftIsFlagged() {
         val analyzer = SeatedLegRaiseAnalyzer()
         repeat(8) { index -> analyzer.update(seatedLeg(), timestampMs = index * 33L) }

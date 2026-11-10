@@ -4,11 +4,12 @@
     python -m app.seed
 """
 
+from datetime import timedelta
 from uuid import uuid4
 
 from sqlalchemy import select
 
-from app.core.database import Base, SessionLocal, engine, init_db
+from app.core.database import SessionLocal, init_db
 from app.core.security import hash_password
 from app.core.timeutils import utcnow
 from app.models.alert import AlertEvent, NotificationDelivery
@@ -23,6 +24,8 @@ THERAPIST_ID = "therapist-demo"
 ADMIN_ID = "admin-demo"
 CAREGIVER_ID = "caregiver-demo"
 PATIENT_ACCOUNT_ID = "account-patient-demo"
+# 绑定码的主键值必须与幂等检查、控制台提示、CI 联调脚本保持一致。
+DEMO_BINDING_TOKEN = "demo-binding-token"
 
 
 def _ensure_org(db) -> None:
@@ -234,7 +237,7 @@ def _seed_prescription(db) -> None:
         mapping_table_version="2026.11.0",
         issued_at=now,
         valid_from=now,
-        valid_until=now.replace(year=now.year + 1),
+        valid_until=now + timedelta(days=365),
         status="active",
     )
     prescription.items = [
@@ -287,15 +290,16 @@ def _seed_alert(db) -> None:
 
 
 def _seed_binding_token(db) -> None:
-    if db.get(BindingToken, "demo-binding-token"):
+    if db.get(BindingToken, DEMO_BINDING_TOKEN):
         return
     db.add(
         BindingToken(
-            token="demo-binding-token",
+            token=DEMO_BINDING_TOKEN,
             account_id=PATIENT_ACCOUNT_ID,
             org_id=ORG_ID,
             patient_id=PATIENT_ID,
-            expires_at=utcnow().replace(year=utcnow().year + 1),
+            # timedelta 避免 2 月 29 日 replace(year+1) 抛 ValueError。
+            expires_at=utcnow() + timedelta(days=365),
         )
     )
 
@@ -320,7 +324,7 @@ def seed() -> None:
     print("  照护管理员 admin / admin123")
     print("  患者      patient / patient123")
     print("  照护者    caregiver / caregiver123")
-    print("  绑定码    demo-binding-token（一次性）")
+    print(f"  绑定码    {DEMO_BINDING_TOKEN}（一次性）")
     print("  患者 ID   patient-demo")
 
 

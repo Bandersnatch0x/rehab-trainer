@@ -120,6 +120,8 @@ def save_mp4(chunk_source, *, max_bytes: int, root: Path | None = None) -> Saved
                 "UNSUPPORTED_MEDIA_TYPE",
                 "只接受 MP4 视频（按文件头校验，不信任扩展名）",
             )
+        # mkstemp 默认 0600，rename 会保留该权限；静态服务器（不同用户）将读不到。
+        os.chmod(temp_name, 0o644)
         # 同一文件系统内 rename 是原子的：读端不会看到半截文件。
         os.replace(temp_name, final_path)
     except BaseException:
