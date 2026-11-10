@@ -38,6 +38,10 @@ object AppData {
     @Volatile
     private var api: ApiContainer? = null
 
+    /** 当前登录账号；队列上传只取该账号的条目。null 表示未登录/演示模式。 */
+    @Volatile
+    private var ownerAccountId: String? = null
+
     // 训练页退出后仍要把记录写完并补传；不能挂在 Composable 的 rememberCoroutineScope 上。
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -55,8 +59,11 @@ object AppData {
     /** 入队并尽力上传；返回是否成功入队（不代表已上传成功）。 */
     suspend fun submit(record: SessionRecordCreate): Boolean {
         val uploadQueue = queue ?: return false
+        // 未登录/演示模式不落真实记录：没有归属的条目既不能上传，也无从人工处置。
+        val owner = ownerAccountId ?: return false
         val enqueued = try {
-            uploadQueue.enqueue(record)
+            // 归属随记录落盘：登出/换绑后，旧账号的记录不会被新令牌带上去。
+            uploadQueue.enqueue(record, owner)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -71,11 +78,24 @@ object AppData {
         return true
     }
 
-    /** 登出/换绑时清空待上传队列；旧患者的记录不能在新账号下重放。 */
-    fun clearPending() {
+    /** 登录/刷新成功后记录当前账号；队列上传只取该账号的条目。 */
+    fun setOwner(accountId: String?) {
+        ownerAccountId = accountId
+    }
+
+    /**
+     * 登出/换绑：先同步摘掉归属，再异步清掉上一账号的队列。
+     *
+     * 即便清理还没跑完新账号就登录，[flushQuietly] 也只会取新账号的条目，
+     * 旧患者的记录不会带着新令牌上传。
+     */
+    fun onLogout(previousOwnerAccountId: String?) {
+        ownerAccountId = null
         appScope.launch {
             try {
-                queue?.clear()
+                queue?.clearByOwner(previousOwnerAccountId)
+                // 归属未知的遗留条目同样属于本机旧会话，登出时一并清理。
+                queue?.clearByOwner(null)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -95,8 +115,9 @@ object AppData {
     }
 
     private suspend fun flushQuietly() {
+        val owner = ownerAccountId ?: return
         try {
-            sync?.flushPending()
+            sync?.flushPending(ownerAccountId = owner)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -105,6 +126,26 @@ object AppData {
     }
 
     suspend fun pendingCount(): Int = queue?.pendingCount() ?: 0
+
+    /** 需人工处置的条目数（当前账号被服务端拒绝的记录）。 */
+    suspend fun heldCount(): Int {
+        val owner = ownerAccountId ?: return 0
+        return queue?.heldCount(owner) ?: 0
+    }
+
+    /** 人工重试：把隔离/归属不明的记录归还当前账号并立即补传。 */
+    suspend fun retryHeld() {
+        val owner = ownerAccountId ?: return
+        try {
+            queue?.retryHeld(owner)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "retry held sessions failed", e)
+            return
+        }
+        flushQuietly()
+    }
 
     suspend fun listSessions(patientId: String, limit: Int = 20): ApiResult<SessionRecordPage>? =
         api?.listSessions(patientId, limit)

@@ -29,6 +29,8 @@ class MainActivity : ComponentActivity() {
         val api = ApiContainer(tokenStore = tokenStore)
         val sessionRepository = SessionRepository(api = api, context = applicationContext)
         AppData.install(applicationContext, api)
+        // 冷启动先按上次快照恢复归属；refresh 成功后会再覆盖一次。
+        AppData.setOwner(sessionRepository.cachedSnapshot()?.accountId)
         lifecycleScope.launch {
             withContext(Dispatchers.IO) { ModelFingerprint.sha256(applicationContext) }
             // 未绑定/已登出时补传只会得到 401，并把记录推进退避；有会话再补传。

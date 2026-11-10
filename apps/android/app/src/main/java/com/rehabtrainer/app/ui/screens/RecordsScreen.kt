@@ -15,11 +15,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +32,7 @@ import com.rehabtrainer.app.data.contract.SessionRecord
 import com.rehabtrainer.app.data.session.AppData
 import com.rehabtrainer.app.ui.ExerciseRegistry
 import com.rehabtrainer.app.ui.theme.LocalElderlyDimens
+import kotlinx.coroutines.launch
 
 /**
  * 记录：真实训练记录卡片流。
@@ -41,13 +44,16 @@ import com.rehabtrainer.app.ui.theme.LocalElderlyDimens
 fun RecordsScreen(modifier: Modifier = Modifier) {
     val dimens = LocalElderlyDimens.current
     val patientId = ExerciseRegistry.patientId
+    val scope = rememberCoroutineScope()
     var state by remember { mutableStateOf<RecordsUiState>(RecordsUiState.Loading) }
     var pendingUploads by remember { mutableStateOf(0) }
+    var heldUploads by remember { mutableStateOf(0) }
 
     LaunchedEffect(patientId) {
         // 进入页面先补传离线积压，再回读，使记录页成为自愈点。
         AppData.flushPending()
         pendingUploads = AppData.pendingCount()
+        heldUploads = AppData.heldCount()
         state = when {
             patientId == null -> RecordsUiState.Unbound
             else -> when (val result = AppData.listSessions(patientId)) {
@@ -89,7 +95,17 @@ fun RecordsScreen(modifier: Modifier = Modifier) {
             }
         }
 
-        PendingUploadNotice(pendingUploads)
+        PendingUploadNotice(
+            pending = pendingUploads,
+            held = heldUploads,
+            onRetryHeld = {
+                scope.launch {
+                    AppData.retryHeld()
+                    pendingUploads = AppData.pendingCount()
+                    heldUploads = AppData.heldCount()
+                }
+            }
+        )
     }
 }
 
@@ -111,13 +127,25 @@ private fun Notice(text: String) {
 
 /** 离线积压提示：有未上传记录时明确告知，避免患者以为记录丢失。 */
 @Composable
-private fun PendingUploadNotice(pending: Int) {
+private fun PendingUploadNotice(pending: Int, held: Int, onRetryHeld: () -> Unit) {
     if (pending <= 0) return
-    Text(
-        text = "本机还有 $pending 条记录待上传，联网后会自动补传。",
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onTertiaryContainer
-    )
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(
+            text = "本机还有 $pending 条记录待上传，联网后会自动补传。",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onTertiaryContainer
+        )
+        if (held > 0) {
+            Text(
+                text = "其中 $held 条被服务器拒绝或归属不明，需要人工处理。",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error
+            )
+            TextButton(onClick = onRetryHeld) {
+                Text("重试这些记录")
+            }
+        }
+    }
 }
 
 @Composable

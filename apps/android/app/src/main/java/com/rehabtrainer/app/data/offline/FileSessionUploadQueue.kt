@@ -15,7 +15,8 @@ import java.io.File
  *
  * - 以 `clientRecordId` 去重，重复入队返回 false；
  * - 写入采用「临时文件 + rename」，崩溃不会留下半截文件；
- * - 文件损坏时按空队列处理并保留原文件备份，不影响训练。
+ * - 文件损坏时按空队列处理并保留原文件备份，不影响训练；
+ * - 旧版本 JSON 没有归属与状态字段，读取时按「归属未知、等待上传」兼容。
  */
 class FileSessionUploadQueue(root: File) : SessionUploadQueue {
 
@@ -25,21 +26,38 @@ class FileSessionUploadQueue(root: File) : SessionUploadQueue {
     // 入队（训练页）与补传（启动/记录页）来自不同协程，整文件读改写必须串行。
     private val mutex = Mutex()
 
-    override suspend fun enqueue(record: SessionRecordCreate): Boolean = mutex.withLock {
+    override suspend fun enqueue(
+        record: SessionRecordCreate,
+        ownerAccountId: String?
+    ): Boolean = mutex.withLock {
         withContext(Dispatchers.IO) {
             val all = load().toMutableList()
             if (all.any { it.record.clientRecordId == record.clientRecordId }) {
                 return@withContext false
             }
-            all.add(StoredUpload(record = record, enqueuedAt = System.currentTimeMillis()))
+            all.add(
+                StoredUpload(
+                    record = record,
+                    enqueuedAt = System.currentTimeMillis(),
+                    ownerAccountId = ownerAccountId
+                )
+            )
             save(all)
             true
         }
     }
 
-    override suspend fun pending(limit: Int): List<PendingSessionUpload> = mutex.withLock {
+    override suspend fun pending(
+        limit: Int,
+        ownerAccountId: String?
+    ): List<PendingSessionUpload> = mutex.withLock {
         withContext(Dispatchers.IO) {
-            load().sortedBy { it.enqueuedAt }.take(limit).map { it.toPending() }
+            load()
+                .filter { it.status == STATUS_PENDING }
+                .filter { ownerAccountId == null || it.ownerAccountId == ownerAccountId }
+                .sortedBy { it.enqueuedAt }
+                .take(limit)
+                .map { it.toPending() }
         }
     }
 
@@ -57,12 +75,23 @@ class FileSessionUploadQueue(root: File) : SessionUploadQueue {
                 save(
                     load().map { stored ->
                         if (stored.record.clientRecordId in ids) {
-                            stored.copy(
-                                attemptCount = stored.attemptCount + 1,
-                                lastAttemptAtEpochMillis = System.currentTimeMillis(),
-                                lastErrorCode = error.code,
-                                lastErrorMessage = error.message
-                            )
+                            stored.withError(error)
+                        } else {
+                            stored
+                        }
+                    }
+                )
+            }
+        }
+
+    override suspend fun quarantine(clientRecordIds: Collection<String>, error: ApiError) =
+        mutex.withLock {
+            withContext(Dispatchers.IO) {
+                val ids = clientRecordIds.toSet()
+                save(
+                    load().map { stored ->
+                        if (stored.record.clientRecordId in ids) {
+                            stored.withError(error).copy(status = STATUS_QUARANTINED)
                         } else {
                             stored
                         }
@@ -80,6 +109,44 @@ class FileSessionUploadQueue(root: File) : SessionUploadQueue {
 
     override suspend fun clear() = mutex.withLock {
         withContext(Dispatchers.IO) { save(emptyList()) }
+    }
+
+    override suspend fun clearByOwner(ownerAccountId: String?) = mutex.withLock {
+        withContext(Dispatchers.IO) {
+            save(load().filterNot { it.ownerAccountId == ownerAccountId })
+        }
+    }
+
+    override suspend fun heldCount(ownerAccountId: String): Int = mutex.withLock {
+        withContext(Dispatchers.IO) {
+            load().count {
+                it.status == STATUS_QUARANTINED && it.ownerAccountId == ownerAccountId
+            }
+        }
+    }
+
+    override suspend fun retryHeld(ownerAccountId: String) = mutex.withLock {
+        withContext(Dispatchers.IO) {
+            save(
+                load().map { entry ->
+                    // 只归还当前账号的隔离条目；归属未知的遗留记录不认领。
+                    if (
+                        entry.status == STATUS_QUARANTINED &&
+                        entry.ownerAccountId == ownerAccountId
+                    ) {
+                        entry.copy(
+                            status = STATUS_PENDING,
+                            attemptCount = 0,
+                            lastAttemptAtEpochMillis = null,
+                            lastErrorCode = null,
+                            lastErrorMessage = null
+                        )
+                    } else {
+                        entry
+                    }
+                }
+            )
+        }
     }
 
     override suspend fun pendingCount(): Int = mutex.withLock {
@@ -118,18 +185,35 @@ class FileSessionUploadQueue(root: File) : SessionUploadQueue {
         val attemptCount: Int = 0,
         val lastAttemptAtEpochMillis: Long? = null,
         val lastErrorCode: String? = null,
-        val lastErrorMessage: String? = null
+        val lastErrorMessage: String? = null,
+        val ownerAccountId: String? = null,
+        val status: String = STATUS_PENDING
     ) {
+        fun withError(error: ApiError): StoredUpload = copy(
+            attemptCount = attemptCount + 1,
+            lastAttemptAtEpochMillis = System.currentTimeMillis(),
+            lastErrorCode = error.code,
+            lastErrorMessage = error.message
+        )
+
         fun toPending(): PendingSessionUpload = PendingSessionUpload(
             record = record,
             enqueuedAtEpochMillis = enqueuedAt,
             attemptCount = attemptCount,
             lastAttemptAtEpochMillis = lastAttemptAtEpochMillis,
-            lastError = lastErrorCode?.let { ApiError(it, lastErrorMessage ?: "") }
+            lastError = lastErrorCode?.let { ApiError(it, lastErrorMessage ?: "") },
+            ownerAccountId = ownerAccountId,
+            status = if (status == STATUS_QUARANTINED) {
+                UploadStatus.QUARANTINED
+            } else {
+                UploadStatus.PENDING
+            }
         )
     }
 
     private companion object {
         const val FILE_NAME = "session-uploads.json"
+        const val STATUS_PENDING = "pending"
+        const val STATUS_QUARANTINED = "quarantined"
     }
 }

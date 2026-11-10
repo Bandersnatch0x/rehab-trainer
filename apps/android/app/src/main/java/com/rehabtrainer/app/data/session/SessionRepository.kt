@@ -40,16 +40,20 @@ class SessionRepository(
     }
 
     fun logout() {
+        val previousOwner = cachedSnapshot()?.accountId
         api.clearSession()
         prefs.edit().clear().apply()
-        // 待上传队列属于上一个患者，换绑后不能带着旧 token 重放或落到新账号名下。
-        AppData.clearPending()
+        // 先摘掉队列归属再清理：即便清理未完成就登录新账号，旧记录也不会被新令牌上传。
+        AppData.onLogout(previousOwner)
     }
 
     suspend fun bind(bindingCode: String, deviceId: String?): ApiResult<SessionSnapshot> {
         val result = api.bind(bindingCode, deviceId)
         return when (result) {
             is ApiResult.Success -> {
+                // 令牌已换：旧归属与旧快照立即失效；加载成功后再绑定新账号。
+                AppData.setOwner(null)
+                prefs.edit().remove(KEY_SNAPSHOT).apply()
                 AppPreferences.markDeviceBound(context)
                 loadSnapshot()
             }
@@ -62,6 +66,9 @@ class SessionRepository(
         val result = api.login(username, password, totp)
         return when (result) {
             is ApiResult.Success -> {
+                // 令牌已换：旧归属与旧快照立即失效；加载成功后再绑定新账号。
+                AppData.setOwner(null)
+                prefs.edit().remove(KEY_SNAPSHOT).apply()
                 AppPreferences.markDeviceBound(context)
                 loadSnapshot()
             }
@@ -131,6 +138,8 @@ class SessionRepository(
             loadedAtEpochMillis = System.currentTimeMillis()
         )
         prefs.edit().putString(KEY_SNAPSHOT, json.encodeToString(snapshot)).apply()
+        // 登录/刷新成功后绑定队列归属，后续补传只取本账号的记录。
+        AppData.setOwner(me.accountId)
         return ApiResult.Success(snapshot)
     }
 
